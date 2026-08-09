@@ -14,7 +14,7 @@ import {
 const ownerEmail = "owner@example.com";
 
 test("public and owner HTML expose useful landmarks, labels, and keyboard paths", async (t) => {
-  await t.test("public account semantics", async () => {
+  await t.test("public presence semantics", async () => {
     const response = await fetchApp("/", {
       env: makeEnv({ db: new FakeD1({ entries: [entryRow()] }) }),
       headers: { accept: "text/html" },
@@ -25,13 +25,16 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /class="skip-link"[^>]+href="#main-content"/i);
     assert.match(html, /id="main-content"/i);
     assert.match(html, /<main[^>]+class="public-shell/i);
-    assert.match(html, /<header[^>]+aria-label="Account navigation"/i);
+    assert.match(html, /<header[^>]+aria-label="Presence navigation"/i);
     assert.match(html, /<section[^>]+aria-labelledby="account-name"/i);
-    assert.match(html, /<aside[^>]+aria-label="Account details"/i);
+    assert.match(html, /<aside[^>]+aria-label="Presence details"/i);
     assert.match(html, /<section[^>]+aria-labelledby="entries-title"/i);
     assert.match(html, /<time[^>]+datetime=/i);
-    assert.match(html, /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]*>Sign in<\/a>/i);
-    assert.doesNotMatch(html, /Owner access/i);
+    assert.match(
+      html,
+      /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]+aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage presence as owner<\/a>/i,
+    );
+    assert.doesNotMatch(html, />Sign in<\/a>|Owner access/i);
     assert.match(html, /<strong>\s*<a[^>]+href="https:\/\/aitta\.social"[^>]*>AittaSocial<\/a>\s*<\/strong>/i);
     assert.match(
       html,
@@ -51,14 +54,14 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.doesNotMatch(html, /https:\/\/github\.com\/aittadb\/aitta-social/i);
   });
 
-  await t.test("a signed-in visitor gets a dashboard destination, not an authorization claim", async () => {
+  await t.test("a signed-in visitor gets a management destination, not an authorization claim", async () => {
     const response = await fetchApp("/", {
       env: makeEnv({ db: new FakeD1() }),
       headers: { accept: "text/html", ...ownerHeaders("visitor@example.com") },
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /href="\/owner"[^>]*>Dashboard<\/a>/i);
+    assert.match(html, /href="\/owner"[^>]+aria-label="Manage presence as owner — open local sole-owner administration"[^>]*>Manage presence as owner<\/a>/i);
     assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/i);
   });
 
@@ -71,7 +74,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     const html = await response.text();
     assert.match(html, /<main[^>]+class="owner-shell/i);
     assert.match(html, /<nav[^>]+aria-label="Owner navigation"/i);
-    assert.match(html, /aria-current="page"[^>]*>Profile</i);
+    assert.match(html, /aria-current="page"[^>]*>Identity</i);
     assert.match(html, /<form[^>]+class="owner-form"/i);
     assert.match(html, /<fieldset>/i);
     assert.match(html, /<legend>Identity<\/legend>/i);
@@ -84,17 +87,73 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /role="status"[^>]+aria-live="polite"/i);
   });
 
-  await t.test("owner entry editor semantics", async () => {
+  await t.test("owner update editor semantics", async () => {
     const response = await fetchApp("/owner/entries/new", {
       env: makeEnv({ db: new FakeD1(), ownerEmail }),
       headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /<legend>Entry<\/legend>/i);
+    assert.match(html, /<legend>Update<\/legend>/i);
     assert.match(html, /<select[^>]+name="kind"/i);
     assert.match(html, /<textarea[^>]+name="body"[^>]+required[^>]+maxlength="50000"/i);
     assert.match(html, /<button[^>]+type="submit"[^>]*>Create draft<\/button>/i);
+  });
+});
+
+test("presence language and provisional Hub copy do not overclaim identity or connection", async (t) => {
+  await t.test("public and owner surfaces use presence and update language", async () => {
+    const env = makeEnv({
+      db: new FakeD1({ entries: [entryRow()] }),
+      ownerEmail,
+    });
+    const publicResponse = await fetchApp("/", {
+      env,
+      headers: { accept: "text/html" },
+    });
+    assert.equal(publicResponse.status, 200);
+    const publicHtml = await publicResponse.text();
+    assert.match(publicHtml, />Updates<\/h2>/i);
+    assert.match(publicHtml, />Read update<\/a>/i);
+    assert.match(publicHtml, />Manage presence as owner<\/a>/i);
+    assert.doesNotMatch(publicHtml, />Entries<\/h2>|>Read entry<\/a>|>Sign in<\/a>/i);
+
+    const ownerResponse = await fetchApp("/owner", {
+      env,
+      headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
+    });
+    assert.equal(ownerResponse.status, 200);
+    const ownerHtml = await ownerResponse.text();
+    assert.match(ownerHtml, />Your presence<\/p>/i);
+    assert.match(ownerHtml, />Updates<\/h2>/i);
+    assert.match(ownerHtml, />Create update<\/a>/i);
+    assert.match(ownerHtml, /aria-label="Presence summary"/i);
+    assert.doesNotMatch(ownerHtml, /Deployment overview|Account summary|>Entries<\/h2>|>Create entry<\/a>/i);
+  });
+
+  await t.test("the owner sees only a provisional Hub diagnostic", async () => {
+    const response = await fetchApp("/owner/hub", {
+      env: makeEnv({ ownerEmail }),
+      headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
+    });
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /<h1>Provisional Hub setup<\/h1>/i);
+    assert.match(html, /manual challenge and root probe do not establish a trusted Hub connection or network identity/i);
+    assert.match(html, /successful root response is not a completed Hub connection/i);
+    assert.match(html, /<button[^>]+type="button"[^>]*>Run provisional Hub probe<\/button>/i);
+    assert.doesNotMatch(html, /<h1>AittaSocial Hub setup<\/h1>|>Test Hub connection<\/button>/i);
+  });
+
+  await t.test("a different signed-in user cannot see Hub settings or the provisional control", async () => {
+    const response = await fetchApp("/owner/hub", {
+      env: makeEnv({ ownerEmail }),
+      headers: { accept: "text/html", ...ownerHeaders("other@example.com") },
+    });
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /This presence is not yours to administer/i);
+    assert.doesNotMatch(html, /Protected setting status|Provisional setup sequence|Run provisional Hub probe/i);
   });
 });
 
@@ -152,13 +211,14 @@ test("CSS preserves responsive, reduced-motion, focus, touch-target, and no-grad
 });
 
 test("client mutation controls announce status and use semantic form controls", async () => {
-  const [actions, entryForm, profileForm] = await Promise.all([
+  const [actions, entryForm, profileForm, hubTest] = await Promise.all([
     readFile(new URL("../app/owner/_components/EntryActions.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/entries/EntryForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/profile/ProfileForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/hub/HubTest.tsx", import.meta.url), "utf8"),
   ]);
 
-  for (const source of [actions, entryForm, profileForm]) {
+  for (const source of [actions, entryForm, profileForm, hubTest]) {
     assert.match(source, /role="status"/);
     assert.match(source, /aria-live="polite"/);
   }
@@ -166,11 +226,13 @@ test("client mutation controls announce status and use semantic form controls", 
   assert.match(actions, /disabled=\{busy\}/);
   assert.match(entryForm, /<form[^>]+onSubmit=\{submit\}/);
   assert.match(entryForm, /<fieldset>/);
-  assert.match(entryForm, /<legend>Entry<\/legend>/);
+  assert.match(entryForm, /<legend>Update<\/legend>/);
   assert.match(profileForm, /<fieldset>/);
   assert.match(profileForm, /<legend>Identity<\/legend>/);
   assert.match(profileForm, /<legend>Public details<\/legend>/);
   assert.match(profileForm, /<legend>Presentation<\/legend>/);
+  assert.match(hubTest, /Provisional probe result:/);
+  assert.match(hubTest, /catch \{ setStatus\("Provisional probe result:/);
 });
 
 test("route navigation stays native and cannot be intercepted by the hosted client router", async () => {

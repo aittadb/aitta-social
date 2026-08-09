@@ -24,9 +24,9 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
   if (!entry) notFound();
   return (
     <main className="permalink-shell" style={{ "--accent": profile?.accentColor ?? "#31554d" } as React.CSSProperties}>
-      <nav className="permalink-nav" aria-label="Entry navigation">
-        <a className="wordmark" href="/">{profile?.displayName ?? "Account"}</a>
-        <a className="text-link" href="/">All entries</a>
+      <nav className="permalink-nav" aria-label="Update navigation">
+        <a className="wordmark" href="/">{profile?.displayName ?? "Presence"}</a>
+        <a className="text-link" href="/">All updates</a>
       </nav>
       <article className="permalink-entry">
         <header>
@@ -45,7 +45,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
         )}
       </article>
       <footer className="permalink-footer">
-        <a className="button" href="/">Return to account</a>
+        <a className="button" href="/">Return to presence</a>
         <a className="text-link" href={`/api/v1/entries/${entry.id}`}>View as JSON</a>
       </footer>
     </main>

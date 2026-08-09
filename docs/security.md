@@ -3,8 +3,8 @@
 AittaSocial separates public publishing, local owner administration, and
 optional network discovery. A successful Sign in with ChatGPT identifies a
 visitor to this Site; only this deployment decides whether that visitor is its
-one local owner. Neither the account nor Hub may reinterpret that decision as
-trusted network authentication.
+one local owner. Neither the presence nor Hub may reinterpret that decision as
+trusted network authentication or network membership.
 
 ## Boundaries
 
@@ -15,8 +15,8 @@ trusted network authentication.
 | AittaSocial server code | Validating inputs, authorizing each operation, projecting public data, using protected settings | Assuming an earlier page check covers a later write |
 | Deployment-owned D1 | Persisting validated profile, entry, and minimal local configuration records | Producing a safe public response without an explicit projection |
 | Protected runtime settings | Supplying local owner and optional Hub configuration to server code | Browser-visible configuration or publishable content |
-| AittaSocial Hub | Optional registration, discovery, verification, credentials, and future network sessions | Availability required for public reads; trusted claims from an account deployment |
-| This account deployment | Its own profile, entries, presentation, and local owner actions | Network-user authentication or authority over another deployment |
+| AittaSocial Hub | Optional registration, discovery, verification, credentials, and future network sessions | Availability required for public reads; trusted claims from a presence deployment |
+| This presence deployment | Its own profile, updates, presentation, and local owner actions | Network-user authentication or authority over another deployment |
 
 ChatGPT Sites access policy is a hosting boundary. Keeping a Site private during
 setup is important, but private hosting does not replace application-level
@@ -59,8 +59,10 @@ authorize a subsequent profile or entry mutation: every mutation repeats the
 server-side check.
 
 Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and `/callback`.
-The account must not implement those routes or a general OAuth/OIDC client.
-Sign-in return locations are same-origin relative paths.
+The presence must not implement those routes or a general OAuth/OIDC client.
+Sign-in return locations are same-origin relative paths. Human-facing entry to
+this flow must identify sole-owner presence administration and must not imply
+AittaSocial network sign-in or membership.
 
 ## Route exposure
 
@@ -129,9 +131,9 @@ as a bearer credential or owner session.
 
 ## Hub boundary
 
-Hub is an optional trusted central service, but an account deployment is an
+Hub is an optional trusted central service, but a presence deployment is an
 untrusted external website from Hub's perspective. Local ChatGPT authentication
-claims from this account must not be sent to Hub as proof of a network user.
+claims from this presence must not be sent to Hub as proof of a network user.
 
 The protected Hub probe follows these constraints:
 
@@ -149,11 +151,13 @@ The protected Hub probe follows these constraints:
   `unavailable`. Safe messages contain no URL details, headers, response body,
   stack, credential fragment, or environment value.
 - A timeout, DNS failure, invalid response, missing configuration, or Hub
-  outage cannot change the status of public account or entry reads.
+  outage cannot change the status of public presence or update reads.
 
-This probe is a provisional availability and credential-transport check owned
-by the account POC. It is not an established Hub API, a network session, or
-trusted authentication.
+This manual challenge and root bearer probe is provisional Hub setup owned by
+the presence POC. It must remain labeled as such until an accepted versioned
+Hub contract replaces it. Its internal `connected` result is transport-only;
+it is not registration, a verified connection, network membership, a network
+session, or trusted authentication.
 
 ## Secrets and operational output
 

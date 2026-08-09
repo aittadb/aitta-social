@@ -103,6 +103,9 @@ test("profile validation rejects malformed identity, canonical URL, links, and p
       const body = await responseJson(response);
       assert.equal(body.error, "The submitted values are invalid.");
       for (const issue of expectedIssues) assert.equal(typeof body.details[issue], "string");
+      if (expectedIssues.includes("accountType")) {
+        assert.equal(body.details.accountType, "Choose a valid presence type.");
+      }
       assert.equal(db.mutations.length, 0);
     });
   }
@@ -110,14 +113,14 @@ test("profile validation rejects malformed identity, canonical URL, links, and p
 
 test("entry validation keeps the single flexible model bounded", async (t) => {
   const cases = [
-    ["unsupported kind", { kind: "video", body: "Body" }, "entryKind"],
-    ["missing body", { kind: "note", body: "" }, "body"],
-    ["link destination required", { kind: "link", body: "Body", destinationUrl: "" }, "destinationUrl"],
-    ["destination scheme restricted", { kind: "link", body: "Body", destinationUrl: "file:///etc/passwd" }, "destinationUrl"],
-    ["title bounded", { kind: "article", body: "Body", title: "x".repeat(201) }, "title"],
+    ["unsupported kind", { kind: "video", body: "Body" }, "entryKind", "Choose a valid update kind."],
+    ["missing body", { kind: "note", body: "" }, "body", undefined],
+    ["link destination required", { kind: "link", body: "Body", destinationUrl: "" }, "destinationUrl", "A link update needs a destination URL."],
+    ["destination scheme restricted", { kind: "link", body: "Body", destinationUrl: "file:///etc/passwd" }, "destinationUrl", undefined],
+    ["title bounded", { kind: "article", body: "Body", title: "x".repeat(201) }, "title", undefined],
   ];
 
-  for (const [label, input, issue] of cases) {
+  for (const [label, input, issue, expectedMessage] of cases) {
     await t.test(label, async () => {
       const db = new FakeD1();
       const response = await fetchApp("/api/private/entries", {
@@ -129,6 +132,7 @@ test("entry validation keeps the single flexible model bounded", async (t) => {
       assert.equal(response.status, 400);
       const body = await responseJson(response);
       assert.equal(typeof body.details[issue], "string");
+      if (expectedMessage) assert.equal(body.details[issue], expectedMessage);
       assert.equal(db.mutations.length, 0);
     });
   }
@@ -284,7 +288,7 @@ test("Hub unavailability is coarse, secret-free, and cannot take public reads of
     assert.deepEqual(body, {
       data: {
         status: "unavailable",
-        message: "The Hub could not be reached. Public account pages remain available.",
+        message: "The Hub could not be reached. Public presence pages remain available.",
       },
     });
     assert.doesNotMatch(JSON.stringify(body), new RegExp(credential));

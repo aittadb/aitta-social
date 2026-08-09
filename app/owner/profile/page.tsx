@@ -14,7 +14,7 @@ export default async function ProfileSettings() {
   return (
     <OwnerShell displayName={access.user.displayName} current="profile">
       <header className="owner-page-header compact-header">
-        <div><p className="eyebrow">Public identity</p><h1>Account profile</h1><p>Keep the public presentation specific, concise, and recognizably yours.</p></div>
+        <div><p className="eyebrow">Public presence</p><h1>Identity</h1><p>Keep the public presentation specific, concise, and recognizably yours.</p></div>
       </header>
       <ProfileForm profile={profile} canonicalDefault={canonicalDefault} />
     </OwnerShell>

@@ -68,8 +68,9 @@ export function parseProfileInput(value: unknown): ProfileInput {
   const accountType = enumValue(
     input.accountType,
     ACCOUNT_TYPES,
-    "Account type",
+    "Presence type",
     issues,
+    "accountType",
   ) as AccountType;
   const location = optionalBounded(input.location, "Location", 120, issues);
   const accentColor = text(input.accentColor).toLowerCase();
@@ -136,7 +137,7 @@ export function parseProfileInput(value: unknown): ProfileInput {
 export function parseEntryInput(value: unknown): EntryInput {
   const input = object(value);
   const issues: Record<string, string> = {};
-  const kind = enumValue(input.kind, ENTRY_KINDS, "Entry kind", issues) as EntryKind;
+  const kind = enumValue(input.kind, ENTRY_KINDS, "Update kind", issues, "entryKind") as EntryKind;
   const title = optionalBounded(input.title, "Title", 200, issues);
   const body = bounded(input.body, "Body", 1, 50000, issues);
   let destinationUrl: string | null = null;
@@ -146,7 +147,7 @@ export function parseEntryInput(value: unknown): EntryInput {
     issues.destinationUrl = message(error);
   }
   if (kind === "link" && !destinationUrl) {
-    issues.destinationUrl = "A link entry needs a destination URL.";
+    issues.destinationUrl = "A link update needs a destination URL.";
   }
   if (Object.keys(issues).length) throw new ValidationError(issues);
   return { kind, title, body, destinationUrl };
@@ -209,9 +210,10 @@ function enumValue<T extends string>(
   allowed: readonly T[],
   label: string,
   issues: Record<string, string>,
+  issueKey = lowerFirst(label),
 ): T {
   const result = text(value) as T;
-  if (!allowed.includes(result)) issues[lowerFirst(label)] = `Choose a valid ${label.toLowerCase()}.`;
+  if (!allowed.includes(result)) issues[issueKey] = `Choose a valid ${label.toLowerCase()}.`;
   return result;
 }
 

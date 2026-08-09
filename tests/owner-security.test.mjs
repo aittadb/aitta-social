@@ -221,6 +221,21 @@ test("authorized draft lifecycle stays private until publish and supports every 
   assert.equal(deleteResponse.status, 204);
   assert.equal(await deleteResponse.text(), "");
   assert.equal(db.entries.length, 0);
+
+  for (const [method, path, body] of [
+    ["PUT", `/api/private/entries/${created.id}`, JSON.stringify(validEntryInput())],
+    ["PUT", `/api/private/entries/${created.id}/state`, JSON.stringify({ state: "published" })],
+    ["DELETE", `/api/private/entries/${created.id}`, undefined],
+  ]) {
+    const missingResponse = await fetchApp(path, {
+      env,
+      method,
+      headers: mutationHeaders(ownerEmail),
+      ...(body === undefined ? {} : { body }),
+    });
+    assert.equal(missingResponse.status, 404);
+    assert.deepEqual(await responseJson(missingResponse), { error: "Update not found." });
+  }
 });
 
 test("write boundaries require JSON, bound request size, and valid entry state", async (t) => {

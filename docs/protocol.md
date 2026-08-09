@@ -12,6 +12,11 @@ An incompatible public change requires a new API or protocol version. Optional
 additive fields may be introduced within version 1 only when old clients can
 safely ignore them.
 
+Human-facing pages call the deployment a presence and published content
+updates. Protocol 1.0 deliberately retains the stable `accountType`, `entry`,
+`entries`, `/entries/*`, and `/api/v1/site` names. The terminology change does
+not alter a route, JSON field, schema, migration, or public contract.
+
 ## Conventions
 
 - Successful responses and application-generated validation, not-found, and
@@ -257,9 +262,10 @@ Owner writes and Hub setup live behind independently authorized private routes.
 They are not part of `/api/v1` and clients must not treat them as network
 identity endpoints.
 
-The POC's `POST /api/private/hub/test` is a provisional account-owned
-availability and credential-transport probe, not an established AittaSocial Hub
-API contract. It accepts no destination or request body. Server-side code
+The POC's `POST /api/private/hub/test` is a provisional presence-owned manual
+challenge and root bearer probe, not an established AittaSocial Hub API
+contract or verified connection. It accepts no destination or request body.
+Server-side code
 validates `AITTA_SOCIAL_HUB_URL` as an HTTPS origin without credentials, query,
 or fragment, then sends a short-timeout `GET` to that configured origin root
 with `Accept: application/json` and the protected deployment credential in the
@@ -270,7 +276,8 @@ Only the safe result categories `connected` (2xx), `credentialRejected`
 (401/403), `reachable` (another HTTP response), and `unavailable` (network
 failure or timeout) may reach the owner interface. None of these categories is
 trusted network authentication, and probe failure has no effect on public
-reads.
+reads. This setup remains provisional until an accepted versioned Hub contract
+replaces it.
 
 ## Required contract tests
 

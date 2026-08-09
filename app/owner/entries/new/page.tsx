@@ -9,7 +9,7 @@ export default async function NewEntryPage() {
   if (access.status !== "owner") return <OwnerAccessState status={access.status} />;
   return (
     <OwnerShell displayName={access.user.displayName} current="entries">
-      <header className="owner-page-header compact-header"><div><p className="eyebrow">Private until published</p><h1>New entry</h1><p>Create one flexible piece of text. You can publish it from the overview after reviewing the draft.</p></div></header>
+      <header className="owner-page-header compact-header"><div><p className="eyebrow">Private until published</p><h1>New update</h1><p>Create one flexible piece of text. You can publish it from Your presence after reviewing the draft.</p></div></header>
       <EntryForm entry={null} />
     </OwnerShell>
   );

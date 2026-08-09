@@ -1,7 +1,7 @@
 # Privacy and data handling
 
-One AittaSocial deployment controls and stores one account's data. It uses its
-own ChatGPT Sites D1 database. It does not send profile or entry content to a
+One AittaSocial deployment controls and stores one presence's data. It uses its
+own ChatGPT Sites D1 database. It does not send Identity or update content to a
 shared content store and does not require another database or external
 infrastructure.
 
@@ -32,7 +32,7 @@ browser storage and Hub are not content stores for this deployment.
 | --- | --- | --- |
 | `AITTA_SOCIAL_OWNER_EMAIL` | Exact normalized local owner authorization | None; never disclosed |
 | `AITTA_SOCIAL_CANONICAL_URL` | Canonical public resource URLs | The normalized canonical URL is public |
-| `AITTA_SOCIAL_HUB_URL` | Pins the optional server-side Hub destination | Only a safe connection category is shown to the owner |
+| `AITTA_SOCIAL_HUB_URL` | Pins the optional server-side Hub destination | Only a coarse transport result is shown to the owner |
 | `AITTA_SOCIAL_HUB_CHALLENGE` | Allows Hub to verify deployment control | Public in the manifest only while explicitly configured |
 | `AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL` | Authenticates the deployment's provisional server-side Hub probe | None; never disclosed |
 
@@ -45,8 +45,8 @@ support messages.
 The ChatGPT Sites dispatcher may provide an authenticated user identifier,
 email, and optional name to server code. The POC needs only the authenticated
 email to decide whether the current request belongs to the configured local
-owner. It does not store that identity in D1, publish it, use it as a public
-profile, or present it as AittaSocial network authentication.
+owner. It does not store that identity in D1, publish it, use it as the public
+Identity, or present it as AittaSocial network authentication or membership.
 
 The POC does not implement its own OAuth/OIDC provider, identity database,
 passwords, or authentication cookies. Dispatch-owned sign-in behavior and
@@ -58,7 +58,8 @@ The following is intentionally public after the Site owner approves public
 access:
 
 - the configured public profile fields and constrained presentation values;
-- entries in published state and their public timestamps and links;
+- updates in published state and their public timestamps and links (public
+  protocol 1.0 retains the stable `entry` resource name);
 - stable public entry identifiers and canonical URLs;
 - manifest protocol/software versions, canonical endpoints, and account type;
   and
@@ -85,19 +86,21 @@ as an owner.
 
 ## Optional Hub data flow
 
-Public account reads do not contact Hub.
+Public presence reads do not contact Hub.
 
-During the owner-initiated provisional connection test, server code sends only
+During the owner-initiated provisional transport test, server code sends only
 an HTTP request to the exact configured HTTPS Hub origin. The deployment
-credential is confined to the server-side `Authorization` header. The account
+credential is confined to the server-side `Authorization` header. The presence
 does not send profile content, entries, drafts, owner email, ChatGPT identity,
 or a browser-chosen destination. It does not read or retain the response body;
 the interface receives only a coarse safe status category.
 
 The public verification manifest lets Hub retrieve the configured challenge.
 That challenge is intentionally public and is not personal identity or an
-authentication session. Hub's own network-user registration, directory,
-credentials, and future sessions are separate Hub data handling.
+authentication session. This manual setup is not a verified Hub connection and
+must remain provisional until an accepted versioned Hub contract replaces it.
+Hub's own network-user registration, directory, credentials, and future
+sessions are separate Hub data handling.
 
 ## Retention and control
 

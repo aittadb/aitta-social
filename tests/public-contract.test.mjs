@@ -13,7 +13,7 @@ import {
 const credentialCanary = "DEPLOYMENT_CREDENTIAL_PRIVATE_CANARY";
 const ownerCanary = "owner-private-canary@example.test";
 
-test("signed-out visitors receive the public account HTML and only published content", async () => {
+test("signed-out visitors receive the public presence HTML and only published content", async () => {
   const db = new FakeD1({
     profile: profileRow({ display_name: "Public Ada" }),
     entries: [
@@ -42,15 +42,15 @@ test("signed-out visitors receive the public account HTML and only published con
   assert.match(html, /Public Ada/);
   assert.match(html, /Visible entry/);
   assert.match(html, /PUBLIC_BODY_CANARY/);
-  assert.match(html, />Sign in<\/a>/);
+  assert.match(html, />Manage presence as owner<\/a>/);
   assert.match(html, /\/signin-with-chatgpt\?return_to=%2Fowner/);
-  assert.doesNotMatch(html, /Owner access/);
+  assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/);
   assert.doesNotMatch(html, /DRAFT_TITLE_PRIVATE_CANARY|DRAFT_BODY_PRIVATE_CANARY/);
   assert.doesNotMatch(html, new RegExp(ownerCanary, "i"));
   assert.doesNotMatch(html, new RegExp(credentialCanary));
 });
 
-test("an account with no entries still has an intentional public empty state", async () => {
+test("a presence with no updates still has an intentional public empty state", async () => {
   const response = await fetchApp("/", {
     env: makeEnv({ db: new FakeD1({ entries: [] }) }),
     headers: { accept: "text/html" },
@@ -58,11 +58,11 @@ test("an account with no entries still has an intentional public empty state", a
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /Ada Account/);
-  assert.match(html, /No published entries yet/i);
-  assert.match(html, /account already stands on its own/i);
+  assert.match(html, /No published updates yet/i);
+  assert.match(html, /presence already stands on its own/i);
 });
 
-test("all four entry kinds use the same public account and permalink model", async () => {
+test("all four entry kinds use the same public presence and update permalink model", async () => {
   const entries = [
     entryRow({ id: "kind-note", kind: "note", title: "A public note" }),
     entryRow({ id: "kind-article", kind: "article", title: "A public article" }),
@@ -146,7 +146,7 @@ test("published permalinks render while drafts are indistinguishable from unknow
   const draftNotFoundHtml = await draftHtml.text();
   const missingNotFoundHtml = await missingHtml.text();
   for (const html of [draftNotFoundHtml, missingNotFoundHtml]) {
-    assert.match(html, /This entry is not public/);
+    assert.match(html, /This update is not public/);
     assert.doesNotMatch(html, /First public note|A useful public message/);
   }
 });

@@ -35,17 +35,17 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
   return (
     <form className="owner-form entry-editor-form" onSubmit={submit} noValidate>
       <fieldset>
-        <legend>Entry</legend>
+        <legend>Update</legend>
         <div className="field-grid field-grid-two">
           <label className="field"><span>Kind</span><select name="kind" defaultValue={entry?.kind ?? "note"}><option value="note">Note</option><option value="article">Article</option><option value="link">Link</option><option value="announcement">Announcement</option></select></label>
           <label className="field"><span>Title (optional)</span><input name="title" maxLength={200} defaultValue={entry?.title ?? ""} /></label>
         </div>
-        <label className="field"><span>Text</span><textarea name="body" required maxLength={50000} rows={16} defaultValue={entry?.body} /><small>Plain text only in this POC. Keep each entry focused.</small></label>
+        <label className="field"><span>Text</span><textarea name="body" required maxLength={50000} rows={16} defaultValue={entry?.body} /><small>Plain text only in this POC. Keep each update focused.</small></label>
         <label className="field"><span>Destination URL (optional; required for Link)</span><input name="destinationUrl" type="url" defaultValue={entry?.destinationUrl ?? ""} placeholder="https://example.com/resource" /></label>
       </fieldset>
       <div className="form-footer">
         <button className="button" type="submit" disabled={busy}>{entry ? "Save draft changes" : "Create draft"}</button>
-        <a className="button button-quiet" href="/owner">Return to overview</a>
+        <a className="button button-quiet" href="/owner">Return to Your presence</a>
         <p className="form-status" role="status" aria-live="polite">{status}</p>
       </div>
     </form>
@@ -55,6 +55,6 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
 async function errorMessage(response: Response): Promise<string> {
   try {
     const body = await response.json() as { error?: string; details?: Record<string, string> };
-    return body.details ? Object.values(body.details)[0] : body.error ?? "The entry could not be saved.";
-  } catch { return "The entry could not be saved."; }
+    return body.details ? Object.values(body.details)[0] : body.error ?? "The update could not be saved.";
+  } catch { return "The update could not be saved."; }
 }
