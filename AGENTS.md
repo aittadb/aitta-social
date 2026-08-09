@@ -71,6 +71,11 @@ file. Keep this file strictly below 32,000 bytes and run
   or otherwise mutate schema.
 - Persist only the one profile, entries, and minimal local configuration that
   genuinely requires persistence.
+- Ordinary content and restrained presentation customization must use explicit
+  semantic owner controls persisted in deployment-owned D1. It must not require
+  a repository fork, source edit, redeployment, Hub availability, generic
+  settings blob, arbitrary CSS/HTML/JavaScript, template, plugin, or remote
+  asset URL.
 
 ## Identity, authorization, and mutations
 
@@ -86,6 +91,10 @@ file. Keep this file strictly below 32,000 bytes and run
 - Every mutation independently requires current server-side owner
   authorization, an exact same-origin/CSRF check, an intended method/media type,
   a bounded request body, strict validation, and a prepared query.
+- ChatGPT may help the owner operate the normal signed-in interface, but it is
+  not an authentication principal and receives no separate token or authority.
+  Never add prompt-derived authorization, a magic owner, an agent credential,
+  an authentication bypass, or a public customization endpoint.
 - Never trust a hidden control, client route guard, browser field, browser
   destination, or previous page authorization.
 - Protected owner configuration, Hub credentials, runtime secrets, and
@@ -156,6 +165,10 @@ file. Keep this file strictly below 32,000 bytes and run
   add a runtime asset resolver, URL setting, upload UI, media manager, R2, or a
   storage abstraction for identity assets.
 - Keep the restrained “Powered by AittaSocial” reference owner-hideable.
+- Supported runtime customization must survive reload and upgrade without
+  changing the Git checkout. A downstream repository fork may be an optional
+  owner-approved source workflow, but automatic creation, synchronization,
+  merging, upgrades, or direct Sites forking are not assumed or promised.
 - When that attribution is visible, link AittaSocial to `https://aitta.social`
   and its source to `https://github.com/aittadb/aitta-social`.
 - Use native anchors for route navigation. Do not add `next/link` unless its
@@ -180,6 +193,37 @@ file. Keep this file strictly below 32,000 bytes and run
 - `PLAN.md` contains only accepted unfinished work with stable `TASK-NNN` IDs,
   direct dependencies, and a definition of done. Keep it a flat list of bounded
   vertical slices.
+- Each active task must fit one focused reviewable commit and own its relevant
+  implementation or proof, negative tests, documentation, and migration or
+  configuration decision. Split a task before implementation when its DoD
+  contains independently useful outcomes; never split work into generic
+  implementation, test, and documentation phases.
+- Parallelize only tasks whose recorded dependencies are complete and whose
+  runtime, schema, migration, or public-contract surfaces do not overlap.
+  Shared documentation is reconciled during integration rather than making all
+  otherwise independent work sequential. Parallel work
+  may give each task one owner, one writable worktree, and one
+  `codex/task-NNN-short-name` branch from the same exact validated prerequisite
+  commit; declare intended files and stop if another task overlaps them. Never
+  run two schema or migration tasks in parallel.
+- Integrate only complete validated task commits into the current feature
+  branch in dependency order. Do not stack dependent pull requests by default
+  or pretend an unmerged prerequisite is `main`. The owner rebase-merges the
+  reviewed feature PR; afterward remove obsolete worktrees, fetch the new
+  `origin/main`, and create a fresh branch for follow-up. Never reuse a merged
+  branch.
+- Serialize tracker finalization through the integration owner: after each task
+  commit is integrated, remove only that task from `PLAN.md`, append its exact
+  evidence/residual entry to `CHANGELOG.md`, reconcile shared documentation,
+  and rerun the plan and full repository gates. Parallel task worktrees do not
+  independently finalize the shared trackers.
+- Parallel worktrees must not copy, package, or operate the active ignored
+  `.openai/hosting.json`. Only an explicitly owner-approved checkpoint task may
+  use that binding to package or deploy one exact validated commit.
+- A missing external contract, approval, credential, service, or overlapping
+  file blocks only the affected task and its dependents. Record that exact
+  boundary and continue every independent unblocked task; never treat one lane
+  as a reason to stop unrelated presence, documentation, test, or contract work.
 - `ROADMAP.md` is a flat stable `ROADMAP-NNN` list of high-level future product
   direction. It is not current capability, a release commitment, or authority
   to implement; accepted work moves into `PLAN.md` first.
