@@ -1,0 +1,137 @@
+# Privacy and data handling
+
+One AittaSocial deployment controls and stores one account's data. It uses its
+own ChatGPT Sites D1 database. It does not send profile or entry content to a
+shared content store and does not require another database or external
+infrastructure.
+
+This document describes the POC's application-level behavior. A deployment
+owner remains responsible for the content they publish, their public privacy
+notice where one is required, and any hosting-level retention or access-policy
+choices.
+
+## Data inventory
+
+### Stored in the deployment's D1 database
+
+- one profile: display name, account type, short description, longer
+  introduction, optional location, optional website, optional external links,
+  canonical deployment URL, constrained visual preferences, and the choice to
+  show the restrained AittaSocial attribution;
+- entries: stable identifier, kind, optional title, body, optional destination
+  URL, draft/published state, optional publication time, creation time, and
+  update time; and
+- only minimal local configuration that genuinely needs durable storage.
+
+Drafts and unpublished entries are private owner content. D1 is authoritative;
+browser storage and Hub are not content stores for this deployment.
+
+### Processed from protected runtime settings
+
+| Value | Use | Public effect |
+| --- | --- | --- |
+| `AITTA_SOCIAL_OWNER_EMAIL` | Exact normalized local owner authorization | None; never disclosed |
+| `AITTA_SOCIAL_CANONICAL_URL` | Canonical public resource URLs | The normalized canonical URL is public |
+| `AITTA_SOCIAL_HUB_URL` | Pins the optional server-side Hub destination | Only a safe connection category is shown to the owner |
+| `AITTA_SOCIAL_HUB_CHALLENGE` | Allows Hub to verify deployment control | Public in the manifest only while explicitly configured |
+| `AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL` | Authenticates the deployment's provisional server-side Hub probe | None; never disclosed |
+
+Protected runtime values are not persisted to profile or entry tables. Do not
+copy them into source, migrations, committed fixtures, screenshots, URLs, or
+support messages.
+
+### Processed during Sign in with ChatGPT
+
+The ChatGPT Sites dispatcher may provide an authenticated user identifier,
+email, and optional name to server code. The POC needs only the authenticated
+email to decide whether the current request belongs to the configured local
+owner. It does not store that identity in D1, publish it, use it as a public
+profile, or present it as AittaSocial network authentication.
+
+The POC does not implement its own OAuth/OIDC provider, identity database,
+passwords, or authentication cookies. Dispatch-owned sign-in behavior and
+hosting access policy remain separate platform concerns.
+
+## Public data
+
+The following is intentionally public after the Site owner approves public
+access:
+
+- the configured public profile fields and constrained presentation values;
+- entries in published state and their public timestamps and links;
+- stable public entry identifiers and canonical URLs;
+- manifest protocol/software versions, canonical endpoints, and account type;
+  and
+- the current Hub verification challenge only when explicitly configured.
+
+Publishing makes content retrievable without sign-in through HTML and JSON.
+Unpublishing removes it from this deployment's public surfaces but cannot
+recall copies already cached, indexed, quoted, or saved elsewhere.
+
+Public serializers use explicit allowlists documented in
+[protocol.md](protocol.md). They do not include owner email, ChatGPT identity,
+drafts, internal state, deployment credentials, runtime secrets, Hub response
+bodies, database identifiers, hosting identifiers, or private route data.
+
+## Private data
+
+Owner-only surfaces may display profile drafts, draft entries, local editing
+state retrieved from D1, and safe setup/connection categories. A signed-in
+visitor who is not the configured owner receives none of that data.
+
+Missing owner configuration disables all writes. It does not cause the
+application to reveal expected configuration values or treat the first visitor
+as an owner.
+
+## Optional Hub data flow
+
+Public account reads do not contact Hub.
+
+During the owner-initiated provisional connection test, server code sends only
+an HTTP request to the exact configured HTTPS Hub origin. The deployment
+credential is confined to the server-side `Authorization` header. The account
+does not send profile content, entries, drafts, owner email, ChatGPT identity,
+or a browser-chosen destination. It does not read or retain the response body;
+the interface receives only a coarse safe status category.
+
+The public verification manifest lets Hub retrieve the configured challenge.
+That challenge is intentionally public and is not personal identity or an
+authentication session. Hub's own network-user registration, directory,
+credentials, and future sessions are separate Hub data handling.
+
+## Retention and control
+
+- Profile changes replace the stored profile values used by this deployment.
+- Drafts remain in D1 until published or deleted by the owner.
+- Unpublishing retains an entry privately in D1 while removing it from all
+  public queries.
+- Deleting an entry removes the application record. Hosting backups or
+  provider-level recovery retention, if any, are outside this application's
+  direct control.
+- Removing the Hub challenge setting removes it from the next deployed
+  manifest. Removing the deployment credential disables authenticated probes.
+- Deleting or decommissioning the Site and its D1 resource is a hosting-level
+  owner operation and should be checked against the owner's retention needs.
+
+The application has no additional administrators, team access, invitations,
+followers, messages, comments, reactions, notifications, payments, advertising,
+analytics subsystem, or media store in this POC.
+
+## Logs and errors
+
+Application logs and browser errors must not contain email addresses,
+authentication headers, Hub credentials, runtime setting values, request
+bodies, entry drafts, SQL text with values, or Hub response bodies. Safe errors
+use fixed categories and may include a generated correlation identifier that
+contains no embedded user data.
+
+Tests use obvious private canary values and assert that public HTML, JSON,
+headers, errors, and logs do not contain them. Production authorization is not
+relaxed for fixtures.
+
+## Data minimization checklist
+
+Before adding a field or outbound request, determine whether the current POC
+needs it, where it is stored, who can retrieve it, how it is deleted, and which
+test proves its boundary. Do not add speculative identity, analytics, network,
+upload, or generic configuration data.

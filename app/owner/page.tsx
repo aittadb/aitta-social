@@ -1,0 +1,70 @@
+import Link from "next/link";
+import { getProfile, listAllEntries } from "@/db/repository";
+import { EntryActions } from "./_components/EntryActions";
+import { OwnerAccessState, OwnerShell } from "./_components/OwnerShell";
+import { requireOwnerPage } from "./owner-access";
+
+export const dynamic = "force-dynamic";
+
+export default async function OwnerDashboard() {
+  const access = await requireOwnerPage("/owner");
+  if (access.status !== "owner") return <OwnerAccessState status={access.status} />;
+  const [profile, entries] = await Promise.all([getProfile(), listAllEntries()]);
+  const published = entries.filter((entry) => entry.state === "published").length;
+  return (
+    <OwnerShell displayName={access.user.displayName} current="overview">
+      <header className="owner-page-header">
+        <div>
+          <p className="eyebrow">Deployment overview</p>
+          <h1>{profile ? profile.displayName : "Complete the account profile"}</h1>
+          <p>{profile ? "Review drafts, publication state, and the public account from one focused workspace." : "The Site should remain private until the sole owner and this profile are configured and tested."}</p>
+        </div>
+        <Link className="button" href={profile ? "/owner/entries/new" : "/owner/profile"}>
+          {profile ? "Create entry" : "Set up profile"}
+        </Link>
+      </header>
+
+      <section className="owner-summary" aria-label="Account summary">
+        <Summary label="Profile" value={profile ? "Ready" : "Needed"} />
+        <Summary label="Published" value={String(published)} />
+        <Summary label="Drafts" value={String(entries.length - published)} />
+      </section>
+
+      <section className="owner-section" aria-labelledby="owner-entries-title">
+        <div className="owner-section-heading">
+          <div><p className="eyebrow">Local content</p><h2 id="owner-entries-title">Entries</h2></div>
+          <Link className="text-link" href="/owner/entries/new">New draft</Link>
+        </div>
+        {entries.length ? (
+          <div className="owner-entry-list">
+            {entries.map((entry) => (
+              <article className="owner-entry-row" key={entry.id}>
+                <div className="owner-entry-copy">
+                  <div className="entry-meta"><span>{entry.kind}</span><span className={`state state-${entry.state}`}>{entry.state}</span></div>
+                  <h3><Link href={`/owner/entries/${entry.id}`}>{entry.title ?? entry.body.slice(0, 90)}</Link></h3>
+                  <p>Updated {formatDate(entry.updatedAt)}</p>
+                </div>
+                <EntryActions id={entry.id} state={entry.state} />
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="owner-empty">
+            <h3>Nothing to manage yet</h3>
+            <p>Create a draft, shape it privately, and publish it when it is ready.</p>
+            <Link className="button" href="/owner/entries/new">Create the first draft</Link>
+          </div>
+        )}
+      </section>
+    </OwnerShell>
+  );
+}
+
+function Summary({ label, value }: { label: string; value: string }) {
+  return <div><span>{label}</span><strong>{value}</strong></div>;
+}
+
+function formatDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.valueOf()) ? value : new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(date);
+}
