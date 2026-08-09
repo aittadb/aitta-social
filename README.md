@@ -17,7 +17,7 @@ database directly and requires no separate database or external infrastructure.
 The first version is intentionally small:
 
 - a public presence and public update permalinks;
-- one configurable Identity profile;
+- one configurable, category-neutral Identity profile;
 - note, article, link, and announcement updates in draft or published state;
 - Sign in with ChatGPT for sole-owner administration of this presence;
 - private Your presence, Identity, update editing, and provisional Hub setup
@@ -92,8 +92,13 @@ visibility or a browser control never grants access.
 Human-facing pages call the deployment a presence and its published content
 updates. Public protocol 1.0 and the existing implementation retain the stable
 `profile`, `entry`, `/entries`, `accountType`, and `/api/v1/site` names. This
-terminology change requires no D1 schema, migration, route, or public JSON
-contract change.
+technical compatibility does not add a category choice or label to ordinary
+Identity setup or public HTML. A new profile uses the neutral `accountType`
+value `other`; later edits do not accept or modify this field, so an existing
+profile's earlier supported value remains readable in the manifest and
+`/api/v1/site`. The public field remains required in protocol 1.0 and is not an
+authorization, capability, or network-identity claim. This category-neutral
+change requires no D1 schema migration or protocol-version change.
 
 ## Development
 

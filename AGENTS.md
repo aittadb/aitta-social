@@ -14,6 +14,12 @@ file. Keep this file strictly below 32,000 bytes and run
 - The deployment owns its public identity, profile, updates, drafts, canonical
   URL, D1 data, design, runtime configuration, and local behavior. Preserve
   `entry` and related names where they are stable internal or protocol terms.
+- Ordinary Identity setup and public HTML are category-neutral. A new profile
+  is inserted with the server-owned protocol 1.0 compatibility value `other`;
+  profile updates must not accept or modify `accountType`. Preserve a legacy
+  stored value and expose it only through the explicit manifest and
+  `/api/v1/site` allowlists. Never use this field for presentation,
+  authorization, Hub trust, capability, or network identity.
 - Public profile and published-update reads operate without Hub. Hub integration
   is optional and failure-isolated.
 - Hub treats this deployment as an untrusted external website. Local
@@ -96,6 +102,10 @@ file. Keep this file strictly below 32,000 bytes and run
   JSON, pagination, counts, links, status, and error wording.
 - Keep public APIs versioned under `/api/v1` and discovery at
   `/.well-known/aitta-social.json`.
+- Preserve the required protocol 1.0 `accountType` field and its documented
+  legacy values until a deliberate versioned contract change. Hiding the
+  category from ordinary HTML does not authorize dropping, renaming, or
+  reinterpreting the public field.
 - Build every public response from an explicit field allowlist. Never serialize
   a D1 row, environment object, authenticated user, or private domain object.
 - Preserve stable entry identifiers, canonical configured URLs, documented JSON

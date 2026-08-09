@@ -67,7 +67,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
 
   await t.test("owner profile form semantics", async () => {
     const response = await fetchApp("/owner/profile", {
-      env: makeEnv({ db: new FakeD1(), ownerEmail }),
+      env: makeEnv({ db: new FakeD1({ profile: profileRow({ account_type: "project" }) }), ownerEmail }),
       headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
     });
     assert.equal(response.status, 200);
@@ -79,6 +79,8 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<fieldset>/i);
     assert.match(html, /<legend>Identity<\/legend>/i);
     assert.match(html, /<label[^>]*>.*Display name.*<input[^>]+name="displayName"/is);
+    assert.doesNotMatch(html, /name="accountType"|>Presence type</i);
+    assert.doesNotMatch(html, /(?:&quot;|\\?")accountType(?:&quot;|\\?")/i);
     assert.match(html, /<textarea[^>]+name="shortDescription"[^>]+required/i);
     assert.match(
       html,
@@ -170,7 +172,7 @@ test("owner-only pages redirect signed-out visitors and explain denied/configura
   });
 
   await t.test("different signed-in user", async () => {
-    const response = await fetchApp("/owner", {
+    const response = await fetchApp("/owner/profile", {
       env: makeEnv({ ownerEmail }),
       headers: { accept: "text/html", ...ownerHeaders("other@example.com") },
     });
@@ -178,11 +180,12 @@ test("owner-only pages redirect signed-out visitors and explain denied/configura
     const html = await response.text();
     assert.match(html, /not yours to administer/i);
     assert.match(html, /does not match the sole owner/i);
+    assert.doesNotMatch(html, /class="owner-form"|name="accountType"/i);
     assert.doesNotMatch(html, /owner@example\.com/i);
   });
 
   await t.test("owner setting missing", async () => {
-    const response = await fetchApp("/owner", {
+    const response = await fetchApp("/owner/profile", {
       env: makeEnv(),
       headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
     });
@@ -191,6 +194,7 @@ test("owner-only pages redirect signed-out visitors and explain denied/configura
     assert.match(html, /Administration is safely disabled/i);
     assert.match(html, /protected runtime settings/i);
     assert.match(html, /every write operation remains disabled/i);
+    assert.doesNotMatch(html, /class="owner-form"|name="accountType"/i);
     assert.doesNotMatch(html, /owner@example\.com/i);
   });
 });
@@ -231,6 +235,7 @@ test("client mutation controls announce status and use semantic form controls", 
   assert.match(profileForm, /<legend>Identity<\/legend>/);
   assert.match(profileForm, /<legend>Public details<\/legend>/);
   assert.match(profileForm, /<legend>Presentation<\/legend>/);
+  assert.doesNotMatch(profileForm, /accountType|name="accountType"|>Presence type/);
   assert.match(hubTest, /Provisional probe result:/);
   assert.match(hubTest, /catch \{ setStatus\("Provisional probe result:/);
 });

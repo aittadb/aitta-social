@@ -55,10 +55,9 @@ export async function saveProfile(input: ProfileInput): Promise<Profile> {
       id, display_name, account_type, short_description, introduction, location,
       website, external_links_json, canonical_url, accent_color, density,
       hide_powered_by, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, 'other', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       display_name = excluded.display_name,
-      account_type = excluded.account_type,
       short_description = excluded.short_description,
       introduction = excluded.introduction,
       location = excluded.location,
@@ -72,7 +71,6 @@ export async function saveProfile(input: ProfileInput): Promise<Profile> {
     .bind(
       1,
       input.displayName,
-      input.accountType,
       input.shortDescription,
       input.introduction,
       input.location,

@@ -147,10 +147,11 @@ class FakeStatement {
     this.database.mutations.push(record);
 
     if (this.normalized.startsWith("insert into profiles")) {
+      assert.match(this.normalized, /values \(\?, \?, 'other', \?/);
+      assert.doesNotMatch(this.normalized, /account_type = excluded\.account_type/);
       const [
         id,
         displayName,
-        accountType,
         shortDescription,
         introduction,
         location,
@@ -166,7 +167,7 @@ class FakeStatement {
       assert.equal(id, 1);
       this.database.profile = {
         display_name: displayName,
-        account_type: accountType,
+        account_type: this.database.profile?.account_type ?? "other",
         short_description: shortDescription,
         introduction,
         location,
