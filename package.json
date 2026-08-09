@@ -16,11 +16,12 @@
     "db:migrate:local": "WRANGLER_LOG_PATH=.wrangler/wrangler.log wrangler d1 migrations apply site-creator-d1 --local --persist-to .wrangler/state --config wrangler.local.jsonc",
     "db:check": "node scripts/check-migrations.mjs",
     "agents:check": "node scripts/check-agents-size.mjs",
+    "license:check": "node scripts/check-license.mjs",
     "plan:check": "node scripts/check-plan.mjs",
     "instance:check": "node scripts/check-instance-boundaries.mjs",
     "runtime:check": "node scripts/check-runtime-boundaries.mjs",
     "sites:package": "node scripts/require-active-hosting.mjs && npm run build",
-    "validate": "npm run agents:check && npm run plan:check && npm run instance:check && npm run runtime:check && npm run db:check && npm run typecheck && npm run lint && npm test"
+    "validate": "npm run agents:check && npm run license:check && npm run plan:check && npm run instance:check && npm run runtime:check && npm run db:check && npm run typecheck && npm run lint && npm test"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

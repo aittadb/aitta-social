@@ -129,31 +129,18 @@ accidental object serialization.
 ## Reusable deployment prompt
 
 ```text
-@Sites Deploy the AittaSocial account application from
-https://github.com/aittadb/aitta-social.
-
-Reuse my existing AittaSocial Site with slug `aittasocial` if it is already
-linked to this repository; do not create a duplicate. If more than one Site
-could match, stop and ask me which one to use. Keep the repository as the
-maintained source project and keep the Site private initially. Provision the
-Site's own D1 database and leave R2 unconfigured. Do not add another database
-or external infrastructure.
-
-Guide me to configure my verified ChatGPT email as the sole owner through the
-Site's protected `AITTA_SOCIAL_OWNER_EMAIL` runtime setting, without placing it
-in source code or this prompt. Let me complete the initial account profile,
-then test signed-out, owner, non-owner, draft-privacy, and published-entry
-behavior. Generate and inspect D1 migrations, run the relevant tests, inspect
-the responsive and accessible public and owner experiences, and save and
-verify a private checkpoint deployment for my review.
-
-Ask for explicit approval before publishing the Site publicly or connecting a
-custom domain. Treat optional AittaSocial Hub setup as separate from public
-operation, and never expose or send its deployment credential from the browser.
+@Sites Deploy my AittaSocial account from
+https://github.com/aittadb/aitta-social. Reuse the one existing Site linked to
+that repository; never create a duplicate, and ask me if the match is
+ambiguous. Keep the repository as its source and keep the Site private
+initially. Use only the Site's own D1 and leave R2 unconfigured. Guide me to set
+my verified ChatGPT email as the sole owner in the protected
+`AITTA_SOCIAL_OWNER_EMAIL` setting without putting it in chat or source. Then
+help me complete the profile, verify public/draft/owner/non-owner behavior, and
+save a private checkpoint. Ask before public access or a custom domain.
 ```
 
 ## License
 
-The exact Functional Source License variant, parameters, and change license for
-this Aitta project still require an owner decision. [LICENSE](LICENSE) records
-that pending status without inventing terms.
+AittaSocial is licensed under `FSL-1.1-MIT`. [LICENSE](LICENSE) contains the
+exact owner-selected terms and notice.

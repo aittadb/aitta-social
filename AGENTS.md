@@ -32,8 +32,8 @@ file. Keep this file strictly below 32,000 bytes and run
   selected private Site.
 - Do not modify AittaSocial Hub, AittaDB, Invest, or another sibling project from
   this repository's scope.
-- Do not copy sibling storage, OAuth/OIDC, R2, financial, custom-domain, or FSL
-  terms into this project; follow this product's accepted requirements only.
+- Do not copy sibling storage, OAuth/OIDC, R2, financial, or custom-domain
+  behavior into this project; follow this product's accepted requirements only.
 - This project does not use AittaDB, external databases, shared Hub content
   storage, shared Aitta runtime libraries, or external infrastructure.
 - Keep R2 null until an approved upload feature requires it.
@@ -136,8 +136,9 @@ file. Keep this file strictly below 32,000 bytes and run
   capability or release claim; promotion to PLAN is required before work.
 - Run repository agent/plan checks, focused tests, strict type/lint checks, the
   deployment build, and migration review relevant to each change.
-- Keep the Site private until protected owner configuration and the initial
+- Keep a new Site private until protected owner configuration and the initial
   profile are tested. Do not publish or connect a custom domain without explicit
   owner approval.
-- Do not finalize `LICENSE` until the owner supplies the exact FSL variant,
-  parameters, and change license. Do not copy terms from sibling projects.
+- Preserve the exact owner-selected `FSL-1.1-MIT` text and notice in `LICENSE`.
+  Any license change requires a new explicit owner decision plus synchronized
+  README, changelog, and automated-check updates.
