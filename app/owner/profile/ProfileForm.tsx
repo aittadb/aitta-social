@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
 import type { Profile } from "@/lib/types";
 
 export function ProfileForm({ profile, canonicalDefault }: { profile: Profile | null; canonicalDefault: string }) {
@@ -85,7 +84,7 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: Profile | 
 
       <div className="form-footer">
         <button className="button" type="submit" disabled={busy}>Save profile</button>
-        <Link className="button button-quiet" href="/">Preview public account</Link>
+        <a className="button button-quiet" href="/">Preview public account</a>
         <p className="form-status" role="status" aria-live="polite">{status}</p>
       </div>
     </form>

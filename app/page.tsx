@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-import Link from "next/link";
 import { getProfile, listPublishedEntries } from "@/db/repository";
 import { chatGPTSignInPath, getChatGPTUser } from "./chatgpt-auth";
 import type { Entry, Profile } from "@/lib/types";
@@ -20,9 +19,9 @@ export default async function Home() {
         <a className="wordmark" href="#account">{profile?.displayName ?? "Account"}</a>
         <div className="public-nav-actions">
           <a href="/.well-known/aitta-social.json" className="text-link">Manifest</a>
-          <Link className="button button-quiet" href={user ? "/owner" : chatGPTSignInPath("/owner")}>
+          <a className="button button-quiet" href={user ? "/owner" : chatGPTSignInPath("/owner")}>
             {user ? "Dashboard" : "Sign in"}
-          </Link>
+          </a>
         </div>
       </header>
 
@@ -62,7 +61,7 @@ export default async function Home() {
             <p className="eyebrow">Published here</p>
             <h2 id="entries-title">Entries</h2>
           </div>
-          <Link className="text-link" href="/api/v1/entries">JSON API</Link>
+          <a className="text-link" href="/api/v1/entries">JSON API</a>
         </div>
         {entries.length ? (
           <ol className="entry-list">
@@ -129,11 +128,11 @@ function EntryCard({ entry, index }: { entry: Entry; index: number }) {
           </time>
         </div>
         <h3 className={entry.title ? undefined : "entry-note-title"}>
-          <Link href={`/entries/${entry.id}`}>{label}</Link>
+          <a href={`/entries/${entry.id}`}>{label}</a>
         </h3>
         {entry.title && <p className="entry-excerpt">{excerpt(entry.body)}</p>}
         <div className="entry-card-links">
-          <Link className="text-link" href={`/entries/${entry.id}`}>Read entry</Link>
+          <a className="text-link" href={`/entries/${entry.id}`}>Read entry</a>
           {entry.destinationUrl && <a className="text-link" href={entry.destinationUrl} rel="noopener noreferrer">Open destination</a>}
         </div>
       </div>

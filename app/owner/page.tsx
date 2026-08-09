@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getProfile, listAllEntries } from "@/db/repository";
 import { EntryActions } from "./_components/EntryActions";
 import { OwnerAccessState, OwnerShell } from "./_components/OwnerShell";
@@ -19,9 +18,9 @@ export default async function OwnerDashboard() {
           <h1>{profile ? profile.displayName : "Complete the account profile"}</h1>
           <p>{profile ? "Review drafts, publication state, and the public account from one focused workspace." : "The Site should remain private until the sole owner and this profile are configured and tested."}</p>
         </div>
-        <Link className="button" href={profile ? "/owner/entries/new" : "/owner/profile"}>
+        <a className="button" href={profile ? "/owner/entries/new" : "/owner/profile"}>
           {profile ? "Create entry" : "Set up profile"}
-        </Link>
+        </a>
       </header>
 
       <section className="owner-summary" aria-label="Account summary">
@@ -33,7 +32,7 @@ export default async function OwnerDashboard() {
       <section className="owner-section" aria-labelledby="owner-entries-title">
         <div className="owner-section-heading">
           <div><p className="eyebrow">Local content</p><h2 id="owner-entries-title">Entries</h2></div>
-          <Link className="text-link" href="/owner/entries/new">New draft</Link>
+          <a className="text-link" href="/owner/entries/new">New draft</a>
         </div>
         {entries.length ? (
           <div className="owner-entry-list">
@@ -41,7 +40,7 @@ export default async function OwnerDashboard() {
               <article className="owner-entry-row" key={entry.id}>
                 <div className="owner-entry-copy">
                   <div className="entry-meta"><span>{entry.kind}</span><span className={`state state-${entry.state}`}>{entry.state}</span></div>
-                  <h3><Link href={`/owner/entries/${entry.id}`}>{entry.title ?? entry.body.slice(0, 90)}</Link></h3>
+                  <h3><a href={`/owner/entries/${entry.id}`}>{entry.title ?? entry.body.slice(0, 90)}</a></h3>
                   <p>Updated {formatDate(entry.updatedAt)}</p>
                 </div>
                 <EntryActions id={entry.id} state={entry.state} />
@@ -52,7 +51,7 @@ export default async function OwnerDashboard() {
           <div className="owner-empty">
             <h3>Nothing to manage yet</h3>
             <p>Create a draft, shape it privately, and publish it when it is ready.</p>
-            <Link className="button" href="/owner/entries/new">Create the first draft</Link>
+            <a className="button" href="/owner/entries/new">Create the first draft</a>
           </div>
         )}
       </section>

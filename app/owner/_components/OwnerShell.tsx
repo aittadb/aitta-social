@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
 
 export function OwnerShell({
@@ -14,7 +13,7 @@ export function OwnerShell({
     <main className="owner-shell">
       <header className="owner-topbar">
         <div>
-          <Link className="owner-wordmark" href="/owner">AittaSocial</Link>
+          <a className="owner-wordmark" href="/owner">AittaSocial</a>
           <span className="owner-badge">Owner workspace</span>
         </div>
         <div className="owner-session">
@@ -28,7 +27,7 @@ export function OwnerShell({
           <OwnerNavLink href="/owner/profile" active={current === "profile"}>Profile</OwnerNavLink>
           <OwnerNavLink href="/owner/entries/new" active={current === "entries"}>New entry</OwnerNavLink>
           <OwnerNavLink href="/owner/hub" active={current === "hub"}>Hub setup</OwnerNavLink>
-          <Link className="owner-public-link" href="/">View public account ↗</Link>
+          <a className="owner-public-link" href="/">View public account ↗</a>
         </nav>
         <div className="owner-content">{children}</div>
       </div>
@@ -48,7 +47,7 @@ export function OwnerAccessState({ status }: { status: "not-owner" | "unconfigur
           : "You are signed in, but this ChatGPT identity does not match the sole owner configured for this deployment."}
       </p>
       <div className="button-row">
-        <Link className="button" href="/">Return to public account</Link>
+        <a className="button" href="/">Return to public account</a>
         <a className="button button-quiet" href={chatGPTSignOutPath("/")}>Sign out</a>
       </div>
     </main>
@@ -56,5 +55,5 @@ export function OwnerAccessState({ status }: { status: "not-owner" | "unconfigur
 }
 
 function OwnerNavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
-  return <Link href={href} aria-current={active ? "page" : undefined}>{children}</Link>;
+  return <a href={href} aria-current={active ? "page" : undefined}>{children}</a>;
 }

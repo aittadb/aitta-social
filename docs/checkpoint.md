@@ -40,19 +40,19 @@ owner-approved personal hostname is the only connected custom domain.
 
 ## Validation and deployed source proof
 
-- Pull requests [#1](https://github.com/aittadb/aitta-social/pull/1) and
-  [#2](https://github.com/aittadb/aitta-social/pull/2) were owner-reviewed and
+- Pull requests [#1](https://github.com/aittadb/aitta-social/pull/1),
+  [#2](https://github.com/aittadb/aitta-social/pull/2), and
+  [#3](https://github.com/aittadb/aitta-social/pull/3) were owner-reviewed and
   rebase-merged. The deployed source is the resulting `main` commit
-  `465dc3370744e25306f88f8732e66589be1a8346`.
+  `a7e84e67e4ecf5a6fc4232e94d065bf0d95f4b28`.
 - A clean checkout from the bare repository URL selected that default branch
   source and contained no active hosting binding. `npm ci`, migration
-  generation, and `npm run validate` passed with 79 focused tests, and migration
+  generation, and `npm run validate` passed with 80 focused tests, and migration
   generation produced no schema diff.
 - The exact main-derived source, reviewed migration, and ignored checkout-local
   binding were packaged. The packaged and reviewed migration hashes match, the
-  Sites source ref was synchronized to that commit, and Site version 4 reached
-  successful deployment status. The same saved version was redeployed after
-  the protected canonical setting changed.
+  Sites source ref was synchronized to that commit, and Site version 5 reached
+  successful deployment status.
 - The corrected hosted owner Hub control now returns the safe setup status when
   the optional Hub URL and credential are absent; it no longer reports the
   empty-request-stream body error.
@@ -68,6 +68,19 @@ owner-approved personal hostname is the only connected custom domain.
 - Anonymous requests to the custom hostname return the personal account. The
   site API, entry API, entry resource links, and discovery manifest all emit
   `https://jhh.aitta.social` as their canonical origin.
+
+## Current navigation repair
+
+- Hosted browser reproduction found that the deployed client-link runtime
+  throws during prefetch and click handling. Both the reported Sign in action
+  and a signed-in Dashboard action remained on the account homepage.
+- TASK-033 replaces client-intercepted route links with ordinary browser links
+  throughout the small server-rendered application. A local Dashboard click
+  completed as a full-document navigation with no console warnings or errors,
+  and the focused suite passes with 81 tests.
+- The hosted Site remains on the merged version described above until the owner
+  reviews and rebase-merges the repair pull request. Only the resulting new
+  `main` commit may be packaged and deployed as the corrected hosted version.
 
 The optional Hub origin, verification challenge, and deployment credential are
 not configured. Public account operation remains independent of Hub.
