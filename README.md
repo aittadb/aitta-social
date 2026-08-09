@@ -4,8 +4,9 @@
 @Sites Deploy AittaSocial from https://github.com/aittadb/aitta-social. Reuse
 the existing Site for this project if exactly one matches; never create a
 duplicate, and stop to ask me if more than one Site could match. Keep it
-private first, give it its own private storage, and guide me to set up the one
-owner securely without putting their email in this prompt or source. Hub stays
+private first, give it its own storage, and guide me to set up one owner
+through protected Site settings without putting their email in this prompt or
+source. Hub stays
 optional and public use works without it. After sign-in, help the owner
 customize Identity, links, updates, accent, density, and attribution through
 owner controls without a GitHub fork. Ask before any later source change or

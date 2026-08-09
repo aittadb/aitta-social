@@ -29,8 +29,8 @@ test("deployment prompt preserves every setup and approval boundary", () => {
   assert.match(normalizedPrompt, /never create a.*duplicate/i);
   assert.match(normalizedPrompt, /stop to ask me if more than one Site could match/i);
   assert.match(normalizedPrompt, /keep it.*private first/i);
-  assert.match(normalizedPrompt, /its own private storage/i);
-  assert.match(normalizedPrompt, /set up the one owner securely/i);
+  assert.match(normalizedPrompt, /its own storage/i);
+  assert.match(normalizedPrompt, /set up one owner through protected Site settings/i);
   assert.match(normalizedPrompt, /Hub stays optional.*public use works without it/i);
   assert.match(normalizedPrompt, /after sign-in.*owner controls.*without a GitHub fork/i);
   for (const control of ["Identity", "links", "updates", "accent", "density", "attribution"]) {
