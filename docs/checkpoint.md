@@ -36,23 +36,32 @@ is connected.
   horizontal overflow at a 375-pixel viewport. The temporary viewport overrides
   were reset after review.
 
-## Validation and current source gate
+## Validation and deployed source proof
 
-- `npm run validate` passes with 78 focused tests after the hosted Hub-test
-  regression fix. The suite covers every private write boundary, sole-owner
-  matching, missing-owner failure, draft privacy, public allowlists, pagination,
-  URL validation, the shared public model for all four entry kinds, Hub
-  credential confinement, responsive semantics, and the empty browser
-  request-stream shape found during hosted review.
-- The deployed saved version still predates that Hub-test fix. Sites correctly
-  refused to save an archive for a commit that is not the configured source
-  branch's current `main` HEAD. The validated feature branch is available in
-  draft pull request [#1](https://github.com/aittadb/aitta-social/pull/1) and is
-  review input only: an agent must neither update nor merge `main` directly.
-  After the owner reviews and rebase-merges it, checkpoint work must begin on a
-  fresh branch from the resulting `origin/main`, since the rebase changes commit
-  provenance. Only that exact main-derived source can prove the final corrected
-  deployment.
+- Pull request [#1](https://github.com/aittadb/aitta-social/pull/1) was
+  owner-reviewed and rebase-merged. The fresh checkpoint branch began at the
+  resulting `main` commit
+  `d1b591ff6ba6f1e6fc5393b67597f1a55100724b` with no source changes.
+- A clean checkout from the bare repository URL selected that same default
+  branch commit and contained no active hosting binding. `npm ci`, migration
+  generation, and `npm run validate` passed with 78 focused tests, and migration
+  generation produced no schema diff.
+- The exact main-derived source, reviewed migration, and ignored checkout-local
+  binding were packaged. The packaged and reviewed migration hashes match, the
+  Sites source ref was synchronized to that commit, and Site version 3 reached
+  successful deployment status at the canonical checkpoint URL above.
+- The corrected hosted owner Hub control now returns the safe setup status when
+  the optional Hub URL and credential are absent; it no longer reports the
+  empty-request-stream body error.
+- Anonymous checks returned 200 for the account, published permalink, manifest,
+  site API, and entries API. The draft permalink returned 404, the entries API
+  contained only the published note, and the manifest and API projections
+  contained no private fields or unconfigured verification challenge. A
+  signed-out owner request redirected to the dispatcher-owned sign-in route,
+  and an unauthenticated owner-only Hub probe returned 401.
+- The owner-approved link-public access remained unchanged. Exactly one allowed
+  owner remains configured, no groups or external visitors were added, and the
+  custom-domain count remains zero.
 
 The optional Hub origin, verification challenge, and deployment credential are
 not configured. Public account operation remains independent of Hub.
