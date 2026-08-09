@@ -7,6 +7,6 @@ implementation, negative tests, security review, migration, and documentation.
 
 Current status:
 
-- The accepted POC queue is complete. `CHANGELOG.md` records every finished
-  task and its validation evidence. New scope must be promoted from
-  `BACKLOG.md` or added here as a new accepted task before implementation.
+- The accepted queue is complete. `CHANGELOG.md` records every finished task and
+  its validation evidence. New scope must be promoted from `ROADMAP.md` or
+  `BACKLOG.md`, or added here as a new accepted task, before implementation.

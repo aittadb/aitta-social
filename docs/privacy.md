@@ -17,7 +17,7 @@ choices.
 - one profile: display name, account type, short description, longer
   introduction, optional location, optional website, optional external links,
   canonical deployment URL, constrained visual preferences, and the choice to
-  show the restrained AittaSocial attribution;
+  show the restrained AittaSocial attribution and official project links;
 - entries: stable identifier, kind, optional title, body, optional destination
   URL, draft/published state, optional publication time, creation time, and
   update time; and

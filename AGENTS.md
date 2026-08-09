@@ -120,6 +120,8 @@ file. Keep this file strictly below 32,000 bytes and run
 - Use constrained accent/density choices, few colors, no gradients, no
   unnecessary generated imagery, and no generic dashboard clutter.
 - Keep the restrained “Powered by AittaSocial” reference owner-hideable.
+- When that attribution is visible, link AittaSocial to `https://aitta.social`
+  and its source to `https://github.com/aittadb/aitta-social`.
 
 ## Delivery and work tracking
 
@@ -139,6 +141,9 @@ file. Keep this file strictly below 32,000 bytes and run
 - `PLAN.md` contains only accepted unfinished work with stable `TASK-NNN` IDs,
   direct dependencies, and a definition of done. Keep it a flat list of bounded
   vertical slices.
+- `ROADMAP.md` is a flat stable `ROADMAP-NNN` list of high-level future product
+  direction. It is not current capability, a release commitment, or authority
+  to implement; accepted work moves into `PLAN.md` first.
 - Move finished tasks to `CHANGELOG.md` with decisive validation evidence and
   residual uncertainty.
 - `BACKLOG.md` contains stable-ID unscheduled possibilities only. It is not a
