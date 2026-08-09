@@ -17,6 +17,11 @@ updates. Protocol 1.0 deliberately retains the stable `accountType`, `entry`,
 `entries`, `/entries/*`, and `/api/v1/site` names. The terminology change does
 not alter a route, JSON field, schema, migration, or public contract.
 
+Ordinary Identity setup and public HTML are category-neutral. `accountType`
+remains a required protocol 1.0 compatibility field in the discovery manifest
+and public site resource; it is not a required visible classification of the
+represented identity.
+
 ## Conventions
 
 - Successful responses and application-generated validation, not-found, and
@@ -53,7 +58,7 @@ not alter a route, JSON field, schema, migration, or public contract.
     "profile": "https://account.example/api/v1/site",
     "entries": "https://account.example/api/v1/entries"
   },
-  "accountType": "project"
+  "accountType": "other"
 }
 ```
 
@@ -92,7 +97,7 @@ contains links derived from the request host.
 {
   "data": {
     "displayName": "Northern Workshop",
-    "accountType": "project",
+    "accountType": "other",
     "shortDescription": "Tools and field notes for careful collaboration.",
     "introduction": "We publish working notes, longer explanations, and project announcements.",
     "location": "Helsinki",
@@ -125,6 +130,25 @@ contains links derived from the request host.
 `compact`; `presentation.accentColor` is a validated six-digit hex color; and
 `presentation.showPoweredBy` is a boolean. These values are validated by the
 application rather than accepted as arbitrary HTML or template input.
+
+The category-neutral owner editor does not ask the owner to choose an
+`accountType`, and the private profile-write model does not contain that field.
+The server inserts the neutral compatibility value `other` when it creates a
+profile and omits `account_type` from later profile updates. An `accountType`
+property sent by an older or handcrafted private client is ignored like any
+other unknown input and cannot select or replace the stored value. Reads do not
+rewrite legacy values. The manifest and `/api/v1/site` continue to emit the
+stored value through their exact public allowlists. The owner form receives
+only editable fields, and a successful private profile write returns no profile
+representation.
+
+This is an additive-compatible presentation and write-boundary change: no
+field, allowed legacy value, endpoint, or response envelope is removed or
+renamed, so protocol and API version 1.0 remain current. The existing non-null
+D1 column already stores `other`; no schema migration or data rewrite is
+needed. Consumers must treat `accountType` as compatibility metadata, not as
+proof of identity, authorization, capability, Hub verification, or network
+membership.
 
 The response never contains owner identity, authentication state, protected
 runtime settings, Hub connection details, drafts, database metadata, or

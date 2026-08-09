@@ -14,10 +14,11 @@ choices.
 
 ### Stored in the deployment's D1 database
 
-- one profile: display name, account type, short description, longer
-  introduction, optional location, optional website, optional external links,
-  canonical deployment URL, constrained visual preferences, and the choice to
-  show the restrained AittaSocial attribution and official project links;
+- one profile: display name, the protocol 1.0 `accountType` compatibility
+  value, short description, longer introduction, optional location, optional
+  website, optional external links, canonical deployment URL, constrained
+  visual preferences, and the choice to show the restrained AittaSocial
+  attribution and official project links;
 - entries: stable identifier, kind, optional title, body, optional destination
   URL, draft/published state, optional publication time, creation time, and
   update time; and
@@ -61,9 +62,18 @@ access:
 - updates in published state and their public timestamps and links (public
   protocol 1.0 retains the stable `entry` resource name);
 - stable public entry identifiers and canonical URLs;
-- manifest protocol/software versions, canonical endpoints, and account type;
-  and
+- manifest protocol/software versions, canonical endpoints, and the stored
+  protocol 1.0 `accountType` compatibility value; and
 - the current Hub verification challenge only when explicitly configured.
+
+Ordinary Identity setup and public HTML do not request or display a category.
+A new profile stores the server-owned value `other`; later profile edits do not
+accept or modify the field, so an earlier supported stored value is preserved.
+The manifest and `/api/v1/site` expose that stored value. This field is retained
+solely for protocol 1.0 compatibility and must not be interpreted as verified
+identity, authorization, capability, or network membership. It remains in
+exact public allowlists; no other private profile or storage field becomes
+public with it.
 
 Publishing makes content retrievable without sign-in through HTML and JSON.
 Unpublishing removes it from this deployment's public surfaces but cannot

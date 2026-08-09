@@ -1,7 +1,5 @@
 import {
-  ACCOUNT_TYPES,
   ENTRY_KINDS,
-  type AccountType,
   type EntryKind,
   type PresentationDensity,
 } from "./constants";
@@ -65,13 +63,6 @@ export function parseProfileInput(value: unknown): ProfileInput {
     issues,
   );
   const introduction = bounded(input.introduction, "Introduction", 1, 10000, issues);
-  const accountType = enumValue(
-    input.accountType,
-    ACCOUNT_TYPES,
-    "Presence type",
-    issues,
-    "accountType",
-  ) as AccountType;
   const location = optionalBounded(input.location, "Location", 120, issues);
   const accentColor = text(input.accentColor).toLowerCase();
   if (!/^#[0-9a-f]{6}$/.test(accentColor)) {
@@ -121,7 +112,6 @@ export function parseProfileInput(value: unknown): ProfileInput {
   if (Object.keys(issues).length) throw new ValidationError(issues);
   return {
     displayName,
-    accountType,
     shortDescription,
     introduction,
     location,

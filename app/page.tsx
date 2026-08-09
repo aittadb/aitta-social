@@ -31,7 +31,7 @@ export default async function Home() {
 
       <section className="identity-block" id="account" aria-labelledby="account-name">
         <div className="identity-main">
-          <p className="eyebrow">{profile ? accountTypeLabel(profile.accountType) : "Independent presence"}</p>
+          <p className="eyebrow">Public presence</p>
           <h1 id="account-name">{profile?.displayName ?? "This presence is being prepared"}</h1>
           <p className="identity-summary">
             {profile?.shortDescription ?? "A clear public presence will appear here after its owner completes the identity."}
@@ -161,8 +161,4 @@ function formatDate(value: string): string {
   return Number.isNaN(date.valueOf())
     ? value
     : new Intl.DateTimeFormat("en", { year: "numeric", month: "short", day: "numeric" }).format(date);
-}
-
-function accountTypeLabel(value: string): string {
-  return value === "other" ? "Independent presence" : `${value.charAt(0).toUpperCase()}${value.slice(1)} presence`;
 }

@@ -153,6 +153,38 @@ test("every private mutation route independently rejects a non-owner before touc
   }
 });
 
+test("category-neutral profile writes still require configured sole-owner authorization", async (t) => {
+  const input = validProfileInput();
+
+  await t.test("different signed-in user", async () => {
+    const db = new FakeD1({ profile: null });
+    const response = await fetchApp("/api/private/profile", {
+      env: makeEnv({ db, ownerEmail }),
+      method: "PUT",
+      headers: mutationHeaders("other@example.com"),
+      body: JSON.stringify(input),
+    });
+    assert.equal(response.status, 403);
+    assert.deepEqual(await responseJson(response), {
+      error: "Administrative access denied.",
+    });
+    assert.equal(db.mutations.length, 0);
+  });
+
+  await t.test("owner setting missing", async () => {
+    const db = new FakeD1({ profile: null });
+    const response = await fetchApp("/api/private/profile", {
+      env: makeEnv({ db }),
+      method: "PUT",
+      headers: mutationHeaders(ownerEmail),
+      body: JSON.stringify(input),
+    });
+    assert.equal(response.status, 503);
+    assert.match(JSON.stringify(await responseJson(response)), /not configured/i);
+    assert.equal(db.mutations.length, 0);
+  });
+});
+
 test("authorized draft lifecycle stays private until publish and supports every POC action", async () => {
   const db = new FakeD1();
   const env = makeEnv({ db, ownerEmail });

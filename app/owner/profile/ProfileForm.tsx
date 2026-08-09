@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import type { Profile } from "@/lib/types";
+import type { ProfileInput } from "@/lib/types";
 
-export function ProfileForm({ profile, canonicalDefault }: { profile: Profile | null; canonicalDefault: string }) {
+export function ProfileForm({ profile, canonicalDefault }: { profile: ProfileInput | null; canonicalDefault: string }) {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -27,7 +27,6 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: Profile | 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         displayName: form.get("displayName"),
-        accountType: form.get("accountType"),
         shortDescription: form.get("shortDescription"),
         introduction: form.get("introduction"),
         location: form.get("location"),
@@ -52,13 +51,7 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: Profile | 
     <form className="owner-form" onSubmit={submit} noValidate>
       <fieldset>
         <legend>Identity</legend>
-        <div className="field-grid field-grid-two">
-          <Field label="Display name" name="displayName" required maxLength={100} defaultValue={profile?.displayName} />
-          <label className="field"><span>Presence type</span><select name="accountType" defaultValue={profile?.accountType ?? "person"}>
-            <option value="person">Person</option><option value="company">Company</option><option value="project">Project</option>
-            <option value="community">Community</option><option value="publication">Publication</option><option value="agent">AI agent</option><option value="other">Other entity</option>
-          </select></label>
-        </div>
+        <Field label="Display name" name="displayName" required maxLength={100} defaultValue={profile?.displayName} />
         <label className="field"><span>Short description</span><textarea name="shortDescription" required maxLength={280} rows={3} defaultValue={profile?.shortDescription} /><small>One clear sentence for the top of the presence.</small></label>
         <label className="field"><span>Longer introduction</span><textarea name="introduction" required maxLength={10000} rows={8} defaultValue={profile?.introduction} /></label>
       </fieldset>

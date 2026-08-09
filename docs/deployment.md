@@ -108,10 +108,10 @@ checking that its key is configured.
    join or sign in to the AittaSocial network.
 2. Confirm that the authenticated email matches the protected owner setting by
    reaching Your presence, not by displaying either email.
-3. Open `/owner/profile` and configure Identity: display name, the current
-   protocol-compatible presence category, short description, longer
-   introduction, optional location/website/external links, canonical URL,
-   accent color, density, and attribution preference.
+3. Open `/owner/profile` and configure Identity: display name, short
+   description, longer introduction, optional location/website/external links,
+   canonical URL, accent color, density, and attribution preference. Ordinary
+   setup does not ask for or display an identity category.
 4. Save and reopen the public presence. It should look intentional with no
    updates and should describe the represented identity rather than AittaSocial.
 5. Create a draft update at `/owner/entries/new`; verify it is visible to the
@@ -121,6 +121,11 @@ checking that its key is configured.
 
 Identity and update writes use the stable profile and entry models in this
 deployment's D1 database and do not require another deployment after each edit.
+For protocol 1.0 compatibility, a new profile stores the neutral `accountType`
+value `other`, while later edits neither accept nor modify the field and
+therefore preserve an existing supported value. The stored value remains
+readable only through the public manifest and `/api/v1/site`; it is not a setup
+choice or trust claim. No D1 migration or protocol-version change is required.
 
 ## 6. Test access without broadening it
 

@@ -10,8 +10,8 @@ export async function PUT(request: Request) {
   if (!auth.ok) return auth.response;
   try {
     const input = parseProfileInput(await readJson(request));
-    const profile = await saveProfile(input);
-    return Response.json({ data: profile }, { headers: { "Cache-Control": "no-store" } });
+    await saveProfile(input);
+    return new Response(null, { status: 204, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const response = validationResponse(error);
     if (response) return response;

@@ -99,6 +99,12 @@ and pagination effects are private.
 - Normalize the canonical deployment URL once at a server write boundary. A
   hosted canonical URL is an HTTPS base without credentials, query, or
   fragment. Do not derive public canonical links from the request host.
+- Do not render an owner category control or include `accountType` in the
+  private profile-write model. The server inserts the protocol 1.0
+  compatibility value `other` for a new profile and leaves the column unchanged
+  on updates. Ignore a browser-supplied `accountType`; it cannot select or
+  replace the stored value. Project only editable fields into the client form;
+  a successful private write returns no profile serialization.
 - Use prepared D1 statements with bound parameters. Pass one SQL statement to
   each preparation and batch separate statements when an operation must be
   atomic. Never concatenate user input into SQL.
@@ -128,6 +134,14 @@ The discovery manifest conditionally exposes only the configured Hub
 verification challenge. The challenge is intentionally public and proves only
 that a deployment could be changed at verification time. It must never be used
 as a bearer credential or owner session.
+
+Protocol 1.0 also requires the stored `accountType` in the discovery manifest
+and `/api/v1/site`. Ordinary HTML does not display it. Legacy supported values
+remain public and are unchanged by profile edits, while the server inserts
+`other` for a new profile; no value is an authorization decision, verified
+identity category, capability claim, Hub assertion, or network-membership
+signal. Both JSON surfaces continue to construct the field through their exact
+allowlists.
 
 ## Hub boundary
 

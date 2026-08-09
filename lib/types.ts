@@ -35,5 +35,5 @@ export type Entry = {
   updatedAt: string;
 };
 
-export type ProfileInput = Omit<Profile, "createdAt" | "updatedAt">;
+export type ProfileInput = Omit<Profile, "accountType" | "createdAt" | "updatedAt">;
 export type EntryInput = Pick<Entry, "kind" | "title" | "body" | "destinationUrl">;

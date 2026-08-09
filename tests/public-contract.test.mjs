@@ -62,6 +62,39 @@ test("a presence with no updates still has an intentional public empty state", a
   assert.match(html, /presence already stands on its own/i);
 });
 
+test("public HTML is category-neutral while protocol 1.0 retains a legacy accountType", async () => {
+  const env = makeEnv({
+    db: new FakeD1({
+      profile: profileRow({
+        display_name: "Legacy organization",
+        account_type: "company",
+      }),
+    }),
+    canonicalUrl: "https://canonical.example/presence",
+  });
+
+  const htmlResponse = await fetchApp("/", {
+    env,
+    headers: { accept: "text/html" },
+  });
+  assert.equal(htmlResponse.status, 200);
+  const html = await htmlResponse.text();
+  assert.match(html, />Public presence</i);
+  assert.doesNotMatch(html, />Company presence</i);
+  assert.doesNotMatch(html, />Presence type</i);
+
+  const siteResponse = await fetchApp("/api/v1/site", { env });
+  assert.equal(siteResponse.status, 200);
+  const site = await responseJson(siteResponse);
+  assert.equal(site.data.accountType, "company");
+
+  const manifestResponse = await fetchApp("/.well-known/aitta-social.json", { env });
+  assert.equal(manifestResponse.status, 200);
+  const manifest = await responseJson(manifestResponse);
+  assert.equal(manifest.accountType, "company");
+  assert.equal(manifest.protocolVersion, "1.0");
+});
+
 test("all four entry kinds use the same public presence and update permalink model", async () => {
   const entries = [
     entryRow({ id: "kind-note", kind: "note", title: "A public note" }),

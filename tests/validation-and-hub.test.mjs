@@ -34,18 +34,17 @@ test("profile writes normalize canonical/public URLs and persist only validated 
     })),
   });
 
-  assert.equal(response.status, 200);
-  const profile = (await responseJson(response)).data;
-  assert.equal(profile.displayName, "Normalized account");
-  assert.equal(profile.location, "Helsinki");
-  assert.equal(profile.website, "http://example.com/about?q=public#section");
-  assert.deepEqual(profile.externalLinks, [
+  assert.equal(response.status, 204);
+  assert.equal(await response.text(), "");
+  assert.equal(db.profile.display_name, "Normalized account");
+  assert.equal(db.profile.location, "Helsinki");
+  assert.equal(db.profile.website, "http://example.com/about?q=public#section");
+  assert.deepEqual(JSON.parse(db.profile.external_links_json), [
     { label: "Documentation", url: "https://example.com/docs" },
   ]);
-  assert.equal(profile.canonicalUrl, "https://canonical.example/account");
-  assert.equal(profile.accentColor, "#aabbcc");
-  assert.equal(profile.density, "compact");
-  assert.equal(profile.hidePoweredBy, true);
+  assert.equal(db.profile.accent_color, "#aabbcc");
+  assert.equal(db.profile.density, "compact");
+  assert.equal(db.profile.hide_powered_by, 1);
   assert.equal(db.profile.canonical_url, "https://canonical.example/account");
 
   const publicProfile = (await responseJson(await fetchApp("/api/v1/site", {
@@ -55,6 +54,58 @@ test("profile writes normalize canonical/public URLs and persist only validated 
   assert.equal(publicProfile.presentation.showPoweredBy, false);
 });
 
+test("category-neutral profile writes keep the smallest protocol 1.0 compatibility value", async (t) => {
+  await t.test("new profiles store other even when a legacy caller supplies person", async () => {
+    const db = new FakeD1({ profile: null });
+    const response = await fetchApp("/api/private/profile", {
+      env: makeEnv({ db, ownerEmail }),
+      method: "PUT",
+      headers: mutationHeaders(ownerEmail),
+      body: JSON.stringify(validProfileInput({
+        accountType: "person",
+        displayName: "Category-neutral presence",
+      })),
+    });
+
+    assert.equal(response.status, 204);
+    assert.equal(await response.text(), "");
+    assert.equal(db.profile.display_name, "Category-neutral presence");
+    assert.equal(db.profile.account_type, "other");
+  });
+
+  await t.test("legacy profile updates preserve their stored value", async () => {
+    const db = new FakeD1({ profile: {
+      display_name: "Legacy project",
+      account_type: "project",
+      short_description: "Existing public identity.",
+      introduction: "A legacy profile that remains compatible.",
+      location: null,
+      website: null,
+      external_links_json: "[]",
+      canonical_url: "https://account.example",
+      accent_color: "#31554d",
+      density: "comfortable",
+      hide_powered_by: 0,
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-02T00:00:00.000Z",
+    } });
+    const response = await fetchApp("/api/private/profile", {
+      env: makeEnv({ db, ownerEmail }),
+      method: "PUT",
+      headers: mutationHeaders(ownerEmail),
+      body: JSON.stringify(validProfileInput({
+        accountType: "person",
+        displayName: "Updated legacy project",
+      })),
+    });
+
+    assert.equal(response.status, 204);
+    assert.equal(await response.text(), "");
+    assert.equal(db.profile.display_name, "Updated legacy project");
+    assert.equal(db.profile.account_type, "project");
+  });
+});
+
 test("profile validation rejects malformed identity, canonical URL, links, and presentation", async (t) => {
   const cases = [
     ["required public identity", {
@@ -62,7 +113,7 @@ test("profile validation rejects malformed identity, canonical URL, links, and p
       accountType: "unsupported",
       shortDescription: "",
       introduction: "",
-    }, ["displayName", "accountType", "shortDescription", "introduction"]],
+    }, ["displayName", "shortDescription", "introduction"]],
     ["canonical URL must be credential-free HTTPS without query or fragment", {
       canonicalUrl: "https://user:pass@example.com/account?secret=yes#fragment",
     }, ["canonicalUrl"]],
@@ -103,9 +154,7 @@ test("profile validation rejects malformed identity, canonical URL, links, and p
       const body = await responseJson(response);
       assert.equal(body.error, "The submitted values are invalid.");
       for (const issue of expectedIssues) assert.equal(typeof body.details[issue], "string");
-      if (expectedIssues.includes("accountType")) {
-        assert.equal(body.details.accountType, "Choose a valid presence type.");
-      }
+      assert.equal("accountType" in body.details, false);
       assert.equal(db.mutations.length, 0);
     });
   }
