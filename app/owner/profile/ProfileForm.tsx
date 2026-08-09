@@ -80,7 +80,7 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: Profile | 
           <label className="field color-field"><span>Accent color</span><input name="accentColor" type="color" defaultValue={profile?.accentColor ?? "#31554d"} /></label>
           <label className="field"><span>Entry density</span><select name="density" defaultValue={profile?.density ?? "comfortable"}><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
         </div>
-        <label className="check-field"><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” footer</span></label>
+        <label className="check-field"><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” and source links</span></label>
       </fieldset>
 
       <div className="form-footer">

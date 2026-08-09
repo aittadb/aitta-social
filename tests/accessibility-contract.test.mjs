@@ -8,6 +8,7 @@ import {
   fetchApp,
   makeEnv,
   ownerHeaders,
+  profileRow,
 } from "./helpers/worker-harness.mjs";
 
 const ownerEmail = "owner@example.com";
@@ -29,6 +30,23 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<aside[^>]+aria-label="Account details"/i);
     assert.match(html, /<section[^>]+aria-labelledby="entries-title"/i);
     assert.match(html, /<time[^>]+datetime=/i);
+    assert.match(html, /<strong>\s*<a[^>]+href="https:\/\/aitta\.social"[^>]*>AittaSocial<\/a>\s*<\/strong>/i);
+    assert.match(
+      html,
+      /href="https:\/\/github\.com\/aittadb\/aitta-social"[^>]*aria-label="AittaSocial source on GitHub"/i,
+    );
+  });
+
+  await t.test("the owner can hide the complete software attribution", async () => {
+    const response = await fetchApp("/", {
+      env: makeEnv({ db: new FakeD1({ profile: profileRow({ hide_powered_by: 1 }) }) }),
+      headers: { accept: "text/html" },
+    });
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.doesNotMatch(html, /Powered by/i);
+    assert.doesNotMatch(html, /https:\/\/aitta\.social/i);
+    assert.doesNotMatch(html, /https:\/\/github\.com\/aittadb\/aitta-social/i);
   });
 
   await t.test("owner profile form semantics", async () => {

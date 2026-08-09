@@ -89,7 +89,18 @@ export default async function Home() {
 
       <footer className="public-footer">
         <span>{profile?.displayName ?? "Independent account"}</span>
-        {!profile?.hidePoweredBy && <span>Powered by <strong>AittaSocial</strong></span>}
+        {!profile?.hidePoweredBy && (
+          <span>
+            Powered by <strong><a href="https://aitta.social">AittaSocial</a></strong>
+            {" · "}
+            <a
+              href="https://github.com/aittadb/aitta-social"
+              aria-label="AittaSocial source on GitHub"
+            >
+              GitHub
+            </a>
+          </span>
+        )}
       </footer>
     </main>
   );

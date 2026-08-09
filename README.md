@@ -4,6 +4,9 @@ AittaSocial is independently hosted social software for ChatGPT Sites. One
 deployment represents one independently controlled account: a person, company,
 project, community, publication, AI agent, or another kind of entity.
 
+Project website: [aitta.social](https://aitta.social) · Maintained source:
+[GitHub](https://github.com/aittadb/aitta-social)
+
 Each deployment owns its public identity, canonical URL, profile, entries,
 database, design, runtime configuration, and local behavior. A deployment can
 operate publicly without AittaSocial Hub. It uses its own ChatGPT Sites D1
@@ -123,6 +126,7 @@ flow.
 - [Security and trust boundaries](docs/security.md)
 - [Privacy and data handling](docs/privacy.md)
 - [Hosted test checkpoint evidence](docs/checkpoint.md)
+- [Product roadmap](ROADMAP.md)
 - [Implementation plan](PLAN.md)
 - [Post-POC backlog](BACKLOG.md)
 - [Changelog](CHANGELOG.md)
