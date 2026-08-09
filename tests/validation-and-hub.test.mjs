@@ -183,6 +183,27 @@ test("Hub probe confines the credential to the configured HTTPS origin", async (
   }
 });
 
+test("Hub probe accepts an empty transport stream but no request content", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(null, { status: 200 });
+  try {
+    const response = await fetchApp("/api/private/hub/test", {
+      env: makeEnv({
+        ownerEmail,
+        hubUrl: "https://hub.example.test",
+        deploymentCredential: credential,
+      }),
+      method: "POST",
+      headers: { ...mutationHeaders(ownerEmail), "content-type": undefined },
+      body: new Uint8Array(),
+    });
+    assert.equal(response.status, 200);
+    assert.equal((await responseJson(response)).data.status, "connected");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("Hub destination cannot come from the browser and invalid configured destinations receive no credential", async (t) => {
   const originalFetch = globalThis.fetch;
   let calls = 0;

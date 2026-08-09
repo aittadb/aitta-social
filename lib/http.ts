@@ -14,6 +14,25 @@ export function publicJsonError(code: string, message: string, status: number): 
   );
 }
 
+export async function hasNonEmptyBody(request: Request): Promise<boolean> {
+  if (request.body === null) return false;
+  const reader = request.body.getReader();
+  try {
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) return false;
+      if (chunk.value.byteLength > 0) return true;
+    }
+  } finally {
+    try {
+      await reader.cancel();
+    } catch {
+      // The stream may already be closed after an empty body.
+    }
+    reader.releaseLock();
+  }
+}
+
 export async function readJson(request: Request): Promise<unknown> {
   const type = request.headers.get("content-type")?.split(";", 1)[0].trim();
   if (type !== "application/json") {
