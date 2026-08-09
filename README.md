@@ -1,5 +1,17 @@
 # AittaSocial
 
+```text
+@Sites Deploy AittaSocial from https://github.com/aittadb/aitta-social. Reuse
+the existing Site for this project if exactly one matches; never create a
+duplicate, and stop to ask me if more than one Site could match. Keep it
+private first, give it its own private storage, and guide me to set up the one
+owner securely without putting their email in this prompt or source. Hub stays
+optional and public use works without it. After sign-in, help the owner
+customize Identity, links, updates, accent, density, and attribution through
+owner controls without a GitHub fork. Ask before any later source change or
+deployment, and ask separately before public access and before a custom domain.
+```
+
 AittaSocial is independently hosted social software for ChatGPT Sites. One
 deployment represents one independently controlled presence for a person,
 company, project, community, publication, AI agent, or another kind of entity.
@@ -88,6 +100,12 @@ reads.
 
 Owner pages and every private write enforce authorization on the server. Route
 visibility or a browser control never grants access.
+
+The signed-in owner can use these controls to change Identity text and links,
+publish or edit updates, and choose the accent, density, and attribution
+visibility. These supported runtime changes require no GitHub fork. The
+template neither creates nor assumes an automatically synchronized fork;
+advanced source or Site edits remain separate review and deployment work.
 
 Human-facing pages call the deployment a presence and its published content
 updates. Public protocol 1.0 and the existing implementation retain the stable
@@ -188,18 +206,6 @@ flow.
 Public JSON is built from explicit allowlists so drafts, owner identity,
 credentials, runtime secrets, and hosting identifiers cannot enter responses by
 accidental object serialization.
-
-## Reusable deployment prompt
-
-```text
-@Sites Deploy AittaSocial from https://github.com/aittadb/aitta-social. Reuse
-the existing Site linked to this repository; do not create a duplicate. Keep
-setup private, use its own D1, and guide me through protected sole-owner setup,
-the initial Identity and sole-owner/non-owner/signed-out access
-checks. Make clear that local Sign in is only presence administration and that
-Hub setup is optional and provisional. Ask before public access or a custom
-domain.
-```
 
 ## License
 
