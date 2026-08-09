@@ -85,7 +85,7 @@ source file, migration, screenshot, or chat response.
 
 | Setting | Setup action |
 | --- | --- |
-| `AITTA_SOCIAL_OWNER_EMAIL` | Owner enters their verified ChatGPT email directly in protected settings. Required for all writes. |
+| `AITTA_SOCIAL_OWNER_EMAIL` | Owner enters their verified ChatGPT email directly in protected settings. Required for all writes. Do not infer it from the Site owner/access record; that hosting identity may differ. |
 | `AITTA_SOCIAL_CANONICAL_URL` | Set to the normalized canonical HTTPS deployment URL. Use the private Sites URL until the owner later approves and configures another canonical domain. |
 | `AITTA_SOCIAL_HUB_URL` | Optional HTTPS Hub origin; no path, credentials, query, or fragment. |
 | `AITTA_SOCIAL_HUB_CHALLENGE` | Optional current verification challenge. It becomes public in discovery after redeployment. |

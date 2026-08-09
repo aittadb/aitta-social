@@ -46,6 +46,12 @@ non-owner receives no administrative data or write capability. If the owner
 setting is missing, all writes are disabled and the interface explains how to
 use protected Site settings without printing an email or configuration value.
 
+Do not infer `AITTA_SOCIAL_OWNER_EMAIL` from a Sites project owner, editor,
+access-policy record, or workspace account. Those hosting identities can differ
+from the verified email returned by Sign in with ChatGPT. The intended owner
+must enter the verified ChatGPT email directly in protected settings and verify
+the match by reaching the owner surface; neither value is displayed.
+
 Do not send the configured email to a client for comparison. Hidden controls,
 client route guards, form fields, cookies created by application code, and
 browser-supplied headers are not authorization. A dashboard check does not
