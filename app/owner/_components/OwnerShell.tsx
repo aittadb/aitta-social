@@ -1,0 +1,60 @@
+import Link from "next/link";
+import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
+
+export function OwnerShell({
+  displayName,
+  current,
+  children,
+}: {
+  displayName: string;
+  current: "overview" | "profile" | "entries" | "hub";
+  children: React.ReactNode;
+}) {
+  return (
+    <main className="owner-shell">
+      <header className="owner-topbar">
+        <div>
+          <Link className="owner-wordmark" href="/owner">AittaSocial</Link>
+          <span className="owner-badge">Owner workspace</span>
+        </div>
+        <div className="owner-session">
+          <span className="owner-user">{displayName}</span>
+          <a href={chatGPTSignOutPath("/")}>Sign out</a>
+        </div>
+      </header>
+      <div className="owner-frame">
+        <nav className="owner-nav" aria-label="Owner navigation">
+          <OwnerNavLink href="/owner" active={current === "overview"}>Overview</OwnerNavLink>
+          <OwnerNavLink href="/owner/profile" active={current === "profile"}>Profile</OwnerNavLink>
+          <OwnerNavLink href="/owner/entries/new" active={current === "entries"}>New entry</OwnerNavLink>
+          <OwnerNavLink href="/owner/hub" active={current === "hub"}>Hub setup</OwnerNavLink>
+          <Link className="owner-public-link" href="/">View public account ↗</Link>
+        </nav>
+        <div className="owner-content">{children}</div>
+      </div>
+    </main>
+  );
+}
+
+export function OwnerAccessState({ status }: { status: "not-owner" | "unconfigured" }) {
+  return (
+    <main className="owner-access-state">
+      <div className="owner-state-mark" aria-hidden="true">A</div>
+      <p className="eyebrow">Owner administration</p>
+      <h1>{status === "unconfigured" ? "Administration is safely disabled" : "This account is not yours to administer"}</h1>
+      <p>
+        {status === "unconfigured"
+          ? "Configure AITTA_SOCIAL_OWNER_EMAIL in this Site’s protected runtime settings, then redeploy. Do not add the address to source files. Until then, every write operation remains disabled."
+          : "You are signed in, but this ChatGPT identity does not match the sole owner configured for this deployment."}
+      </p>
+      <div className="button-row">
+        <Link className="button" href="/">Return to public account</Link>
+        <a className="button button-quiet" href={chatGPTSignOutPath("/")}>Sign out</a>
+      </div>
+    </main>
+  );
+}
+
+function OwnerNavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+  return <Link href={href} aria-current={active ? "page" : undefined}>{children}</Link>;
+}

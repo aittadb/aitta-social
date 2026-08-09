@@ -1,0 +1,159 @@
+# Local development
+
+Local development uses the same vinext application shape, server-side owner
+checks, and deployment-owned D1 interface as the hosted Site. Fixtures provide
+request identity explicitly; there is no production authorization bypass.
+
+## Prerequisites
+
+- Node.js `>=22.13.0`
+- npm from that Node.js installation
+
+No separately deployed database, object store, Hub, or other infrastructure is
+required. The local Sites runtime simulates the declared `DB` binding and keeps
+its state under ignored project-local tooling directories. R2 remains null.
+
+## Install and start
+
+```bash
+npm ci
+cp .env.example .env.local
+npm run db:migrate:local
+npm run dev
+```
+
+Open the exact local URL printed by the development server. Do not assume a
+port or scan for one.
+
+`.env.local` is ignored. Use only fixture identities and credentials in it; do
+not copy a real owner email, a production deployment credential, or hosted
+runtime secrets into the repository or a shared test log.
+
+The committed `.env.example` documents these local inputs:
+
+```text
+AITTA_SOCIAL_OWNER_EMAIL=owner@example.test
+AITTA_SOCIAL_CANONICAL_URL=https://account.example
+AITTA_SOCIAL_HUB_URL=https://hub.example
+AITTA_SOCIAL_HUB_CHALLENGE=
+AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL=
+AITTA_SOCIAL_DEV_AUTH_EMAIL=owner@example.test
+```
+
+`AITTA_SOCIAL_DEV_AUTH_EMAIL` is an explicit development-only request-identity
+fixture. Production code must ignore it outside development. It supplies the
+same input boundary that Sites authentication headers supply in a hosted
+request; all normal server authorization still runs.
+
+## Exercise authorization states
+
+Restart the development process after changing environment fixtures.
+
+- **Owner:** set the development identity fixture to the same normalized test
+  address as `AITTA_SOCIAL_OWNER_EMAIL`.
+- **Other signed-in visitor:** use a different syntactically valid test address.
+- **Signed out:** remove or leave `AITTA_SOCIAL_DEV_AUTH_EMAIL` empty.
+- **Owner not configured:** remove or leave `AITTA_SOCIAL_OWNER_EMAIL` empty,
+  even if a development identity is present.
+
+Use reserved example domains and obvious canary values. Never add a constant
+that treats all local visitors as owners. The missing-owner case must keep all
+writes disabled; the non-owner case must expose no dashboard data; signed-out
+and non-owner public reads must return published content only.
+
+Automated tests should construct request fixtures directly rather than depend
+on a developer's `.env.local`.
+
+## Database and migrations
+
+The committed `.openai/hosting.example.json` declares an inert `project_id:
+null`, logical `DB` binding, and null R2. The ignored checkout-local
+`.openai/hosting.json` resolves the one selected Site for local packaging; never
+stage or print it. Sites owns the actual hosted resource and its deployment
+wiring. `db/schema.ts` is the reviewed schema source. Application queries use
+prepared statements against the raw D1 binding.
+
+After every schema change:
+
+```bash
+npm run db:generate
+```
+
+Inspect the generated SQL under `drizzle/` before accepting it. Confirm that:
+
+- each statement changes only the intended profile, entry, or index structure;
+- singleton profile and entry kind/state constraints are preserved;
+- indexes correspond to real published-entry and owner-dashboard queries;
+- no fixture data, owner address, Hub value, or hosting identifier is embedded;
+  and
+- runtime code contains no `CREATE`, `ALTER`, `DROP`, or other schema mutation;
+  reviewed migrations create and change the schema before application access.
+
+After review, apply pending migrations to the project-local D1 used by the
+development server:
+
+```bash
+npm run db:migrate:local
+```
+
+This command targets only the local `site-creator-d1` declaration in
+`wrangler.local.jsonc` and persists it under ignored `.wrangler/state`. It is
+not a hosted migration command. Hosted migrations are packaged from `drizzle/`
+and applied through Sites deployment.
+
+Run `PRAGMA optimize` after index creation in a migration or maintenance path
+where the platform supports it. Use `EXPLAIN QUERY PLAN` with representative
+published-entry queries when an index changes. Do not create speculative
+indexes or combine multiple SQL statements in one prepared query.
+
+Local D1 state is disposable development data. Do not treat it as a migration
+substitute or copy it into production.
+
+Worker runtime modules use web/Cloudflare primitives only. Do not import Node
+built-ins, access a filesystem, or depend on mutable process state that must
+survive a request. Keep TypeScript strict, parse unknown inputs at boundaries,
+avoid `any`, and prefer small direct product modules.
+
+## Verification
+
+Run the repository checks before handing off a change:
+
+```bash
+npm run validate
+```
+
+`validate` checks root instruction size, the PLAN dependency graph, instance and
+Worker boundaries, migration integrity, strict types, lint, build, and tests.
+Use `npm test`, `npm run lint`, `npm run typecheck`, or the individual
+`*:check` scripts for a focused rerun while correcting a failure.
+
+`npm test` must cover the affected product boundary. Focused coverage for the
+POC includes:
+
+- anonymous public account and permalink reads;
+- exact owner match, another signed-in visitor, and missing owner setting;
+- independent authorization on each write;
+- profile and canonical URL validation;
+- draft privacy and published visibility in HTML and JSON;
+- exact discovery/API allowlists with private canary values;
+- deterministic `page`/`pageSize` pagination;
+- Hub HTTPS-origin and credential confinement plus timeout isolation; and
+- semantic, labeled, keyboard-usable public and owner interfaces.
+
+Use a local preview to inspect the empty profile/entry state, a populated public
+account, all entry kinds, a public permalink, the unconfigured explanation, the
+owner dashboard, editor validation, narrow/mobile layout, zoom, visible focus,
+and reduced motion. Fix failures in implementation, tests, and the relevant
+documentation together.
+
+## Local Hub testing
+
+Hub integration is optional. Because there is no established Hub API contract
+for this POC, local tests should use a controlled fake fetch at the server
+boundary, not a real external destination or credential. Assert the exact
+configured HTTPS origin, manual redirect behavior, authorization-header
+confinement, short timeout, ignored response body, safe result categories, and
+continued public reads during every failure.
+
+Do not add an environment switch that sends a production credential to a
+browser-selected or non-HTTPS test service.
