@@ -62,6 +62,12 @@ migrations, and the resolved checkout-local binding. Keep source-write
 credentials, active hosting identity, temporary packages, and protected
 settings out of source control and user-visible output.
 
+Repository changes reach `main` only through an owner-reviewed pull request
+using **Rebase and merge**. An agent must not push or merge directly to `main`.
+Because a rebase merge creates new commit identifiers, post-merge packaging and
+checkpoint work begins on a fresh `codex/*` branch from the updated
+`origin/main`; it never reuses the pre-merge feature branch as provenance.
+
 ## 3. Create the first private checkpoint
 
 Save and deploy a private version. Wait for Sites deployment status to report a

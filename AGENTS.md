@@ -125,6 +125,15 @@ file. Keep this file strictly below 32,000 bytes and run
 
 - Complete changes vertically: implementation, negative tests, security review,
   migration when relevant, and documentation land together.
+- Changes reach `main` only through a pull request reviewed and rebase-merged
+  by the owner. Agents must not push to, merge, or otherwise update `main`
+  directly.
+- After a rebase merge, begin any follow-up on a fresh `codex/*` branch from
+  the updated `origin/main`; do not continue the pre-merge branch as though its
+  commit identifiers were merged.
+- A Sites archive and its `commit_sha` must identify the exact validated commit
+  on the configured source branch. Never mislabel a feature-branch archive as
+  `main` or bypass source-provenance checks.
 - Never weaken a production boundary for tests. Include private canaries in
   public-projection tests.
 - `PLAN.md` contains only accepted unfinished work with stable `TASK-NNN` IDs,
