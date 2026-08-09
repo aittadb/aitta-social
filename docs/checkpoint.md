@@ -38,16 +38,20 @@ is connected.
 
 ## Validation and current source gate
 
-- `npm run validate` passes with 77 focused tests after the hosted Hub-test
+- `npm run validate` passes with 78 focused tests after the hosted Hub-test
   regression fix. The suite covers every private write boundary, sole-owner
   matching, missing-owner failure, draft privacy, public allowlists, pagination,
-  URL validation, Hub credential confinement, responsive semantics, and the
-  empty browser request-stream shape found during hosted review.
+  URL validation, the shared public model for all four entry kinds, Hub
+  credential confinement, responsive semantics, and the empty browser
+  request-stream shape found during hosted review.
 - The deployed saved version still predates that Hub-test fix. Sites correctly
   refused to save an archive for a commit that is not the configured source
-  branch's current `main` HEAD. The validated feature branch must be promoted to
-  `main` with explicit owner approval before the corrected checkpoint can be
-  saved and deployed.
+  branch's current `main` HEAD. The validated feature branch is pull-request
+  input only: an agent must neither update nor merge `main` directly. After the
+  owner reviews and rebase-merges the pull request, checkpoint work must begin
+  on a fresh branch from the resulting `origin/main`, since the rebase changes
+  commit provenance. Only that exact main-derived source can prove the final
+  corrected deployment.
 
 The optional Hub origin, verification challenge, and deployment credential are
 not configured. Public account operation remains independent of Hub.

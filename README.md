@@ -108,6 +108,11 @@ Generate and inspect a migration whenever `db/schema.ts` changes. The
 deployment owns the resulting D1 database. Browser storage is never the source
 of truth for profiles, entries, or authorization.
 
+Changes reach `main` through an owner-reviewed pull request using **Rebase and
+merge**. Do not update `main` directly. After a successful rebase merge, start
+follow-up work on a fresh branch from the updated `main` so source and Sites
+checkpoint provenance remain exact.
+
 See [local development](docs/local-development.md) for fixtures and validation,
 and [ChatGPT Sites deployment](docs/deployment.md) for the private-first setup
 flow.
@@ -130,15 +135,11 @@ accidental object serialization.
 ## Reusable deployment prompt
 
 ```text
-@Sites Deploy my AittaSocial account from
-https://github.com/aittadb/aitta-social. Reuse the one existing Site linked to
-that repository; never create a duplicate, and ask me if the match is
-ambiguous. Keep the repository as its source and keep the Site private
-initially. Use only the Site's own D1 and leave R2 unconfigured. Guide me to set
-my verified ChatGPT email as the sole owner in the protected
-`AITTA_SOCIAL_OWNER_EMAIL` setting without putting it in chat or source. Then
-help me complete the profile, verify public/draft/owner/non-owner behavior, and
-save a private checkpoint. Ask before public access or a custom domain.
+@Sites Deploy AittaSocial from https://github.com/aittadb/aitta-social. Reuse
+the existing Site linked to this repository; do not create a duplicate. Keep
+setup private, use its own D1, and guide me through protected sole-owner setup,
+the initial profile, and access checks. Ask before public access or a custom
+domain.
 ```
 
 ## License

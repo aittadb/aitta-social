@@ -61,6 +61,53 @@ test("an account with no entries still has an intentional public empty state", a
   assert.match(html, /account already stands on its own/i);
 });
 
+test("all four entry kinds use the same public account and permalink model", async () => {
+  const entries = [
+    entryRow({ id: "kind-note", kind: "note", title: "A public note" }),
+    entryRow({ id: "kind-article", kind: "article", title: "A public article" }),
+    entryRow({
+      id: "kind-link",
+      kind: "link",
+      title: "A public link",
+      destination_url: "https://destination.example/resource",
+    }),
+    entryRow({ id: "kind-announcement", kind: "announcement", title: "A public announcement" }),
+  ];
+  const env = makeEnv({
+    db: new FakeD1({ entries }),
+    canonicalUrl: "https://canonical.example/account",
+  });
+
+  const accountResponse = await fetchApp("/", {
+    env,
+    headers: { accept: "text/html" },
+  });
+  assert.equal(accountResponse.status, 200);
+  const accountHtml = await accountResponse.text();
+
+  for (const entry of entries) {
+    assert.match(accountHtml, new RegExp(entry.title));
+
+    const permalinkResponse = await fetchApp(`/entries/${entry.id}`, {
+      env,
+      headers: { accept: "text/html" },
+    });
+    assert.equal(permalinkResponse.status, 200);
+    const permalinkHtml = await permalinkResponse.text();
+    assert.match(permalinkHtml, new RegExp(entry.title));
+    assert.match(permalinkHtml, new RegExp(`>${entry.kind}<`));
+
+    const apiResponse = await fetchApp(`/api/v1/entries/${entry.id}`, { env });
+    assert.equal(apiResponse.status, 200);
+    const api = await responseJson(apiResponse);
+    assert.equal(api.data.kind, entry.kind);
+    assert.equal(api.data.id, entry.id);
+  }
+
+  assert.match(accountHtml, /Open destination/);
+  assert.match(accountHtml, /https:\/\/destination\.example\/resource/);
+});
+
 test("published permalinks render while drafts are indistinguishable from unknown entries", async () => {
   const db = new FakeD1({
     entries: [
