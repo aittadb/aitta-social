@@ -1,9 +1,19 @@
 import type { CSSProperties } from "react";
+import type { Metadata } from "next";
 import { getProfile, listPublishedEntries } from "@/db/repository";
 import { chatGPTSignInPath, getChatGPTUser } from "./chatgpt-auth";
+import { publicPresenceMetadata } from "@/lib/public-metadata";
 import type { Entry, Profile } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    return publicPresenceMetadata(await getProfile());
+  } catch {
+    return publicPresenceMetadata(null);
+  }
+}
 
 export default async function Home() {
   const [{ profile, entries }, user] = await Promise.all([

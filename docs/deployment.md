@@ -114,10 +114,13 @@ checking that its key is configured.
    setup does not ask for or display an identity category.
 4. Save and reopen the public presence. It should look intentional with no
    updates and should describe the represented identity rather than AittaSocial.
+   Inspect its document metadata: title and description come from the public
+   Identity, and canonical/sharing URLs use the normalized configured canonical
+   URL rather than the request host.
 5. Create a draft update at `/owner/entries/new`; verify it is visible to the
    owner but returns the same public not-found result as an unknown entry.
 6. Publish a test update, open its `/entries/{id}` permalink, then unpublish it
-   and confirm it disappears from every public HTML and JSON route.
+   and confirm it disappears from every public HTML, metadata, and JSON route.
 
 Identity and update writes use the stable profile and entry models in this
 deployment's D1 database and do not require another deployment after each edit.
@@ -126,6 +129,21 @@ value `other`, while later edits neither accept nor modify the field and
 therefore preserve an existing supported value. The stored value remains
 readable only through the public manifest and `/api/v1/site`; it is not a setup
 choice or trust claim. No D1 migration or protocol-version change is required.
+
+### Optional source-only identity assets
+
+The template's default identity is typographic and its sharing metadata is
+text-only. It deliberately includes no generic software logo, favicon, or
+social-preview image. If the owner supplies an identity asset, make it a normal,
+directly checked-in source file, reference only that reviewed file, and add a
+useful text alternative wherever an image is exposed. Do not accept a remote
+image URL from a request, add a runtime asset resolver or setting, or provision
+an upload UI, media manager, R2 bucket, or new storage subsystem.
+
+This customization is an ordinary reviewed repository change followed by a
+separately approved deployment. It does not modify the Identity record, D1
+schema, or public JSON protocol. Before packaging, confirm the intended source
+asset exists in the build output and that removed or superseded assets do not.
 
 ## 6. Test access without broadening it
 
@@ -137,7 +155,10 @@ Before public release, verify:
 - a different signed-in identity receiving no administrative access;
 - missing-owner behavior disabling every write;
 - draft and private-canary absence from HTML, JSON, headers, links, errors, and
-  pagination; and
+  pagination;
+- profile- and published-update-derived document metadata, neutral unconfigured
+  `noindex, nofollow` metadata, hostile request-host rejection, and absence of
+  image references when no direct checked-in identity asset exists; and
 - public presence reads while the optional Hub test times out or fails.
 
 A private Sites access policy may prevent anonymous traffic from reaching the

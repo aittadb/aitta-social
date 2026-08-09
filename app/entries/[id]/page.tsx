@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getEntry, getProfile } from "@/db/repository";
+import {
+  publicEntryMetadata,
+  unavailableEntryMetadata,
+} from "@/lib/public-metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -9,12 +13,15 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { id } = await params;
   try {
-    const entry = await getEntry(id, true);
+    const [entry, profile] = await Promise.all([
+      getEntry(id, true),
+      getProfile(),
+    ]);
     return entry
-      ? { title: entry.title ?? `${entry.kind.charAt(0).toUpperCase()}${entry.kind.slice(1)}` }
-      : { title: "Entry not found" };
+      ? publicEntryMetadata(entry, profile)
+      : unavailableEntryMetadata();
   } catch {
-    return { title: "Entry" };
+    return unavailableEntryMetadata();
   }
 }
 

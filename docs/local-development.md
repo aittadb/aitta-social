@@ -146,6 +146,10 @@ POC includes:
   compatibility;
 - draft privacy and published visibility in HTML and JSON;
 - exact discovery/API allowlists with private canary values;
+- profile- and published-update-derived document metadata, hostile request-host
+  rejection, neutral `noindex, nofollow` metadata without a canonical/image URL
+  when setup is incomplete or private, draft/private-canary exclusion from head
+  tags, and the absence of runtime asset-resolution code;
 - deterministic `page`/`pageSize` pagination;
 - Hub HTTPS-origin and credential confinement plus timeout isolation; and
 - semantic, labeled, keyboard-usable public and owner interfaces.
@@ -156,6 +160,16 @@ continues to read supported legacy values. `npm run db:generate` must therefore
 produce no new migration for this change. Protocol 1.0 remains current because
 the manifest and `/api/v1/site` still emit the required stored field through
 their explicit allowlists.
+
+Presence-derived text metadata also leaves `db/schema.ts` and public protocol
+1.0 unchanged, so `npm run db:generate` must produce no migration for that work.
+The default package should contain no generic AittaSocial logo, favicon, or
+social-preview image. If a later approved source edit adds a direct identity
+asset, add a packaging assertion for its exact reviewed path and an accessible
+text alternative where it is exposed; do not add runtime asset configuration,
+uploads, or R2. Handler-produced HTML should remain dynamic with `no-store` and
+`must-revalidate`; public JSON keeps its documented cache headers and static
+asset caching remains a hosting concern.
 
 Use a local preview to inspect the empty Identity/update state, a populated
 public presence, all update kinds, a public permalink, the unconfigured

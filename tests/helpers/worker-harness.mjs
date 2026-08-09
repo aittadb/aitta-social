@@ -251,11 +251,6 @@ export function makeEnv({
   return {
     DB: db,
     ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) },
-    IMAGES: {
-      input() {
-        throw new Error("Image optimization is outside this text-only POC test harness.");
-      },
-    },
     ...(ownerEmail === undefined ? {} : { AITTA_SOCIAL_OWNER_EMAIL: ownerEmail }),
     ...(canonicalUrl === undefined ? {} : { AITTA_SOCIAL_CANONICAL_URL: canonicalUrl }),
     ...(hubUrl === undefined ? {} : { AITTA_SOCIAL_HUB_URL: hubUrl }),
