@@ -117,6 +117,7 @@ flow.
 - [Public protocol and JSON API](docs/protocol.md)
 - [Security and trust boundaries](docs/security.md)
 - [Privacy and data handling](docs/privacy.md)
+- [Hosted test checkpoint evidence](docs/checkpoint.md)
 - [Implementation plan](PLAN.md)
 - [Post-POC backlog](BACKLOG.md)
 - [Changelog](CHANGELOG.md)
