@@ -21,7 +21,7 @@ export default async function Home() {
         <div className="public-nav-actions">
           <a href="/.well-known/aitta-social.json" className="text-link">Manifest</a>
           <Link className="button button-quiet" href={user ? "/owner" : chatGPTSignInPath("/owner")}>
-            Owner access
+            {user ? "Dashboard" : "Sign in"}
           </Link>
         </div>
       </header>

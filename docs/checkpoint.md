@@ -1,11 +1,11 @@
 # Hosted test checkpoint evidence
 
-This record contains only safe, identity-free evidence for the owner-approved
-link-public test Site at
-`https://aittasocial.jaakko-heusala.chatgpt.site`. It contains no protected
-setting values, authenticated email addresses, credentials, database IDs, Site
-project IDs, deployment IDs, or source-repository credentials. No custom domain
-is connected.
+This record contains only safe public evidence for the owner-approved account
+at `https://jhh.aitta.social`. The Sites-provided URL remains
+`https://aittasocial.jaakko-heusala.chatgpt.site`. This record contains no
+protected setting values, authenticated email addresses, credentials, database
+IDs, Site project IDs, deployment IDs, or source-repository credentials. The
+owner-approved personal hostname is the only connected custom domain.
 
 ## Site and storage
 
@@ -16,6 +16,8 @@ is connected.
   is inert, declares only the deployment-owned `DB` binding, and leaves R2 null.
 - The reviewed D1 migration is packaged with the Site. A saved profile and
   entry lifecycle persisted across separate hosted requests.
+- The active custom hostname, protected canonical setting, and stored profile
+  canonical URL all use `https://jhh.aitta.social`.
 
 ## Access and public privacy proof
 
@@ -38,18 +40,19 @@ is connected.
 
 ## Validation and deployed source proof
 
-- Pull request [#1](https://github.com/aittadb/aitta-social/pull/1) was
-  owner-reviewed and rebase-merged. The fresh checkpoint branch began at the
-  resulting `main` commit
-  `d1b591ff6ba6f1e6fc5393b67597f1a55100724b` with no source changes.
-- A clean checkout from the bare repository URL selected that same default
-  branch commit and contained no active hosting binding. `npm ci`, migration
-  generation, and `npm run validate` passed with 78 focused tests, and migration
+- Pull requests [#1](https://github.com/aittadb/aitta-social/pull/1) and
+  [#2](https://github.com/aittadb/aitta-social/pull/2) were owner-reviewed and
+  rebase-merged. The deployed source is the resulting `main` commit
+  `465dc3370744e25306f88f8732e66589be1a8346`.
+- A clean checkout from the bare repository URL selected that default branch
+  source and contained no active hosting binding. `npm ci`, migration
+  generation, and `npm run validate` passed with 79 focused tests, and migration
   generation produced no schema diff.
 - The exact main-derived source, reviewed migration, and ignored checkout-local
   binding were packaged. The packaged and reviewed migration hashes match, the
-  Sites source ref was synchronized to that commit, and Site version 3 reached
-  successful deployment status at the canonical checkpoint URL above.
+  Sites source ref was synchronized to that commit, and Site version 4 reached
+  successful deployment status. The same saved version was redeployed after
+  the protected canonical setting changed.
 - The corrected hosted owner Hub control now returns the safe setup status when
   the optional Hub URL and credential are absent; it no longer reports the
   empty-request-stream body error.
@@ -60,8 +63,11 @@ is connected.
   signed-out owner request redirected to the dispatcher-owned sign-in route,
   and an unauthenticated owner-only Hub probe returned 401.
 - The owner-approved link-public access remained unchanged. Exactly one allowed
-  owner remains configured, no groups or external visitors were added, and the
-  custom-domain count remains zero.
+  owner remains configured, no groups or external visitors were added, and no
+  custom hostname other than `jhh.aitta.social` is connected.
+- Anonymous requests to the custom hostname return the personal account. The
+  site API, entry API, entry resource links, and discovery manifest all emit
+  `https://jhh.aitta.social` as their canonical origin.
 
 The optional Hub origin, verification challenge, and deployment credential are
 not configured. Public account operation remains independent of Hub.

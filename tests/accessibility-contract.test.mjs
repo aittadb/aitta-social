@@ -30,6 +30,8 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<aside[^>]+aria-label="Account details"/i);
     assert.match(html, /<section[^>]+aria-labelledby="entries-title"/i);
     assert.match(html, /<time[^>]+datetime=/i);
+    assert.match(html, /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]*>Sign in<\/a>/i);
+    assert.doesNotMatch(html, /Owner access/i);
     assert.match(html, /<strong>\s*<a[^>]+href="https:\/\/aitta\.social"[^>]*>AittaSocial<\/a>\s*<\/strong>/i);
     assert.match(
       html,
@@ -47,6 +49,17 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.doesNotMatch(html, /Powered by/i);
     assert.doesNotMatch(html, /https:\/\/aitta\.social/i);
     assert.doesNotMatch(html, /https:\/\/github\.com\/aittadb\/aitta-social/i);
+  });
+
+  await t.test("a signed-in visitor gets a dashboard destination, not an authorization claim", async () => {
+    const response = await fetchApp("/", {
+      env: makeEnv({ db: new FakeD1() }),
+      headers: { accept: "text/html", ...ownerHeaders("visitor@example.com") },
+    });
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /href="\/owner"[^>]*>Dashboard<\/a>/i);
+    assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/i);
   });
 
   await t.test("owner profile form semantics", async () => {
