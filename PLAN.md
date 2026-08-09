@@ -12,13 +12,16 @@ Current external blockers:
   unconfigured public JSON routes return the same safe `profile_not_configured`
   response, and signed-out `/owner` redirects to Sign in with ChatGPT. A signed-in
   request reaches the owner boundary but does not match the protected sole-owner
-  setting, so the hosted profile cannot yet be saved. Correct that value only
-  through protected runtime settings; never disclose either email or weaken the
-  check. Local production-equivalent owner/non-owner, write-authorization, and
-  draft-privacy fixtures remain complete.
-- A private version and successful deployment status were proven before access
-  became link-public, but TASK-027 remains open because TASK-026 is an explicit
-  dependency and its hosted owner checks are incomplete.
+  setting, so the hosted profile cannot yet be saved. Copying the sole Sites
+  project-owner record into the protected setting and successfully redeploying
+  the saved version did not create a match, proving that hosting ownership is
+  not a safe proxy for the Sign in with ChatGPT email. The intended owner must
+  correct the value directly in protected runtime settings; never disclose
+  either email or weaken the check. Local production-equivalent owner/non-owner,
+  write-authorization, and draft-privacy fixtures remain complete.
+- The saved version has successfully deployed under the owner-approved
+  link-public access with no custom domain, but TASK-027 remains open because
+  TASK-026 is an explicit dependency and its hosted owner checks are incomplete.
 - The reusable prompt is now deliberately short, but the maintained default
   branch still contains only starter content. TASK-028 cannot prove a clean
   prompt-only deployment until the validated feature branch is promoted with
