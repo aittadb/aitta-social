@@ -114,6 +114,12 @@ built-ins, access a filesystem, or depend on mutable process state that must
 survive a request. Keep TypeScript strict, parse unknown inputs at boundaries,
 avoid `any`, and prefer small direct product modules.
 
+Use native `<a>` elements for route navigation. The hosted Vinext client-link
+runtime has caused click-time JavaScript failures that prevented authentication
+and dashboard navigation, while ordinary browser navigation is sufficient for
+this small server-rendered application. A source-boundary test keeps
+`next/link` out until hosted behavior is deliberately re-evaluated.
+
 ## Verification
 
 Run the repository checks before handing off a change:

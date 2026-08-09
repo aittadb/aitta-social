@@ -122,6 +122,9 @@ file. Keep this file strictly below 32,000 bytes and run
 - Keep the restrained “Powered by AittaSocial” reference owner-hideable.
 - When that attribution is visible, link AittaSocial to `https://aitta.social`
   and its source to `https://github.com/aittadb/aitta-social`.
+- Use native anchors for route navigation. Do not add `next/link` unless its
+  hosted Vinext click and console behavior is deliberately proven; reliable
+  full-document navigation is the simpler POC boundary.
 
 ## Delivery and work tracking
 

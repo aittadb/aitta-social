@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getEntry, getProfile } from "@/db/repository";
 
@@ -26,8 +25,8 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
   return (
     <main className="permalink-shell" style={{ "--accent": profile?.accentColor ?? "#31554d" } as React.CSSProperties}>
       <nav className="permalink-nav" aria-label="Entry navigation">
-        <Link className="wordmark" href="/">{profile?.displayName ?? "Account"}</Link>
-        <Link className="text-link" href="/">All entries</Link>
+        <a className="wordmark" href="/">{profile?.displayName ?? "Account"}</a>
+        <a className="text-link" href="/">All entries</a>
       </nav>
       <article className="permalink-entry">
         <header>
@@ -46,7 +45,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
         )}
       </article>
       <footer className="permalink-footer">
-        <Link className="button" href="/">Return to account</Link>
+        <a className="button" href="/">Return to account</a>
         <a className="text-link" href={`/api/v1/entries/${entry.id}`}>View as JSON</a>
       </footer>
     </main>

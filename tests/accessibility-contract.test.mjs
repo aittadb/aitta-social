@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -171,4 +171,19 @@ test("client mutation controls announce status and use semantic form controls", 
   assert.match(profileForm, /<legend>Identity<\/legend>/);
   assert.match(profileForm, /<legend>Public details<\/legend>/);
   assert.match(profileForm, /<legend>Presentation<\/legend>/);
+});
+
+test("route navigation stays native and cannot be intercepted by the hosted client router", async () => {
+  const appDirectory = new URL("../app/", import.meta.url);
+  const routeFiles = (await readdir(appDirectory, { recursive: true }))
+    .filter((path) => path.endsWith(".tsx"));
+  const sources = await Promise.all(
+    routeFiles.map(async (path) => ({ path, source: await readFile(new URL(path, appDirectory), "utf8") })),
+  );
+
+  assert.ok(sources.length > 0);
+  for (const { path, source } of sources) {
+    assert.doesNotMatch(source, /from\s+["']next\/link["']/, `${path} must use native anchors`);
+    assert.doesNotMatch(source, /<\/?Link(?:\s|>)/, `${path} must not restore intercepted Link elements`);
+  }
 });
