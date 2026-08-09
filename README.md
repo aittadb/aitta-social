@@ -100,6 +100,43 @@ profile's earlier supported value remains readable in the manifest and
 authorization, capability, or network-identity claim. This category-neutral
 change requires no D1 schema migration or protocol-version change.
 
+## Presence metadata and source customization
+
+Public document metadata represents the configured presence. After Identity is
+complete, the presence page uses its bounded display name and short description
+for the document title and description. Its canonical, Open Graph, and sharing
+URLs come only from the normalized configured canonical URL. A published update
+permalink adds that update's bounded public title or body excerpt; article
+metadata also uses its public publication and update timestamps. Draft and
+unknown updates have the same non-public metadata result.
+
+The request `Host` and forwarding headers never select public identity or a
+canonical URL. Without a valid public profile and canonical URL, the application
+uses neutral setup metadata, marks it `noindex, nofollow`, and emits no canonical
+or image URL. Owner-only pages use the same neutral robots boundary. All
+handler-produced HTML is rendered dynamically with `no-store` and
+`must-revalidate`; the documented public JSON cache headers and static-asset
+handling are unchanged. External preview or search services may nevertheless
+retain public information they have already fetched.
+
+The reusable template intentionally ships with a typographic identity and
+text-only sharing metadata. It does not ship a generic logo, favicon, or social
+preview image that would describe AittaSocial instead of the deployed presence.
+An owner can later ask ChatGPT to add a supplied identity asset directly to the
+maintained source and wire that exact checked-in file into metadata, with useful
+alternative text where an image is exposed. For example:
+
+```text
+Use the attached image as this presence's checked-in favicon and social preview.
+Keep the display name and short description as the metadata text, add useful
+alternative text, and do not add uploads, R2, a media manager, remote image URLs,
+or a runtime asset setting. Validate the source change and ask before deploying.
+```
+
+That source-only customization requires a reviewed source change and deployment;
+it is not an Identity-form setting and stores nothing new in D1. The text-only
+metadata work changes neither the D1 schema nor public protocol 1.0.
+
 ## Development
 
 Prerequisite: Node.js `>=22.13.0`.

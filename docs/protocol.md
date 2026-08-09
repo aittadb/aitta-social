@@ -303,6 +303,21 @@ trusted network authentication, and probe failure has no effect on public
 reads. This setup remains provisional until an accepted versioned Hub contract
 replaces it.
 
+## HTML document metadata is not protocol 1.0
+
+The server-rendered document title, description, canonical link, robots policy,
+and text-only Open Graph/Twitter fields are presentation. They are not discovery
+fields, API resources, or capability signals. Protocol consumers must use the
+manifest and `/api/v1` resources rather than infer a contract from HTML head
+tags.
+
+Configured public-page metadata uses the public profile, published entry
+projection, and normalized configured canonical URL. Unconfigured, draft,
+unknown, and owner-only metadata emits no canonical or image URL and never
+substitutes a request host. This presentation change adds no route or JSON
+field, does not change protocol version `1.0`, and requires no D1 schema
+migration or data rewrite. Existing `/api/v1` cache headers are unchanged.
+
 ## Required contract tests
 
 Implementations of this document must test exact field allowlists, JSON content

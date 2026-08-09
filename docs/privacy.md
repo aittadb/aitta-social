@@ -62,6 +62,10 @@ access:
 - updates in published state and their public timestamps and links (public
   protocol 1.0 retains the stable `entry` resource name);
 - stable public entry identifiers and canonical URLs;
+- document title and description derived from the public display name and short
+  description, plus a bounded public update title or body excerpt on a
+  published permalink and public publication/update timestamps for article
+  metadata;
 - manifest protocol/software versions, canonical endpoints, and the stored
   protocol 1.0 `accountType` compatibility value; and
 - the current Hub verification challenge only when explicitly configured.
@@ -78,6 +82,19 @@ public with it.
 Publishing makes content retrievable without sign-in through HTML and JSON.
 Unpublishing removes it from this deployment's public surfaces but cannot
 recall copies already cached, indexed, quoted, or saved elsewhere.
+
+The same limit applies to public document metadata. Handler-produced HTML is
+served with `no-store` and `must-revalidate`, but a search, sharing, or preview
+service may retain a previously fetched title, description, excerpt, timestamp,
+or canonical URL. Missing valid profile/canonical setup and owner-only pages use
+neutral `noindex, nofollow` metadata without a canonical or image URL;
+request-host headers and private configuration are not fallback identity data.
+
+The default template publishes no logo, favicon, or social-preview image and
+stores no identity media. If an owner later approves a source customization, a
+direct checked-in asset becomes public with the Site and should contain no
+private metadata. Such a source asset is not D1 content, an upload, or a Hub
+identity claim.
 
 Public serializers use explicit allowlists documented in
 [protocol.md](protocol.md). They do not include owner email, ChatGPT identity,

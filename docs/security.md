@@ -143,6 +143,40 @@ identity category, capability claim, Hub assertion, or network-membership
 signal. Both JSON surfaces continue to construct the field through their exact
 allowlists.
 
+## Public document metadata and identity assets
+
+Document metadata is a public projection, not a copy of a profile or D1 row.
+The presence page may read only the bounded public display name and short
+description. A permalink may additionally read only a published entry's bounded
+public title or body excerpt and stable identifier; article metadata may also
+read its public publication/update timestamps. Draft and unknown identifiers
+produce the same non-public metadata;
+an entry draft, owner identity, runtime value, private canary, or database field
+must never enter a title, description, link, image URL, or serialized head tag.
+
+Canonical and sharing URLs are constructed only from the normalized configured
+canonical URL. `Host`, `X-Forwarded-Host`, `X-Forwarded-Proto`, and other request
+headers are untrusted and cannot select identity, origin, or an asset URL. If the
+public profile or canonical URL is missing or invalid, emit neutral setup text,
+`noindex, nofollow`, and no canonical, Open Graph URL, or image reference. Do
+not fall back to the request origin.
+
+All handler-produced HTML, including an owner page and a draft/unknown 404,
+remains dynamic with `no-store` and `must-revalidate`; do not freeze D1 profile
+or publication state into the build, mutable module state, or a cross-request
+application cache. This prevents the application from continuing to serve a
+stale draft/public decision, but it cannot recall metadata already retained by
+an external crawler or recipient. The versioned JSON endpoints retain their
+documented public cache headers, and this rule does not change static-asset
+caching.
+
+The default template uses text-only sharing metadata and no logo, favicon, or
+social image. A later approved source edit may add only a direct checked-in
+asset with an accessible text alternative. Do not resolve an asset from a
+request value, profile URL, remote response, or protected setting, and do not
+add an upload endpoint, R2 bucket, runtime asset registry, or generic media
+abstraction for this boundary.
+
 ## Hub boundary
 
 Hub is an optional trusted central service, but a presence deployment is an
@@ -192,9 +226,11 @@ Hub response bodies.
 At minimum, keep focused tests for anonymous public reads, matching-owner
 access, another signed-in user, missing owner setting, every independently
 authorized write, forged client fields, draft privacy, exact public projections,
-canonical URL rejection/normalization, manifest canary exclusion, deterministic
-pagination, Hub URL pinning, redirect confinement, credential/error/log
-redaction, timeout behavior, and public reads during Hub failure.
+canonical URL rejection/normalization, hostile-host metadata, neutral
+unconfigured metadata, draft/private-canary absence from head tags, checked-in
+asset packaging, manifest canary exclusion, deterministic pagination, Hub URL
+pinning, redirect confinement, credential/error/log redaction, timeout
+behavior, and public reads during Hub failure.
 
 Use explicit request fixtures or a development-only identity injection boundary
 in tests. Never add a production bypass, magic owner address, or client-only

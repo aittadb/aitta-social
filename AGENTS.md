@@ -108,6 +108,16 @@ file. Keep this file strictly below 32,000 bytes and run
   reinterpreting the public field.
 - Build every public response from an explicit field allowlist. Never serialize
   a D1 row, environment object, authenticated user, or private domain object.
+- Treat document metadata as another explicit public projection. Root metadata
+  may use only the bounded public display name and short description; permalink
+  metadata may additionally use only a published entry's bounded public text
+  and timestamps. Construct canonical and sharing URLs from the normalized
+  configured canonical URL, never `Host` or forwarding headers. Missing valid
+  public profile/canonical setup uses neutral `noindex, nofollow` metadata with
+  no canonical URL or image reference. Keep handler-produced HTML dynamic with
+  `no-store` and `must-revalidate` so a profile, publication-state change, or
+  private value is not frozen into a build or cross-request application cache;
+  do not alter documented JSON or static-asset caching incidentally.
 - Preserve stable entry identifiers, canonical configured URLs, documented JSON
   envelopes, correct content types/statuses, deterministic pagination, and
   resource links. Do not derive canonical success links from an untrusted
@@ -139,6 +149,12 @@ file. Keep this file strictly below 32,000 bytes and run
   error states.
 - Use constrained accent/density choices, few colors, no gradients, no
   unnecessary generated imagery, and no generic dashboard clutter.
+- Keep the template's default identity typographic and its sharing metadata
+  text-only; a generic software logo, favicon, or preview image does not
+  represent the configured presence. An owner-approved source customization may
+  add a directly checked-in asset and an accessible text alternative. Do not
+  add a runtime asset resolver, URL setting, upload UI, media manager, R2, or a
+  storage abstraction for identity assets.
 - Keep the restrained “Powered by AittaSocial” reference owner-hideable.
 - When that attribution is visible, link AittaSocial to `https://aitta.social`
   and its source to `https://github.com/aittadb/aitta-social`.
