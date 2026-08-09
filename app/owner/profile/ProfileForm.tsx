@@ -40,7 +40,7 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: Profile | 
       }),
     });
     if (response.ok) {
-      setStatus("Profile saved. The public account is ready to review.");
+      setStatus("Identity saved. The public presence is ready to review.");
       setBusy(false);
       return;
     }
@@ -54,12 +54,12 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: Profile | 
         <legend>Identity</legend>
         <div className="field-grid field-grid-two">
           <Field label="Display name" name="displayName" required maxLength={100} defaultValue={profile?.displayName} />
-          <label className="field"><span>Account type</span><select name="accountType" defaultValue={profile?.accountType ?? "person"}>
+          <label className="field"><span>Presence type</span><select name="accountType" defaultValue={profile?.accountType ?? "person"}>
             <option value="person">Person</option><option value="company">Company</option><option value="project">Project</option>
             <option value="community">Community</option><option value="publication">Publication</option><option value="agent">AI agent</option><option value="other">Other entity</option>
           </select></label>
         </div>
-        <label className="field"><span>Short description</span><textarea name="shortDescription" required maxLength={280} rows={3} defaultValue={profile?.shortDescription} /><small>One clear sentence for the top of the account.</small></label>
+        <label className="field"><span>Short description</span><textarea name="shortDescription" required maxLength={280} rows={3} defaultValue={profile?.shortDescription} /><small>One clear sentence for the top of the presence.</small></label>
         <label className="field"><span>Longer introduction</span><textarea name="introduction" required maxLength={10000} rows={8} defaultValue={profile?.introduction} /></label>
       </fieldset>
 
@@ -70,21 +70,21 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: Profile | 
           <Field label="Website (optional)" name="website" type="url" defaultValue={profile?.website ?? ""} placeholder="https://example.com" />
         </div>
         <label className="field"><span>External links (optional)</span><textarea name="externalLinks" rows={4} defaultValue={profile?.externalLinks.map((link) => `${link.label} | ${link.url}`).join("\n")} placeholder={"Documentation | https://example.com/docs\nContact | https://example.com/contact"} /><small>One per line in “Label | URL” form. Maximum eight.</small></label>
-        <Field label="Canonical deployment URL" name="canonicalUrl" type="url" required defaultValue={profile?.canonicalUrl ?? canonicalDefault} placeholder="https://account.example" />
+        <Field label="Canonical presence URL" name="canonicalUrl" type="url" required defaultValue={profile?.canonicalUrl ?? canonicalDefault} placeholder="https://presence.example" />
       </fieldset>
 
       <fieldset>
         <legend>Presentation</legend>
         <div className="field-grid field-grid-two">
           <label className="field color-field"><span>Accent color</span><input name="accentColor" type="color" defaultValue={profile?.accentColor ?? "#31554d"} /></label>
-          <label className="field"><span>Entry density</span><select name="density" defaultValue={profile?.density ?? "comfortable"}><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
+          <label className="field"><span>Update density</span><select name="density" defaultValue={profile?.density ?? "comfortable"}><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
         </div>
         <label className="check-field"><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” and source links</span></label>
       </fieldset>
 
       <div className="form-footer">
-        <button className="button" type="submit" disabled={busy}>Save profile</button>
-        <a className="button button-quiet" href="/">Preview public account</a>
+        <button className="button" type="submit" disabled={busy}>Save identity</button>
+        <a className="button button-quiet" href="/">Preview public presence</a>
         <p className="form-status" role="status" aria-live="polite">{status}</p>
       </div>
     </form>
@@ -98,6 +98,6 @@ function Field({ label, name, type = "text", ...props }: { label: string; name: 
 async function errorMessage(response: Response): Promise<string> {
   try {
     const body = await response.json() as { error?: string; details?: Record<string, string> };
-    return body.details ? Object.values(body.details)[0] : body.error ?? "The profile could not be saved.";
-  } catch { return "The profile could not be saved."; }
+    return body.details ? Object.values(body.details)[0] : body.error ?? "The identity could not be saved.";
+  } catch { return "The identity could not be saved."; }
 }

@@ -15,25 +15,29 @@ export default async function Home() {
 
   return (
     <main className={`public-shell density-${profile?.density ?? "comfortable"}`} style={style}>
-      <header className="public-nav" aria-label="Account navigation">
-        <a className="wordmark" href="#account">{profile?.displayName ?? "Account"}</a>
+      <header className="public-nav" aria-label="Presence navigation">
+        <a className="wordmark" href="#account">{profile?.displayName ?? "Presence"}</a>
         <div className="public-nav-actions">
           <a href="/.well-known/aitta-social.json" className="text-link">Manifest</a>
-          <a className="button button-quiet" href={user ? "/owner" : chatGPTSignInPath("/owner")}>
-            {user ? "Dashboard" : "Sign in"}
+          <a
+            className="button button-quiet"
+            href={user ? "/owner" : chatGPTSignInPath("/owner")}
+            aria-label={user ? "Manage presence as owner — open local sole-owner administration" : "Manage presence as owner — sign in with ChatGPT for local sole-owner administration"}
+          >
+            Manage presence as owner
           </a>
         </div>
       </header>
 
       <section className="identity-block" id="account" aria-labelledby="account-name">
         <div className="identity-main">
-          <p className="eyebrow">{profile ? accountTypeLabel(profile.accountType) : "Independent account"}</p>
-          <h1 id="account-name">{profile?.displayName ?? "This account is being prepared"}</h1>
+          <p className="eyebrow">{profile ? accountTypeLabel(profile.accountType) : "Independent presence"}</p>
+          <h1 id="account-name">{profile?.displayName ?? "This presence is being prepared"}</h1>
           <p className="identity-summary">
-            {profile?.shortDescription ?? "A clear public presence will appear here after its owner completes the profile."}
+            {profile?.shortDescription ?? "A clear public presence will appear here after its owner completes the identity."}
           </p>
         </div>
-        <aside className="identity-details" aria-label="Account details">
+        <aside className="identity-details" aria-label="Presence details">
           {profile?.location && <Detail label="Location" value={profile.location} />}
           {profile?.website && (
             <Detail label="Website" value={<a href={profile.website} rel="me">{readableHost(profile.website)}</a>} />
@@ -59,7 +63,7 @@ export default async function Home() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Published here</p>
-            <h2 id="entries-title">Entries</h2>
+            <h2 id="entries-title">Updates</h2>
           </div>
           <a className="text-link" href="/api/v1/entries">JSON API</a>
         </div>
@@ -75,11 +79,11 @@ export default async function Home() {
           <div className="empty-public">
             <p className="empty-mark" aria-hidden="true">A</p>
             <div>
-              <h3>No published entries yet</h3>
+              <h3>No published updates yet</h3>
               <p>
                 {profile
-                  ? "The account already stands on its own. Its first entry will appear here when it is ready."
-                  : "The owner is completing this account before it becomes public."}
+                  ? "The presence already stands on its own. Its first update will appear here when it is ready."
+                  : "The owner is completing this presence before it becomes public."}
               </p>
             </div>
           </div>
@@ -87,7 +91,7 @@ export default async function Home() {
       </section>
 
       <footer className="public-footer">
-        <span>{profile?.displayName ?? "Independent account"}</span>
+        <span>{profile?.displayName ?? "Independent presence"}</span>
         {!profile?.hidePoweredBy && (
           <span>
             Powered by <strong><a href="https://aitta.social">AittaSocial</a></strong>
@@ -132,7 +136,7 @@ function EntryCard({ entry, index }: { entry: Entry; index: number }) {
         </h3>
         {entry.title && <p className="entry-excerpt">{excerpt(entry.body)}</p>}
         <div className="entry-card-links">
-          <a className="text-link" href={`/entries/${entry.id}`}>Read entry</a>
+          <a className="text-link" href={`/entries/${entry.id}`}>Read update</a>
           {entry.destinationUrl && <a className="text-link" href={entry.destinationUrl} rel="noopener noreferrer">Open destination</a>}
         </div>
       </div>
@@ -160,5 +164,5 @@ function formatDate(value: string): string {
 }
 
 function accountTypeLabel(value: string): string {
-  return value === "other" ? "Independent account" : `${value.charAt(0).toUpperCase()}${value.slice(1)} account`;
+  return value === "other" ? "Independent presence" : `${value.charAt(0).toUpperCase()}${value.slice(1)} presence`;
 }

@@ -8,17 +8,18 @@ file. Keep this file strictly below 32,000 bytes and run
 
 ## Product invariants
 
-- One deployment equals one independently controlled account.
-- An account may represent a person, company, project, community, publication,
+- One deployment equals one independently controlled presence.
+- A presence may represent a person, company, project, community, publication,
   AI agent, or another entity. Keep the core identity-neutral.
-- The deployment owns its profile, entries, drafts, canonical URL, D1 data,
-  design, runtime configuration, and local behavior.
-- Public profile and published-entry reads operate without Hub. Hub integration
+- The deployment owns its public identity, profile, updates, drafts, canonical
+  URL, D1 data, design, runtime configuration, and local behavior. Preserve
+  `entry` and related names where they are stable internal or protocol terms.
+- Public profile and published-update reads operate without Hub. Hub integration
   is optional and failure-isolated.
 - Hub treats this deployment as an untrusted external website. Local
   authentication claims are never trusted network authentication.
-- Sign in with ChatGPT here authorizes only possible local administration of
-  this deployment.
+- Sign in with ChatGPT here enables only possible sole-owner administration of
+  this presence. It is not AittaSocial network sign-in or membership.
 - Do not compare or market AittaSocial by naming another social, publishing,
   blogging, or website product.
 
@@ -37,7 +38,7 @@ file. Keep this file strictly below 32,000 bytes and run
 - This project does not use AittaDB, external databases, shared Hub content
   storage, shared Aitta runtime libraries, or external infrastructure.
 - Keep R2 null until an approved upload feature requires it.
-- Do not implement multiple local accounts, extra administrators, roles, teams,
+- Do not implement multiple presences in one deployment, extra administrators, roles, teams,
   invitations, follows, combined timelines, comments, reactions, resharing,
   messages, notifications, recommendations, advertising, payments, ActivityPub,
   background federation, plugins, general themes, media uploads, or general
@@ -107,13 +108,22 @@ file. Keep this file strictly below 32,000 bytes and run
   configured HTTPS Hub origin. Accept no browser destination, follow no
   credentialed redirect, expose only documented safe statuses, and keep public
   reads independent of Hub.
+- Keep the current manual challenge and root bearer probe explicitly labeled as
+  provisional Hub setup. A successful transport result is not registration, a
+  network session, or a trusted connection; only an accepted versioned Hub
+  contract may replace this provisional boundary.
 - Public contract changes update `docs/protocol.md` and receive a versioning
   decision when incompatible.
 
 ## Product and accessibility
 
-- Public pages describe the deployed account, not the software. Use neutral
-  terms such as account, presence, and entries.
+- Public pages describe the deployed presence, not the software. Human-facing
+  product and setup language uses presence, updates, Your presence, and
+  Identity where accurate. Keep `account`, `entries`, `accountType`, and route
+  names only where stable internal or public protocol 1.0 compatibility
+  requires them.
+- A public owner-management entry must identify local sole-owner
+  administration and must not imply AittaSocial network identity or membership.
 - Keep public and owner surfaces clearly distinct, responsive, accessible,
   keyboard- and touch-friendly, with excellent typography and useful empty and
   error states.

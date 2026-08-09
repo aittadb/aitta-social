@@ -16,7 +16,7 @@ export default async function EditEntryPage({ params }: { params: Promise<{ id: 
   return (
     <OwnerShell displayName={access.user.displayName} current="entries">
       <header className="owner-page-header compact-header">
-        <div><p className="eyebrow">{entry.state}</p><h1>Edit entry</h1><p>Every save and publication change is checked against the configured owner on the server.</p></div>
+        <div><p className="eyebrow">{entry.state}</p><h1>Edit update</h1><p>Every save and publication change is checked against the configured owner on the server.</p></div>
         <EntryActions id={entry.id} state={entry.state} />
       </header>
       <EntryForm entry={entry} />

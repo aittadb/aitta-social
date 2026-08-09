@@ -54,7 +54,7 @@ export async function probeHub(
   } catch {
     return {
       status: "unavailable",
-      message: "The Hub could not be reached. Public account pages remain available.",
+      message: "The Hub could not be reached. Public presence pages remain available.",
     };
   }
 }

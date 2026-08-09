@@ -22,7 +22,7 @@ export function EntryActions({ id, state }: { id: string; state: "draft" | "publ
   }
 
   async function remove() {
-    if (!window.confirm("Delete this entry permanently? This cannot be undone.")) return;
+    if (!window.confirm("Delete this update permanently? This cannot be undone.")) return;
     setBusy(true);
     setMessage("");
     const response = await fetch(`/api/private/entries/${encodeURIComponent(id)}`, { method: "DELETE" });

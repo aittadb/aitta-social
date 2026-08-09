@@ -14,25 +14,25 @@ export default async function OwnerDashboard() {
     <OwnerShell displayName={access.user.displayName} current="overview">
       <header className="owner-page-header">
         <div>
-          <p className="eyebrow">Deployment overview</p>
-          <h1>{profile ? profile.displayName : "Complete the account profile"}</h1>
-          <p>{profile ? "Review drafts, publication state, and the public account from one focused workspace." : "The Site should remain private until the sole owner and this profile are configured and tested."}</p>
+          <p className="eyebrow">Your presence</p>
+          <h1>{profile ? profile.displayName : "Complete your identity"}</h1>
+          <p>{profile ? "Review drafts, publication state, and the public presence from one focused workspace." : "The Site should remain private until the sole owner and this identity are configured and tested."}</p>
         </div>
         <a className="button" href={profile ? "/owner/entries/new" : "/owner/profile"}>
-          {profile ? "Create entry" : "Set up profile"}
+          {profile ? "Create update" : "Set up identity"}
         </a>
       </header>
 
-      <section className="owner-summary" aria-label="Account summary">
-        <Summary label="Profile" value={profile ? "Ready" : "Needed"} />
+      <section className="owner-summary" aria-label="Presence summary">
+        <Summary label="Identity" value={profile ? "Ready" : "Needed"} />
         <Summary label="Published" value={String(published)} />
         <Summary label="Drafts" value={String(entries.length - published)} />
       </section>
 
       <section className="owner-section" aria-labelledby="owner-entries-title">
         <div className="owner-section-heading">
-          <div><p className="eyebrow">Local content</p><h2 id="owner-entries-title">Entries</h2></div>
-          <a className="text-link" href="/owner/entries/new">New draft</a>
+          <div><p className="eyebrow">Local content</p><h2 id="owner-entries-title">Updates</h2></div>
+          <a className="text-link" href="/owner/entries/new">New update</a>
         </div>
         {entries.length ? (
           <div className="owner-entry-list">

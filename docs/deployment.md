@@ -1,9 +1,9 @@
-# ChatGPT Sites deployment and setup
+# AittaSocial presence deployment and setup
 
 Deploy AittaSocial private-first. Reuse the existing Site linked to this source
-when there is one, give it its own D1 database, configure the sole owner through
-protected runtime settings, and verify a private checkpoint before considering
-public access.
+when there is one, give the presence its own D1 database, configure its sole
+owner through protected runtime settings, and verify a private checkpoint
+before considering public access.
 
 Do not publish publicly or connect a custom domain without the deployment
 owner's explicit approval.
@@ -101,36 +101,39 @@ Redeploy privately after a runtime-setting change that must reach the deployed
 server. Verify status again before testing. Never print a setting value while
 checking that its key is configured.
 
-## 5. Complete the initial profile
+## 5. Complete the initial Identity and first update
 
-1. Open the private Site and use Sign in with ChatGPT.
+1. Open the private Site and choose the local owner-management entry to use Sign
+   in with ChatGPT. This sign-in administers only this presence; it does not
+   join or sign in to the AittaSocial network.
 2. Confirm that the authenticated email matches the protected owner setting by
-   observing owner access, not by displaying either email.
-3. Open `/owner/profile` and configure the display name, account type, short
-   description, longer introduction, optional location/website/external links,
-   canonical URL, accent color, density, and attribution preference.
-4. Save and reopen the public account page. It should look intentional with no
-   entries and should describe the deployed account rather than AittaSocial.
-5. Create a draft at `/owner/entries/new`; verify it is visible to the owner but
-   returns the same public not-found result as an unknown entry.
-6. Publish a test entry, open its `/entries/{id}` permalink, then unpublish it
+   reaching Your presence, not by displaying either email.
+3. Open `/owner/profile` and configure Identity: display name, the current
+   protocol-compatible presence category, short description, longer
+   introduction, optional location/website/external links, canonical URL,
+   accent color, density, and attribution preference.
+4. Save and reopen the public presence. It should look intentional with no
+   updates and should describe the represented identity rather than AittaSocial.
+5. Create a draft update at `/owner/entries/new`; verify it is visible to the
+   owner but returns the same public not-found result as an unknown entry.
+6. Publish a test update, open its `/entries/{id}` permalink, then unpublish it
    and confirm it disappears from every public HTML and JSON route.
 
-Profile and entry writes go directly to this deployment's D1 database and do
-not require another deployment after each edit.
+Identity and update writes use the stable profile and entry models in this
+deployment's D1 database and do not require another deployment after each edit.
 
 ## 6. Test access without broadening it
 
 Before public release, verify:
 
-- signed-out public account, published-entry, manifest, and `/api/v1` behavior
+- signed-out public presence, published-update, manifest, and `/api/v1` behavior
   using automated production-equivalent request fixtures;
-- matching-owner dashboard and every write;
+- matching-owner access to Your presence and every write;
 - a different signed-in identity receiving no administrative access;
 - missing-owner behavior disabling every write;
 - draft and private-canary absence from HTML, JSON, headers, links, errors, and
   pagination; and
-- public account reads while the optional Hub test times out or fails.
+- public presence reads while the optional Hub test times out or fails.
 
 A private Sites access policy may prevent anonymous traffic from reaching the
 application at all. Do not temporarily publish the Site to work around that
@@ -138,16 +141,22 @@ boundary. Use the local/automated signed-out fixture until the owner explicitly
 approves public access. Hosting privacy and application authorization are both
 required during setup.
 
-## 7. Optional AittaSocial Hub setup
+## 7. Optional provisional AittaSocial Hub setup
 
-The account remains fully readable without this section. AittaSocial Hub is a
-separate service and must treat every account deployment as an untrusted
+The presence remains fully readable without this section. AittaSocial Hub is a
+separate service and must treat every presence deployment as an untrusted
 external website.
 
-1. Configure and privately deploy this account, including its owner and
+This is a manual challenge and root bearer probe only. It does not register the
+presence, establish network membership or a session, or create a trusted Hub
+connection. Keep it visibly provisional until an accepted versioned Hub
+contract replaces the entire flow; do not extend it by guessing Hub endpoints,
+claims, or credential semantics.
+
+1. Configure and privately deploy this presence, including its owner and
    canonical URL.
 2. Open AittaSocial Hub separately.
-3. Sign in with ChatGPT at Hub; that Hub sign-in, not this account's local
+3. Sign in with ChatGPT at Hub; that Hub sign-in, not this presence's local
    sign-in, establishes any network-user identity.
 4. Submit this deployment's canonical URL to Hub.
 5. Receive an opaque verification challenge from Hub.
@@ -161,33 +170,33 @@ external website.
    `AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL` secret. Never paste it into the owner
    page or browser.
 10. Configure `AITTA_SOCIAL_HUB_URL` as the exact HTTPS Hub origin, redeploy,
-    and run the owner-only connection test at `/owner/hub`.
+    and run the owner-only transport probe at `/owner/hub`.
 
-The POC connection test is provisional because Hub has no established API
+The POC transport test is provisional because Hub has no established API
 contract for it. `POST /api/private/hub/test` accepts no request body or
 destination. Server code sends a short-timeout `GET` to the configured HTTPS
 origin root with `Accept: application/json` and the deployment credential in an
 `Authorization: Bearer ...` header. It does not follow redirects with the
 credential and does not read, return, or log the response body.
 
-The owner sees only `connected`, `credentialRejected`, `reachable`, or
-`unavailable`. These categories describe transport/credential-probe results;
-they are not trusted network authentication and do not affect public account
-operation.
+The internal result is one of `connected`, `credentialRejected`, `reachable`,
+or `unavailable`. These categories describe transport/credential-probe results;
+even `connected` is not a verified connection or trusted network
+authentication. They do not affect public presence operation.
 
 ## 8. Inspect and save the review checkpoint
 
 Start the Sites agent preview and inspect at least:
 
-- public account with no entries;
-- public account with representative published entries at wide and narrow
+- public presence with no updates;
+- public presence with representative published updates at wide and narrow
   widths;
-- each public entry kind and a permalink;
+- each public update kind and a permalink;
 - keyboard navigation, visible focus, labels, errors, contrast, text zoom, touch
   targets, and reduced-motion behavior;
 - missing-owner guidance;
-- owner dashboard, profile form, entry editor, state transitions, delete
-  confirmation, and Hub setup/status; and
+- Your presence, Identity form, update editor, state transitions, delete
+  confirmation, and provisional Hub setup/status; and
 - a signed-in non-owner and signed-out public response using the safe test
   boundary described above.
 

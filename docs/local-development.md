@@ -136,7 +136,7 @@ Use `npm test`, `npm run lint`, `npm run typecheck`, or the individual
 `npm test` must cover the affected product boundary. Focused coverage for the
 POC includes:
 
-- anonymous public account and permalink reads;
+- anonymous public presence and update-permalink reads;
 - exact owner match, another signed-in visitor, and missing owner setting;
 - independent authorization on each write;
 - profile and canonical URL validation;
@@ -146,20 +146,21 @@ POC includes:
 - Hub HTTPS-origin and credential confinement plus timeout isolation; and
 - semantic, labeled, keyboard-usable public and owner interfaces.
 
-Use a local preview to inspect the empty profile/entry state, a populated public
-account, all entry kinds, a public permalink, the unconfigured explanation, the
-owner dashboard, editor validation, narrow/mobile layout, zoom, visible focus,
-and reduced motion. Fix failures in implementation, tests, and the relevant
-documentation together.
+Use a local preview to inspect the empty Identity/update state, a populated
+public presence, all update kinds, a public permalink, the unconfigured
+explanation, Your presence, editor validation, narrow/mobile layout, zoom,
+visible focus, and reduced motion. Fix failures in implementation, tests, and
+the relevant documentation together.
 
 ## Local Hub testing
 
-Hub integration is optional. Because there is no established Hub API contract
-for this POC, local tests should use a controlled fake fetch at the server
-boundary, not a real external destination or credential. Assert the exact
-configured HTTPS origin, manual redirect behavior, authorization-header
-confinement, short timeout, ignored response body, safe result categories, and
-continued public reads during every failure.
+Hub integration is optional. The current manual challenge and root bearer probe
+is provisional setup, not a verified connection. Because there is no
+established Hub API contract for this POC, local tests should use a controlled
+fake fetch at the server boundary, not a real external destination or
+credential. Assert the exact configured HTTPS origin, manual redirect behavior,
+authorization-header confinement, short timeout, ignored response body, safe
+result categories, and continued public reads during every failure.
 
 Do not add an environment switch that sends a production credential to a
 browser-selected or non-HTTPS test service.

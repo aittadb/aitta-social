@@ -20,7 +20,7 @@ export async function PUT(
     const entry = await setEntryState(id, payload.state);
     return entry
       ? Response.json({ data: entry }, { headers: { "Cache-Control": "no-store" } })
-      : jsonError("Entry not found.", 404);
+      : jsonError("Update not found.", 404);
   } catch (error) {
     const response = validationResponse(error);
     if (response) return response;
