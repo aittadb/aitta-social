@@ -192,13 +192,16 @@ Start the Sites agent preview and inspect at least:
   boundary described above.
 
 Correct functional, responsive, accessibility, and visual problems, rerun the
-checks, then save one final private version. Poll Sites deployment status until
-it succeeds and use that returned private URL for owner review.
+checks, then save one final review version under the Site's current
+owner-approved access. A Site that is still private stays private. If the owner
+has already explicitly approved broader access, preserve that exact access
+without broadening it further. Poll Sites deployment status until it succeeds
+and use the returned checkpoint URL for owner review.
 
 The handoff must state what is implemented, what is intentionally excluded,
-which protected setting keys remain required, the private checkpoint URL, and
-open owner decisions. It must not include setting values, credentials, internal
-hosting/database identifiers, or claim that the Site is public.
+which protected setting keys remain required, the checkpoint URL and its actual
+access level, and open owner decisions. It must not include setting values,
+credentials, or internal hosting/database identifiers.
 
 ## Public release is a separate approval
 
