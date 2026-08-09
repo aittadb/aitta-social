@@ -42,16 +42,16 @@ owner-approved personal hostname is the only connected custom domain.
 
 - Pull requests [#1](https://github.com/aittadb/aitta-social/pull/1),
   [#2](https://github.com/aittadb/aitta-social/pull/2), and
-  [#3](https://github.com/aittadb/aitta-social/pull/3) were owner-reviewed and
+  [#3](https://github.com/aittadb/aitta-social/pull/3), and
+  [#4](https://github.com/aittadb/aitta-social/pull/4) were owner-reviewed and
   rebase-merged. The deployed source is the resulting `main` commit
-  `a7e84e67e4ecf5a6fc4232e94d065bf0d95f4b28`.
-- A clean checkout from the bare repository URL selected that default branch
-  source and contained no active hosting binding. `npm ci`, migration
-  generation, and `npm run validate` passed with 80 focused tests, and migration
-  generation produced no schema diff.
+  `3d028321f26cda7ce1e4cdbffc64406bb52e4ff5`.
+- The exact default-branch source had a clean worktree and contained no tracked
+  active hosting binding. `npm run validate` passed with 81 focused tests; the
+  navigation boundary added by the repair is included in that suite.
 - The exact main-derived source, reviewed migration, and ignored checkout-local
   binding were packaged. The packaged and reviewed migration hashes match, the
-  Sites source ref was synchronized to that commit, and Site version 5 reached
+  Sites source ref was synchronized to that commit, and Site version 6 reached
   successful deployment status.
 - The corrected hosted owner Hub control now returns the safe setup status when
   the optional Hub URL and credential are absent; it no longer reports the
@@ -69,18 +69,21 @@ owner-approved personal hostname is the only connected custom domain.
   site API, entry API, entry resource links, and discovery manifest all emit
   `https://jhh.aitta.social` as their canonical origin.
 
-## Current navigation repair
+## Post-merge navigation proof
 
-- Hosted browser reproduction found that the deployed client-link runtime
-  throws during prefetch and click handling. Both the reported Sign in action
-  and a signed-in Dashboard action remained on the account homepage.
-- TASK-033 replaces client-intercepted route links with ordinary browser links
-  throughout the small server-rendered application. A local Dashboard click
-  completed as a full-document navigation with no console warnings or errors,
-  and the focused suite passes with 81 tests.
-- The hosted Site remains on the merged version described above until the owner
-  reviews and rebase-merges the repair pull request. Only the resulting new
-  `main` commit may be packaged and deployed as the corrected hosted version.
+- A fresh hosted page load produced no console warnings or errors. The signed-in
+  Dashboard link reached `/owner`, and a public entry link reached its stable
+  permalink through ordinary document navigation.
+- An anonymous request to `https://jhh.aitta.social` rendered the exact Sign in
+  link and no obsolete Owner access label. Requesting that link reached the
+  dispatcher-owned authentication route with a redirect response.
+- The public site, entries, and discovery responses remained available and used
+  `https://jhh.aitta.social` for account-owned canonical links. The entries API
+  returned the one published entry, and an unauthenticated private Hub probe
+  returned 401.
+- Public access, the sole-owner setting, profile and entry data, optional Hub
+  settings, D1, and the single active custom hostname were not changed during
+  this release.
 
 The optional Hub origin, verification challenge, and deployment credential are
 not configured. Public account operation remains independent of Hub.
