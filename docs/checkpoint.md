@@ -46,12 +46,13 @@ is connected.
   request-stream shape found during hosted review.
 - The deployed saved version still predates that Hub-test fix. Sites correctly
   refused to save an archive for a commit that is not the configured source
-  branch's current `main` HEAD. The validated feature branch is pull-request
-  input only: an agent must neither update nor merge `main` directly. After the
-  owner reviews and rebase-merges the pull request, checkpoint work must begin
-  on a fresh branch from the resulting `origin/main`, since the rebase changes
-  commit provenance. Only that exact main-derived source can prove the final
-  corrected deployment.
+  branch's current `main` HEAD. The validated feature branch is available in
+  draft pull request [#1](https://github.com/aittadb/aitta-social/pull/1) and is
+  review input only: an agent must neither update nor merge `main` directly.
+  After the owner reviews and rebase-merges it, checkpoint work must begin on a
+  fresh branch from the resulting `origin/main`, since the rebase changes commit
+  provenance. Only that exact main-derived source can prove the final corrected
+  deployment.
 
 The optional Hub origin, verification challenge, and deployment credential are
 not configured. Public account operation remains independent of Hub.
