@@ -6,9 +6,17 @@ renumbered or reused. Accepted implementation work moves into `PLAN.md` first;
 unscheduled possibilities remain in `BACKLOG.md`, and completed evidence
 belongs in `CHANGELOG.md`.
 
-The completed account-first POC is recorded in `CHANGELOG.md` and is not
-repeated below.
+There is currently no unscheduled roadmap direction. On 2026-08-09 the owner
+accepted the next presence phase and promoted the previous roadmap entries:
 
-- [ ] ROADMAP-001: Mature the independently operated one-deployment/one-account foundation into a dependable supported release while preserving deployment ownership, public-read independence, secure owner administration, and the stable public protocol.
-- [ ] ROADMAP-002: Consume accepted optional Hub contracts for verified deployment discovery and network identity or sessions while keeping account deployments untrusted and Hub failure-isolated.
-- [ ] ROADMAP-003: Introduce opt-in, privacy-preserving cross-account discovery, relationships, and aggregate reading experiences only after their required Hub contracts are accepted and proven.
+- `ROADMAP-001` is represented by `TASK-035` through `TASK-040` for the
+  dependable presence-first release.
+- `ROADMAP-002` is represented by `TASK-041` through `TASK-050` and
+  `TASK-053` for optional accepted Hub contracts, verified resolution, network
+  sessions, and connection lifecycle.
+- `ROADMAP-003` is represented by `TASK-045` through `TASK-053` for verified
+  discovery, relationships, Your network, and privacy-preserving suggestions.
+
+These mappings remain promotion provenance as individual tasks move from
+`PLAN.md` to `CHANGELOG.md`; they are not capability claims. Only completed
+entries in `CHANGELOG.md` describe shipped work.
