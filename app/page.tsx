@@ -4,6 +4,7 @@ import { getProfile, listPublishedEntries } from "@/db/repository";
 import { chatGPTSignInPath, getChatGPTUser } from "./chatgpt-auth";
 import { publicPresenceMetadata } from "@/lib/public-metadata";
 import type { Entry, Profile } from "@/lib/types";
+import { DeploymentPrompt } from "./_components/DeploymentPrompt";
 
 export const dynamic = "force-dynamic";
 
@@ -16,17 +17,26 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const [{ profile, entries }, user] = await Promise.all([
+  const [account, user] = await Promise.all([
     loadAccount(),
     getChatGPTUser(),
   ]);
-  const accent = profile?.accentColor ?? "#31554d";
+  if (account.status === "unavailable") {
+    return <UnavailablePresence signedIn={Boolean(user)} />;
+  }
+
+  const { profile, entries } = account;
+  if (!profile) {
+    return <UnconfiguredPresence entries={entries} signedIn={Boolean(user)} />;
+  }
+
+  const accent = profile.accentColor;
   const style = { "--accent": accent } as CSSProperties;
 
   return (
-    <main className={`public-shell density-${profile?.density ?? "comfortable"}`} style={style}>
+    <main className={`public-shell density-${profile.density}`} style={style}>
       <header className="public-nav" aria-label="Presence navigation">
-        <a className="wordmark" href="#account">{profile?.displayName ?? "Presence"}</a>
+        <a className="wordmark" href="#account">{profile.displayName}</a>
         <nav className="public-nav-actions" aria-label="Presence actions">
           <a
             className="button button-quiet"
@@ -41,24 +51,23 @@ export default async function Home() {
       <section className="identity-block" id="account" aria-labelledby="account-name">
         <div className="identity-main">
           <p className="eyebrow">Public presence</p>
-          <h1 id="account-name">{profile?.displayName ?? "This presence is being prepared"}</h1>
+          <h1 id="account-name">{profile.displayName}</h1>
           <p className="identity-summary">
-            {profile?.shortDescription ?? "A clear public presence will appear here after its owner completes the identity."}
+            {profile.shortDescription}
           </p>
         </div>
         <aside className="identity-details" aria-label="Presence details">
-          {profile?.location && <Detail label="Location" value={profile.location} />}
-          {profile?.website && (
+          {profile.location && <Detail label="Location" value={profile.location} />}
+          {profile.website && (
             <Detail label="Website" value={<a href={profile.website} rel="me">{readableHost(profile.website)}</a>} />
           )}
-          {profile?.externalLinks.map((link) => (
+          {profile.externalLinks.map((link) => (
             <Detail key={`${link.label}-${link.url}`} label={link.label} value={<a href={link.url} rel="me">Open link</a>} />
           ))}
-          {!profile && <Detail label="Status" value="Private setup in progress" />}
         </aside>
       </section>
 
-      {profile?.introduction && (
+      {profile.introduction && (
         <section className="introduction" aria-labelledby="introduction-title">
           <p className="section-index" aria-hidden="true">01</p>
           <div>
@@ -69,71 +78,140 @@ export default async function Home() {
         </section>
       )}
 
-      <section className="entries-section" aria-labelledby="entries-title">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Recent</p>
-            <h2 id="entries-title">Updates</h2>
-          </div>
-        </div>
-        {entries.length ? (
-          <ol className="entry-list">
-            {entries.map((entry, index) => (
-              <li key={entry.id}>
-                <EntryCard entry={entry} index={index + 1} />
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <div className="empty-public">
-            <p className="empty-mark" aria-hidden="true">A</p>
-            <div>
-              <h3>No published updates yet</h3>
-              <p>
-                {profile
-                  ? "The presence already stands on its own. Its first update will appear here when it is ready."
-                  : "The owner is completing this presence before it becomes public."}
-              </p>
-            </div>
-          </div>
-        )}
-      </section>
+      <EntriesSection entries={entries} configured />
 
-      <footer className="public-footer">
-        <span className="public-footer-name">{profile?.displayName ?? "Independent presence"}</span>
-        <div className="public-footer-context">
-          {!profile?.hidePoweredBy && (
-            <span className="public-attribution">
-              Powered by <strong><a href="https://aitta.social">AittaSocial</a></strong>
-              {" · "}
-              <a
-                href="https://github.com/aittadb/aitta-social"
-                aria-label="AittaSocial source on GitHub"
-              >
-                GitHub
-              </a>
-            </span>
-          )}
-          <nav className="technical-links" aria-label="Technical resources">
-            <span>Technical</span>
-            <a href="/.well-known/aitta-social.json">Manifest</a>
-            <a href="/api/v1/site">Profile JSON</a>
-            <a href="/api/v1/entries">Updates JSON</a>
-          </nav>
-        </div>
-      </footer>
+      <PublicFooter profile={profile} />
     </main>
   );
 }
 
-async function loadAccount(): Promise<{ profile: Profile | null; entries: Entry[] }> {
+type AccountLoad =
+  | { status: "ready"; profile: Profile | null; entries: Entry[] }
+  | { status: "unavailable" };
+
+async function loadAccount(): Promise<AccountLoad> {
   try {
     const profile = await getProfile();
     const { entries } = await listPublishedEntries(12);
-    return { profile, entries };
+    return { status: "ready", profile, entries };
   } catch {
-    return { profile: null, entries: [] };
+    return { status: "unavailable" };
   }
+}
+
+function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedIn: boolean }) {
+  const ownerPath = signedIn ? "/owner" : chatGPTSignInPath("/owner");
+  return (
+    <main className="public-shell density-comfortable template-shell">
+      <header className="public-nav" aria-label="Presence setup navigation">
+        <a className="wordmark" href="#start">AittaSocial</a>
+        <nav className="public-nav-actions" aria-label="Presence setup actions">
+          <a
+            className="button button-quiet"
+            href={ownerPath}
+            aria-label={signedIn
+              ? "Set up this presence — open local sole-owner administration"
+              : "Set up this presence — sign in with ChatGPT for local sole-owner administration"}
+          >
+            Set up this presence
+          </a>
+        </nav>
+      </header>
+
+      <section className="template-start" id="start" aria-labelledby="template-title">
+        <div className="template-introduction">
+          <p className="eyebrow">Start with one prompt</p>
+          <h1 id="template-title">Create your own presence</h1>
+          <p className="identity-summary">
+            Give this prompt to ChatGPT. It will keep setup private, reuse the right Site,
+            and guide you through the first Identity.
+          </p>
+        </div>
+        <DeploymentPrompt />
+      </section>
+
+      <EntriesSection entries={entries} configured={false} />
+      <PublicFooter profile={null} />
+    </main>
+  );
+}
+
+function UnavailablePresence({ signedIn }: { signedIn: boolean }) {
+  return (
+    <main className="state-page" aria-labelledby="unavailable-title">
+      <p className="eyebrow">Presence unavailable</p>
+      <h1 id="unavailable-title">This presence cannot be loaded right now</h1>
+      <p>Try again shortly. No setup or public content has been changed.</p>
+      <div className="button-row">
+        <a className="button" href="/">Try again</a>
+        <a className="button button-quiet" href={signedIn ? "/owner" : chatGPTSignInPath("/owner")}>
+          Manage presence
+        </a>
+      </div>
+    </main>
+  );
+}
+
+function EntriesSection({ entries, configured }: { entries: Entry[]; configured: boolean }) {
+  return (
+    <section className="entries-section" aria-labelledby="entries-title">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Recent</p>
+          <h2 id="entries-title">Updates</h2>
+        </div>
+      </div>
+      {entries.length ? (
+        <ol className="entry-list">
+          {entries.map((entry, index) => (
+            <li key={entry.id}>
+              <EntryCard entry={entry} index={index + 1} />
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <div className="empty-public">
+          <p className="empty-mark" aria-hidden="true">A</p>
+          <div>
+            <h3>No published updates yet</h3>
+            <p>
+              {configured
+                ? "The presence already stands on its own. Its first update will appear here when it is ready."
+                : "Published updates will appear here after the owner completes this presence."}
+            </p>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PublicFooter({ profile }: { profile: Profile | null }) {
+  return (
+    <footer className="public-footer">
+      <span className="public-footer-name">{profile?.displayName ?? "Independent presence"}</span>
+      <div className="public-footer-context">
+        {!profile?.hidePoweredBy && (
+          <span className="public-attribution">
+            Powered by <strong><a href="https://aitta.social">AittaSocial</a></strong>
+            {" · "}
+            <a
+              href="https://github.com/aittadb/aitta-social"
+              aria-label="AittaSocial source on GitHub"
+            >
+              GitHub
+            </a>
+          </span>
+        )}
+        <nav className="technical-links" aria-label="Technical resources">
+          <span>Technical</span>
+          <a href="/.well-known/aitta-social.json">Manifest</a>
+          <a href="/api/v1/site">Profile JSON</a>
+          <a href="/api/v1/entries">Updates JSON</a>
+        </nav>
+      </div>
+    </footer>
+  );
 }
 
 function EntryCard({ entry, index }: { entry: Entry; index: number }) {

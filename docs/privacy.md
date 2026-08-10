@@ -60,6 +60,22 @@ The POC does not implement its own OAuth/OIDC provider, identity database,
 passwords, or authentication cookies. Dispatch-owned sign-in behavior and
 hosting access policy remain separate platform concerns.
 
+### Public template prompt
+
+The short `@Sites` creation prompt is public source content, not a D1 record or
+runtime setting. It contains no owner identity, protected setting name,
+credential, draft, hosting identifier, or Hub response. The public page renders
+it only after a successful D1 read confirms that no profile exists. A storage
+failure instead produces a fixed unavailable state, so an operational problem
+does not disclose private values or masquerade as first-time setup.
+
+The prompt's owner link may reflect only whether the visitor is signed in by
+choosing the normal sign-in or `/owner` destination. It does not reveal whether
+that visitor is authorized. The owner route repeats the server-side sole-owner
+check, and missing owner configuration keeps every write disabled. Selecting or
+copying the read-only prompt grants no authority and writes no browser or server
+state.
+
 ## Public data
 
 The following is intentionally public after the Site owner approves public
@@ -172,6 +188,12 @@ sessions are separate Hub data handling.
 The application has no additional administrators, team access, invitations,
 followers, messages, comments, reactions, notifications, payments, advertising,
 analytics subsystem, or media store in this POC.
+
+Supported Identity, link, update, accent, density, and attribution changes are
+stored through explicit owner-authorized controls in deployment-owned D1. They
+survive reload without a repository fork or Hub connection. The template prompt
+adds no generic settings record, browser storage, remote asset, or new outbound
+data flow.
 
 ## Logs and errors
 

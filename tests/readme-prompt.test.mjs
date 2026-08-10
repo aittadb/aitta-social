@@ -3,6 +3,9 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+const deploymentPromptContent = JSON.parse(
+  await readFile(new URL("../content/deployment-prompt.json", import.meta.url), "utf8"),
+);
 const promptMatch = readme.match(
   /^# AittaSocial\r?\n\r?\n```text\r?\n([\s\S]*?)\r?\n```/,
 );
@@ -21,6 +24,13 @@ test("README opens with one short plain-language deployment prompt", () => {
   );
   assert.ok(readme.indexOf(promptMatch[0]) < readme.indexOf("## Proof-of-concept scope"));
   assert.match(readme, /\[ChatGPT Sites deployment\]\(docs\/deployment\.md\)/);
+});
+
+test("README and runtime use one exact normalized deployment prompt", () => {
+  assert.equal(typeof deploymentPromptContent.prompt, "string");
+  assert.equal(deploymentPromptContent.prompt, normalizedPrompt);
+  assert.equal(deploymentPromptContent.prompt.trim(), deploymentPromptContent.prompt);
+  assert.doesNotMatch(deploymentPromptContent.prompt, /\s{2,}|\r|\n/);
 });
 
 test("deployment prompt preserves every setup and approval boundary", () => {

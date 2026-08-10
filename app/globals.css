@@ -123,7 +123,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   text-transform: uppercase;
 }
 .public-shell .eyebrow { color: var(--ink); }
-.identity-main h1, .permalink-entry h1, .state-page h1, .owner-access-state h1 {
+.identity-main h1, .template-introduction h1, .permalink-entry h1, .state-page h1, .owner-access-state h1 {
   max-width: 900px;
   margin: 0;
   font-family: var(--serif);
@@ -132,6 +132,41 @@ button, a { -webkit-tap-highlight-color: transparent; }
   line-height: 0.92;
   text-wrap: balance;
   overflow-wrap: anywhere;
+}
+.template-start {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(320px, 1.15fr);
+  gap: clamp(3rem, 7vw, 7rem);
+  padding: clamp(4rem, 9vw, 8rem) 0;
+  border-bottom: 1px solid var(--line);
+}
+.template-introduction { min-width: 0; }
+.template-introduction h1 { font-size: clamp(3.2rem, 7vw, 6.8rem); }
+.deployment-prompt { min-width: 0; align-self: end; }
+.deployment-prompt label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--ink);
+  font-weight: 750;
+}
+.deployment-prompt p {
+  margin: 0 0 0.8rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.deployment-prompt textarea {
+  width: 100%;
+  min-height: 17rem;
+  padding: 1rem;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  resize: vertical;
 }
 .identity-summary {
   max-width: 760px;
@@ -394,6 +429,7 @@ code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; bac
 @media (max-width: 900px) {
   .identity-block { grid-template-columns: 1fr; gap: 3rem; }
   .identity-details { max-width: 580px; }
+  .template-start { grid-template-columns: 1fr; gap: 2.5rem; }
   .owner-frame { grid-template-columns: minmax(0, 1fr); }
   .owner-nav { min-width: 0; max-width: 100%; position: sticky; z-index: 10; top: 0; flex-direction: row; overflow-x: auto; padding: 0.55rem 1rem; border-right: 0; border-bottom: 1px solid #d7d9d4; }
   .owner-nav > a { flex: 0 0 auto; }
@@ -410,7 +446,9 @@ code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; bac
   .public-nav .wordmark { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .public-nav-actions, .public-nav-actions .button { width: 100%; }
   .identity-block { padding: 4rem 0; }
-  .identity-main h1 { font-size: clamp(3.1rem, 17vw, 5rem); }
+  .identity-main h1, .template-introduction h1 { font-size: clamp(3.1rem, 17vw, 5rem); }
+  .template-start { padding: 4rem 0; }
+  .deployment-prompt textarea { min-height: 20rem; }
   .identity-summary { margin-top: 1.5rem; }
   .introduction { grid-template-columns: 1fr; gap: 1rem; }
   .entry-card { grid-template-columns: 1fr; gap: 0.7rem; }
