@@ -44,11 +44,15 @@ file. Keep this file strictly below 32,000 bytes and run
 - This project does not use AittaDB, external databases, shared Hub content
   storage, shared Aitta runtime libraries, or external infrastructure.
 - Keep R2 null until an approved upload feature requires it.
-- Do not implement multiple presences in one deployment, extra administrators, roles, teams,
-  invitations, follows, combined timelines, comments, reactions, resharing,
-  messages, notifications, recommendations, advertising, payments, ActivityPub,
-  background federation, plugins, general themes, media uploads, or general
-  OAuth/OIDC support in this POC.
+- The accepted minimum network scope is verified presence discovery, explicit
+  one-way Follow and Unfollow, and a private bounded followed-update reader.
+  Do not extend it into automatic or reciprocal relationships, popularity
+  counts, public graphs, recommendations, or shared content storage.
+- Do not implement multiple presences in one deployment, extra administrators,
+  roles, teams, invitations, comments, reactions, resharing, messages,
+  notifications, advertising, payments, ActivityPub, background federation,
+  plugins, general themes, media uploads, or general OAuth/OIDC support in this
+  POC.
 - Do not add placeholders for excluded or backlog capabilities. Backlog work
   must be accepted and promoted to `PLAN.md` before implementation.
 
