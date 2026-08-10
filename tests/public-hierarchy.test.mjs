@@ -184,10 +184,58 @@ test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 });
 
+test("normal form-control boundaries preserve non-text contrast", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const sharedControls = css.match(
+    /\.field input, \.field textarea, \.field select\s*\{[^}]*border:\s*1px solid (#[0-9a-f]{6})[^}]*background:\s*(#[0-9a-f]{6}|#[0-9a-f]{3})[^}]*\}/is,
+  );
+  const ownerCanvas = css.match(/\.owner-shell\s*\{[^}]*background:\s*(#[0-9a-f]{6})/i);
+  assert.ok(sharedControls, "missing the shared input, textarea, and select colors");
+  assert.ok(ownerCanvas, "missing the adjacent owner canvas color");
+  const controlBorder = sharedControls[1];
+  const controlFill = expandHex(sharedControls[2]);
+  assert.ok(
+    contrastRatio(controlBorder, controlFill) >= 3,
+    "shared control border must contrast with its fill",
+  );
+  assert.ok(
+    contrastRatio(controlBorder, ownerCanvas[1]) >= 3,
+    "shared control border must contrast with the owner canvas",
+  );
+  assert.doesNotMatch(sharedControls[0], /\b(?:filter|opacity|forced-color-adjust)\s*:/i);
+
+  assert.match(
+    css,
+    /\.deployment-prompt textarea\s*\{[^}]*border:\s*1px solid var\(--ink\)[^}]*background:\s*var\(--paper-raised\)/s,
+  );
+  const promptBorder = customProperty(css, "ink");
+  assert.ok(
+    contrastRatio(promptBorder, customProperty(css, "paper-raised")) >= 3,
+    "prompt border must contrast with its fill",
+  );
+  assert.ok(
+    contrastRatio(promptBorder, customProperty(css, "paper")) >= 3,
+    "prompt border must contrast with the public canvas",
+  );
+
+  const nativeCheckbox = css.match(/\.check-field input\s*\{([^}]*)\}/s);
+  assert.ok(nativeCheckbox, "missing native checkbox sizing rule");
+  assert.doesNotMatch(
+    nativeCheckbox[1],
+    /\b(?:appearance|background|border|forced-color-adjust)\s*:/i,
+  );
+});
+
 function customProperty(css, name) {
   const match = css.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, "i"));
   assert.ok(match, `missing --${name} color token`);
   return match[1];
+}
+
+function expandHex(value) {
+  return value.length === 4
+    ? `#${value.slice(1).split("").map((channel) => channel.repeat(2)).join("")}`
+    : value;
 }
 
 function contrastRatio(first, second) {

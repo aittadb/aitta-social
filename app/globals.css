@@ -391,7 +391,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   width: 100%;
   min-height: 48px;
   padding: 0.72rem 0.8rem;
-  border: 1px solid #abb2ad;
+  border: 1px solid #89908c;
   border-radius: 5px;
   background: #fff;
   color: var(--ink);
