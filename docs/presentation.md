@@ -95,6 +95,26 @@ readiness. The owner grids collapse to one column at the narrow breakpoint;
 native links, buttons, and fields retain keyboard focus behavior and at least
 44-pixel interactive height.
 
+When a protected runtime canonical URL is effective, the editable field is
+named as the saved fallback and explains that saving it cannot change the
+protected setting. A malformed legacy stored value is never used as a form
+default or transient preview; a valid normalized runtime value becomes the safe
+fallback default instead. This lets an unrelated Identity or presentation save
+proceed without serializing the malformed value.
+
+Repeated update rows give each action a bounded owner-visible text label plus
+the complete collision-free stable entry identifier in its accessible name,
+while keeping concise visible labels. Publishing opens a native,
+update-specific confirmation. A
+supervising ChatGPT must pause for the human owner's explicit approval before
+accepting it. Save and state controls announce pending, safe response-error, and
+unknown result states. A rejected fetch or 5xx response exposes a native
+recovery link instead of retrying automatically; a 4xx response remains a
+definitive safe error without that link. Form inputs remain available until the
+owner chooses to reload the saved state. These additions use the existing button,
+focus, touch-target, wrapping, 320-pixel, effective 400-percent-zoom, and
+reduced-motion rules.
+
 ## Review checklist
 
 The focused automated contract renders the public route with an empty state and

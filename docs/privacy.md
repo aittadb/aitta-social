@@ -149,6 +149,23 @@ unpublishing returns that same record to the private resumable state. Public
 HTML and JSON continue to treat its identifier exactly like an unknown
 identifier.
 
+When the owner asks ChatGPT to operate this interface, ChatGPT can process the
+owner-only fields visible in that already authenticated foreground browser.
+The application adds no agent identity, agent token, browser-storage record,
+database field, log field, or outbound content request for that assistance.
+The owner should not ask the assistant to expose protected settings or other
+secrets; those settings are not part of the owner forms. The publish
+confirmation is shown to the owner before public visibility changes, and the
+assistant must wait for explicit owner approval before accepting it.
+
+An interrupted response or 5xx response does not establish whether the D1 write
+committed. The interface retains current inputs and provides a saved-state
+reload link; the owner checks the server-rendered state before retrying. This
+recovery behavior stores no extra history. Identity saves replace the current
+profile, draft edits replace the current draft text, unpublishing retains the
+same entry privately, and deletion remains subject to hosting-provider backup
+limitations.
+
 Missing owner configuration disables all writes. It does not cause the
 application to reveal expected configuration values or treat the first visitor
 as an owner.

@@ -1,6 +1,7 @@
 import { getProfile } from "@/db/repository";
 import { deriveIdentityReadiness } from "@/lib/identity-readiness";
 import type { ProfileInput } from "@/lib/types";
+import { normalizeCanonicalUrl } from "@/lib/validation";
 import { OwnerAccessState, OwnerShell } from "../_components/OwnerShell";
 import { requireOwnerPage } from "../owner-access";
 import { ProfileForm } from "./ProfileForm";
@@ -12,6 +13,8 @@ export default async function ProfileSettings() {
   if (access.status !== "owner") return <OwnerAccessState status={access.status} />;
   const profile = await getProfile();
   const readiness = deriveIdentityReadiness(profile);
+  const storedCanonical = normalizedCanonicalOrNull(profile?.canonicalUrl ?? null);
+  const canonicalDefault = storedCanonical ?? readiness.canonicalUrl ?? "";
   const formProfile: ProfileInput | null = profile ? {
     displayName: profile.displayName,
     shortDescription: profile.shortDescription,
@@ -19,12 +22,11 @@ export default async function ProfileSettings() {
     location: profile.location,
     website: profile.website,
     externalLinks: profile.externalLinks.map(({ label, url }) => ({ label, url })),
-    canonicalUrl: profile.canonicalUrl,
+    canonicalUrl: canonicalDefault,
     accentColor: profile.accentColor,
     density: profile.density,
     hidePoweredBy: profile.hidePoweredBy,
   } : null;
-  const canonicalDefault = profile?.canonicalUrl ?? readiness.canonicalUrl ?? "";
   return (
     <OwnerShell displayName={access.user.displayName} current="profile">
       <header className="owner-page-header compact-header">
@@ -37,4 +39,13 @@ export default async function ProfileSettings() {
       />
     </OwnerShell>
   );
+}
+
+function normalizedCanonicalOrNull(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    return normalizeCanonicalUrl(value);
+  } catch {
+    return null;
+  }
 }
