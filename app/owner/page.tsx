@@ -1,5 +1,6 @@
-import { getProfile, listAllEntries } from "@/db/repository";
+import { getFirstEntryByState, getProfile, listAllEntries } from "@/db/repository";
 import { deriveIdentityReadiness, type IdentityReadiness } from "@/lib/identity-readiness";
+import type { Entry } from "@/lib/types";
 import { EntryActions } from "./_components/EntryActions";
 import { OwnerAccessState, OwnerShell } from "./_components/OwnerShell";
 import { requireOwnerPage } from "./owner-access";
@@ -11,7 +12,15 @@ export default async function OwnerDashboard() {
   if (access.status !== "owner") return <OwnerAccessState status={access.status} />;
   const [profile, entries] = await Promise.all([getProfile(), listAllEntries()]);
   const readiness = deriveIdentityReadiness(profile);
+  const [firstDraft, firstPublished] = readiness.state === "complete"
+    ? await Promise.all([
+        getFirstEntryByState("draft"),
+        getFirstEntryByState("published"),
+      ])
+    : [null, null];
+  const firstUpdate = deriveFirstUpdateJourney(readiness, firstDraft, firstPublished);
   const published = entries.filter((entry) => entry.state === "published").length;
+  const primaryAction = dashboardPrimaryAction(readiness, firstUpdate);
   const heading = readiness.state === "complete"
     ? profile?.displayName
     : readiness.state === "incomplete"
@@ -23,14 +32,15 @@ export default async function OwnerDashboard() {
         <div>
           <p className="eyebrow">Your presence</p>
           <h1>{heading}</h1>
-          <p>{dashboardIntroduction(readiness.state)}</p>
+          <p>{dashboardIntroduction(readiness.state, firstUpdate)}</p>
         </div>
-        <a className="button" href={readiness.state === "complete" ? "/" : "/owner/profile"}>
-          {readiness.state === "complete" ? "Preview public presence" : readiness.state === "incomplete" ? "Finish identity" : "Set up identity"}
+        <a className="button" href={primaryAction.href}>
+          {primaryAction.label}
         </a>
       </header>
 
       <IdentityReadinessPanel readiness={readiness} />
+      <FirstUpdateJourneyPanel journey={firstUpdate} />
 
       <section className="owner-summary" aria-label="Presence summary">
         <Summary label="Identity" value={readiness.state === "complete" ? "Ready" : readiness.state === "incomplete" ? "Incomplete" : "Not started"} />
@@ -41,7 +51,7 @@ export default async function OwnerDashboard() {
       <section className="owner-section" aria-labelledby="owner-entries-title">
         <div className="owner-section-heading">
           <div><p className="eyebrow">Local content</p><h2 id="owner-entries-title">Updates</h2></div>
-          <a className="text-link" href="/owner/entries/new">Create update</a>
+          {entries.length ? <a className="text-link" href="/owner/entries/new">Create update</a> : null}
         </div>
         {entries.length ? (
           <div className="owner-entry-list">
@@ -60,12 +70,76 @@ export default async function OwnerDashboard() {
           <div className="owner-empty">
             <h3>Nothing to manage yet</h3>
             <p>Create a draft, shape it privately, and publish it when it is ready.</p>
-            <a className="button" href="/owner/entries/new">Create the first draft</a>
           </div>
         )}
       </section>
     </OwnerShell>
   );
+}
+
+type FirstUpdateJourney =
+  | { state: "identity" }
+  | { state: "empty" }
+  | { state: "draft"; entry: Entry }
+  | { state: "published"; entry: Entry };
+
+function deriveFirstUpdateJourney(
+  readiness: IdentityReadiness,
+  firstDraft: Entry | null,
+  firstPublished: Entry | null,
+): FirstUpdateJourney {
+  if (readiness.state !== "complete") return { state: "identity" };
+  if (firstPublished) return { state: "published", entry: firstPublished };
+  return firstDraft ? { state: "draft", entry: firstDraft } : { state: "empty" };
+}
+
+function FirstUpdateJourneyPanel({ journey }: { journey: FirstUpdateJourney }) {
+  if (journey.state === "identity") return null;
+
+  const content = firstUpdateContent(journey);
+  return (
+    <section
+      className="identity-readiness identity-readiness-complete first-update-journey"
+      aria-labelledby="first-update-journey-title"
+    >
+      <div>
+        <p className="eyebrow">First update</p>
+        <h2 id="first-update-journey-title">{content.title}</h2>
+        <p>{content.message}</p>
+      </div>
+      {journey.state === "published" ? (
+        <div className="identity-readiness-actions">
+          <a className="text-link" href={`/entries/${journey.entry.id}`}>Open first update permalink</a>
+        </div>
+      ) : journey.state === "empty" ? (
+        <div className="identity-readiness-actions">
+          <a className="text-link" href="/">Preview public presence</a>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function firstUpdateContent(journey: Exclude<FirstUpdateJourney, { state: "identity" }>): {
+  title: string;
+  message: string;
+} {
+  if (journey.state === "empty") {
+    return {
+      title: "Create a private first draft",
+      message: "Your Identity is ready. Start one update and review it privately before choosing to publish.",
+    };
+  }
+  if (journey.state === "draft") {
+    return {
+      title: "Resume your saved draft",
+      message: "This draft is stored in this presence and remains private until you publish it.",
+    };
+  }
+  return {
+    title: "Your first update is public",
+    message: "The published update is visible on your public presence and at its stable permalink.",
+  };
 }
 
 function IdentityReadinessPanel({ readiness }: { readiness: IdentityReadiness }) {
@@ -88,10 +162,29 @@ function IdentityReadinessPanel({ readiness }: { readiness: IdentityReadiness })
   );
 }
 
-function dashboardIntroduction(state: IdentityReadiness["state"]): string {
-  if (state === "complete") return "Review Identity, drafts, publication state, and the public presence from one focused workspace.";
+function dashboardIntroduction(
+  state: IdentityReadiness["state"],
+  firstUpdate: FirstUpdateJourney,
+): string {
+  if (firstUpdate.state === "empty") return "Identity is ready. Create one private draft, review it, and publish only when it is ready.";
+  if (firstUpdate.state === "draft") return "Your first draft is saved in this presence and ready to resume without starting over.";
+  if (firstUpdate.state === "published") return "Your first public update is complete. Preview it while the existing update controls remain available below.";
   if (state === "incomplete") return "Saved Identity content is available, but public links need a valid canonical URL before this presence is ready.";
   return "The Site should remain private until the sole owner and public Identity are configured and tested.";
+}
+
+function dashboardPrimaryAction(
+  readiness: IdentityReadiness,
+  firstUpdate: FirstUpdateJourney,
+): { href: string; label: string } {
+  if (firstUpdate.state === "empty") return { href: "/owner/entries/new", label: "Create first draft" };
+  if (firstUpdate.state === "draft") {
+    return { href: `/owner/entries/${firstUpdate.entry.id}`, label: "Resume first draft" };
+  }
+  if (firstUpdate.state === "published") return { href: "/", label: "Preview public presence" };
+  return readiness.state === "incomplete"
+    ? { href: "/owner/profile", label: "Finish identity" }
+    : { href: "/owner/profile", label: "Set up identity" };
 }
 
 function readinessMessage(readiness: IdentityReadiness): string {

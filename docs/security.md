@@ -67,6 +67,18 @@ URL, or defaults from ChatGPT identity headers, drafts, request host headers, or
 Hub state. Unsaved form progress exists only in the current browser component
 and cannot make a later request appear complete.
 
+First-update guidance is derived only after that same owner check. Incomplete
+Identity keeps the Identity action primary. Complete Identity plus no entries
+offers a new private draft; entries with no published record resume an existing
+stable draft; any published record offers public preview and its permalink.
+The milestone uses bounded prepared state queries ordered by creation time and
+stable identifier, rather than inferring existence from the capped management
+list. The dashboard performs no onboarding write and grants no authority to
+the linked editor or action controls: create, edit, publish, unpublish, and
+delete requests each repeat the established server-side owner, origin,
+media-type, size, and validation checks. Hub failure cannot promote a state or
+block these local D1 decisions.
+
 Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and `/callback`.
 The presence must not implement those routes or a general OAuth/OIDC client.
 Sign-in return locations are same-origin relative paths. Human-facing entry to

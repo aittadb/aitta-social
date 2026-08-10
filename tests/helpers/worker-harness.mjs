@@ -108,6 +108,20 @@ class FakeStatement {
       );
       return clone(entry ?? null);
     }
+    if (
+      this.normalized.includes(" from entries") &&
+      this.normalized.includes(" where state = ?") &&
+      this.normalized.includes(" order by created_at asc, id asc") &&
+      this.normalized.includes(" limit 1")
+    ) {
+      const [state] = this.values;
+      const entry = this.database.entries
+        .filter((candidate) => candidate.state === state)
+        .toSorted((left, right) =>
+          ascending(left.created_at, right.created_at) || ascending(left.id, right.id),
+        )[0];
+      return clone(entry ?? null);
+    }
     throw new Error(`Unhandled D1 first() query in test fake: ${this.normalized}`);
   }
 
@@ -342,6 +356,10 @@ function comparePublicEntries(left, right) {
 
 function descending(left, right) {
   return left < right ? 1 : left > right ? -1 : 0;
+}
+
+function ascending(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
 }
 
 function changed(changes) {
