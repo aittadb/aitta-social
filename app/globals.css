@@ -362,7 +362,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .owner-section h2, .runtime-status h2, .setup-steps h2 { font-size: 2.7rem; }
 .owner-entry-list { border-top: 1px solid #cfd2cc; }
 .owner-entry-row { display: grid; grid-template-columns: minmax(240px, 1fr) auto; gap: 2rem; align-items: center; padding: 1.4rem 0; border-bottom: 1px solid #cfd2cc; }
+.owner-entry-copy { min-width: 0; }
 .owner-entry-copy h3 { margin: 0.5rem 0 0; font-family: var(--serif); font-size: 1.4rem; font-weight: 600; }
+.owner-entry-copy h3 a { overflow-wrap: anywhere; }
 .owner-entry-copy p { margin: 0.4rem 0 0; color: var(--muted); font-size: 0.78rem; }
 .state { padding: 0.16rem 0.36rem; border: 1px solid #c2c8c4; border-radius: 4px; }
 .state-published { border-color: #79a091; color: #235b47; }
