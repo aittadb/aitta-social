@@ -362,6 +362,36 @@ test("repeated dashboard controls have distinct accessible names without leaking
   assert.doesNotMatch(html, /REPEATED_ACTION_CREDENTIAL_CANARY|owner@example\.com/i);
 });
 
+test("a maximum-length unbroken owner title and the full action set retain shrink and wrap source contracts", async () => {
+  const entryId = "22222222-2222-4222-8222-222222222222";
+  const unbrokenTitle = `${"OwnerUpdateTitle".repeat(12)}LongTest`;
+  assert.equal(unbrokenTitle.length, 200);
+  assert.equal(/\s/.test(unbrokenTitle), false);
+
+  const [html, css] = await Promise.all([
+    ownerHtml("/owner", makeEnv({
+      db: new FakeD1({
+        entries: [entryRow({ id: entryId, title: unbrokenTitle, state: "published" })],
+      }),
+      ownerEmail,
+    })),
+    source("app/globals.css"),
+  ]);
+  const row = html.match(/<article class="owner-entry-row"[\s\S]*?<\/article>/)?.[0];
+  assert.ok(row, "the populated owner route must render its update row");
+  assert.match(row, new RegExp(`<h3><a href="/owner/entries/${entryId}">${unbrokenTitle}</a></h3>`));
+  assert.match(row, /<div class="entry-actions" role="group"/);
+  for (const label of ["Edit", "Permalink", "Unpublish", "Delete"]) {
+    assert.match(row, new RegExp(`>${label}</(?:a|button)>`));
+  }
+  assert.equal(countMatches(row, /class="button button-small/g), 4);
+
+  assert.match(css, /\.owner-entry-copy\s*\{[^}]*min-width:\s*0/s);
+  assert.match(css, /\.owner-entry-copy h3 a\s*\{[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.entry-actions\s*\{[^}]*min-width:\s*0/s);
+  assert.match(css, /\.public-nav-actions, \.button-row, \.entry-card-links, \.entry-actions, \.form-footer\s*\{[^}]*flex-wrap:\s*wrap/s);
+});
+
 async function ownerHtml(path, env, extraHeaders = {}) {
   const response = await fetchApp(path, {
     env,
