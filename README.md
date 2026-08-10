@@ -189,8 +189,9 @@ follow-up work on a fresh branch from the updated `main` so source and Sites
 checkpoint provenance remain exact.
 
 See [local development](docs/local-development.md) for fixtures and validation,
-and [ChatGPT Sites deployment](docs/deployment.md) for the private-first setup
-flow.
+[clean-source reproducibility](docs/reproducibility.md) for the isolated release
+proof, and [ChatGPT Sites deployment](docs/deployment.md) for the private-first
+setup flow.
 
 ## Public interfaces and safety
 
@@ -198,6 +199,7 @@ flow.
 - [Public presence presentation](docs/presentation.md)
 - [Security and trust boundaries](docs/security.md)
 - [Privacy and data handling](docs/privacy.md)
+- [Clean-source reproducibility](docs/reproducibility.md)
 - [Hosted test checkpoint evidence](docs/checkpoint.md)
 - [Product roadmap](ROADMAP.md)
 - [Implementation plan](PLAN.md)

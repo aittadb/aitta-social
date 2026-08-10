@@ -133,6 +133,13 @@ Worker boundaries, migration integrity, strict types, lint, build, and tests.
 Use `npm test`, `npm run lint`, `npm run typecheck`, or the individual
 `*:check` scripts for a focused rerun while correcting a failure.
 
+Before a release candidate can claim clean-source reproducibility, follow the
+separate [fresh-clone procedure](reproducibility.md). Its
+`npm run reproducibility:check` command deliberately refuses an active Sites
+binding, applies migrations only to a disposable fresh local D1, performs a
+value-canary build and inert archive rehearsal, and changes no hosted state.
+It is not a substitute for `npm run validate` or hosted acceptance.
+
 `npm test` must cover the affected product boundary. Focused coverage for the
 POC includes:
 
