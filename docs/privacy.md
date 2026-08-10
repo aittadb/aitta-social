@@ -202,6 +202,13 @@ sessions are separate Hub data handling.
 - Deleting or decommissioning the Site and its D1 resource is a hosting-level
   owner operation and should be checked against the owner's retention needs.
 
+The automated [in-place upgrade proof](upgrade.md) copies a disposable local D1
+persistence directory only after its Worker has closed, then reopens the copy to
+check state and behavior. That copy is not atomic, is unsafe as a live-copy
+procedure, and is not a hosted backup, export, snapshot, or retention promise.
+The proof neither reads nor mutates hosted D1 data. Hosted migration recovery
+must use separately reviewed provider facilities and explicit owner approval.
+
 The application has no additional administrators, team access, invitations,
 followers, messages, comments, reactions, notifications, payments, advertising,
 analytics subsystem, or media store in this POC.

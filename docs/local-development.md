@@ -109,6 +109,14 @@ indexes or combine multiple SQL statements in one prepared query.
 Local D1 state is disposable development data. Do not treat it as a migration
 substitute or copy it into production.
 
+For an in-place candidate, run the separate
+[upgrade-preservation proof](upgrade.md). It starts from the reviewed historical
+migration prefix and committed legacy fixture, applies the candidate tail to a
+persisted local D1, and compares the exact schema, rows, authorization, draft
+privacy, canonical metadata, public APIs, and setup-prompt behavior. Its closed-
+Worker file copy is a disposable recovery fixture, not an atomic or hosted D1
+backup, and the proof performs no deployment or external mutation.
+
 Worker runtime modules use web/Cloudflare primitives only. Do not import Node
 built-ins, access a filesystem, or depend on mutable process state that must
 survive a request. Keep TypeScript strict, parse unknown inputs at boundaries,
@@ -139,6 +147,13 @@ separate [fresh-clone procedure](reproducibility.md). Its
 binding, applies migrations only to a disposable fresh local D1, performs a
 value-canary build and inert archive rehearsal, and changes no hosted state.
 It is not a substitute for `npm run validate` or hosted acceptance.
+
+Fresh-clone and upgrade evidence answer different questions. The fresh-clone
+procedure proves an empty database can be created reproducibly; the
+[upgrade-preservation procedure](upgrade.md) proves an existing historical
+profile, draft, published update, presentation, canonical behavior, and owner
+boundary survive the candidate migration tail. Neither is hosted deployment or
+provider-backup proof.
 
 `npm test` must cover the affected product boundary. Focused coverage for the
 POC includes:

@@ -69,6 +69,15 @@ migrations, and the resolved checkout-local binding. Keep source-write
 credentials, active hosting identity, temporary packages, and protected
 settings out of source control and user-visible output.
 
+For an existing presence, review the
+[local in-place upgrade proof](upgrade.md) before packaging. It verifies the
+reviewed historical-prefix-to-candidate-tail transition against persisted local
+D1 state, owner authorization, draft privacy, canonical metadata, public APIs,
+and fresh-versus-upgraded prompt behavior. Its closed-Worker local file copy is
+neither atomic nor a hosted backup or restore. Before any approved hosted schema
+change, separately verify the current provider backup/export and recovery
+facilities; do not infer hosted rollback from the local fixture.
+
 Repository changes reach `main` only through an owner-reviewed pull request
 using **Rebase and merge**. An agent must not push or merge directly to `main`.
 Because a rebase merge creates new commit identifiers, post-merge packaging and
