@@ -122,6 +122,17 @@ server after authorization from the current profile and effective canonical
 URL; it reveals no owner email, ChatGPT identity, credential, draft, Hub
 response, or request-host value.
 
+The owner dashboard's first-update state is likewise a server-rendered view of
+the existing D1 profile and entries after authorization. Bounded prepared
+queries select the earliest applicable record by creation time and stable
+identifier even when it falls outside the capped management list. Leaving and
+reopening the dashboard therefore resumes the same stored draft identifier; no
+completion flag, browser-storage value, onboarding row, or Hub record is
+created. A draft stays owner-only until the owner publishes it, and
+unpublishing returns that same record to the private resumable state. Public
+HTML and JSON continue to treat its identifier exactly like an unknown
+identifier.
+
 Missing owner configuration disables all writes. It does not cause the
 application to reveal expected configuration values or treat the first visitor
 as an owner.

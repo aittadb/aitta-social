@@ -125,10 +125,16 @@ checking that its key is configured.
    Inspect its document metadata: title and description come from the public
    Identity, and canonical/sharing URLs use the normalized configured canonical
    URL rather than the request host.
-7. Create a draft update at `/owner/entries/new`; verify it is visible to the
-   owner but returns the same public not-found result as an unknown entry.
-8. Publish a test update, open its `/entries/{id}` permalink, then unpublish it
-   and confirm it disappears from every public HTML, metadata, and JSON route.
+7. With complete Identity and no updates, **Your presence** leads to **Create
+   first draft**. Save the draft, leave the editor, and return to **Your
+   presence**. It must offer to resume that same stable draft identifier and
+   state clearly that the draft remains private until publication.
+8. Publish the test update. **Your presence** then marks the first-update
+   journey complete and offers both the public preview and the stable
+   `/entries/{id}` permalink while retaining the normal edit, unpublish, and
+   delete controls. Unpublish it and confirm the same D1 record becomes the
+   resumable private draft again and disappears from every public HTML,
+   metadata, and JSON route.
 
 The effective canonical URL follows one server-owned rule: a valid normalized
 `AITTA_SOCIAL_CANONICAL_URL` takes precedence, otherwise the normalized URL
@@ -145,8 +151,14 @@ value `other`, while later edits neither accept nor modify the field and
 therefore preserve an existing supported value. The stored value remains
 readable only through the public manifest and `/api/v1/site`; it is not a setup
 choice or trust claim. No D1 migration or protocol-version change is required.
-The readiness and preview UI adds no persistent field, private endpoint, or
-public protocol change.
+The readiness, resumable first-update guidance, and preview UI are derived on
+each authorized server request from the existing profile and entries. Two
+bounded prepared reads select the earliest draft and published entry by
+creation time and stable identifier, independently of the 200-row management
+list. They add no onboarding record, persistent field, browser storage,
+private endpoint, schema migration, publication behavior, or public protocol
+change. Hub configuration and availability do not select or block a
+first-update state.
 
 ### Optional source-only identity assets
 

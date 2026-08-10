@@ -115,6 +115,17 @@ export async function listAllEntries(limit = 200): Promise<Entry[]> {
   return (result.results ?? []).map(mapEntry);
 }
 
+export async function getFirstEntryByState(state: EntryState): Promise<Entry | null> {
+  const row = await getD1()
+    .prepare(`${ENTRY_SELECT}
+      WHERE state = ?
+      ORDER BY created_at ASC, id ASC
+      LIMIT 1`)
+    .bind(state)
+    .first<EntryRow>();
+  return row ? mapEntry(row) : null;
+}
+
 export async function getEntry(
   id: string,
   publishedOnly = false,
