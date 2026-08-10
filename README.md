@@ -40,11 +40,15 @@ The first version is intentionally small:
 - read-only public JSON endpoints under `/api/v1`; and
 - an optional, failure-isolated provisional Hub transport probe.
 
-The POC does not include multiple presences in one deployment or additional administrators, follows,
-timelines, comments, reactions, resharing, messages, notifications,
-recommendations, advertising, payments, federation, plugins, general themes,
-media uploads, a general OAuth/OIDC client, or shared runtime packages. R2 is
-left unconfigured.
+The completed presence-first POC does not yet include Hub registration,
+verified discovery, Follow and Unfollow, or a private followed-update reader.
+Those are the only accepted network additions in the active plan. Multiple presences in
+one deployment, additional administrators, automatic or reciprocal
+relationships, popularity counts, public graphs, recommendations, comments,
+reactions, resharing, messages, notifications, advertising, payments,
+federation, plugins, general themes, media uploads, a general OAuth/OIDC client,
+and shared runtime packages remain excluded or deferred. R2 is left
+unconfigured.
 
 ## Owner authorization
 
