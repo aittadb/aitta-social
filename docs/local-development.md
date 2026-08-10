@@ -154,6 +154,16 @@ POC includes:
 - Hub HTTPS-origin and credential confinement plus timeout isolation; and
 - semantic, labeled, keyboard-usable public and owner interfaces.
 
+The assisted-runtime fixture drives the compiled Worker through Identity and
+presentation save, draft creation and edit, publication, signed-out HTML/JSON
+preview, unpublish rollback, and persisted reload using the existing D1 fake
+and production authorization boundaries. It also checks non-owner,
+missing-owner, CSRF, validation, draft/private-canary, normalized canonical,
+per-update accessible-name, publish-confirmation, definitive 4xx response, and
+ambiguous rejected-fetch/5xx recovery contracts. Source assertions cover the established
+320-pixel/effective-400-percent-zoom and touch/focus rules; record actual browser
+geometry separately rather than presenting source checks as rendered proof.
+
 The category-neutral Identity change does not alter `db/schema.ts`: the
 existing non-null `account_type` column stores the neutral `other` value and
 continues to read supported legacy values. `npm run db:generate` must therefore

@@ -369,7 +369,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .owner-empty { min-height: 260px; display: grid; place-content: center; justify-items: start; padding: 2rem; border: 1px solid #cfd2cc; background: #fff; }
 .owner-empty h3 { margin: 0; font-family: var(--serif); font-size: 2rem; }
 .owner-empty p { max-width: 520px; color: var(--muted); }
-.entry-actions { justify-content: end; }
+.entry-actions { min-width: 0; justify-content: end; }
+.entry-actions .form-status { flex: 1 0 100%; overflow-wrap: anywhere; text-align: right; }
 .entry-actions .form-status:empty { display: none; }
 
 .owner-form { padding-top: 1rem; }
@@ -438,6 +439,7 @@ code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; bac
   .owner-content { width: min(100% - 40px, 900px); padding-top: 3rem; }
   .owner-entry-row { grid-template-columns: 1fr; }
   .entry-actions { justify-content: start; }
+  .entry-actions .form-status { text-align: left; }
 }
 
 @media (max-width: 640px) {

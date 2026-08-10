@@ -79,6 +79,31 @@ delete requests each repeat the established server-side owner, origin,
 media-type, size, and validation checks. Hub failure cannot promote a state or
 block these local D1 decisions.
 
+## Supervised browser assistance
+
+ChatGPT may control the normal owner interface only through the human owner's
+existing foreground browser session. It is not a principal: there is no agent
+credential, agent route, prompt-derived permission, source mutation endpoint,
+or production authorization bypass. Closing the browser session or losing the
+owner match removes the same access it would remove from a human-operated page.
+
+The native publication confirmation is a human approval boundary, not another
+authentication factor. A browser-controlling ChatGPT must pause before
+accepting it and ask the owner for explicit approval of that update. The
+server-side publication request still independently enforces owner
+authorization, same origin, JSON media type, body bound, state validation, and
+the prepared D1 update; a manipulated client or accepted dialog cannot bypass
+those checks.
+
+A rejected fetch or 5xx response is ambiguous because D1 may have committed
+before the browser lost a usable success response. Owner controls therefore
+never claim the record stayed unchanged in either case. They retain unsaved
+inputs, re-enable the controls, announce that the result could not be confirmed,
+and offer a native saved-state recovery link. The owner or assistant reloads
+and inspects that server-rendered state before any retry. A 4xx validation or
+authorization response uses its safe response category, re-enables the control,
+and does not show the ambiguous-result recovery link.
+
 Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and `/callback`.
 The presence must not implement those routes or a general OAuth/OIDC client.
 Sign-in return locations are same-origin relative paths. Human-facing entry to

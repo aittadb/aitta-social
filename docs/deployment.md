@@ -160,6 +160,47 @@ and attribution visibility through those existing controls. These ordinary
 changes persist in D1 across reloads and do not require a repository fork,
 source edit, or Hub connection. The creation prompt provides no separate agent
 token, write endpoint, or authorization path.
+
+### Supervised ChatGPT-assisted owner controls
+
+An owner may ask ChatGPT to operate the normal owner interface in the same
+foreground browser session. The human owner first establishes the Sites-owned
+sign-in session; the application then performs its ordinary server-side owner
+and same-origin checks for every save. ChatGPT receives no separate identity,
+token, endpoint, or authority. It may navigate, fill Identity and presentation
+fields, create or edit a private draft, and use preview or unpublish controls
+only while the owner supervises that signed-in browser.
+
+Publishing is the deliberate stop point. Choosing **Publish** opens a native
+confirmation that identifies the update and states that it will become public.
+A browser-controlling ChatGPT must stop there, show the request to the human
+owner, and accept the confirmation only after the owner explicitly approves
+that publication. A deployment request, prior approval to make the Site public,
+an earlier publication, or permission to edit a draft is not publish approval.
+
+If a browser request loses its response, or the server returns a 5xx response,
+the interface describes the result as unknown, keeps current form inputs in
+place, and offers a native link to reload the applicable saved Identity, update,
+or dashboard state. Reload before retrying: the server may have committed the
+first request, so an immediate retry could create a second draft or reverse the
+wrong state. A 4xx validation or authorization response re-enables the control
+and shows its safe server message without adding the ambiguous-result recovery
+link.
+
+Rollback stays within the existing product model. Reloading before a successful
+Identity save discards its transient preview. A saved Identity or presentation
+choice can be replaced by saving the previous explicit values; there is no
+version history. Unpublishing returns the same update to its private draft
+state, and deleting remains a separate destructive confirmation. Saved draft
+edits likewise have no revision history, so preserve text separately before a
+destructive replacement when recovery matters.
+
+These controls modify only deployment-owned D1 content. They do not fork or
+edit GitHub source, redeploy the Site, change protected settings, change access,
+or connect a domain. Any source change, deployment, public-access change, or
+custom-domain action remains a separately reviewed and explicitly approved
+operation outside this assisted runtime workflow.
+
 For protocol 1.0 compatibility, a new profile stores the neutral `accountType`
 value `other`, while later edits neither accept nor modify the field and
 therefore preserve an existing supported value. The stored value remains

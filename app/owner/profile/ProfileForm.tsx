@@ -3,6 +3,7 @@
 import { useState, type CSSProperties, type FormEvent } from "react";
 import type { IdentityReadiness } from "@/lib/identity-readiness";
 import type { ProfileInput } from "@/lib/types";
+import { classifyOwnerMutationResponse } from "../_components/owner-mutation-outcome";
 
 type DraftPreview = Pick<ProfileInput, "displayName" | "shortDescription" | "introduction" | "canonicalUrl" | "accentColor">;
 
@@ -18,13 +19,20 @@ export function ProfileForm({
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(false);
   const [preview, setPreview] = useState<DraftPreview>({
     displayName: profile?.displayName ?? "",
     shortDescription: profile?.shortDescription ?? "",
     introduction: profile?.introduction ?? "",
-    canonicalUrl: profile?.canonicalUrl ?? canonicalDefault,
+    canonicalUrl: canonicalDefault,
     accentColor: profile?.accentColor ?? "#31554d",
   });
+
+  function showUnconfirmedSave() {
+    setStatus("The Identity save result could not be confirmed. Reload this page before retrying.");
+    setShowRecovery(true);
+    setBusy(false);
+  }
 
   function updatePreview(event: FormEvent<HTMLFormElement>) {
     const form = new FormData(event.currentTarget);
@@ -41,6 +49,7 @@ export function ProfileForm({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
+    setShowRecovery(false);
     setStatus("Saving…");
     const form = new FormData(event.currentTarget);
     const externalLinks = String(form.get("externalLinks") ?? "")
@@ -53,39 +62,54 @@ export function ProfileForm({
           ? { label: "Link", url: line }
           : { label: line.slice(0, separator).trim(), url: line.slice(separator + 1).trim() };
       });
-    const response = await fetch("/api/private/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        displayName: form.get("displayName"),
-        shortDescription: form.get("shortDescription"),
-        introduction: form.get("introduction"),
-        location: form.get("location"),
-        website: form.get("website"),
-        externalLinks,
-        canonicalUrl: form.get("canonicalUrl"),
-        accentColor: form.get("accentColor"),
-        density: form.get("density"),
-        hidePoweredBy: form.get("hidePoweredBy") === "on",
-      }),
-    });
-    if (response.ok) {
-      setStatus("Identity saved. Reloading its durable readiness…");
-      window.location.assign("/owner/profile");
+    try {
+      const response = await fetch("/api/private/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: form.get("displayName"),
+          shortDescription: form.get("shortDescription"),
+          introduction: form.get("introduction"),
+          location: form.get("location"),
+          website: form.get("website"),
+          externalLinks,
+          canonicalUrl: form.get("canonicalUrl"),
+          accentColor: form.get("accentColor"),
+          density: form.get("density"),
+          hidePoweredBy: form.get("hidePoweredBy") === "on",
+        }),
+      });
+      const outcome = classifyOwnerMutationResponse(response);
+      if (outcome === "success") {
+        setStatus("Identity saved. Reloading its durable readiness…");
+        window.location.assign("/owner/profile");
+        return;
+      }
+      if (outcome === "unconfirmed") {
+        showUnconfirmedSave();
+        return;
+      }
+      setStatus(await errorMessage(response));
+    } catch {
+      showUnconfirmedSave();
       return;
     }
-    setStatus(await errorMessage(response));
     setBusy(false);
   }
 
   return (
-    <form className="owner-form" onSubmit={submit} onInput={updatePreview} noValidate>
+    <form className="owner-form" aria-label="Identity and presentation settings" onSubmit={submit} onInput={updatePreview} aria-busy={busy} noValidate>
       <section className={`identity-form-readiness identity-readiness-${readiness.state}`} aria-labelledby="identity-form-readiness-title">
         <div>
           <p className="eyebrow">Saved readiness</p>
           <h2 id="identity-form-readiness-title">{readinessTitle(readiness.state)}</h2>
           <p>{canonicalExplanation(readiness)}</p>
-          {readiness.canonicalUrl ? <p className="effective-canonical"><span>Effective public URL</span><code>{readiness.canonicalUrl}</code></p> : null}
+          {readiness.canonicalUrl ? (
+            <p className="effective-canonical">
+              <span>Effective public URL · {canonicalSourceLabel(readiness.canonicalSource)}</span>
+              <code>{readiness.canonicalUrl}</code>
+            </p>
+          ) : null}
         </div>
         <a className="text-link" href="/">Preview saved public presence</a>
       </section>
@@ -121,8 +145,16 @@ export function ProfileForm({
           <Field label="Website (optional)" name="website" type="url" defaultValue={profile?.website ?? ""} placeholder="https://example.com" />
         </div>
         <label className="field"><span>External links (optional)</span><textarea name="externalLinks" rows={4} defaultValue={profile?.externalLinks.map((link) => `${link.label} | ${link.url}`).join("\n")} placeholder={"Documentation | https://example.com/docs\nContact | https://example.com/contact"} /><small>One per line in “Label | URL” form. Maximum eight.</small></label>
-        <Field label="Canonical presence URL" name="canonicalUrl" type="url" required defaultValue={canonicalDefault} placeholder="https://presence.example" />
-        <p className="field-note">A valid protected runtime URL takes precedence. This field remains the durable fallback and is validated when you save.</p>
+        <Field
+          label={readiness.canonicalSource === "runtime" ? "Fallback canonical presence URL" : "Canonical presence URL"}
+          name="canonicalUrl"
+          type="url"
+          required
+          defaultValue={canonicalDefault}
+          placeholder="https://presence.example"
+          aria-describedby="canonical-url-help"
+        />
+        <p className="field-note" id="canonical-url-help">{canonicalFieldHelp(readiness.canonicalSource)}</p>
       </fieldset>
 
       <fieldset>
@@ -137,7 +169,8 @@ export function ProfileForm({
       <div className="form-footer">
         <button className="button" type="submit" disabled={busy}>Save identity</button>
         <a className="button button-quiet" href="/">Preview public presence</a>
-        <p className="form-status" role="status" aria-live="polite">{status}</p>
+        <p className="form-status" role="status" aria-live="polite" aria-atomic="true">{status}</p>
+        {showRecovery ? <a className="button button-quiet" href="/owner/profile">Reload saved Identity</a> : null}
       </div>
     </form>
   );
@@ -161,6 +194,22 @@ function canonicalExplanation(readiness: IdentityReadiness): string {
   return readiness.state === "incomplete"
     ? "Saved Identity content is preserved, but there is no valid effective canonical URL. Save a valid HTTPS URL below."
     : "Complete the required fields and save a valid HTTPS canonical URL. Unsaved changes do not survive reload.";
+}
+
+function canonicalSourceLabel(source: IdentityReadiness["canonicalSource"]): string {
+  if (source === "runtime") return "protected Site setting";
+  if (source === "stored") return "saved Identity fallback";
+  return "not configured";
+}
+
+function canonicalFieldHelp(source: IdentityReadiness["canonicalSource"]): string {
+  if (source === "runtime") {
+    return "The protected Site setting is currently effective. Saving this field updates only the durable D1 fallback and cannot change that protected setting.";
+  }
+  if (source === "stored") {
+    return "This saved Identity URL is currently effective because no valid protected runtime override is active.";
+  }
+  return "Save a valid HTTPS URL as the durable fallback. A later valid protected runtime URL will take precedence.";
 }
 
 function requiredCount(preview: DraftPreview): number {

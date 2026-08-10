@@ -99,7 +99,8 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<legend>Update<\/legend>/i);
     assert.match(html, /<select[^>]+name="kind"/i);
     assert.match(html, /<textarea[^>]+name="body"[^>]+required[^>]+maxlength="50000"/i);
-    assert.match(html, /<button[^>]+type="submit"[^>]*>Create draft<\/button>/i);
+    assert.match(html, /<form[^>]+aria-label="Create private draft"[^>]+aria-busy="false"/i);
+    assert.match(html, /<button[^>]+type="submit"[^>]*>Create private draft<\/button>/i);
   });
 });
 

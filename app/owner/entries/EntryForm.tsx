@@ -2,38 +2,62 @@
 
 import { useState, type FormEvent } from "react";
 import type { Entry } from "@/lib/types";
+import { classifyOwnerMutationResponse } from "../_components/owner-mutation-outcome";
 
 export function EntryForm({ entry }: { entry: Entry | null }) {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(false);
+  const isPublished = entry?.state === "published";
+
+  function showUnconfirmedSave() {
+    setStatus("The save result could not be confirmed. Reload Your presence before retrying.");
+    setShowRecovery(true);
+    setBusy(false);
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
-    setStatus("Saving draft…");
+    setShowRecovery(false);
+    setStatus(entry ? (isPublished ? "Saving public update…" : "Saving private draft…") : "Creating private draft…");
     const form = new FormData(event.currentTarget);
-    const response = await fetch(entry ? `/api/private/entries/${encodeURIComponent(entry.id)}` : "/api/private/entries", {
-      method: entry ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        kind: form.get("kind"),
-        title: form.get("title"),
-        body: form.get("body"),
-        destinationUrl: form.get("destinationUrl"),
-      }),
-    });
-    if (response.ok) {
-      const payload = await response.json() as { data: Entry };
-      if (!entry) window.location.href = `/owner/entries/${payload.data.id}`;
-      else { setStatus("Draft changes saved."); setBusy(false); }
+    try {
+      const response = await fetch(entry ? `/api/private/entries/${encodeURIComponent(entry.id)}` : "/api/private/entries", {
+        method: entry ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: form.get("kind"),
+          title: form.get("title"),
+          body: form.get("body"),
+          destinationUrl: form.get("destinationUrl"),
+        }),
+      });
+      const outcome = classifyOwnerMutationResponse(response);
+      if (outcome === "success") {
+        const payload = await response.json() as { data: Entry };
+        if (!entry) {
+          window.location.assign(`/owner/entries/${payload.data.id}`);
+          return;
+        }
+        setStatus(isPublished ? "Public update saved." : "Private draft saved.");
+        setBusy(false);
+        return;
+      }
+      if (outcome === "unconfirmed") {
+        showUnconfirmedSave();
+        return;
+      }
+      setStatus(await errorMessage(response));
+    } catch {
+      showUnconfirmedSave();
       return;
     }
-    setStatus(await errorMessage(response));
     setBusy(false);
   }
 
   return (
-    <form className="owner-form entry-editor-form" onSubmit={submit} noValidate>
+    <form className="owner-form entry-editor-form" aria-label={entry ? "Edit update" : "Create private draft"} onSubmit={submit} aria-busy={busy} noValidate>
       <fieldset>
         <legend>Update</legend>
         <div className="field-grid field-grid-two">
@@ -44,9 +68,16 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
         <label className="field"><span>Destination URL (optional; required for Link)</span><input name="destinationUrl" type="url" defaultValue={entry?.destinationUrl ?? ""} placeholder="https://example.com/resource" /></label>
       </fieldset>
       <div className="form-footer">
-        <button className="button" type="submit" disabled={busy}>{entry ? "Save draft changes" : "Create draft"}</button>
+        <button className="button" type="submit" disabled={busy}>
+          {entry ? (isPublished ? "Save public update" : "Save private draft") : "Create private draft"}
+        </button>
         <a className="button button-quiet" href="/owner">Return to Your presence</a>
-        <p className="form-status" role="status" aria-live="polite">{status}</p>
+        <p className="form-status" role="status" aria-live="polite" aria-atomic="true">{status}</p>
+        {showRecovery ? (
+          <a className="button button-quiet" href={entry ? `/owner/entries/${entry.id}` : "/owner"}>
+            {entry ? "Reload saved update" : "Check saved updates"}
+          </a>
+        ) : null}
       </div>
     </form>
   );

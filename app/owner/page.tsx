@@ -62,7 +62,7 @@ export default async function OwnerDashboard() {
                   <h3><a href={`/owner/entries/${entry.id}`}>{entry.title ?? entry.body.slice(0, 90)}</a></h3>
                   <p>Updated {formatDate(entry.updatedAt)}</p>
                 </div>
-                <EntryActions id={entry.id} state={entry.state} />
+                <EntryActions id={entry.id} state={entry.state} label={entry.title ?? entry.body.slice(0, 90)} />
               </article>
             ))}
           </div>
@@ -151,7 +151,12 @@ function IdentityReadinessPanel({ readiness }: { readiness: IdentityReadiness })
         <p className="eyebrow">Identity setup</p>
         <h2 id="identity-readiness-title">{complete ? "Ready for public review" : readiness.state === "incomplete" ? "Canonical URL needed" : "Start with the public Identity"}</h2>
         <p>{readinessMessage(readiness)}</p>
-        {readiness.canonicalUrl ? <p className="effective-canonical"><span>Effective public URL</span><code>{readiness.canonicalUrl}</code></p> : null}
+        {readiness.canonicalUrl ? (
+          <p className="effective-canonical">
+            <span>Effective public URL · {readiness.canonicalSource === "runtime" ? "protected Site setting" : "saved Identity fallback"}</span>
+            <code>{readiness.canonicalUrl}</code>
+          </p>
+        ) : null}
       </div>
       <div className="identity-readiness-actions">
         <label htmlFor="identity-progress">Identity readiness: {progress} of 2 requirements complete</label>
