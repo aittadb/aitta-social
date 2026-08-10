@@ -16,6 +16,23 @@ to the represented presence and are not primary navigation or update-heading
 actions. Moving their links changes no route, response, cache policy, schema,
 migration, or protocol 1.0 field.
 
+Before an Identity exists, the reusable template has a deliberately different
+first-content hierarchy:
+
+1. a plain-language heading explaining that one ChatGPT prompt creates a
+   presence;
+2. the exact short README prompt in a labeled, selectable, read-only field;
+3. a clear native link into the normal local owner sign-in/management path;
+4. any already-published updates, still using the same published-only query;
+   and
+5. the existing restrained footer context.
+
+This template-first state is selected only by a successful D1 read returning no
+profile. Once Identity is saved, the prompt, setup heading, and setup action are
+absent and the represented presence regains the normal hierarchy above. A D1
+failure renders a fixed temporary-unavailable state instead of the creation
+prompt. Optional Hub availability never selects any of these states.
+
 ## Content states
 
 A configured presence remains intentional when it has no published updates.
@@ -24,9 +41,10 @@ state. Drafts never affect the public hierarchy, counts, links, or wording. All
 four supported update kinds use the same recent-update list and public
 permalink model.
 
-If D1 is unavailable, the existing neutral setup state remains the safe public
-fallback. Optional Hub configuration or failure does not participate in public
-profile or published-update rendering.
+If D1 is unavailable, the fixed temporary-unavailable state remains the safe
+public fallback and is not presented as new setup. Optional Hub configuration
+or failure does not participate in public profile or published-update
+rendering.
 
 ## Accessibility and responsive behavior
 
@@ -45,6 +63,14 @@ which is the effective layout width produced by enlarging a 1280-pixel desktop
 viewport to 400 percent—the navigation, identity, featured information,
 updates, empty state, and footer become single-column layouts. Reduced-motion
 preferences disable smooth scrolling and animation.
+
+The prompt itself is a native read-only textarea. Its visible label and help
+text make manual selection and copying available without a script-only control;
+keyboard selection and platform copy commands therefore remain available on
+every browser. The field fills its bounded column, wraps long text, and becomes
+single-column with the introduction at the 900-pixel breakpoint. The 320-pixel
+and effective 400-percent-zoom layouts use the same narrow rules and cannot
+expand the viewport.
 
 The configured accent remains a constrained decorative preference. Essential
 public labels use the stable foreground colors instead of depending on an
@@ -85,3 +111,13 @@ Measure `scrollWidth` against `clientWidth`, inspect each public target's box,
 tab through the page to see the focus ring, enable reduced motion, and confirm
 that long visible hostnames and unbroken text wrap without clipping. Repeat the
 focused hierarchy review described in the deployment guide before a checkpoint.
+
+The template contract additionally compares the README prompt with the reviewed
+runtime content projection byte-for-byte after README whitespace normalization.
+It renders signed-out, owner, non-owner, and missing-owner fixtures; an absent
+profile with public and draft updates; a configured profile; unavailable D1;
+and protected identity/credential canaries. Source assertions cover native
+selection, visible labeling, native navigation, focus, touch sizing, wide and
+narrow grids, overflow wrapping, reduced motion, and the no-gradient boundary.
+This presentation adds no schema, migration, private write, public API, or
+protocol change.

@@ -5,6 +5,13 @@ when there is one, give the presence its own D1 database, configure its sole
 owner through protected runtime settings, and verify a private checkpoint
 before considering public access.
 
+When the D1 profile read succeeds and no Identity exists, the public template
+leads with the same short prompt shown at the top of the README. The prompt is
+selectable in a labeled read-only field, so it can be copied without running a
+browser write or granting authority. A configured Site never shows that prompt:
+it leads with the represented Identity. A D1 read failure shows a temporary
+unavailable state and must never be described as a new or unconfigured Site.
+
 Do not publish publicly or connect a custom domain without the deployment
 owner's explicit approval.
 
@@ -79,9 +86,11 @@ If the selected hosting path cannot deploy privately, stop and ask the owner
 before using any shared or public access level. Do not choose a broader access
 level to complete a test.
 
-The first private checkpoint may show safe unconfigured guidance because the
-owner setting and profile do not yet exist. That is expected: it must not grant
-the first visitor write access.
+The first private checkpoint may show the public creation prompt because the
+profile does not yet exist. That is expected only after a successful empty D1
+read: it must not grant the first visitor write access, reveal whether a signed-
+in visitor matches the owner, or expose protected configuration. The owner path
+still performs its normal server-side authorization before displaying controls.
 
 ## 4. Configure protected runtime settings
 
@@ -146,6 +155,11 @@ not participate in Identity readiness or public preview.
 
 Identity and update writes use the stable profile and entry models in this
 deployment's D1 database and do not require another deployment after each edit.
+The signed-in owner can also change the supported accent, density, public links,
+and attribution visibility through those existing controls. These ordinary
+changes persist in D1 across reloads and do not require a repository fork,
+source edit, or Hub connection. The creation prompt provides no separate agent
+token, write endpoint, or authorization path.
 For protocol 1.0 compatibility, a new profile stores the neutral `accountType`
 value `other`, while later edits neither accept nor modify the field and
 therefore preserve an existing supported value. The stored value remains
