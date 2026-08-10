@@ -193,19 +193,36 @@ file. Keep this file strictly below 32,000 bytes and run
 - `PLAN.md` contains only accepted unfinished work with stable `TASK-NNN` IDs,
   direct dependencies, and a definition of done. Keep it a flat list of bounded
   vertical slices.
-- Each active task must fit one focused reviewable commit and own its relevant
-  implementation or proof, negative tests, documentation, and migration or
-  configuration decision. Split a task before implementation when its DoD
-  contains independently useful outcomes; never split work into generic
-  implementation, test, and documentation phases.
-- Parallelize only tasks whose recorded dependencies are complete and whose
-  runtime, schema, migration, or public-contract surfaces do not overlap.
-  Shared documentation is reconciled during integration rather than making all
-  otherwise independent work sequential. Parallel work
-  may give each task one owner, one writable worktree, and one
-  `codex/task-NNN-short-name` branch from the same exact validated prerequisite
-  commit; declare intended files and stop if another task overlaps them. Never
-  run two schema or migration tasks in parallel.
+- Before starting or delegating any active task, audit its definition of done
+  for independently useful user, contract, migration, destructive-operation,
+  hosted-evidence, or acceptance outcomes. If more than one outcome can be
+  implemented, reviewed, rolled back, externally approved, or blocked
+  independently, keep the existing stable ID for the first narrow outcome,
+  assign new monotonically increasing IDs to the others, and rewrite downstream
+  dependencies before implementation. Never reuse an omitted or archived ID,
+  renumber history, or split one outcome into separate implementation, test,
+  security, migration, documentation, or deployment-inspection phases.
+- Each active task must fit one focused reviewable commit and own one meaningful
+  vertical outcome plus its relevant negative tests or security review,
+  documentation, and migration or configuration decision. Its DoD must be
+  binary and achievable from named evidence; a task cannot complete merely by
+  creating a follow-up for work its own outcome requires. A contract-pin or
+  conformance task covers one versioned operation or one deliberately shared
+  envelope; a hosted checkpoint covers one explicitly approved external
+  mutation or cohesive read-only journey; an acceptance task covers one
+  coherent matrix. Bundle outcomes only when separating them would leave
+  unusable evidence or require duplicating the same irreversible action.
+- Record only direct prerequisites in `Depends on`; remove transitive or
+  redundant edges and never use a broad acceptance or checkpoint task where a
+  narrower prerequisite is sufficient. Tasks with no dependency path may run
+  in parallel only when their declared files, runtime, schema, migration,
+  contract fixtures, and external-state targets do not overlap. Shared
+  documentation is reconciled during integration rather than serializing
+  otherwise independent work. Parallel work may give each task one owner, one
+  writable worktree, and one `codex/task-NNN-short-name` branch from the same
+  exact validated prerequisite commit; declare intended files and
+  external-state targets, stop on overlap, and never run two schema or migration
+  tasks in parallel.
 - Integrate only complete validated task commits into the current feature
   branch in dependency order. Do not stack dependent pull requests by default
   or pretend an unmerged prerequisite is `main`. The owner rebase-merges the
