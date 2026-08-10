@@ -20,6 +20,7 @@
     "plan:check": "node scripts/check-plan.mjs",
     "instance:check": "node scripts/check-instance-boundaries.mjs",
     "runtime:check": "node scripts/check-runtime-boundaries.mjs",
+    "reproducibility:check": "npm audit --omit=dev && node scripts/check-clean-source.mjs",
     "sites:package": "node scripts/require-active-hosting.mjs && npm run build",
     "validate": "npm run agents:check && npm run license:check && npm run plan:check && npm run instance:check && npm run runtime:check && npm run db:check && npm run typecheck && npm run lint && npm test"
   },
