@@ -14,6 +14,7 @@ test("accepts an ordered acyclic graph with direct dependencies", () => {
 test("rejects malformed, duplicate, reused, unknown, self, repeated, and cyclic tasks", () => {
   assert.throws(() => validatePlanGraph("- [ ] **TASK-040 — Missing contract.**", ""), /stable PLAN syntax|Invalid PLAN task syntax/);
   assert.throws(() => validatePlanGraph([task("TASK-040", "First"), task("TASK-040", "Second")].join("\n"), ""), /duplicated/);
+  assert.throws(() => validatePlanGraph("", [done("TASK-001"), done("TASK-001")].join("\n")), /CHANGELOG.md contains a duplicate task ID/);
   assert.throws(() => validatePlanGraph(task("TASK-040", "First"), done("TASK-040")), /both open and completed/);
   assert.throws(() => validatePlanGraph(task("TASK-040", "First", "TASK-999"), ""), /unknown TASK-999/);
   assert.throws(() => validatePlanGraph(task("TASK-040", "First", "TASK-040"), ""), /depends on itself/);
