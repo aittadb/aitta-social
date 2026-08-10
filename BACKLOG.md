@@ -53,16 +53,17 @@ accepted work must be promoted to `PLAN.md` before implementation.
   `TASK-122`. The retained local contract and implementation work may later be
   followed by a separately approved disposable hosted verification.
 
-The owner deferred these items on 2026-08-10 to keep the active plan focused on
-the minimum meaningful product: an independently deployable presence, secure
-Hub registration, verified discovery, explicit Follow and Unfollow, and a
-private followed-update feed. The referenced `TASK` identifiers are unfinished deferral
-provenance, not completed work; any future promotion receives new monotonically
-increasing `TASK` identifiers and a fresh achievable DoD.
+The owner deferred these items on 2026-08-10 because they are not required for
+the next immediately usable presence-first release. The smaller core network
+direction is recorded separately in `ROADMAP-004` through `ROADMAP-008`; these
+backlog items remain optional even within that future program. The referenced
+`TASK` identifiers are unfinished deferral provenance, not completed work; any
+future promotion receives new monotonically increasing `TASK` identifiers and
+a fresh achievable DoD.
 
 ## Promotion history
 
-On 2026-08-09 the owner accepted and promoted the previous network candidates:
+On 2026-08-09 the owner initially promoted the previous network candidates:
 
 - `BACKLOG-001` (following presences) is represented by `TASK-047` and
   `TASK-048`.
@@ -71,6 +72,8 @@ On 2026-08-09 the owner accepted and promoted the previous network candidates:
 - `BACKLOG-003` (presence discovery) is represented by `TASK-045` and
   `TASK-046`.
 
-The mapped task IDs preserve promotion provenance. `PLAN.md` is authoritative
-for accepted unfinished work and `CHANGELOG.md` for completed work; this file
-makes no current-capability or delivery claim.
+On 2026-08-10 their still-unfinished core network direction returned to
+`ROADMAP-005` through `ROADMAP-007`, which preserve the former task-ID
+provenance. `PLAN.md` is authoritative only for the current accepted increment,
+`ROADMAP.md` for future direction, and `CHANGELOG.md` for completed work; this
+file makes no current-capability or delivery claim.

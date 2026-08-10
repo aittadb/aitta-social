@@ -44,10 +44,13 @@ file. Keep this file strictly below 32,000 bytes and run
 - This project does not use AittaDB, external databases, shared Hub content
   storage, shared Aitta runtime libraries, or external infrastructure.
 - Keep R2 null until an approved upload feature requires it.
-- The accepted minimum network scope is verified presence discovery, explicit
-  one-way Follow and Unfollow, and a private bounded followed-update reader.
-  Do not extend it into automatic or reciprocal relationships, popularity
-  counts, public graphs, recommendations, or shared content storage.
+- The minimum future network direction is secure optional registration,
+  verified presence discovery, explicit one-way Follow and Unfollow, and a
+  private bounded followed-update reader. It is roadmap direction, not active
+  implementation authority; promote only the next contract-backed vertical
+  increment to `PLAN.md`. Never extend it into automatic or reciprocal
+  relationships, popularity counts, public graphs, recommendations, or shared
+  content storage.
 - Do not implement multiple presences in one deployment, extra administrators,
   roles, teams, invitations, comments, reactions, resharing, messages,
   notifications, advertising, payments, ActivityPub, background federation,
@@ -194,9 +197,11 @@ file. Keep this file strictly below 32,000 bytes and run
   `main` or bypass source-provenance checks.
 - Never weaken a production boundary for tests. Include private canaries in
   public-projection tests.
-- `PLAN.md` contains only accepted unfinished work with stable `TASK-NNN` IDs,
-  direct dependencies, and a definition of done. Keep it a flat list of bounded
-  vertical slices.
+- `PLAN.md` contains only accepted unfinished work required for the smallest
+  next immediately useful increment, with stable `TASK-NNN` IDs, direct
+  dependencies, and a definition of done. Keep it a flat list of bounded
+  vertical slices; never preload the whole product roadmap or a blocked
+  multi-milestone program into the active queue.
 - Before starting or delegating any active task, audit its definition of done
   for independently useful user, contract, migration, destructive-operation,
   hosted-evidence, or acceptance outcomes. If more than one outcome can be
@@ -247,7 +252,9 @@ file. Keep this file strictly below 32,000 bytes and run
   as a reason to stop unrelated presence, documentation, test, or contract work.
 - `ROADMAP.md` is a flat stable `ROADMAP-NNN` list of high-level future product
   direction. It is not current capability, a release commitment, or authority
-  to implement; accepted work moves into `PLAN.md` first.
+  to implement. Promote only the smallest next meaningful vertical increment
+  into `PLAN.md` when its prerequisites are concrete; leave later milestones
+  on the roadmap even when their desired end state is already understood.
 - Move finished tasks to `CHANGELOG.md` with decisive validation evidence and
   residual uncertainty.
 - `BACKLOG.md` contains stable-ID unscheduled possibilities only. It is not a

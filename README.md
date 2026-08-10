@@ -42,8 +42,9 @@ The first version is intentionally small:
 
 The completed presence-first POC does not yet include Hub registration,
 verified discovery, Follow and Unfollow, or a private followed-update reader.
-Those are the only accepted network additions in the active plan. Multiple presences in
-one deployment, additional administrators, automatic or reciprocal
+Those are future roadmap increments; the active plan first finishes and checks
+the immediately usable presence-first release. Multiple presences in one
+deployment, additional administrators, automatic or reciprocal
 relationships, popularity counts, public graphs, recommendations, comments,
 reactions, resharing, messages, notifications, advertising, payments,
 federation, plugins, general themes, media uploads, a general OAuth/OIDC client,
