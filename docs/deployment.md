@@ -238,6 +238,26 @@ which protected setting keys remain required, the checkpoint URL and its actual
 access level, and open owner decisions. It must not include setting values,
 credentials, or internal hosting/database identifiers.
 
+### Focused public hierarchy review
+
+Use empty and populated local fixtures; the populated fixture should contain
+all four update kinds, a translated introduction, a genuinely long visible
+hostname, and long unbroken public text. At a 320 CSS-pixel viewport, confirm
+that the document `scrollWidth` does not exceed its `clientWidth`, public
+navigation and content are single-column, and each visible public link or
+button has a target box at least 44 CSS pixels high. Repeat at a 1280-pixel
+desktop viewport enlarged to 400 percent, whose effective layout viewport is
+320 CSS pixels.
+
+Use the keyboard to move focus through the skip link, presence name, owner
+management action, update links, attribution, and technical links. Confirm the
+two-layer focus indicator is visible on both light and dark surfaces; with
+forced colors active it must use the system highlight. With reduced motion
+enabled, confirm smooth scrolling, transitions, and animations are disabled.
+Record separately what was measured in a rendered browser and what was covered
+only by automated route or source assertions; do not present source matching as
+rendered geometry evidence.
+
 ## Public release is a separate approval
 
 After private review, ask explicitly before either:

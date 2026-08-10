@@ -14,11 +14,11 @@ migration and protocol decisions, documentation, and decisive evidence.
   responsive behavior, and Hub-failure isolation are working and remain in
   scope without being rewritten.
 - The deployed Site version 6 uses product source commit
-  `3d028321f26cda7ce1e4cdbffc64406bb52e4ff5`; current reviewed source HEAD is
-  `f988764` with TASK-035 through TASK-037 completed. The older live version
-  still uses generic terminology/metadata, but the source corrections are
-  completed under TASK-035 through TASK-037 and must not be replanned; hosted
-  alignment belongs only to the separately approved TASK-061 checkpoint.
+  `3d028321f26cda7ce1e4cdbffc64406bb52e4ff5`; the current reviewed feature
+  source includes TASK-035 through TASK-038 and TASK-056. The older live
+  version still uses generic terminology, metadata, and hierarchy, but those
+  source corrections are completed and must not be replanned; hosted alignment
+  belongs only to the separately approved TASK-061 checkpoint.
 - No accepted presence-consumable Hub contract currently exists. The Hub's
   current documented API is its legacy centralized model and explicitly
   defers independent-presence registration and network credentials. Contract-
@@ -48,7 +48,6 @@ are disjoint. Each task owns one bounded outcome plus its tests, documentation,
 and migration/configuration decision; split it again before implementation if
 those cannot land as one focused reviewable commit.
 
-- [ ] **TASK-038 — Establish an accessible strong public hierarchy and secondary technical context.** Presence-only work promoted from ROADMAP-001: use the existing profile and published-entry model to order public identity, featured information and recent updates clearly, while moving manifest/JSON links into a restrained secondary context and preserving the intentional empty state, attribution control and existing design except for demonstrated usability failures. DoD: implement semantic ordering, technical-link placement and necessary focused layout/CSS corrections; test empty/populated content, every update kind, long names/descriptions/URLs, translated text, draft/private canaries, heading/landmark order, contrast, focus, 44-pixel targets, native links, wide/320-pixel layouts, 400-percent zoom, reduced motion and Hub-unavailable behavior; update presentation/accessibility/setup docs; record no D1 migration/protocol change; and pass full validation. Depends on: TASK-037.
 - [ ] **TASK-039 — Guide the owner through completing Identity and previewing the presence.** Presence-only work promoted from ROADMAP-001: give the authorized sole owner a truthful fresh, incomplete, and complete Identity journey using existing durable profile state, with public preview and advanced runtime/Hub material kept separate; never derive public identity from ChatGPT identity. DoD: implement only Identity readiness/progress and preview states, test owner, non-owner, missing-owner, refresh/resume, validation, private canaries and accessible responsive controls, update owner/security/privacy guidance, record no new persistence or protocol change, and pass full validation. Depends on: TASK-038.
 - [ ] **TASK-040 — Prove a clean bare-repository presence-first build is reproducible.** Presence-only release work promoted from ROADMAP-001: validate the maintained source from a clean isolated checkout with the inert hosting example and fresh local D1, without creating/deploying a Site or using the active hosting binding. DoD: record source/dependency provenance; run clean install, production audit, migration application/generation/hash review, full validation and production build plus an inert archive-shape/private-canary rehearsal; prove safe missing-owner/empty-Identity/prompt behavior, no-fork customization and absence of stale/private artifacts; document supported software/protocol/setup evidence and residual hosted uncertainty; make no external-state change; and pass every repository gate. Depends on: TASK-093.
 - [ ] **TASK-041 — Pin the accepted Hub consumer artifacts for public presence discovery.** Contract work promoted from ROADMAP-002; external prerequisite: Hub publishes an accepted versioned consumer profile, examples and stable errors for the presence-owned discovery protocol. DoD: record completed Hub task IDs, source commit, exact paths/versions and fixture digest; mirror and integrity-check only those artifacts without a shared runtime package; pin canonical `https://aitta.social` authority and protocol 1.0 compatibility expectations; add no production route, UI, outbound call, schema, migration or live control; document provenance and trust boundaries; and pass validation. Depends on: none.

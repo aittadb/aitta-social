@@ -27,8 +27,7 @@ export default async function Home() {
     <main className={`public-shell density-${profile?.density ?? "comfortable"}`} style={style}>
       <header className="public-nav" aria-label="Presence navigation">
         <a className="wordmark" href="#account">{profile?.displayName ?? "Presence"}</a>
-        <div className="public-nav-actions">
-          <a href="/.well-known/aitta-social.json" className="text-link">Manifest</a>
+        <nav className="public-nav-actions" aria-label="Presence actions">
           <a
             className="button button-quiet"
             href={user ? "/owner" : chatGPTSignInPath("/owner")}
@@ -36,7 +35,7 @@ export default async function Home() {
           >
             Manage presence as owner
           </a>
-        </div>
+        </nav>
       </header>
 
       <section className="identity-block" id="account" aria-labelledby="account-name">
@@ -63,6 +62,7 @@ export default async function Home() {
         <section className="introduction" aria-labelledby="introduction-title">
           <p className="section-index" aria-hidden="true">01</p>
           <div>
+            <p className="eyebrow">Featured information</p>
             <h2 id="introduction-title">Introduction</h2>
             <p className="prose-copy">{profile.introduction}</p>
           </div>
@@ -72,10 +72,9 @@ export default async function Home() {
       <section className="entries-section" aria-labelledby="entries-title">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Published here</p>
+            <p className="eyebrow">Recent</p>
             <h2 id="entries-title">Updates</h2>
           </div>
-          <a className="text-link" href="/api/v1/entries">JSON API</a>
         </div>
         {entries.length ? (
           <ol className="entry-list">
@@ -101,19 +100,27 @@ export default async function Home() {
       </section>
 
       <footer className="public-footer">
-        <span>{profile?.displayName ?? "Independent presence"}</span>
-        {!profile?.hidePoweredBy && (
-          <span>
-            Powered by <strong><a href="https://aitta.social">AittaSocial</a></strong>
-            {" · "}
-            <a
-              href="https://github.com/aittadb/aitta-social"
-              aria-label="AittaSocial source on GitHub"
-            >
-              GitHub
-            </a>
-          </span>
-        )}
+        <span className="public-footer-name">{profile?.displayName ?? "Independent presence"}</span>
+        <div className="public-footer-context">
+          {!profile?.hidePoweredBy && (
+            <span className="public-attribution">
+              Powered by <strong><a href="https://aitta.social">AittaSocial</a></strong>
+              {" · "}
+              <a
+                href="https://github.com/aittadb/aitta-social"
+                aria-label="AittaSocial source on GitHub"
+              >
+                GitHub
+              </a>
+            </span>
+          )}
+          <nav className="technical-links" aria-label="Technical resources">
+            <span>Technical</span>
+            <a href="/.well-known/aitta-social.json">Manifest</a>
+            <a href="/api/v1/site">Profile JSON</a>
+            <a href="/api/v1/entries">Updates JSON</a>
+          </nav>
+        </div>
       </footer>
     </main>
   );

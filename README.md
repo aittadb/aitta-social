@@ -195,6 +195,7 @@ flow.
 ## Public interfaces and safety
 
 - [Public protocol and JSON API](docs/protocol.md)
+- [Public presence presentation](docs/presentation.md)
 - [Security and trust boundaries](docs/security.md)
 - [Privacy and data handling](docs/privacy.md)
 - [Hosted test checkpoint evidence](docs/checkpoint.md)
