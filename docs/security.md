@@ -58,6 +58,15 @@ browser-supplied headers are not authorization. A dashboard check does not
 authorize a subsequent profile or entry mutation: every mutation repeats the
 server-side check.
 
+Identity readiness is also a server decision, not an authentication shortcut.
+Each authorized owner page derives it from the current D1 profile and the
+existing normalized effective-canonical resolver: no profile is fresh, a
+profile without an effective canonical URL is incomplete, and only both
+together are complete. It never derives display name, description, canonical
+URL, or defaults from ChatGPT identity headers, drafts, request host headers, or
+Hub state. Unsaved form progress exists only in the current browser component
+and cannot make a later request appear complete.
+
 Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and `/callback`.
 The presence must not implement those routes or a general OAuth/OIDC client.
 Sign-in return locations are same-origin relative paths. Human-facing entry to
@@ -99,6 +108,11 @@ and pagination effects are private.
 - Normalize the canonical deployment URL once at a server write boundary. A
   hosted canonical URL is an HTTPS base without credentials, query, or
   fragment. Do not derive public canonical links from the request host.
+- Resolve effective canonical URLs with valid protected runtime configuration
+  first and the stored profile URL second. Owner readiness and preview may
+  expose only the resulting normalized public URL and a safe source category;
+  never serialize an invalid/raw runtime value, credentials, query text, or a
+  Host-derived fallback.
 - Do not render an owner category control or include `accountType` in the
   private profile-write model. The server inserts the protocol 1.0
   compatibility value `other` for a new profile and leaves the column unchanged

@@ -51,6 +51,24 @@ public labels use the stable foreground colors instead of depending on an
 owner-selected accent for readable contrast. No image, gradient, theme engine,
 arbitrary HTML, or client-side layout state is required.
 
+## Owner Identity journey
+
+The visually distinct owner workspace presents fresh, incomplete, and complete
+Identity readiness derived from saved server state. Its primary next action is
+Identity setup while fresh or incomplete, and public preview when complete;
+update creation remains in the existing update controls rather than being
+presented as Identity completion. The form pairs saved readiness with a clearly
+labeled transient preview and native progress elements. Saving reloads the
+server-derived state, while a reload before saving discards the preview.
+
+The normalized effective public URL is shown with a safe runtime-override or
+stored-fallback explanation. Raw runtime configuration, request hosts, ChatGPT
+identity, drafts, and Hub state never become Identity defaults. Provisional Hub
+setup appears below an **Advanced** navigation label and is not part of Identity
+readiness. The owner grids collapse to one column at the narrow breakpoint;
+native links, buttons, and fields retain keyboard focus behavior and at least
+44-pixel interactive height.
+
 ## Review checklist
 
 The focused automated contract renders the public route with an empty state and

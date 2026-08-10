@@ -1,11 +1,42 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
+import type { IdentityReadiness } from "@/lib/identity-readiness";
 import type { ProfileInput } from "@/lib/types";
 
-export function ProfileForm({ profile, canonicalDefault }: { profile: ProfileInput | null; canonicalDefault: string }) {
+type DraftPreview = Pick<ProfileInput, "displayName" | "shortDescription" | "introduction" | "canonicalUrl" | "accentColor">;
+
+export function ProfileForm({
+  profile,
+  canonicalDefault,
+  readiness,
+}: {
+  profile: ProfileInput | null;
+  canonicalDefault: string;
+  readiness: IdentityReadiness;
+}) {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [preview, setPreview] = useState<DraftPreview>({
+    displayName: profile?.displayName ?? "",
+    shortDescription: profile?.shortDescription ?? "",
+    introduction: profile?.introduction ?? "",
+    canonicalUrl: profile?.canonicalUrl ?? canonicalDefault,
+    accentColor: profile?.accentColor ?? "#31554d",
+  });
+
+  function updatePreview(event: FormEvent<HTMLFormElement>) {
+    const form = new FormData(event.currentTarget);
+    setPreview({
+      displayName: String(form.get("displayName") ?? ""),
+      shortDescription: String(form.get("shortDescription") ?? ""),
+      introduction: String(form.get("introduction") ?? ""),
+      canonicalUrl: String(form.get("canonicalUrl") ?? ""),
+      accentColor: String(form.get("accentColor") ?? "#31554d"),
+    });
+    setDirty(true);
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,8 +70,8 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: ProfileInp
       }),
     });
     if (response.ok) {
-      setStatus("Identity saved. The public presence is ready to review.");
-      setBusy(false);
+      setStatus("Identity saved. Reloading its durable readiness…");
+      window.location.assign("/owner/profile");
       return;
     }
     setStatus(await errorMessage(response));
@@ -48,7 +79,34 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: ProfileInp
   }
 
   return (
-    <form className="owner-form" onSubmit={submit} noValidate>
+    <form className="owner-form" onSubmit={submit} onInput={updatePreview} noValidate>
+      <section className={`identity-form-readiness identity-readiness-${readiness.state}`} aria-labelledby="identity-form-readiness-title">
+        <div>
+          <p className="eyebrow">Saved readiness</p>
+          <h2 id="identity-form-readiness-title">{readinessTitle(readiness.state)}</h2>
+          <p>{canonicalExplanation(readiness)}</p>
+          {readiness.canonicalUrl ? <p className="effective-canonical"><span>Effective public URL</span><code>{readiness.canonicalUrl}</code></p> : null}
+        </div>
+        <a className="text-link" href="/">Preview saved public presence</a>
+      </section>
+
+      <aside
+        className="identity-draft-preview"
+        aria-labelledby="identity-draft-preview-title"
+        style={{ "--preview-accent": safePreviewAccent(preview.accentColor) } as CSSProperties}
+      >
+        <div>
+          <p className="eyebrow">{dirty ? "Unsaved form preview" : profile ? "Saved Identity preview" : "New Identity preview"}</p>
+          <h2 id="identity-draft-preview-title">{preview.displayName.trim() || "Your display name"}</h2>
+          <p>{preview.shortDescription.trim() || "A short description will introduce this presence."}</p>
+        </div>
+        <div className="identity-draft-progress">
+          <label htmlFor="identity-draft-progress">Required fields filled: {requiredCount(preview)} of 4</label>
+          <progress id="identity-draft-progress" max="4" value={requiredCount(preview)}>{requiredCount(preview)} of 4</progress>
+          <small>{dirty ? "This preview is temporary until Save identity succeeds." : profile ? "These values come from the saved Identity." : "Nothing has been saved yet."}</small>
+        </div>
+      </aside>
+
       <fieldset>
         <legend>Identity</legend>
         <Field label="Display name" name="displayName" required maxLength={100} defaultValue={profile?.displayName} />
@@ -63,7 +121,8 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: ProfileInp
           <Field label="Website (optional)" name="website" type="url" defaultValue={profile?.website ?? ""} placeholder="https://example.com" />
         </div>
         <label className="field"><span>External links (optional)</span><textarea name="externalLinks" rows={4} defaultValue={profile?.externalLinks.map((link) => `${link.label} | ${link.url}`).join("\n")} placeholder={"Documentation | https://example.com/docs\nContact | https://example.com/contact"} /><small>One per line in “Label | URL” form. Maximum eight.</small></label>
-        <Field label="Canonical presence URL" name="canonicalUrl" type="url" required defaultValue={profile?.canonicalUrl ?? canonicalDefault} placeholder="https://presence.example" />
+        <Field label="Canonical presence URL" name="canonicalUrl" type="url" required defaultValue={canonicalDefault} placeholder="https://presence.example" />
+        <p className="field-note">A valid protected runtime URL takes precedence. This field remains the durable fallback and is validated when you save.</p>
       </fieldset>
 
       <fieldset>
@@ -82,6 +141,36 @@ export function ProfileForm({ profile, canonicalDefault }: { profile: ProfileInp
       </div>
     </form>
   );
+}
+
+function readinessTitle(state: IdentityReadiness["state"]): string {
+  if (state === "complete") return "Identity is complete";
+  if (state === "incomplete") return "Identity needs a canonical URL";
+  return "Identity has not been saved";
+}
+
+function canonicalExplanation(readiness: IdentityReadiness): string {
+  if (readiness.canonicalSource === "runtime") {
+    return readiness.state === "fresh"
+      ? "A normalized canonical URL from protected runtime settings is ready. Complete the Identity fields and save them."
+      : "Public links use the normalized canonical URL from protected runtime settings. The saved Identity URL remains the fallback editable below.";
+  }
+  if (readiness.canonicalSource === "stored") {
+    return "Public links use the normalized canonical URL saved with this Identity because no valid runtime override is active.";
+  }
+  return readiness.state === "incomplete"
+    ? "Saved Identity content is preserved, but there is no valid effective canonical URL. Save a valid HTTPS URL below."
+    : "Complete the required fields and save a valid HTTPS canonical URL. Unsaved changes do not survive reload.";
+}
+
+function requiredCount(preview: DraftPreview): number {
+  return [preview.displayName, preview.shortDescription, preview.introduction, preview.canonicalUrl]
+    .filter((value) => value.trim().length > 0)
+    .length;
+}
+
+function safePreviewAccent(value: string): string {
+  return /^#[0-9a-f]{6}$/i.test(value) ? value : "#31554d";
 }
 
 function Field({ label, name, type = "text", ...props }: { label: string; name: string; type?: string; [key: string]: unknown }) {
