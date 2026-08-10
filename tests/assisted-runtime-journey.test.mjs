@@ -387,9 +387,30 @@ test("a maximum-length unbroken owner title and the full action set retain shrin
   assert.equal(countMatches(row, /class="button button-small/g), 4);
 
   assert.match(css, /\.owner-entry-copy\s*\{[^}]*min-width:\s*0/s);
-  assert.match(css, /\.owner-entry-copy h3 a\s*\{[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.owner-entry-copy h3 a\s*\{[^}]*min-height:\s*44px[^}]*display:\s*inline-block[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.entry-actions\s*\{[^}]*min-width:\s*0/s);
   assert.match(css, /\.public-nav-actions, \.button-row, \.entry-card-links, \.entry-actions, \.form-footer\s*\{[^}]*flex-wrap:\s*wrap/s);
+});
+
+test("the complete native checkbox label retains its owner touch-target source contract", async () => {
+  const [html, css] = await Promise.all([
+    ownerHtml("/owner/profile", makeEnv({ db: new FakeD1(), ownerEmail })),
+    source("app/globals.css"),
+  ]);
+  assert.match(
+    html,
+    /<label class="check-field">\s*<input(?=[^>]*name="hidePoweredBy")(?=[^>]*type="checkbox")[^>]*>\s*<span>Hide the restrained “Powered by AittaSocial” and source links<\/span>\s*<\/label>/is,
+  );
+
+  const labelRule = css.match(/\.check-field\s*\{([^}]*)\}/s);
+  assert.ok(labelRule, "the enclosing checkbox label needs a shared source rule");
+  assert.match(labelRule[1], /min-height:\s*44px/);
+  assert.match(labelRule[1], /display:\s*flex/);
+  assert.match(labelRule[1], /align-items:\s*flex-start/);
+
+  const nativeCheckboxRule = css.match(/\.check-field input\s*\{([^}]*)\}/s);
+  assert.ok(nativeCheckboxRule, "the native checkbox needs its existing sizing rule");
+  assert.doesNotMatch(nativeCheckboxRule[1], /\b(?:appearance|forced-color-adjust)\s*:/i);
 });
 
 async function ownerHtml(path, env, extraHeaders = {}) {
