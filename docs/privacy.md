@@ -41,6 +41,13 @@ Protected runtime values are not persisted to profile or entry tables. Do not
 copy them into source, migrations, committed fixtures, screenshots, URLs, or
 support messages.
 
+The owner Identity view shows only the normalized effective canonical public
+URL and the safe fact that either protected runtime configuration or the stored
+profile fallback selected it. It does not send the raw runtime value to the
+browser. A malformed protected value is ignored by the resolver and never
+echoed; a valid stored URL may remain visible to its authorized owner as the
+editable durable fallback.
+
 ### Processed during Sign in with ChatGPT
 
 The ChatGPT Sites dispatcher may provide an authenticated user identifier,
@@ -106,6 +113,14 @@ bodies, database identifiers, hosting identifiers, or private route data.
 Owner-only surfaces may display profile drafts, draft entries, local editing
 state retrieved from D1, and safe setup/connection categories. A signed-in
 visitor who is not the configured owner receives none of that data.
+
+The Identity form's live preview and required-field count are transient
+in-memory browser state. They are not written to D1, browser storage, Hub, a
+runtime setting, or a new onboarding record. Reloading before a successful save
+discards them. Fresh, incomplete, and complete readiness is recalculated on the
+server after authorization from the current profile and effective canonical
+URL; it reveals no owner email, ChatGPT identity, credential, draft, Hub
+response, or request-host value.
 
 Missing owner configuration disables all writes. It does not cause the
 application to reveal expected configuration values or treat the first visitor

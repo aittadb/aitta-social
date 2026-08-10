@@ -112,15 +112,31 @@ checking that its key is configured.
    description, longer introduction, optional location/website/external links,
    canonical URL, accent color, density, and attribution preference. Ordinary
    setup does not ask for or display an identity category.
-4. Save and reopen the public presence. It should look intentional with no
+4. Use the temporary form preview to check the display name, short description,
+   accent, and required-field progress. The preview is not saved progress:
+   reload discards unsaved form changes, and only a successful **Save identity**
+   write creates or updates the durable D1 profile.
+5. Return to **Your presence** after saving. The owner workspace derives one of
+   three states on every request: fresh when no profile exists, incomplete when
+   a stored profile has no valid effective canonical URL, and complete only
+   when both the profile and effective canonical URL exist.
+6. Save and reopen the public presence. It should look intentional with no
    updates and should describe the represented identity rather than AittaSocial.
    Inspect its document metadata: title and description come from the public
    Identity, and canonical/sharing URLs use the normalized configured canonical
    URL rather than the request host.
-5. Create a draft update at `/owner/entries/new`; verify it is visible to the
+7. Create a draft update at `/owner/entries/new`; verify it is visible to the
    owner but returns the same public not-found result as an unknown entry.
-6. Publish a test update, open its `/entries/{id}` permalink, then unpublish it
+8. Publish a test update, open its `/entries/{id}` permalink, then unpublish it
    and confirm it disappears from every public HTML, metadata, and JSON route.
+
+The effective canonical URL follows one server-owned rule: a valid normalized
+`AITTA_SOCIAL_CANONICAL_URL` takes precedence, otherwise the normalized URL
+stored with Identity is the fallback. The owner workspace may show that
+normalized effective public URL and whether the protected runtime override or
+stored fallback selected it. It never prints an invalid/raw runtime value. Hub
+setup remains a separately labeled advanced, provisional destination and does
+not participate in Identity readiness or public preview.
 
 Identity and update writes use the stable profile and entry models in this
 deployment's D1 database and do not require another deployment after each edit.
@@ -129,6 +145,8 @@ value `other`, while later edits neither accept nor modify the field and
 therefore preserve an existing supported value. The stored value remains
 readable only through the public manifest and `/api/v1/site`; it is not a setup
 choice or trust claim. No D1 migration or protocol-version change is required.
+The readiness and preview UI adds no persistent field, private endpoint, or
+public protocol change.
 
 ### Optional source-only identity assets
 
