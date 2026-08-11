@@ -22,8 +22,6 @@ test("complete Identity leads from a new draft through public preview and back t
   const env = makeEnv({
     db,
     ownerEmail,
-    hubUrl: "https://offline-hub.invalid",
-    deploymentCredential: "HUB_CREDENTIAL_CANARY",
   });
 
   const emptyDashboard = await ownerPage(env);
@@ -36,7 +34,6 @@ test("complete Identity leads from a new draft through public preview and back t
   const emptyPanel = firstUpdatePanel(emptyDashboard);
   assert.equal(countMatches(emptyPanel, /<a /gi), 1);
   assert.doesNotMatch(emptyPanel, /owner\/entries\/new|Create first draft|class="button"/i);
-  assert.doesNotMatch(emptyDashboard, /offline-hub\.invalid|HUB_CREDENTIAL_CANARY/i);
   assert.equal(db.mutations.length, 0);
 
   const createdResponse = await fetchApp("/api/private/entries", {
@@ -254,19 +251,13 @@ test("bounded state queries keep the journey truthful beyond the 200-row managem
 test("only the configured owner sees the D1-backed first-update journey and page reads never mutate", async (t) => {
   const privateCanary = "OWNER_ONLY_FIRST_UPDATE_CANARY";
 
-  await t.test("configured owner can resume while Hub configuration remains isolated", async () => {
+  await t.test("configured owner can resume without Hub", async () => {
     const db = new FakeD1({
       entries: [entryRow({ state: "draft", title: privateCanary, published_at: null })],
     });
-    const html = await ownerPage(makeEnv({
-      db,
-      ownerEmail,
-      hubUrl: "https://offline-hub.invalid",
-      deploymentCredential: "PRIVATE_DEPLOYMENT_CREDENTIAL_CANARY",
-    }));
+    const html = await ownerPage(makeEnv({ db, ownerEmail }));
     assert.match(html, /Resume your saved draft/i);
     assert.match(html, new RegExp(privateCanary));
-    assert.doesNotMatch(html, /offline-hub\.invalid|PRIVATE_DEPLOYMENT_CREDENTIAL_CANARY/i);
     assert.equal(db.mutations.length, 0);
   });
 

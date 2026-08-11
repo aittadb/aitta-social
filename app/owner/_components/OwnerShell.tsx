@@ -6,7 +6,7 @@ export function OwnerShell({
   children,
 }: {
   displayName: string;
-  current: "overview" | "profile" | "entries" | "hub";
+  current: "overview" | "profile" | "entries";
   children: React.ReactNode;
 }) {
   return (
@@ -26,8 +26,6 @@ export function OwnerShell({
           <OwnerNavLink href="/owner" active={current === "overview"}>Your presence</OwnerNavLink>
           <OwnerNavLink href="/owner/profile" active={current === "profile"}>Identity</OwnerNavLink>
           <OwnerNavLink href="/owner/entries/new" active={current === "entries"}>New update</OwnerNavLink>
-          <span className="owner-nav-label">Advanced</span>
-          <OwnerNavLink href="/owner/hub" active={current === "hub"}>Provisional Hub setup</OwnerNavLink>
           <a className="owner-public-link" href="/">View public presence ↗</a>
         </nav>
         <div className="owner-content">{children}</div>

@@ -33,12 +33,10 @@ The first version is intentionally small:
 - one configurable, category-neutral Identity profile;
 - note, article, link, and announcement updates in draft or published state;
 - Sign in with ChatGPT for sole-owner administration of this presence;
-- private Your presence, Identity, update editing, and provisional Hub setup
-  surfaces;
+- private Your presence, Identity, and update editing surfaces;
 - deployment-owned D1 persistence;
 - `/.well-known/aitta-social.json` discovery;
-- read-only public JSON endpoints under `/api/v1`; and
-- an optional, failure-isolated provisional Hub transport probe.
+- read-only public JSON endpoints under `/api/v1`.
 
 The completed presence-first POC does not yet include Hub registration,
 verified discovery, Follow and Unfollow, or a private followed-update reader.
@@ -80,16 +78,13 @@ source control.
 | --- | --- | --- |
 | `AITTA_SOCIAL_OWNER_EMAIL` | Required for writes | Sole local owner's verified ChatGPT email. Its absence safely disables administration. |
 | `AITTA_SOCIAL_CANONICAL_URL` | Recommended for deployment | Canonical public HTTPS deployment URL used to construct public resource links. |
-| `AITTA_SOCIAL_HUB_URL` | Optional | Configured HTTPS origin of AittaSocial Hub. |
 | `AITTA_SOCIAL_HUB_CHALLENGE` | Optional | Current verification challenge. It is included in the manifest only when explicitly set. |
-| `AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL` | Optional secret | Deployment credential sent only by server-side code to the configured Hub origin. |
 
 The verification challenge is public proof that the deployment could be
-modified at verification time; it is not authentication. The deployment
-credential is secret. The current manual challenge and root bearer probe are
-provisional setup, not network registration, membership, a session, or a
-trusted connection. Hub availability never gates public profile or update
-reads.
+modified at verification time; it is not authentication, network registration,
+membership, a session, or a trusted connection. The POC has no outbound Hub
+probe or deployment credential. Hub availability never gates public profile or
+update reads.
 
 ## Application surfaces
 
@@ -100,7 +95,6 @@ reads.
 | `/owner` | Owner-only “Your presence” area |
 | `/owner/profile` | Identity and constrained presentation settings |
 | `/owner/entries/new` and `/owner/entries/{id}` | Draft update creation and editing |
-| `/owner/hub` | Provisional manual Hub setup and coarse probe status |
 | `/.well-known/aitta-social.json` | Public discovery manifest |
 | `/api/v1/site`, `/api/v1/entries`, and `/api/v1/entries/{id}` | Versioned public JSON resources |
 
@@ -172,7 +166,7 @@ npm run dev
 ```
 
 Use non-production fixture values only in an ignored local environment file.
-Do not commit an owner's email, a Hub credential, or other runtime values.
+Do not commit an owner's email, a runtime secret, or other runtime values.
 
 Useful checks:
 

@@ -13,7 +13,6 @@ import {
 const hostileOrigin = "https://hostile-request-host.example";
 const hostileForwardedHost = "forwarded-host-private-canary.example";
 const ownerCanary = "metadata-owner-private-canary@example.test";
-const credentialCanary = "METADATA_DEPLOYMENT_CREDENTIAL_PRIVATE_CANARY";
 
 test("populated presence metadata uses only public profile fields and configured canonical URL", async () => {
   const response = await fetchApp("/", {
@@ -34,7 +33,6 @@ test("populated presence metadata uses only public profile fields and configured
       }),
       ownerEmail: ownerCanary,
       canonicalUrl: "https://CANONICAL.example/presence///",
-      deploymentCredential: credentialCanary,
     }),
   });
 
@@ -73,7 +71,6 @@ test("unconfigured metadata is neutral, non-indexable, and independent of reques
       db: new FakeD1({ profile: null }),
       ownerEmail: ownerCanary,
       canonicalUrl: "https://runtime-canonical-without-profile.example",
-      deploymentCredential: credentialCanary,
     }),
   });
 
@@ -127,7 +124,6 @@ test("published update metadata has a stable presence canonical and excludes dra
       }),
       ownerEmail: ownerCanary,
       canonicalUrl: "https://canonical.example/presence",
-      deploymentCredential: credentialCanary,
     }),
   });
 
@@ -270,7 +266,6 @@ function assertNoImageMetadata(html) {
 function assertNoPrivateMetadata(html) {
   assert.doesNotMatch(html, /hostile-request-host|forwarded-host-private-canary/i);
   assert.doesNotMatch(html, new RegExp(ownerCanary, "i"));
-  assert.doesNotMatch(html, new RegExp(credentialCanary, "i"));
   assert.doesNotMatch(html, /PROFILE_METADATA_PRIVATE_CANARY/i);
 }
 

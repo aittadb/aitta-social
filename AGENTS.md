@@ -20,8 +20,8 @@ file. Keep this file strictly below 32,000 bytes and run
   stored value and expose it only through the explicit manifest and
   `/api/v1/site` allowlists. Never use this field for presentation,
   authorization, Hub trust, capability, or network identity.
-- Public profile and published-update reads operate without Hub. Hub integration
-  is optional and failure-isolated.
+- Public profile and published-update reads operate without Hub. Any future Hub
+  integration is optional and failure-isolated.
 - Hub treats this deployment as an untrusted external website. Local
   authentication claims are never trusted network authentication.
 - Sign in with ChatGPT here enables only possible sole-owner administration of
@@ -104,7 +104,7 @@ file. Keep this file strictly below 32,000 bytes and run
   an authentication bypass, or a public customization endpoint.
 - Never trust a hidden control, client route guard, browser field, browser
   destination, or previous page authorization.
-- Protected owner configuration, Hub credentials, runtime secrets, and
+- Protected owner configuration, any future Hub credentials, runtime secrets, and
   authentication headers stay server-side and out of HTML, client code, URLs,
   errors, logs, fixtures, snapshots, and build output. ChatGPT identity,
   drafts, and database/hosting identifiers never enter public surfaces; send
@@ -140,14 +140,9 @@ file. Keep this file strictly below 32,000 bytes and run
   request host.
 - Treat the public Hub verification challenge only as a configured
   control-of-deployment check, never authentication.
-- Send the Hub deployment credential only from server code to the exact
-  configured HTTPS Hub origin. Accept no browser destination, follow no
-  credentialed redirect, expose only documented safe statuses, and keep public
-  reads independent of Hub.
-- Keep the current manual challenge and root bearer probe explicitly labeled as
-  provisional Hub setup. A successful transport result is not registration, a
-  network session, or a trusted connection; only an accepted versioned Hub
-  contract may replace this provisional boundary.
+- Do not add an outbound Hub credential flow, private Hub probe, registration,
+  or connection behavior until its exact versioned contract is accepted and
+  promoted to `PLAN.md`. Public reads remain independent of Hub.
 - Public contract changes update `docs/protocol.md` and receive a versioning
   decision when incompatible.
 
