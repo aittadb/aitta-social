@@ -8,10 +8,21 @@ file. Keep this file strictly below 32,000 bytes and run
 
 ## Product invariants
 
-- One deployment equals one independently controlled presence.
-- A presence may represent a person, company, project, community, publication,
+- An Aitta is your independently controlled AittaSocial application. It remains
+  authoritative for its identity, content, configuration, and locally stored
+  data, whether it is publicly reachable, private, or disconnected from the
+  AittaSocial Hub.
+- Use **Aitta** and plural **Aittas** as branded nouns. An **Aitta deployment**
+  is a particular running installation of an Aitta; use deployment alone for a
+  packaging, release, or hosting operation. A **profile** is an Aitta's optional
+  outward identity presentation. A **Hub connection** is an owner-authorized
+  relationship between an Aitta and the **AittaSocial Hub**, the network
+  authority and coordination service. Use **AittaSocial app** when a first-time
+  reader needs an immediate generic explanation.
+- One Aitta deployment runs one independently controlled Aitta.
+- An Aitta may represent a person, company, project, community, publication,
   AI agent, or another entity. Keep the core identity-neutral.
-- The deployment owns its public identity, profile, updates, drafts, canonical
+- The Aitta owns its public identity, profile, updates, drafts, canonical
   URL, D1 data, design, runtime configuration, and local behavior. Preserve
   `entry` and related names where they are stable internal or protocol terms.
 - Ordinary Identity setup and public HTML are category-neutral. A new profile
@@ -22,10 +33,11 @@ file. Keep this file strictly below 32,000 bytes and run
   authorization, Hub trust, capability, or network identity.
 - Public profile and published-update reads operate without Hub. Any future Hub
   integration is optional and failure-isolated.
-- Hub treats this deployment as an untrusted external website. Local
-  authentication claims are never trusted network authentication.
+- AittaSocial Hub treats every Aitta deployment as an untrusted external
+  website. Treat every remote Aitta as untrusted. Local authentication claims
+  are never trusted network authentication.
 - Sign in with ChatGPT here enables only possible sole-owner administration of
-  this presence. It is not AittaSocial network sign-in or membership.
+  this Aitta. It is not AittaSocial network sign-in or membership.
 - Do not compare or market AittaSocial by naming another social, publishing,
   blogging, or website product.
 
@@ -45,13 +57,13 @@ file. Keep this file strictly below 32,000 bytes and run
   storage, shared Aitta runtime libraries, or external infrastructure.
 - Keep R2 null until an approved upload feature requires it.
 - The minimum future network direction is secure optional registration,
-  verified presence discovery, explicit one-way Follow and Unfollow, and a
+  verified Aitta discovery, explicit one-way Follow and Unfollow, and a
   private bounded followed-update reader. It is roadmap direction, not active
   implementation authority; promote only the next contract-backed vertical
   increment to `PLAN.md`. Never extend it into automatic or reciprocal
   relationships, popularity counts, public graphs, recommendations, or shared
   content storage.
-- Do not implement multiple presences in one deployment, extra administrators,
+- Do not implement multiple Aittas in one Aitta deployment, extra administrators,
   roles, teams, invitations, comments, reactions, resharing, messages,
   notifications, advertising, payments, ActivityPub, background federation,
   plugins, general themes, media uploads, or general OAuth/OIDC support in this
@@ -69,8 +81,8 @@ file. Keep this file strictly below 32,000 bytes and run
 - Worker runtime code uses web/Cloudflare primitives only. Do not use Node
   built-ins, filesystem access, a durable process, or mutable process/module
   state for correctness, persistence, or authorization.
-- Use this deployment's Sites D1 `DB` binding as the only authoritative content
-  store. Browser storage may hold disposable UI preferences only.
+- Use this Aitta deployment's Sites D1 `DB` binding as the only authoritative
+  content store. Browser storage may hold disposable UI preferences only.
 - Keep the relational schema compact. Use bound prepared queries and indexes
   justified by real query patterns.
 - Generate and review migrations with schema changes. Apply migrations before
@@ -79,7 +91,7 @@ file. Keep this file strictly below 32,000 bytes and run
 - Persist only the one profile, entries, and minimal local configuration that
   genuinely requires persistence.
 - Ordinary content and restrained presentation customization must use explicit
-  semantic owner controls persisted in deployment-owned D1. It must not require
+  semantic owner controls persisted in Aitta-owned D1. It must not require
   a repository fork, source edit, redeployment, Hub availability, generic
   settings blob, arbitrary CSS/HTML/JavaScript, template, plugin, or remote
   asset URL.
@@ -148,9 +160,10 @@ file. Keep this file strictly below 32,000 bytes and run
 
 ## Product and accessibility
 
-- Public pages describe the deployed presence, not the software. Human-facing
-  product and setup language uses presence, updates, Your presence, and
-  Identity where accurate. Keep `account`, `entries`, `accountType`, and route
+- Public pages describe the Aitta's configured profile, not the software.
+  Human-facing product and setup language uses Aitta, Aittas, profile, updates,
+  and Identity where accurate. Keep `account`, `entries`,
+  `accountType`, and route
   names only where stable internal or public protocol 1.0 compatibility
   requires them.
 - A public owner-management entry must identify local sole-owner
@@ -162,7 +175,7 @@ file. Keep this file strictly below 32,000 bytes and run
   meanings shared across public and owner surfaces: semantic surfaces, text,
   separators, focus, 44-pixel controls, fields, actions, status, notices, and
   empty states. Reuse or deliberately extend that vocabulary instead of adding
-  a parallel hard-coded visual language; keep the public presence and private
+  a parallel hard-coded visual language; keep the public profile and private
   owner workspace compositionally distinct.
 - Prefer narrowly named product elements when the same interaction and meaning
   genuinely repeat. Do not turn visual consistency or source customization into
@@ -175,7 +188,7 @@ file. Keep this file strictly below 32,000 bytes and run
   unnecessary generated imagery, and no generic dashboard clutter.
 - Keep the template's default identity typographic and its sharing metadata
   text-only; a generic software logo, favicon, or preview image does not
-  represent the configured presence. An owner-approved source customization may
+  represent the configured profile. An owner-approved source customization may
   add a directly checked-in asset and an accessible text alternative. Do not
   add a runtime asset resolver, URL setting, upload UI, media manager, R2, or a
   storage abstraction for identity assets.
@@ -274,7 +287,7 @@ file. Keep this file strictly below 32,000 bytes and run
 - A missing external contract, approval, credential, service, or overlapping
   file blocks only the affected task and its dependents. Record that exact
   boundary and continue every independent unblocked task; never treat one lane
-  as a reason to stop unrelated presence, documentation, test, or contract work.
+  as a reason to stop unrelated Aitta, documentation, test, or contract work.
 - `ROADMAP.md` is a flat stable `ROADMAP-NNN` list of high-level future product
   direction. It is not current capability, a release commitment, or authority
   to implement. Promote only the smallest next meaningful vertical increment

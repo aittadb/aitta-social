@@ -2,9 +2,9 @@
 
 AittaSocial separates public publishing, local owner administration, and
 optional network discovery. A successful Sign in with ChatGPT identifies a
-visitor to this Site; only this deployment decides whether that visitor is its
-one local owner. Neither the presence nor Hub may reinterpret that decision as
-trusted network authentication or network membership.
+visitor to this Site; only this Aitta deployment decides whether that visitor is
+its one local owner. Neither the Aitta nor the AittaSocial Hub may reinterpret
+that decision as trusted network authentication or network membership.
 
 ## Boundaries
 
@@ -13,10 +13,10 @@ trusted network authentication or network membership.
 | Anonymous or signed-in browser | Rendering public output; submitting validated owner forms | Identity headers, owner claims, destination URLs, write authorization, secrets |
 | ChatGPT Sites dispatcher | Injecting authenticated-user headers and operating sign-in routes | Establishing local owner status or AittaSocial network identity |
 | AittaSocial server code | Validating inputs, authorizing each operation, projecting public data, using protected settings | Assuming an earlier page check covers a later write |
-| Deployment-owned D1 | Persisting validated profile, entry, and minimal local configuration records | Producing a safe public response without an explicit projection |
+| Aitta-owned D1 | Persisting validated profile, entry, and minimal local configuration records | Producing a safe public response without an explicit projection |
 | Protected runtime settings | Supplying local owner, canonical URL, and optional public verification challenge to server code | Browser-visible configuration beyond documented public effects or publishable content |
-| Future AittaSocial Hub contract | Optional registration, discovery, verification, credentials, and future network sessions | Current implementation authority; availability required for public reads; trusted claims from a presence deployment |
-| This presence deployment | Its own profile, updates, presentation, and local owner actions | Network-user authentication or authority over another deployment |
+| Future AittaSocial Hub contract | Optional registration, discovery, verification, credentials, and future network sessions | Current implementation authority; availability required for public reads; trusted claims from an Aitta deployment |
+| This Aitta deployment | Its own profile, updates, presentation, and local owner actions | Network-user authentication or authority over another Aitta deployment |
 
 ChatGPT Sites access policy is a hosting boundary. Keeping a Site private during
 setup is important, but private hosting does not replace application-level
@@ -105,9 +105,9 @@ authorization response uses its safe response category, re-enables the control,
 and does not show the ambiguous-result recovery link.
 
 Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and `/callback`.
-The presence must not implement those routes or a general OAuth/OIDC client.
+The Aitta must not implement those routes or a general OAuth/OIDC client.
 Sign-in return locations are same-origin relative paths. Human-facing entry to
-this flow must identify sole-owner presence administration and must not imply
+this flow must identify sole-owner Aitta administration and must not imply
 AittaSocial network sign-in or membership.
 
 ## Route exposure
@@ -140,7 +140,7 @@ and pagination effects are private.
   rendering; do not accept executable markup in the POC.
 - Permit only reviewed `http:` or `https:` destinations for public website,
   external-link, and entry-link fields. Apply safe link behavior in HTML.
-- Normalize the canonical deployment URL once at a server write boundary. A
+- Normalize the canonical Aitta deployment URL once at a server write boundary. A
   hosted canonical URL is an HTTPS base without credentials, query, or
   fragment. Do not derive public canonical links from the request host.
 - Resolve effective canonical URLs with valid protected runtime configuration
@@ -181,8 +181,8 @@ headers, URLs, errors, counts, or logs.
 
 The discovery manifest conditionally exposes only the configured Hub
 verification challenge. The challenge is intentionally public and proves only
-that a deployment could be changed at verification time. It must never be used
-as a bearer credential or owner session.
+that an Aitta deployment could be changed at verification time. It must never
+be used as a bearer credential or owner session.
 
 Protocol 1.0 also requires the stored `accountType` in the discovery manifest
 and `/api/v1/site`. Ordinary HTML does not display it. Legacy supported values
@@ -195,7 +195,7 @@ allowlists.
 ## Public document metadata and identity assets
 
 Document metadata is a public projection, not a copy of a profile or D1 row.
-The presence page may read only the bounded public display name and short
+The public profile page may read only the bounded public display name and short
 description. A permalink may additionally read only a published entry's bounded
 public title or body excerpt and stable identifier; article metadata may also
 read its public publication/update timestamps. Draft and unknown identifiers
@@ -228,18 +228,20 @@ abstraction for this boundary.
 
 ## Hub boundary
 
-Hub is optional future infrastructure, and a presence deployment is an
-untrusted external website from Hub's perspective. Local ChatGPT authentication
-claims from this presence must not be sent to Hub as proof of a network user.
+The AittaSocial Hub is optional future infrastructure, and every Aitta
+deployment is an untrusted external website from the Hub's perspective. Local
+ChatGPT authentication claims from this Aitta must not be sent to Hub as proof
+of a network user. Every remote Aitta is untrusted; its profile, content, origin,
+and claims confer no local authority.
 
 The only current Hub-related input is the optional public protocol 1.0
 verification challenge. It is projected through the manifest allowlist and
 proves only control of the deployment at verification time. It never authorizes
 a request. The application has no private Hub route, configured Hub origin,
-deployment credential, outbound probe, registration, connection state, or safe
+deployment credential, outbound probe, registration, Hub connection, or safe
 status category. No browser or server path may invent one before an exact
 versioned Hub contract is accepted and promoted to `PLAN.md`. Hub absence or
-failure cannot change public presence or update reads.
+failure cannot change public profile or update reads.
 
 ## Secrets and operational output
 

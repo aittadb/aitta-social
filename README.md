@@ -13,15 +13,29 @@ owner controls without a GitHub fork. Ask before any later source change or
 deployment, and ask separately before public access and before a custom domain.
 ```
 
+An Aitta is your independently controlled AittaSocial application. It remains
+authoritative for its identity, content, configuration, and locally stored
+data, whether it is publicly reachable, private, or disconnected from the
+AittaSocial Hub.
+
+An **Aitta deployment** is a particular running installation of an Aitta. A
+**profile** is an Aitta's optional outward identity presentation. A **Hub
+connection** is the owner-authorized relationship between an Aitta and the
+**AittaSocial Hub**, the network authority and coordination service. The
+current POC has no Hub connection. Public profile and published-update reads
+remain Hub-independent.
+
 AittaSocial is independently hosted social software for ChatGPT Sites. One
-deployment represents one independently controlled presence for a person,
-company, project, community, publication, AI agent, or another kind of entity.
+Aitta deployment runs one independently controlled Aitta for a person, company,
+project, community, publication, AI agent, or another kind of entity. Use
+**Aitta** and plural **Aittas** as branded nouns; **AittaSocial app** is the
+generic explanation for a first-time reader.
 
 Project website: [aitta.social](https://aitta.social) · Maintained source:
 [GitHub](https://github.com/aittadb/aitta-social)
 
-Each deployment owns its public identity, canonical URL, profile, updates,
-database, design, runtime configuration, and local behavior. A deployment can
+Each Aitta owns its public identity, canonical URL, profile, updates, database,
+design, runtime configuration, and local behavior. An Aitta deployment can
 operate publicly without AittaSocial Hub. It uses its own ChatGPT Sites D1
 database directly and requires no separate database or external infrastructure.
 
@@ -29,20 +43,21 @@ database directly and requires no separate database or external infrastructure.
 
 The first version is intentionally small:
 
-- a public presence and public update permalinks;
+- a public profile and public update permalinks;
 - one configurable, category-neutral Identity profile;
 - note, article, link, and announcement updates in draft or published state;
-- Sign in with ChatGPT for sole-owner administration of this presence;
-- private Your presence, Identity, and update editing surfaces;
-- deployment-owned D1 persistence;
+- Sign in with ChatGPT for sole-owner administration of this Aitta;
+- private Aitta administration, Identity, and update editing surfaces;
+- Aitta-owned D1 persistence;
 - `/.well-known/aitta-social.json` discovery;
 - read-only public JSON endpoints under `/api/v1`.
 
-The completed presence-first POC does not yet include Hub registration,
-verified discovery, Follow and Unfollow, or a private followed-update reader.
+The completed Aitta-first POC does not yet include a Hub connection, Hub
+registration, verified discovery, Follow and Unfollow, or a private
+followed-update reader.
 Those are future roadmap increments; the active plan first finishes and checks
-the immediately usable presence-first release. Multiple presences in one
-deployment, additional administrators, automatic or reciprocal
+the immediately usable Aitta-first release. Multiple Aittas in one
+Aitta deployment, additional administrators, automatic or reciprocal
 relationships, popularity counts, public graphs, recommendations, comments,
 reactions, resharing, messages, notifications, advertising, payments,
 federation, plugins, general themes, media uploads, a general OAuth/OIDC client,
@@ -51,16 +66,15 @@ unconfigured.
 
 ## Owner authorization
 
-ChatGPT sign-in identifies a visitor to this deployment; it neither joins the
-AittaSocial network nor grants administrative access by itself. Server-side
+ChatGPT sign-in identifies a visitor to this Aitta deployment; it neither joins
+the AittaSocial network nor grants administrative access by itself. Server-side
 code authorizes writes only when
 the normalized authenticated ChatGPT email matches the protected
 `AITTA_SOCIAL_OWNER_EMAIL` runtime setting. Version one supports exactly one
-owner.
+owner of this Aitta.
 
-If that setting is absent, every write is disabled and the owner-only “Your
-presence” area shows safe setup guidance. The configured owner email is not
-stored in content,
+If that setting is absent, every write is disabled and the owner-only workspace
+shows safe setup guidance. The configured owner email is not stored in content,
 exposed through public HTML, the public API, or the manifest, or committed to
 this repository. Configure it only in the Site's protected runtime settings.
 
@@ -77,10 +91,10 @@ source control.
 | Setting | Required | Purpose |
 | --- | --- | --- |
 | `AITTA_SOCIAL_OWNER_EMAIL` | Required for writes | Sole local owner's verified ChatGPT email. Its absence safely disables administration. |
-| `AITTA_SOCIAL_CANONICAL_URL` | Recommended for deployment | Canonical public HTTPS deployment URL used to construct public resource links. |
+| `AITTA_SOCIAL_CANONICAL_URL` | Recommended for an Aitta deployment | Canonical public HTTPS Aitta deployment URL used to construct public resource links. |
 | `AITTA_SOCIAL_HUB_CHALLENGE` | Optional | Current verification challenge. It is included in the manifest only when explicitly set. |
 
-The verification challenge is public proof that the deployment could be
+The verification challenge is public proof that the Aitta deployment could be
 modified at verification time; it is not authentication, network registration,
 membership, a session, or a trusted connection. The POC has no outbound Hub
 probe or deployment credential. Hub availability never gates public profile or
@@ -90,9 +104,9 @@ update reads.
 
 | Path | Surface |
 | --- | --- |
-| `/` | Public presence and published updates |
+| `/` | Public profile and published updates |
 | `/entries/{id}` | Public permalink for one published update |
-| `/owner` | Owner-only “Your presence” area |
+| `/owner` | Owner-only local Aitta administration |
 | `/owner/profile` | Identity and constrained presentation settings |
 | `/owner/entries/new` and `/owner/entries/{id}` | Draft update creation and editing |
 | `/.well-known/aitta-social.json` | Public discovery manifest |
@@ -107,8 +121,10 @@ visibility. These supported runtime changes require no GitHub fork. The
 template neither creates nor assumes an automatically synchronized fork;
 advanced source or Site edits remain separate review and deployment work.
 
-Human-facing pages call the deployment a presence and its published content
-updates. Public protocol 1.0 and the existing implementation retain the stable
+Canonical human-facing guidance uses Aitta for the owner-controlled
+application, profile for its optional outward identity presentation, and
+updates for its published content. Public protocol 1.0 and the existing
+implementation retain the stable
 `profile`, `entry`, `/entries`, `accountType`, and `/api/v1/site` names. This
 technical compatibility does not add a category choice or label to ordinary
 Identity setup or public HTML. A new profile uses the neutral `accountType`
@@ -118,10 +134,10 @@ profile's earlier supported value remains readable in the manifest and
 authorization, capability, or network-identity claim. This category-neutral
 change requires no D1 schema migration or protocol-version change.
 
-## Presence metadata and source customization
+## Profile metadata and source customization
 
-Public document metadata represents the configured presence. After Identity is
-complete, the presence page uses its bounded display name and short description
+Public document metadata represents the configured profile. After Identity is
+complete, the public profile page uses its bounded display name and short description
 for the document title and description. Its canonical, Open Graph, and sharing
 URLs come only from the normalized configured canonical URL. A published update
 permalink adds that update's bounded public title or body excerpt; article
@@ -139,13 +155,13 @@ retain public information they have already fetched.
 
 The reusable template intentionally ships with a typographic identity and
 text-only sharing metadata. It does not ship a generic logo, favicon, or social
-preview image that would describe AittaSocial instead of the deployed presence.
+preview image that would describe AittaSocial instead of the configured profile.
 An owner can later ask ChatGPT to add a supplied identity asset directly to the
 maintained source and wire that exact checked-in file into metadata, with useful
 alternative text where an image is exposed. For example:
 
 ```text
-Use the attached image as this presence's checked-in favicon and social preview.
+Use the attached image as this Aitta's checked-in favicon and social preview.
 Keep the display name and short description as the metadata text, add useful
 alternative text, and do not add uploads, R2, a media manager, remote image URLs,
 or a runtime asset setting. Validate the source change and ask before deploying.
@@ -179,7 +195,7 @@ npm run validate
 ```
 
 Generate and inspect a migration whenever `db/schema.ts` changes. The
-deployment owns the resulting D1 database. Browser storage is never the source
+Aitta owns the resulting D1 database. Browser storage is never the source
 of truth for profiles, entries, or authorization.
 
 `develop` is the shared Git workspace. Feature branches start from and rebase
@@ -202,7 +218,7 @@ private-first setup flow.
 ## Public interfaces and safety
 
 - [Public protocol and JSON API](docs/protocol.md)
-- [Public presence presentation](docs/presentation.md)
+- [Public profile presentation](docs/presentation.md)
 - [Security and trust boundaries](docs/security.md)
 - [Privacy and data handling](docs/privacy.md)
 - [In-place upgrade preservation](docs/upgrade.md)

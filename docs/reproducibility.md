@@ -91,9 +91,9 @@ git status --porcelain
 The final commit must equal the initial commit and the tracked status must be
 clean. Generated `node_modules`, `dist`, and `.wrangler` paths are ignored local
 artifacts and may be deleted with the disposable clone; they are never copied
-to the maintained checkout or a deployment.
+to the maintained checkout or an Aitta deployment.
 
-## Fresh-presence acceptance
+## Fresh-Aitta acceptance
 
 The compiled-Worker acceptance fixtures start with a new empty D1 interface and
 prove these release boundaries together:
@@ -106,7 +106,8 @@ prove these release boundaries together:
   temporary unavailable state rather than the creation prompt;
 - saving Identity and constrained presentation through the authorized owner
   endpoint persists in D1 and removes the setup prompt without changing Git;
-- a configured presence with no updates remains intentional and public;
+- an Aitta with a configured profile and no updates remains intentional and
+  public;
 - a draft and its private canary remain indistinguishable from an unknown
   update, while only an explicitly published update reaches public HTML and
   `/api/v1`; and

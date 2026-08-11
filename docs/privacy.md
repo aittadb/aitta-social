@@ -1,22 +1,21 @@
 # Privacy and data handling
 
-One AittaSocial deployment controls and stores one presence's data. It uses its
-own ChatGPT Sites D1 database. It does not send Identity or update content to a
-shared content store and does not require another database or external
-infrastructure.
+One Aitta controls and stores its own data in its Aitta deployment's ChatGPT
+Sites D1 database. It does not send Identity or update content to a shared
+content store and does not require another database or external infrastructure.
 
-This document describes the POC's application-level behavior. A deployment
-owner remains responsible for the content they publish, their public privacy
+This document describes the POC's application-level behavior. The Aitta owner
+remains responsible for the content they publish, their public privacy
 notice where one is required, and any hosting-level retention or access-policy
 choices.
 
 ## Data inventory
 
-### Stored in the deployment's D1 database
+### Stored in the Aitta-owned D1 database
 
 - one profile: display name, the protocol 1.0 `accountType` compatibility
   value, short description, longer introduction, optional location, optional
-  website, optional external links, canonical deployment URL, constrained
+  website, optional external links, canonical Aitta deployment URL, constrained
   visual preferences, and the choice to show the restrained AittaSocial
   attribution and official project links;
 - entries: stable identifier, kind, optional title, body, optional destination
@@ -25,7 +24,7 @@ choices.
 - only minimal local configuration that genuinely needs durable storage.
 
 Drafts and unpublished entries are private owner content. D1 is authoritative;
-browser storage and Hub are not content stores for this deployment.
+browser storage and Hub are not content stores for this Aitta.
 
 ### Processed from protected runtime settings
 
@@ -101,7 +100,7 @@ exact public allowlists; no other private profile or storage field becomes
 public with it.
 
 Publishing makes content retrievable without sign-in through HTML and JSON.
-Unpublishing removes it from this deployment's public surfaces but cannot
+Unpublishing removes it from this Aitta's public surfaces but cannot
 recall copies already cached, indexed, quoted, or saved elsewhere.
 
 The same limit applies to public document metadata. Handler-produced HTML is
@@ -170,20 +169,20 @@ as an owner.
 
 ## Optional Hub verification data
 
-Public presence reads do not contact Hub. The POC has no configured Hub
-destination, deployment credential, outbound probe, registration, or connection
-data flow.
+Public profile reads do not contact Hub. The POC has no Hub connection,
+configured Hub destination, deployment credential, outbound probe,
+registration, or connection data flow.
 
 The public verification manifest exposes the configured challenge when present.
-That challenge is intentionally public, proves only control of this deployment
-at verification time, and is not personal identity, authentication, a network
-session, or a trusted connection. Hub's own future registration, directory,
-credentials, and sessions require a separately accepted contract and are not
-this deployment's current data handling.
+That challenge is intentionally public, proves only control of this Aitta
+deployment at verification time, and is not personal identity, authentication,
+a network session, or a trusted connection. Hub's own future registration,
+directory, credentials, and sessions require a separately accepted contract and
+are not this Aitta's current data handling.
 
 ## Retention and control
 
-- Profile changes replace the stored profile values used by this deployment.
+- Profile changes replace the stored profile values used by this Aitta.
 - Drafts remain in D1 until published or deleted by the owner.
 - Unpublishing retains an entry privately in D1 while removing it from all
   public queries.
@@ -207,7 +206,7 @@ followers, messages, comments, reactions, notifications, payments, advertising,
 analytics subsystem, or media store in this POC.
 
 Supported Identity, link, update, accent, density, and attribution changes are
-stored through explicit owner-authorized controls in deployment-owned D1. They
+stored through explicit owner-authorized controls in Aitta-owned D1. They
 survive reload without a repository fork or Hub connection. The template prompt
 adds no generic settings record, browser storage, remote asset, or new outbound
 data flow.

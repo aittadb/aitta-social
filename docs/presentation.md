@@ -1,9 +1,10 @@
-# Public presence presentation
+# Public profile presentation
 
-The default is a presence rather than an editorial page. The configured public
-home and every published permalink now share one compact product frame:
+The default is an Aitta's profile rather than an editorial page. The configured
+public home and every published permalink share one compact product frame:
 
-1. a 60-pixel single-line header containing the bounded presence name and one
+1. a 60-pixel single-line header containing the bounded profile display name
+   and one
    quiet real action;
 2. the configured Identity, with a shallow accent field, initials tile,
    display name, short description, optional public details, and About content;
@@ -13,7 +14,7 @@ home and every published permalink now share one compact product frame:
    attribution and the existing discovery and JSON resources.
 
 The manifest and JSON resources remain directly usable, but they are secondary
-to the represented presence and never compete with Identity or updates. A
+to the configured profile and never compete with Identity or updates. A
 permalink is the focused view of that same stream rather than a separate
 editorial page. These presentation changes do not alter a route, response,
 cache policy, metadata projection, query, schema, migration, or protocol 1.0
@@ -82,7 +83,7 @@ or inert social controls.
 
 Published permalinks repeat the 40-pixel source tile, source name, useful kind,
 and full publication time directly above the content. A native header action
-and a native footer action both return to the presence. Article titles remain
+and a native footer action both return to the public profile. Article titles remain
 moderate and article bodies use a comfortable 66-character reading measure.
 Notes remain at the same ordinary scale as the stream. Every note permalink has
 one visually hidden semantic h1, `Update from {display name}`, while its body
@@ -92,7 +93,8 @@ instead of an invented visible headline. Safe destination links remain beside
 the content, while View as JSON stays in the secondary permalink footer.
 
 Historical published rows can exist before a profile is configured. Their
-source is always the neutral `Independent presence`; public presentation never
+source currently uses the compatibility fallback `Independent presence`;
+TASK-169 owns changing that runtime string. Public presentation never
 invents profile data from the setup product name, request host, runtime
 configuration, or update content.
 
@@ -105,9 +107,10 @@ any published updates still use the published-only query. A successful D1 read
 with no profile is the only condition that selects this state. D1 failure still
 renders the fixed temporary-unavailable state rather than setup guidance.
 
-A configured presence remains intentional with no published updates. Its
-Identity and About content stand on their own before the compact explicit empty
-state. One update uses the same continuous container as many updates, and all
+An Aitta with a configured profile remains intentional with no published
+updates. Its Identity and About content stand on their own before the compact
+explicit empty state. One update uses the same continuous container as many
+updates, and all
 four supported kinds keep the same source-first structure. Drafts never affect
 public hierarchy, counts, links, or wording.
 Optional Hub availability never selects or modifies any public state.
@@ -117,7 +120,7 @@ Optional Hub availability never selects or modifies any public state.
 Source order matches reading and focus order: shared navigation, one Identity
 h1, optional detail and About regions, Updates, then the shared technical
 footer. All routes use native anchors. The header stays one unwrapped line at
-320 pixels; the presence name is the only flexible item and the short visible
+320 pixels; the profile display name is the only flexible item and the short visible
 management label retains the complete sole-owner-administration accessible
 name. It is not fixed or sticky and therefore cannot obscure focused content.
 
@@ -155,7 +158,7 @@ and the application never disables system color adjustment.
 ## Owner Identity journey
 
 The visually distinct owner workspace uses a neutral 60-pixel application
-header with `Manage` and a quiet `View presence` link. A separate, horizontally
+header with `Manage` and a quiet public-view link. A separate, horizontally
 scrollable, non-wrapping route bar contains exactly three destinations: Home,
 Identity, and New update. `Sign out` stays in the compact private-workspace
 footer rather than becoming a route destination or menu item. The accepted

@@ -1,8 +1,13 @@
 # AittaSocial public protocol 1.0
 
+An Aitta is your independently controlled AittaSocial application. It remains
+authoritative for its identity, content, configuration, and locally stored
+data, whether it is publicly reachable, private, or disconnected from the
+AittaSocial Hub.
+
 This document defines the public discovery and read-only JSON contract for one
-AittaSocial account deployment. It is usable independently of the HTML
-interface and does not depend on AittaSocial Hub.
+Aitta deployment. It is usable independently of the HTML interface and does
+not depend on AittaSocial Hub.
 
 - Protocol name: `aitta-social`
 - Protocol version: `1.0`
@@ -12,8 +17,10 @@ An incompatible public change requires a new API or protocol version. Optional
 additive fields may be introduced within version 1 only when old clients can
 safely ignore them.
 
-Human-facing pages call the deployment a presence and published content
-updates. Protocol 1.0 deliberately retains the stable `accountType`, `entry`,
+Canonical human-facing guidance uses Aitta for the owner-controlled
+application, profile for its optional outward identity presentation, and
+updates for published content. Protocol 1.0 deliberately retains the stable
+`accountType`, `entry`,
 `entries`, `/entries/*`, and `/api/v1/site` names. The terminology change does
 not alter a route, JSON field, schema, migration, or public contract.
 
@@ -30,8 +37,8 @@ represented identity.
   allowlists. Database rows, environment objects, and authenticated-user
   objects are never serialized directly.
 - Resource links are absolute canonical URLs. They are constructed from the
-  normalized configured canonical deployment URL, never an untrusted request
-  `Host` header.
+  normalized configured canonical Aitta deployment URL, never an untrusted
+  request `Host` header.
 - Identifiers are stable, opaque strings. Clients must not infer sequence or
   ownership information from them.
 - Timestamps are RFC 3339 UTC strings.
@@ -75,10 +82,10 @@ manifest also includes:
 }
 ```
 
-The challenge shows that someone could modify this deployment at verification
-time. It is public and is not authentication, a session, or a deployment
-credential. Removing or rotating the setting removes or changes the field on
-the next deployment.
+The challenge shows that someone could modify this Aitta deployment at
+verification time. It is public and is not authentication, a session, or a
+deployment credential. Removing or rotating the setting removes or changes the
+field on the next deployment.
 
 The manifest must never include the owner email, any ChatGPT identity field,
 any future Hub credential, runtime secrets, drafts, local authorization state,
@@ -285,11 +292,11 @@ the configured canonical URL is missing or invalid.
 Owner writes live behind independently authorized private routes. They are not
 part of `/api/v1` and clients must not treat them as network identity endpoints.
 
-The POC has no private Hub route, configured Hub destination, deployment
-credential, outbound probe, registration, or connection behavior. The optional
+The POC has no Hub connection, private Hub route, configured Hub destination,
+deployment credential, outbound probe, or registration behavior. The optional
 public `hubVerificationChallenge` described above is only manifest data for a
 control-of-deployment check. It never authorizes a request or causes this
-deployment to contact Hub. Any future Hub operation requires a separately
+Aitta to contact Hub. Any future Hub operation requires a separately
 accepted versioned contract; public reads remain independent of Hub.
 
 ## HTML document metadata is not protocol 1.0

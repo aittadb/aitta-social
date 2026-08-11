@@ -1,7 +1,7 @@
 # Local development
 
 Local development uses the same vinext application shape, server-side owner
-checks, and deployment-owned D1 interface as the hosted Site. Fixtures provide
+checks, and Aitta-owned D1 interface as the hosted Site. Fixtures provide
 request identity explicitly; there is no production authorization bypass.
 
 ## Prerequisites
@@ -156,7 +156,7 @@ provider-backup proof.
 `npm test` must cover the affected product boundary. Focused coverage for the
 POC includes:
 
-- anonymous public presence and update-permalink reads;
+- anonymous public profile and update-permalink reads;
 - exact owner match, another signed-in visitor, and missing owner setting;
 - independent authorization on each write;
 - profile and canonical URL validation;
@@ -192,7 +192,7 @@ produce no new migration for this change. Protocol 1.0 remains current because
 the manifest and `/api/v1/site` still emit the required stored field through
 their explicit allowlists.
 
-Presence-derived text metadata also leaves `db/schema.ts` and public protocol
+Profile-derived text metadata also leaves `db/schema.ts` and public protocol
 1.0 unchanged, so `npm run db:generate` must produce no migration for that work.
 The default package should contain no generic AittaSocial logo, favicon, or
 social-preview image. If a later approved source edit adds a direct identity
@@ -203,8 +203,8 @@ uploads, or R2. Handler-produced HTML should remain dynamic with `no-store` and
 asset caching remains a hosting concern.
 
 Use a local preview to inspect the empty Identity/update state, a populated
-public presence, all update kinds, a public permalink, the unconfigured
-explanation, Your presence, editor validation, narrow/mobile layout, zoom,
+public profile, all update kinds, a public permalink, the unconfigured
+explanation, the owner workspace, editor validation, narrow/mobile layout, zoom,
 visible focus, and reduced motion. Fix failures in implementation, tests, and
 the relevant documentation together.
 

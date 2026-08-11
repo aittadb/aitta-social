@@ -2,7 +2,7 @@
 
 This repository has a production-equivalent local proof that a reviewed
 candidate can open and migrate an existing POC D1 database without replacing
-the deployment-owned profile, updates, presentation choices, or public
+the Aitta-owned profile, updates, presentation choices, or public
 identity. The proof is deliberately local: it changes no Site, hosted D1 data,
 protected runtime setting, access policy, DNS record, or custom domain.
 
@@ -74,9 +74,9 @@ preview, and reload perform no repair write. This is a rendering decision only:
 there is no schema, migration, runtime configuration, authentication, or public
 envelope change.
 
-A successfully migrated but empty database is a **fresh** presence: after the
+A successfully migrated but empty database is a **fresh** Aitta: after the
 empty D1 read succeeds, the public page may show the leading deployment prompt
-and neutral `noindex, nofollow` metadata. An **upgraded** presence retains its
+and neutral `noindex, nofollow` metadata. An **upgraded** Aitta retains its
 configured Identity and public content and therefore does not show that prompt.
 An unmigrated or unreadable database is neither fresh nor unconfigured; it shows
 the fixed unavailable state and never the deployment prompt.
@@ -92,7 +92,7 @@ fixture remains readable and behaviorally equivalent.
 
 Do not copy a live database directory or use the local procedure on production
 data. Before an approved hosted schema change, use the current Sites and D1
-backup or export facilities available to the deployment owner, verify their
+backup or export facilities available to the Aitta owner, verify their
 scope and retention, and record a migration-specific recovery decision. A
 source rollback does not necessarily reverse a schema migration, and old code
 must not be run against a changed schema unless that exact compatibility has
