@@ -59,7 +59,8 @@ viewport. Public Identity and permalink headings stay between 2.5rem and
 access headings stay between 2.25rem and 3.75rem; and owner workspace page
 headings stay between 2.25rem and 3.5rem. Narrow layouts use those same fluid
 bounds rather than a breakpoint that enlarges text. Section headings and update
-titles retain their existing smaller hierarchy. Balanced lines and anywhere
+titles retain a smaller hierarchy; the owner Updates heading uses a bounded
+1.75rem-to-2.5rem scale so it never overtakes the owner page h1. Balanced lines and anywhere
 wrapping remain available for long names and titles.
 The repeated navigation wordmark remains a single concise line and truncates
 only that repeated label when a maximum-length Identity would otherwise widen
