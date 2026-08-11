@@ -182,10 +182,14 @@ Generate and inspect a migration whenever `db/schema.ts` changes. The
 deployment owns the resulting D1 database. Browser storage is never the source
 of truth for profiles, entries, or authorization.
 
-Changes reach `main` through an owner-reviewed pull request using **Rebase and
-merge**. Do not update `main` directly. After a successful rebase merge, start
-follow-up work on a fresh branch from the updated `main` so source and Sites
-checkpoint provenance remain exact.
+`develop` is the shared Git workspace. Feature branches start from and rebase
+onto it; the integration owner serializes only complete validated task commits
+and tracker updates there. Releases promote `develop` to `main` through an
+owner-reviewed pull request using **Rebase and merge**; do not update `main`
+directly. After feature integration, start follow-up work on a fresh branch
+from updated `develop`. After a release merge, wait until the owner refreshes
+`develop` from updated `main` so source and Sites checkpoint provenance remain
+exact.
 
 See [local development](docs/local-development.md) for fixtures and validation,
 [in-place upgrade preservation](docs/upgrade.md) for the local historical-state

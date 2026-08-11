@@ -6,7 +6,8 @@ read or copy an active `.openai/hosting.json`, contact Hub, change hosted D1,
 settings, access, DNS, or a custom domain, or run `npm run sites:package`.
 
 The proof applies to one exact commit. Record that commit with the evidence;
-never relabel a feature-branch result as `main` after a rebase merge.
+never relabel a feature-branch result as `develop` or `main` after a rebase
+merge. Reproduce the actual resulting integration or release commit separately.
 
 ## Fresh-clone procedure
 

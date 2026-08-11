@@ -78,11 +78,15 @@ neither atomic nor a hosted backup or restore. Before any approved hosted schema
 change, separately verify the current provider backup/export and recovery
 facilities; do not infer hosted rollback from the local fixture.
 
-Repository changes reach `main` only through an owner-reviewed pull request
-using **Rebase and merge**. An agent must not push or merge directly to `main`.
-Because a rebase merge creates new commit identifiers, post-merge packaging and
-checkpoint work begins on a fresh `codex/*` branch from the updated
-`origin/main`; it never reuses the pre-merge feature branch as provenance.
+`develop` is the shared integration workspace. Feature branches start from and
+rebase onto `origin/develop`; only the integration owner serializes their
+complete validated commits and tracker updates there. A release promotes
+`develop` to `main` through an owner-reviewed pull request using **Rebase and
+merge**; an agent must not merge or directly update `main`. Post-feature work
+begins on a fresh `codex/*` branch from updated `origin/develop`. After a
+release merge, checkpoint work waits until the owner refreshes
+`origin/develop` from updated `origin/main`; it never reuses the pre-merge
+branch or labels its commit as the merged source.
 
 ## 3. Create the first private checkpoint
 

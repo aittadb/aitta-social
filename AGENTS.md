@@ -181,12 +181,17 @@ file. Keep this file strictly below 32,000 bytes and run
 
 - Complete changes vertically: implementation, negative tests, security review,
   migration when relevant, and documentation land together.
-- Changes reach `main` only through a pull request reviewed and rebase-merged
-  by the owner. Agents must not push to, merge, or otherwise update `main`
-  directly.
-- After a rebase merge, begin any follow-up on a fresh `codex/*` branch from
-  the updated `origin/main`; do not continue the pre-merge branch as though its
-  commit identifiers were merged.
+- `develop` is the shared root workspace and feature-integration branch. Begin
+  each isolated feature on a fresh `codex/*` branch from updated
+  `origin/develop`, fetch again and rebase the complete validated branch onto
+  `origin/develop` before integration. Only the integration owner serializes
+  validated task commits, tracker finalization, and pushes on `develop`;
+  parallel feature worktrees never update it directly.
+- Changes reach `main` only by promoting `develop` through a pull request
+  reviewed and rebase-merged by the owner. Agents must not push to, merge, or
+  otherwise update `main` directly. After that release merge, follow-up feature
+  work waits until the owner refreshes `origin/develop` from the updated
+  `origin/main`; never treat the pre-release commit identifiers as merged.
 - A Sites archive and its `commit_sha` must identify the exact validated commit
   on the configured source branch. Never mislabel a feature-branch archive as
   `main` or bypass source-provenance checks.
@@ -227,12 +232,12 @@ file. Keep this file strictly below 32,000 bytes and run
   exact validated prerequisite commit; declare intended files and
   external-state targets, stop on overlap, and never run two schema or migration
   tasks in parallel.
-- Integrate only complete validated task commits into the current feature
-  branch in dependency order. Do not stack dependent pull requests by default
-  or pretend an unmerged prerequisite is `main`. The owner rebase-merges the
-  reviewed feature PR; afterward remove obsolete worktrees, fetch the new
-  `origin/main`, and create a fresh branch for follow-up. Never reuse a merged
-  branch.
+- Integrate only complete validated task commits into `develop` in dependency
+  order after rebasing their feature branch onto its current head. Do not stack
+  dependent pull requests by default or pretend an unintegrated prerequisite
+  is `develop` or `main`. After integration, remove obsolete worktrees, fetch
+  updated `origin/develop`, and create a fresh branch for follow-up. Never reuse
+  an integrated branch.
 - Serialize tracker finalization through the integration owner: after each task
   commit is integrated, remove only that task from `PLAN.md`, append its exact
   evidence/residual entry to `CHANGELOG.md`, reconcile shared documentation,
