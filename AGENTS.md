@@ -64,10 +64,13 @@ file. Keep this file strictly below 32,000 bytes and run
   relationships, popularity counts, public graphs, recommendations, or shared
   content storage.
 - Do not implement multiple Aittas in one Aitta deployment, extra administrators,
-  roles, teams, invitations, comments, reactions, resharing, messages,
-  notifications, advertising, payments, ActivityPub, background federation,
-  plugins, general themes, media uploads, or general OAuth/OIDC support in this
-  POC.
+  roles, teams, invitations, resharing, notifications, advertising, payments,
+  ActivityPub, background federation, plugins, general themes, media uploads,
+  or general OAuth/OIDC support in this POC.
+- Comments, reactions, messages, revisions, retractions, and other future event
+  semantics remain unimplemented unless an accepted versioned event-type
+  vertical slice defines and implements them with its tests and documentation.
+  Never infer a child's meaning from its parent relation alone.
 - Do not add placeholders for excluded or backlog capabilities. Backlog work
   must be accepted and promoted to `PLAN.md` before implementation.
 
@@ -125,6 +128,19 @@ file. Keep this file strictly below 32,000 bytes and run
 
 ## Public contracts and Hub
 
+- Future Aitta Network work uses a separately versioned immutable event
+  contract owned by the AittaSocial Hub repository and adopted here only
+  through an accepted conformance task. An Aitta is authoritative for events it
+  creates; threads and feeds are derived projections and may span Aittas.
+  Preserve `/api/v1` entries and do not automatically reinterpret or project
+  them as events.
+  AittaSocial Hub may support identity, authorization, discovery, and routing
+  but must not become the authoritative participant-content store. A parent
+  reference grants neither access nor delivery. At a remote boundary, an
+  authoring-Aitta reference is an untrusted assertion until a separately
+  accepted authenticity contract verifies it; identifiers, timestamps, and
+  namespaces alone never prove authorship. Treat every remote event, type,
+  parent, and payload as untrusted and bounded.
 - Signed-out and non-owner visitors may read only the public profile and
   published entries. Drafts are indistinguishable from unknown entries in HTML,
   JSON, pagination, counts, links, status, and error wording.
