@@ -165,9 +165,13 @@ test("the prompt surface stays native, selectable, responsive, and accessible", 
   assert.match(component, /aria-describedby="deployment-prompt-help"/);
   assert.doesNotMatch(component, /["']use client["']|navigator\.clipboard|onClick|<button/i);
   assert.doesNotMatch(page, /from\s+["']next\/link["']|<Link(?:\s|>)/);
-  assert.match(css, /\.template-start\s*\{[^}]*grid-template-columns:\s*minmax\(0,/s);
+  assert.match(css, /\.template-shell \.public-wide-content\s*\{[^}]*max-width:\s*732px/s);
+  assert.match(css, /\.template-start\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)[^}]*gap:\s*12px[^}]*padding:\s*16px[^}]*border-radius:\s*16px/s);
+  assert.match(css, /\.template-introduction h1\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*clamp\(1\.875rem, 4vw, 2\.375rem\)/s);
+  assert.match(css, /\.identity-summary\s*\{[^}]*margin:\s*8px 0 0[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*1rem/s);
   assert.match(css, /\.deployment-prompt textarea\s*\{[^}]*width:\s*100%[^}]*overflow-wrap:\s*anywhere/s);
-  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*\.template-start\s*\{[^}]*grid-template-columns:\s*1fr/s);
+  assert.doesNotMatch(css, /\.template-start\s*\{[^}]*grid-template-columns:\s*minmax\(0, 0\.85fr\)/s);
+  assert.doesNotMatch(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.template-start\s*\{[^}]*padding:\s*4rem/s);
   assert.match(css, /\.public-nav-inner\s*\{[^}]*min-height:\s*60px[^}]*flex-wrap:\s*nowrap/s);
   assert.match(css, /\.public-nav-action\s*\{[^}]*min-height:\s*44px[^}]*white-space:\s*nowrap/s);
   assert.match(css, /:focus-visible\s*\{[^}]*outline:\s*3px/s);

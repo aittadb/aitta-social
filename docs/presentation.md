@@ -36,17 +36,20 @@ Unicode letters or numbers from the first and last display-name words, or the
 first two useful characters of a one-word name. The tile is also decorative
 because the adjacent h1 carries the complete Identity.
 
-At phone sizes the field is 108 pixels high, the tile is 88 pixels, and the
-display name is 2rem (32 pixels). At 768 pixels and above they become 120, 96,
-and 2.375rem (38 pixels). The full heading wraps anywhere; only the repeated
-header name may ellipsize, while retaining its complete text as its accessible
-name.
+At phone sizes the field is 96 pixels high, the tile is 80 pixels, and the
+display name is 1.875rem (30 pixels). At 768 pixels and above they become 120,
+96, and 2.375rem (38 pixels). The full heading wraps anywhere; only the
+repeated header name may ellipsize, while retaining its complete text as its
+accessible name. Phone outer gutters, profile padding, update padding, and
+source-row gaps use the reviewed fixed 8/12/16-pixel rhythm, so enlarged text
+does not also double those principal non-text spaces. Smaller typographic
+margins may still scale with the surrounding text.
 
 Location, website, and up to eight external links render only when present.
-Each detail is a wrapping row with a 44-pixel link target; external public links
-stay native anchors and carry `me noopener noreferrer`. If every optional detail
-is absent, no empty aside, separator, placeholder, or reserved column is
-rendered.
+Each detail is a wrapping row with a 44-by-44-pixel link target; external
+public links stay native anchors and carry `me noopener noreferrer`. If every
+optional detail is absent, no empty aside, separator, placeholder, or reserved
+column is rendered.
 
 About shows an introduction of at most 220 Unicode characters in full. Longer
 content shows a useful summary ending at a word or line boundary when one
@@ -118,12 +121,16 @@ management label retains the complete sole-owner-administration accessible
 name. It is not fixed or sticky and therefore cannot obscure focused content.
 
 Public frame padding is 16 pixels or the larger device safe-area inset on each
-edge. Interactive targets retain at least 44 CSS pixels, the existing two-layer
-focus indicator, and a system Highlight outline in forced colors. Decorative
-identity forms disappear in forced colors, while the field and tile retain
-system-visible boundaries. Long names, descriptions, translated text, About
-content, labels, source names, hosts, URLs, titles, and update copy wrap rather
-than widen the page.
+edge. Public interactive targets retain at least 44 by 44 CSS pixels, the
+existing two-layer focus indicator, and a system Highlight outline in forced
+colors. Decorative identity forms disappear in forced colors, while the field
+and tile retain system-visible boundaries. Long names, descriptions,
+translated text, About content, labels, source names, hosts, URLs, titles, and
+update copy wrap rather than widen the page.
+A non-note source row may stack its quiet kind and date below the source at the
+phone breakpoint, and its metadata receives a bounded wrapping measure. This
+keeps the repeated identity visually primary and prevents enlarged metadata
+from squeezing it into an unreadable sliver.
 A 320-pixel viewport remains equivalent to a 1280-pixel desktop reflowed at 400
 percent. Reduced-motion preferences still disable smooth scrolling and all
 animation or transition.
