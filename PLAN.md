@@ -13,13 +13,12 @@ migration and protocol decisions, documentation, and decisive evidence.
   sole-owner boundary, draft privacy, deployment-owned D1, native navigation,
   responsive behavior, and Hub-failure isolation are working and remain in
   scope without being rewritten.
-- The deployed Site version 7 uses the exact reviewed and pushed `develop`
-  source commit `a14fb61bd43c372d12fed02365020f4cc77c6b57`. The
-  presence-first language, metadata, hierarchy, onboarding,
-  runtime-customization, reproducibility, upgrade, security, and rendered
-  accessibility work is aligned with the live checkpoint recorded in
-  `docs/checkpoint.md` and `CHANGELOG.md`; `main` remains untouched pending a
-  later owner-reviewed pull request.
+- The deployed Site version 7 uses the exact reviewed and pushed historical
+  `develop` source commit `a14fb61bd43c372d12fed02365020f4cc77c6b57`.
+  Owner-reviewed pull request #6 rebase-merged the completed mobile-presence
+  source into `main`; current `main` and refreshed `develop` both identify
+  `18fa16dc967d8502c17afb2bd3cc28518039a172`, while the live Site still uses
+  the older checkpoint recorded in `docs/checkpoint.md` and `CHANGELOG.md`.
 - No accepted presence-consumable Hub contract currently exists. Secure Hub
   registration, verified discovery, Follow and Unfollow, and a private
   followed-update reader therefore remain future direction in `ROADMAP.md`.
@@ -36,11 +35,12 @@ migration and protocol decisions, documentation, and decisive evidence.
   license, plan, instance, runtime, D1 migration, type, lint, production-build,
   and 191 test gates green; `npm audit --omit=dev` reports no production
   dependency advisory.
-- The accepted mobile-presence increment is complete, so the active queue is
-  intentionally empty. The 34 former Hub and network tasks remain future
-  provenance under `ROADMAP-004` through `ROADMAP-008`, while more speculative
-  lifecycle and suggestion work remains in `BACKLOG.md`. Promote only the next
-  immediately useful, contract-backed vertical increment when it is concrete.
+- The accepted mobile-presence implementation is complete. TASK-157 is the one
+  explicitly approved hosted checkpoint required to put that reviewed source
+  on the existing Site without changing its content or configuration. The 34
+  former Hub and network tasks remain future provenance under `ROADMAP-004`
+  through `ROADMAP-008`, while more speculative lifecycle and suggestion work
+  remains in `BACKLOG.md`.
 
 ## Active queue
 
@@ -51,6 +51,4 @@ are disjoint. Each task owns one bounded outcome plus its tests, documentation,
 and migration/configuration decision; split it again before implementation if
 those cannot land as one focused reviewable commit.
 
-There is no accepted unfinished task. Promote only the next smallest meaningful
-increment from `ROADMAP.md` or `BACKLOG.md` after its prerequisites and binary
-definition of done are concrete.
+- [ ] **TASK-157 — Deploy and verify the mobile-first presence redesign.** Save and deploy the exact validated and pushed current `develop` source to the one existing AittaSocial Site, then prove the hosted public presence uses the accepted mobile-first identity and update-stream composition. DoD: before the external mutation, pin a clean exact `develop` commit whose product tree contains the completed TASK-154 through TASK-156 redesign, confirm its pushed source provenance, run `npm run db:generate` with no migration drift, `npm run validate`, `npm audit --omit=dev`, and package inspection, and record value-safe preflight snapshots of Site identity and status, public access, protected-environment revision and key metadata, D1 binding/migration inventory, and custom-domain inventory; save exactly one new Site version with that commit SHA and deploy it to the existing public Site without creating a Site or changing access, owner grants, D1 content, protected settings, binding configuration, DNS, domains, Hub state, or `main`; require terminal `succeeded` status and exact version/source provenance; verify both the Sites URL and `https://jhh.aitta.social` show the compact one-line frame, graphical accent identity field, initials tile, concise About area, and identity-linked chronological update stream with the old `Public presence`, numbered editorial Introduction, sequence numbers, and generic `Read update` treatment absent; recheck representative public homepage and permalink navigation, signed-out owner dispatch plus read-only owner/non-owner boundaries, manifest and `/api/v1` envelopes, published-only privacy, canonical metadata, no-store HTML, fixed CSP and same-origin assets, 320/390/1440-pixel layout, first-viewport hierarchy, keyboard focus/navigation, effective touch targets, reduced motion, forced colors, and clean console/runtime evidence; require value-safe postflight snapshots to equal preflight and public/owner semantic observations to show no hosted content change; update `docs/checkpoint.md`, `CHANGELOG.md`, and the task evidence with exact commit, version, URLs, status, validation, preserved boundaries, and residual uncertainty, then remove only TASK-157 from `PLAN.md`. Depends on: none.
