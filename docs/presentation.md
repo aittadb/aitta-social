@@ -53,6 +53,18 @@ identity heading followed by labeled featured-information and recent-update
 sections, a list for updates, native anchors, and separately labeled primary and
 technical navigation landmarks.
 
+Primary headings use a restrained display scale instead of filling most of the
+viewport. Public Identity and permalink headings stay between 2.5rem and
+4.5rem; the narrower setup column tops out at 4rem; public error and owner
+access headings stay between 2.25rem and 3.75rem; and owner workspace page
+headings stay between 2.25rem and 3.5rem. Narrow layouts use those same fluid
+bounds rather than a breakpoint that enlarges text. Section headings and update
+titles retain their existing smaller hierarchy. Balanced lines and anywhere
+wrapping remain available for long names and titles.
+The repeated navigation wordmark remains a single concise line and truncates
+only that repeated label when a maximum-length Identity would otherwise widen
+the page; the full name remains present in the primary heading.
+
 Public interactive targets have at least 44 CSS pixels of height and retain a
 two-layer dark/light focus indicator. Its dark ring contrasts with the light
 public canvas, its light halo contrasts with dark owner surfaces, and a

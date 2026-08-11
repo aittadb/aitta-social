@@ -66,11 +66,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
   display: inline-flex;
   align-items: center;
   min-width: 0;
+  max-width: min(45vw, 36rem);
+  overflow: hidden;
   color: var(--ink);
   font-family: var(--serif);
   font-size: 1.25rem;
   font-weight: 700;
+  text-overflow: ellipsis;
   text-decoration: none;
+  white-space: nowrap;
 }
 .public-nav-actions, .button-row, .entry-card-links, .entry-actions, .form-footer {
   display: flex;
@@ -127,7 +131,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   max-width: 900px;
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(3.6rem, 9vw, 8.4rem);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 500;
   line-height: 0.92;
   text-wrap: balance;
@@ -141,7 +145,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-bottom: 1px solid var(--line);
 }
 .template-introduction { min-width: 0; }
-.template-introduction h1 { font-size: clamp(3.2rem, 7vw, 6.8rem); }
+.template-introduction h1 { font-size: clamp(2.5rem, 4.5vw, 4rem); }
 .deployment-prompt { min-width: 0; align-self: end; }
 .deployment-prompt label {
   display: block;
@@ -269,7 +273,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .permalink-shell { max-width: 980px; }
 .permalink-entry { padding: clamp(4rem, 10vw, 8rem) 0; }
-.permalink-entry h1 { max-width: 900px; font-size: clamp(3rem, 8vw, 7rem); }
+.permalink-entry h1 { max-width: 900px; }
 .permalink-date { margin: 2rem 0 0; color: var(--muted); }
 .entry-body { margin-top: 4rem; font-size: 1.35rem; }
 .destination-card {
@@ -287,7 +291,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .destination-card span { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; }
 .permalink-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 2rem 0 4rem; border-top: 1px solid var(--line); }
 .state-page { width: min(680px, calc(100% - 40px)); min-height: 100vh; display: grid; place-content: center; margin: 0 auto; }
-.state-page h1 { font-size: clamp(3rem, 8vw, 5rem); }
+.state-page h1 { font-size: clamp(2.25rem, 4vw, 3.75rem); }
 .state-page p:not(.eyebrow) { max-width: 540px; margin: 1.5rem 0 2rem; color: var(--muted); font-size: 1.1rem; }
 .state-page .button { justify-self: start; }
 
@@ -332,7 +336,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-bottom: 1px solid #cfd2cc;
 }
 .owner-page-header > div:first-child { max-width: 760px; }
-.owner-page-header h1 { margin: 0; font-family: var(--serif); font-size: clamp(2.5rem, 5vw, 4.8rem); font-weight: 500; line-height: 1; }
+.owner-page-header h1 { margin: 0; font-family: var(--serif); font-size: clamp(2.25rem, 3.5vw, 3.5rem); font-weight: 500; line-height: 1; }
 .owner-page-header p:not(.eyebrow) { max-width: 700px; margin: 1rem 0 0; color: var(--muted); }
 .compact-header { align-items: start; }
 .identity-readiness, .identity-form-readiness, .identity-draft-preview {
@@ -408,7 +412,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .owner-access-state { width: min(760px, calc(100% - 40px)); min-height: 100vh; display: grid; place-content: center; margin: 0 auto; }
 .owner-state-mark { width: 62px; height: 62px; display: grid; place-items: center; margin-bottom: 2rem; border: 2px solid var(--accent); border-radius: 50%; color: var(--accent); font-family: var(--serif); font-size: 2rem; }
-.owner-access-state h1 { font-size: clamp(2.8rem, 7vw, 5.2rem); }
+.owner-access-state h1 { font-size: clamp(2.25rem, 4vw, 3.75rem); }
 .owner-access-state > p:not(.eyebrow) { max-width: 650px; margin: 1.5rem 0 2rem; color: var(--muted); font-size: 1.1rem; }
 code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; background: #e7e9e4; font-family: var(--mono); font-size: 0.85em; }
 
@@ -432,7 +436,6 @@ code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; bac
   .public-nav .wordmark { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .public-nav-actions, .public-nav-actions .button { width: 100%; }
   .identity-block { padding: 4rem 0; }
-  .identity-main h1, .template-introduction h1 { font-size: clamp(3.1rem, 17vw, 5rem); }
   .template-start { padding: 4rem 0; }
   .deployment-prompt textarea { min-height: 20rem; }
   .identity-summary { margin-top: 1.5rem; }
@@ -444,7 +447,6 @@ code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; bac
   .public-footer-context { justify-items: start; }
   .public-attribution, .technical-links { justify-content: start; }
   .permalink-entry { padding-top: 4rem; }
-  .permalink-entry h1 { font-size: clamp(2.8rem, 15vw, 5rem); }
   .entry-body { margin-top: 3rem; font-size: 1.18rem; }
   .owner-topbar { min-height: 64px; padding: 0 16px; }
   .owner-badge, .owner-user { display: none; }
