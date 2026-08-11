@@ -20,7 +20,7 @@ test("primary headings use one restrained responsive scale", async () => {
 
   assert.match(
     css,
-    /\.template-introduction h1, \.permalink-entry h1, \.state-page h1, \.owner-access-state h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)[^}]*line-height:\s*0\.92[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
+    /\.template-introduction h1, \.state-page h1, \.owner-access-state h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)[^}]*line-height:\s*0\.92[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
   );
   assert.match(
     css,
@@ -58,17 +58,21 @@ test("primary headings use one restrained responsive scale", async () => {
   );
   assert.match(
     css,
+    /\.permalink-entry h1:not\(\.visually-hidden\)\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*clamp\(1\.35rem, 3vw, 1\.5rem\)[^}]*line-height:\s*1\.25[^}]*overflow-wrap:\s*anywhere/s,
+  );
+  assert.match(
+    css,
     /\.wordmark\s*\{[^}]*flex:\s*1 1 auto[^}]*min-width:\s*0[^}]*overflow:\s*hidden[^}]*text-overflow:\s*ellipsis[^}]*white-space:\s*nowrap/s,
     "a maximum-length Identity must not expand public navigation",
   );
 
   assert.match(
     css,
-    /\.section-heading h2, \.owner-section h2\s*\{[^}]*font-size:\s*clamp\(2rem, 4vw, 3\.4rem\)/s,
+    /\.updates-section > h2\s*\{[^}]*font-size:\s*1\.5rem/s,
   );
   assert.match(
     css,
-    /\.entry-card h3\s*\{[^}]*font-size:\s*clamp\(1\.7rem, 3vw, 2\.8rem\)/s,
+    /\.update-title\s*\{[^}]*font-size:\s*clamp\(1\.25rem, 3vw, 1\.5rem\)/s,
   );
   assert.match(
     css,
@@ -92,6 +96,7 @@ test("every primary headline surface keeps semantic text and private values out"
   });
   const published = entryRow({
     id: "headline-published",
+    kind: "article",
     title: LONG_TITLE,
     private_canary: PRIVATE_CANARY,
   });

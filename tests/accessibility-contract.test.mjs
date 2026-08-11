@@ -117,9 +117,10 @@ test("presence and update language stays clear without obsolete Hub controls", a
     assert.equal(publicResponse.status, 200);
     const publicHtml = await publicResponse.text();
     assert.match(publicHtml, />Updates<\/h2>/i);
-    assert.match(publicHtml, />Read update<\/a>/i);
+    assert.match(publicHtml, /href="\/entries\/entry-1"[^>]+aria-label="Open update published [^"]+"/i);
+    assert.match(publicHtml, /<a class="update-source-identity" href="#account">/i);
     assert.match(publicHtml, /aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i);
-    assert.doesNotMatch(publicHtml, />Entries<\/h2>|>Read entry<\/a>|>Sign in<\/a>/i);
+    assert.doesNotMatch(publicHtml, />Entries<\/h2>|>Read (?:entry|update)<\/a>|>Sign in<\/a>/i);
 
     const ownerResponse = await fetchApp("/owner", {
       env,

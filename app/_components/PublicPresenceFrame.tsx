@@ -37,9 +37,18 @@ export function PublicPresenceHeader({
   );
 }
 
-export function PresenceIdentityTile({ displayName }: { displayName: string }) {
+export function PresenceIdentityTile({
+  displayName,
+  size = "profile",
+}: {
+  displayName: string;
+  size?: "profile" | "update";
+}) {
   return (
-    <span className="presence-identity-tile" aria-hidden="true">
+    <span
+      className={`presence-identity-tile presence-identity-tile-${size}`}
+      aria-hidden="true"
+    >
       {presenceInitials(displayName)}
     </span>
   );

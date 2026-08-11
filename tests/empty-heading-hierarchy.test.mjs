@@ -17,7 +17,11 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
 
   assert.match(
     css,
-    /\.section-heading h2, \.owner-section h2\s*\{[^}]*font-size:\s*clamp\(2rem, 4vw, 3\.4rem\)/s,
+    /\.updates-section > h2\s*\{[^}]*font-size:\s*1\.5rem/s,
+  );
+  assert.match(
+    css,
+    /\.owner-section h2\s*\{[^}]*font-size:\s*clamp\(2rem, 4vw, 3\.4rem\)/s,
   );
   assert.match(
     css,
@@ -25,7 +29,7 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
   );
   assert.match(
     css,
-    /\.empty-public h3\s*\{[^}]*font-size:\s*clamp\(1\.65rem, 2\.5vw, 2\.25rem\)[^}]*line-height:\s*1\.15[^}]*overflow-wrap:\s*anywhere/s,
+    /\.empty-public h3\s*\{[^}]*font-size:\s*1rem[^}]*line-height:\s*1\.3[^}]*overflow-wrap:\s*anywhere/s,
   );
   assert.match(
     css,
@@ -33,8 +37,8 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
   );
 
   for (const width of [320, 640, 900, 1280, 1600, 2560]) {
-    const publicH2 = clampPixels(2, 4, 3.4, width);
-    const publicEmptyH3 = clampPixels(1.65, 2.5, 2.25, width);
+    const publicH2 = 1.5 * 16;
+    const publicEmptyH3 = 1 * 16;
     const ownerH2 = clampPixels(1.75, 2.5, 2.5, width);
     const ownerEmptyH3 = clampPixels(1.5, 2, 1.75, width);
 
@@ -62,13 +66,13 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
   );
   assert.match(
     css,
-    /\.entry-card h3\s*\{[^}]*font-size:\s*clamp\(1\.7rem, 3vw, 2\.8rem\)/s,
-    "published card typography must stay unchanged",
+    /\.update-title\s*\{[^}]*font-size:\s*clamp\(1\.25rem, 3vw, 1\.5rem\)/s,
+    "article and announcement titles must stay moderate",
   );
   assert.match(
     css,
-    /\.entry-card h3\.entry-note-title\s*\{[^}]*font-size:\s*1\.32rem/s,
-    "published note typography must stay unchanged",
+    /\.update-note-title\s*\{[^}]*font-size:\s*0\.84rem/s,
+    "an optional note title must remain a quiet affordance",
   );
   assert.match(
     css,
@@ -102,7 +106,7 @@ test("SSR keeps Updates h2 before the empty h3 without changing empty-state mean
   );
   assert.match(
     publicHtml,
-    /<section class="entries-section" aria-labelledby="entries-title">/,
+    /<section class="updates-section" aria-labelledby="entries-title">/,
   );
 
   const ownerResponse = await fetchApp("/owner", {

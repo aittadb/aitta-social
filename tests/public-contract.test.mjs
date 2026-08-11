@@ -116,6 +116,7 @@ test("all four entry kinds use the same public presence and update permalink mod
   });
   assert.equal(accountResponse.status, 200);
   const accountHtml = await accountResponse.text();
+  assert.match(accountHtml, /<ol class="update-stream">/i);
 
   for (const entry of entries) {
     assert.match(accountHtml, new RegExp(entry.title));
@@ -127,7 +128,13 @@ test("all four entry kinds use the same public presence and update permalink mod
     assert.equal(permalinkResponse.status, 200);
     const permalinkHtml = await permalinkResponse.text();
     assert.match(permalinkHtml, new RegExp(entry.title));
-    assert.match(permalinkHtml, new RegExp(`>${entry.kind}<`));
+    if (entry.kind === "note") {
+      assert.match(permalinkHtml, /<h1 class="visually-hidden">Update from Ada Account<\/h1>/i);
+      assert.doesNotMatch(permalinkHtml, /<span class="update-kind">Note<\/span>/i);
+    } else {
+      const kind = `${entry.kind.charAt(0).toUpperCase()}${entry.kind.slice(1)}`;
+      assert.match(permalinkHtml, new RegExp(`>${kind}<`));
+    }
 
     const apiResponse = await fetchApp(`/api/v1/entries/${entry.id}`, { env });
     assert.equal(apiResponse.status, 200);
@@ -136,8 +143,10 @@ test("all four entry kinds use the same public presence and update permalink mod
     assert.equal(api.data.id, entry.id);
   }
 
-  assert.match(accountHtml, /Open destination/);
+  assert.match(accountHtml, /<span>Destination<\/span>/);
   assert.match(accountHtml, /https:\/\/destination\.example\/resource/);
+  assert.match(accountHtml, /href="https:\/\/destination\.example\/resource" rel="noopener noreferrer"/);
+  assert.doesNotMatch(accountHtml, /Read update|Open destination|entry-number|entry-card/i);
 });
 
 test("published permalinks render while drafts are indistinguishable from unknown entries", async () => {

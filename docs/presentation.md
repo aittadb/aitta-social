@@ -7,15 +7,16 @@ home and every published permalink now share one compact product frame:
    quiet real action;
 2. the configured Identity, with a shallow accent field, initials tile,
    display name, short description, optional public details, and About content;
-3. the existing deterministic newest-first published-update collection; and
+3. one continuous, identity-linked, deterministic newest-first update stream;
+   and
 4. a restrained shared footer containing optional AittaSocial/source
    attribution and the existing discovery and JSON resources.
 
 The manifest and JSON resources remain directly usable, but they are secondary
-to the represented presence and never compete with Identity or updates. The
-permalink keeps its existing published content and controls inside the same
-header and footer frame. These presentation changes do not alter a route,
-response, cache policy, metadata projection, schema, migration, or protocol 1.0
+to the represented presence and never compete with Identity or updates. A
+permalink is the focused view of that same stream rather than a separate
+editorial page. These presentation changes do not alter a route, response,
+cache policy, metadata projection, query, schema, migration, or protocol 1.0
 field.
 
 ## Identity composition
@@ -54,6 +55,43 @@ exists after the first 120 characters, followed by a native 44-pixel
 This retains keyboard operation and all owner content without client state or
 silent truncation. An empty historical introduction renders no About region.
 
+## Update stream and focused views
+
+The homepage stream remains at most 700 CSS pixels wide inside the existing
+732-pixel padded public column. It is one ordered list on a single off-white
+surface. Thin separators, rather than a sequence of floating cards, distinguish
+updates. Every item repeats a 40-pixel initials tile, the complete wrapping
+display name, and a human-readable linked publication time. The source name is
+a native link back to the configured Identity. A non-note also carries the
+quiet, human-readable Article, Announcement, or Link label when that context is
+useful; Note is omitted because its body already explains the content form.
+
+Notes lead with their complete body at the ordinary 16-pixel public text scale.
+A saved note title, when present, follows the body as a quiet permalink
+affordance; an absent title creates no replacement headline. Articles and
+announcements may lead with a 20–24-pixel linked title and show a bounded
+Unicode-aware excerpt. Link updates follow the same restrained hierarchy and
+show their complete destination in a wrapping native anchor with
+`noopener noreferrer`. The time already provides a clear permalink path when a
+title is absent. There are no sequence numbers, generic Read calls to action,
+or inert social controls.
+
+Published permalinks repeat the 40-pixel source tile, source name, useful kind,
+and full publication time directly above the content. A native header action
+and a native footer action both return to the presence. Article titles remain
+moderate and article bodies use a comfortable 66-character reading measure.
+Notes remain at the same ordinary scale as the stream. Every note permalink has
+one visually hidden semantic h1, `Update from {display name}`, while its body
+remains the visual lead; an optional stored title appears only once, quietly,
+after the body. An untitled non-note likewise receives a source-based hidden h1
+instead of an invented visible headline. Safe destination links remain beside
+the content, while View as JSON stays in the secondary permalink footer.
+
+Historical published rows can exist before a profile is configured. Their
+source is always the neutral `Independent presence`; public presentation never
+invents profile data from the setup product name, request host, runtime
+configuration, or update content.
+
 ## Content states
 
 Before an Identity exists, the reusable template keeps its established setup
@@ -64,8 +102,10 @@ with no profile is the only condition that selects this state. D1 failure still
 renders the fixed temporary-unavailable state rather than setup guidance.
 
 A configured presence remains intentional with no published updates. Its
-Identity and About content stand on their own before the existing explicit
-empty state. Drafts never affect public hierarchy, counts, links, or wording.
+Identity and About content stand on their own before the compact explicit empty
+state. One update uses the same continuous container as many updates, and all
+four supported kinds keep the same source-first structure. Drafts never affect
+public hierarchy, counts, links, or wording.
 Optional Hub availability never selects or modifies any public state.
 
 ## Accessibility and responsive behavior
@@ -82,7 +122,8 @@ edge. Interactive targets retain at least 44 CSS pixels, the existing two-layer
 focus indicator, and a system Highlight outline in forced colors. Decorative
 identity forms disappear in forced colors, while the field and tile retain
 system-visible boundaries. Long names, descriptions, translated text, About
-content, labels, hosts, URLs, and update copy wrap rather than widen the page.
+content, labels, source names, hosts, URLs, titles, and update copy wrap rather
+than widen the page.
 A 320-pixel viewport remains equivalent to a 1280-pixel desktop reflowed at 400
 percent. Reduced-motion preferences still disable smooth scrolling and all
 animation or transition.
@@ -146,13 +187,16 @@ reduced-motion rules.
 
 ## Review checklist
 
-The focused automated contract renders the public route with an empty state and
-with representative published note, article, link, and announcement fixtures.
-It checks semantic order and public-only projection using long unbroken,
-translated, draft, owner, credential, and row canaries. Source assertions cover
-the single-column breakpoints, 44-pixel target declarations, overflow wrapping,
-reduced-motion behavior, forced-colors fallback, and numeric focus-color
-contrast. These checks do not claim browser geometry by themselves.
+The focused automated contract renders zero, one, and many updates plus
+representative note, article, link, and announcement fixtures. It verifies
+newest-first semantic order, body-first notes, moderate titled kinds, repeated
+source identity, safe destinations, focused permalinks, neutral unconfigured
+source identity, draft/unknown parity, and public-only projection using long
+unbroken, translated, draft, owner, credential, and row canaries. Source
+assertions cover the 700-pixel content bound, 40-pixel repeated tile,
+44-pixel route and destination targets, overflow wrapping, reduced-motion
+behavior, forced-colors fallback, and numeric focus-color contrast. These
+checks do not claim browser geometry by themselves.
 
 For rendered review, inspect both empty and populated states in a browser at a
 320-pixel viewport and at a 1280-pixel desktop viewport enlarged to 400 percent.

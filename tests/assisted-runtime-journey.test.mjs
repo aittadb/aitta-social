@@ -381,7 +381,7 @@ test("a maximum-length unbroken owner title and the full action set retain shrin
   assert.match(css, /\.owner-entry-copy\s*\{[^}]*min-width:\s*0/s);
   assert.match(css, /\.owner-entry-copy h3 a\s*\{[^}]*min-height:\s*44px[^}]*display:\s*inline-block[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.entry-actions\s*\{[^}]*min-width:\s*0/s);
-  assert.match(css, /\.public-nav-actions, \.button-row, \.entry-card-links, \.entry-actions, \.form-footer\s*\{[^}]*flex-wrap:\s*wrap/s);
+  assert.match(css, /\.public-nav-actions, \.button-row, \.entry-actions, \.form-footer\s*\{[^}]*flex-wrap:\s*wrap/s);
 });
 
 test("the complete native checkbox label retains its owner touch-target source contract", async () => {
