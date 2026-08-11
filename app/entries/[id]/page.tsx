@@ -7,7 +7,9 @@ import {
   unavailableEntryMetadata,
 } from "@/lib/public-metadata";
 import { resolvePresentationAccent } from "@/lib/presentation-accent";
+import type { Entry } from "@/lib/types";
 import {
+  PresenceIdentityTile,
   PublicFooter,
   PublicPresenceHeader,
 } from "@/app/_components/PublicPresenceFrame";
@@ -35,13 +37,17 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const [entry, profile] = await Promise.all([getEntry(id, true), getProfile()]);
   if (!entry) notFound();
+  const displayName = profile?.displayName ?? "Independent presence";
+  const publishedAt = entry.publishedAt ?? entry.createdAt;
+  const isNote = entry.kind === "note";
+
   return (
     <main
       className="permalink-shell"
       style={{ "--accent": resolvePresentationAccent(profile?.accentColor) } as CSSProperties}
     >
       <PublicPresenceHeader
-        displayName={profile?.displayName ?? "Presence"}
+        displayName={displayName}
         identityHref="/"
         label="Update navigation"
         actionsLabel="Update actions"
@@ -52,17 +58,38 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
         }}
       />
       <div className="permalink-content">
-        <article className="permalink-entry">
-          <header>
-            <p className="eyebrow">{entry.kind}</p>
-            <h1>{entry.title ?? `${entry.kind.charAt(0).toUpperCase()}${entry.kind.slice(1)}`}</h1>
-            <p className="permalink-date">
-              Published <time dateTime={entry.publishedAt ?? entry.createdAt}>{formatLongDate(entry.publishedAt ?? entry.createdAt)}</time>
-            </p>
+        <article className={`permalink-entry permalink-kind-${entry.kind}`}>
+          <header className="permalink-header">
+            <div className="permalink-source-row">
+              <a className="permalink-source-identity" href="/">
+                <PresenceIdentityTile displayName={displayName} size="update" />
+                <span>{displayName}</span>
+              </a>
+              <div className="permalink-context">
+                {!isNote && <span className="update-kind">{kindLabel(entry.kind)}</span>}
+                <span className="permalink-time">
+                  Published <time dateTime={publishedAt}>{formatLongDate(publishedAt)}</time>
+                </span>
+              </div>
+            </div>
+            {isNote ? (
+              <h1 className="visually-hidden">{`Update from ${displayName}`}</h1>
+            ) : entry.title ? (
+              <h1>{entry.title}</h1>
+            ) : (
+              <h1 className="visually-hidden">{`${kindLabel(entry.kind)} update from ${displayName}`}</h1>
+            )}
           </header>
-          <div className="entry-body">{entry.body}</div>
+          <div className={`permalink-body${isNote ? " permalink-note-body" : ""}`}>
+            {entry.body}
+          </div>
+          {isNote && entry.title && <p className="permalink-note-title">{entry.title}</p>}
           {entry.destinationUrl && (
-            <a className="destination-card" href={entry.destinationUrl} rel="noopener noreferrer">
+            <a
+              className="permalink-destination"
+              href={entry.destinationUrl}
+              rel="noopener noreferrer"
+            >
               <span>Destination</span>
               <strong>{entry.destinationUrl}</strong>
             </a>
@@ -83,4 +110,8 @@ function formatLongDate(value: string): string {
   return Number.isNaN(date.valueOf())
     ? value
     : new Intl.DateTimeFormat("en", { dateStyle: "long", timeStyle: "short" }).format(date);
+}
+
+function kindLabel(kind: Entry["kind"]): string {
+  return `${kind.charAt(0).toUpperCase()}${kind.slice(1)}`;
 }

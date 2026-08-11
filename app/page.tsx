@@ -70,7 +70,12 @@ export default async function Home() {
           </div>
         </section>
 
-        <EntriesSection entries={entries} configured />
+        <EntriesSection
+          entries={entries}
+          configured
+          displayName={profile.displayName}
+          identityHref="#account"
+        />
       </div>
       <PublicFooter profile={profile} />
     </main>
@@ -122,7 +127,12 @@ function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedI
           <DeploymentPrompt />
         </section>
 
-        <EntriesSection entries={entries} configured={false} />
+        <EntriesSection
+          entries={entries}
+          configured={false}
+          displayName="Independent presence"
+          identityHref="#start"
+        />
       </div>
       <PublicFooter profile={null} />
     </main>
@@ -145,61 +155,104 @@ function UnavailablePresence({ signedIn }: { signedIn: boolean }) {
   );
 }
 
-function EntriesSection({ entries, configured }: { entries: Entry[]; configured: boolean }) {
+function EntriesSection({
+  entries,
+  configured,
+  displayName,
+  identityHref,
+}: {
+  entries: Entry[];
+  configured: boolean;
+  displayName: string;
+  identityHref: string;
+}) {
   return (
-    <section className="entries-section" aria-labelledby="entries-title">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">Recent</p>
-          <h2 id="entries-title">Updates</h2>
-        </div>
-      </div>
+    <section className="updates-section" aria-labelledby="entries-title">
+      <h2 id="entries-title">Updates</h2>
       {entries.length ? (
-        <ol className="entry-list">
-          {entries.map((entry, index) => (
+        <ol className="update-stream">
+          {entries.map((entry) => (
             <li key={entry.id}>
-              <EntryCard entry={entry} index={index + 1} />
+              <UpdateItem
+                entry={entry}
+                displayName={displayName}
+                identityHref={identityHref}
+              />
             </li>
           ))}
         </ol>
       ) : (
         <div className="empty-public">
-          <p className="empty-mark" aria-hidden="true">A</p>
-          <div>
-            <h3>No published updates yet</h3>
-            <p>
-              {configured
-                ? "The presence already stands on its own. Its first update will appear here when it is ready."
-                : "Published updates will appear here after the owner completes this presence."}
-            </p>
-          </div>
+          <h3>No published updates yet</h3>
+          <p>
+            {configured
+              ? "The presence already stands on its own. Its first update will appear here when it is ready."
+              : "Published updates will appear here after the owner completes this presence."}
+          </p>
         </div>
       )}
     </section>
   );
 }
 
-function EntryCard({ entry, index }: { entry: Entry; index: number }) {
-  const label = entry.title ?? entry.body.split(/\n/, 1)[0].slice(0, 90);
+function UpdateItem({
+  entry,
+  displayName,
+  identityHref,
+}: {
+  entry: Entry;
+  displayName: string;
+  identityHref: string;
+}) {
+  const permalink = `/entries/${entry.id}`;
+  const publishedAt = entry.publishedAt ?? entry.createdAt;
+  const isNote = entry.kind === "note";
+
   return (
-    <article className={`entry-card entry-kind-${entry.kind}`}>
-      <div className="entry-number" aria-hidden="true">{String(index).padStart(2, "0")}</div>
-      <div className="entry-card-body">
-        <div className="entry-meta">
-          <span>{entry.kind}</span>
-          <time dateTime={entry.publishedAt ?? entry.createdAt}>
-            {formatDate(entry.publishedAt ?? entry.createdAt)}
-          </time>
+    <article className={`update-item update-kind-${entry.kind}`}>
+      <header className="update-source-row">
+        <a className="update-source-identity" href={identityHref}>
+          <PresenceIdentityTile displayName={displayName} size="update" />
+          <span>{displayName}</span>
+        </a>
+        <div className="update-context">
+          {!isNote && <span className="update-kind">{kindLabel(entry.kind)}</span>}
+          <a
+            className="update-time"
+            href={permalink}
+            aria-label={`Open update published ${formatDate(publishedAt)}`}
+          >
+            <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
+          </a>
         </div>
-        <h3 className={entry.title ? undefined : "entry-note-title"}>
-          <a href={`/entries/${entry.id}`}>{label}</a>
-        </h3>
-        {entry.title && <p className="entry-excerpt">{excerpt(entry.body)}</p>}
-        <div className="entry-card-links">
-          <a className="text-link" href={`/entries/${entry.id}`}>Read update</a>
-          {entry.destinationUrl && <a className="text-link" href={entry.destinationUrl} rel="noopener noreferrer">Open destination</a>}
-        </div>
-      </div>
+      </header>
+
+      {isNote ? (
+        <>
+          <p className="update-body update-note-body">{entry.body}</p>
+          {entry.title && (
+            <a className="update-note-title" href={permalink}>{entry.title}</a>
+          )}
+        </>
+      ) : (
+        <>
+          {entry.title && (
+            <h3 className="update-title"><a href={permalink}>{entry.title}</a></h3>
+          )}
+          <p className="update-body update-excerpt">{excerpt(entry.body)}</p>
+        </>
+      )}
+
+      {entry.destinationUrl && (
+        <a
+          className="update-destination"
+          href={entry.destinationUrl}
+          rel="noopener noreferrer"
+        >
+          <span>Destination</span>
+          <strong>{entry.destinationUrl}</strong>
+        </a>
+      )}
     </article>
   );
 }
@@ -270,7 +323,16 @@ function summarizeAbout(value: string): string {
 }
 
 function excerpt(value: string): string {
-  return value.length > 240 ? `${value.slice(0, 237).trimEnd()}…` : value;
+  const characters = Array.from(value);
+  if (characters.length <= 240) return value;
+
+  const candidate = characters.slice(0, 237).join("").trimEnd();
+  const boundary = Math.max(candidate.lastIndexOf(" "), candidate.lastIndexOf("\n"));
+  return `${boundary >= 120 ? candidate.slice(0, boundary).trimEnd() : candidate}…`;
+}
+
+function kindLabel(kind: Entry["kind"]): string {
+  return `${kind.charAt(0).toUpperCase()}${kind.slice(1)}`;
 }
 
 function readableHost(value: string): string {
