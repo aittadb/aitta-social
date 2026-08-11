@@ -58,12 +58,34 @@ origin, hosting binding, or deployment operation.
 
 ## Rendered acceptance
 
-Before TASK-149 is archived, the exact integrated candidate must be opened in
-the in-app browser at wide and actual 320 CSS-pixel viewports. Public,
-permalink, and owner navigation must remain native and keyboard focusable; the
-packaged scripts, styles, and fonts must load; CSP violation, console warning,
-and page-error counts must be zero. Record the browser version, exact commit,
-routes, viewport dimensions, and console counts with the final task evidence.
+The source-equivalent task commit
+`1b5be374338255089ac2fb883482b4775001fe40` and integrated implementation
+commit `8295c07` have the same Git tree
+`072309d6427405b2e01e914eb9f4ade0f5459d33`. That tree was built and opened
+through the in-app browser's Chrome 151.0.0.0 runtime against disposable
+compiled-Worker and real local-D1 fixtures bound only to `127.0.0.1`.
+
+The configured public page, published permalink, authorized owner page, and
+owner Identity route were inspected at requested 1280-by-900 and actual
+320-by-900 CSS-pixel browser viewports. The document client widths were 1265
+and 305 pixels because of the vertical scrollbar; every inspected page had
+zero horizontal overflow. All routes reached complete document state with the
+three emitted same-origin modules, dynamic inline RSC scripts, and compiled
+stylesheet available. The stylesheet exposed all 219 application rules. The
+browser reported 13 loaded font faces, `document.fonts.status` as `loaded`, and
+only same-origin `/_next/static/_vinext_fonts/` URLs. Response inspection
+confirmed the exact fixed CSP and `no-store, must-revalidate` on the public,
+permalink, and owner HTML.
+
+The public `Read update` and owner `Identity` controls remained native anchors.
+An Enter key event focused each anchor, targeted its expected local `href`, and
+was not default-prevented; no app keyboard handler or positive tab-order
+override exists. The same anchors navigated to the published permalink and
+owner Identity page in the browser. Across both viewport sizes, console
+warning, error, page-error, and CSP-violation counts were all zero. The combined
+post-removal source at `1310e06` then passed the production build and all 174
+tests, including the exact CSP asset/header matrix and absence of the retired
+Hub client and routes.
 
 No Site, hosted D1 data, protected setting, access policy, DNS record, or custom
 domain is read or changed by this local acceptance work.
