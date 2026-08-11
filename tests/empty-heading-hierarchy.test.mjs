@@ -17,7 +17,7 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
 
   assert.match(
     css,
-    /\.introduction h2, \.section-heading h2, \.owner-section h2\s*\{[^}]*font-size:\s*clamp\(2rem, 4vw, 3\.4rem\)/s,
+    /\.section-heading h2, \.owner-section h2\s*\{[^}]*font-size:\s*clamp\(2rem, 4vw, 3\.4rem\)/s,
   );
   assert.match(
     css,
@@ -57,8 +57,8 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
 
   assert.match(
     css,
-    /\.identity-main h1, \.template-introduction h1, \.permalink-entry h1, \.state-page h1, \.owner-access-state h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)/s,
-    "the accepted primary headline scale must stay unchanged",
+    /\.presence-heading h1\s*\{[^}]*font-size:\s*2rem[^}]*overflow-wrap:\s*anywhere/s,
+    "the compact public Identity headline must remain bounded and wrapping",
   );
   assert.match(
     css,

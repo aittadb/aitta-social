@@ -14,7 +14,7 @@ const ownerCanary = "HIERARCHY_OWNER_PRIVATE_CANARY@example.test";
 const longVisibleHost = `${"public-presence-segment.".repeat(8)}example.test`;
 const longUnbrokenCopy = "pitkajulkinenpaivitysteksti".repeat(14);
 
-test("the public presence leads with identity, featured information, and recent updates", async () => {
+test("the public presence leads with its compact graphical identity and About content", async () => {
   const entries = [
     entryRow({
       id: "hierarchy-note",
@@ -68,6 +68,10 @@ test("the public presence leads with identity, featured information, and recent 
               label: "Erittäin pitkä julkinen viitelinkki ilman yksityisiä tietoja",
               url: `https://reference.example/${"documented-public-path/".repeat(10)}`,
             },
+            ...Array.from({ length: 7 }, (_, index) => ({
+              label: `Public reference ${index + 2}`,
+              url: `https://reference-${index + 2}.example/resource`,
+            })),
           ]),
           private_canary: "HIERARCHY_PROFILE_PRIVATE_CANARY",
         }),
@@ -82,29 +86,39 @@ test("the public presence leads with identity, featured information, and recent 
   assert.equal(response.headers.get("cache-control"), "no-store, must-revalidate");
   const html = await response.text();
 
-  const identity = html.indexOf('<section class="identity-block"');
+  const navigation = html.indexOf('<header class="public-nav"');
+  const identity = html.indexOf('<section class="presence-identity"');
+  const identityField = html.indexOf('class="presence-identity-field"', identity);
+  const identityTile = html.indexOf('class="presence-identity-tile"', identityField);
   const identityHeading = html.indexOf('id="account-name"', identity);
-  const featured = html.indexOf(">Featured information<", identityHeading);
-  const introduction = html.indexOf('id="introduction-title"', featured);
-  const recent = html.indexOf(">Recent<", introduction);
-  const updates = html.indexOf('id="entries-title"', recent);
+  const details = html.indexOf('aria-label="Presence details"', identityHeading);
+  const about = html.indexOf('id="about-title"', details);
+  const updates = html.indexOf('id="entries-title"', about);
   const firstUpdate = html.indexOf("Lyhyt huomio yhteistyöstä", updates);
   const technical = html.indexOf('aria-label="Technical resources"', firstUpdate);
 
-  for (const marker of [identity, identityHeading, featured, introduction, recent, updates, firstUpdate, technical]) {
+  for (const marker of [navigation, identity, identityField, identityTile, identityHeading, details, about, updates, firstUpdate, technical]) {
     assert.notEqual(marker, -1);
   }
-  assert.ok(identity < identityHeading);
-  assert.ok(identityHeading < featured);
-  assert.ok(featured < introduction);
-  assert.ok(introduction < recent);
-  assert.ok(recent < updates);
+  assert.ok(navigation < identity);
+  assert.ok(identity < identityField);
+  assert.ok(identityField < identityTile);
+  assert.ok(identityTile < identityHeading);
+  assert.ok(identityHeading < details);
+  assert.ok(details < about);
+  assert.ok(about < updates);
   assert.ok(updates < firstUpdate);
   assert.ok(firstUpdate < technical);
 
   assert.match(html, /<header[^>]+class="public-nav"[^>]+aria-label="Presence navigation"/i);
   assert.match(html, /<nav[^>]+class="public-nav-actions"[^>]+aria-label="Presence actions"/i);
   assert.match(html, /<aside[^>]+aria-label="Presence details"/i);
+  const detailRegion = html.slice(html.indexOf('<aside class="presence-details"'), html.indexOf("</aside>") + 8);
+  assert.equal(detailRegion.match(/<p class="presence-detail">/g)?.length, 10);
+  assert.equal(detailRegion.match(/rel="me noopener noreferrer"/g)?.length, 9);
+  assert.match(html, /<span class="presence-identity-tile" aria-hidden="true">PE<\/span>/i);
+  assert.match(html, /<h2 id="about-title">About<\/h2>/i);
+  assert.match(html, /<details>.*<summary>Read full About<\/summary>.*Tämä esittely toimii myös käännetyllä tekstillä.*<\/details>/is);
   assert.match(html, /<ol[^>]+class="entry-list"/i);
   assert.match(
     html,
@@ -115,6 +129,7 @@ test("the public presence leads with identity, featured information, and recent 
   const updatesHeading = html.slice(html.indexOf('<div class="section-heading"'), html.indexOf('<ol class="entry-list"'));
   assert.doesNotMatch(publicHeader, /Manifest|JSON API|api\/v1/i);
   assert.doesNotMatch(updatesHeading, /JSON API|api\/v1/i);
+  assert.doesNotMatch(html, />Public presence<|>Featured information<|>Introduction<|class="section-index"/i);
 
   for (const kind of ["note", "article", "link", "announcement"]) {
     assert.match(html, new RegExp(`>${kind}<`, "i"));
@@ -131,6 +146,48 @@ test("the public presence leads with identity, featured information, and recent 
   assert.doesNotMatch(html, />Company presence|>Presence type|accountType/i);
 });
 
+test("missing optional details and an empty historical introduction reserve no region", async () => {
+  const response = await fetchApp("/", {
+    env: makeEnv({
+      db: new FakeD1({
+        profile: profileRow({
+          introduction: "",
+          location: null,
+          website: null,
+          external_links_json: "[]",
+        }),
+      }),
+    }),
+    headers: { accept: "text/html" },
+  });
+
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /class="presence-identity"/i);
+  assert.doesNotMatch(html, /class="presence-details"|class="presence-about"|id="about-title"/i);
+});
+
+test("the homepage and permalink use the same compact public frame and quiet resources", async () => {
+  const env = makeEnv({ db: new FakeD1({ entries: [entryRow({ id: "shared-frame-update" })] }) });
+  const home = await fetchApp("/", { env, headers: { accept: "text/html" } });
+  const permalink = await fetchApp("/entries/shared-frame-update", {
+    env,
+    headers: { accept: "text/html" },
+  });
+
+  assert.equal(home.status, 200);
+  assert.equal(permalink.status, 200);
+  for (const html of [await home.text(), await permalink.text()]) {
+    assert.match(html, /<header class="public-nav"/i);
+    assert.match(html, /<div class="public-frame public-nav-inner">/i);
+    assert.match(html, /<footer class="public-footer">/i);
+    assert.match(html, /aria-label="Technical resources"/i);
+    assert.match(html, /href="\/\.well-known\/aitta-social\.json"/i);
+    assert.match(html, /href="\/api\/v1\/site"/i);
+    assert.match(html, /href="\/api\/v1\/entries"/i);
+  }
+});
+
 test("an empty presence stays intentional without Hub", async () => {
   const response = await fetchApp("/", {
     env: makeEnv({
@@ -143,7 +200,7 @@ test("an empty presence stays intentional without Hub", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /Ada Account/);
-  assert.match(html, />Featured information</);
+  assert.match(html, />About</);
   assert.match(html, />Recent</);
   assert.match(html, /No published updates yet/);
   assert.match(html, /presence already stands on its own/i);
@@ -166,14 +223,19 @@ test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom
   assert.ok(contrastRatio(focusDark, focusLight) >= 3, "the two focus layers must remain distinguishable");
   assert.match(css, /\.wordmark\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.text-link\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(css, /\.identity-details a\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(css, /\.public-nav-action\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(css, /\.presence-detail a\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(css, /\.presence-about summary\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.public-attribution a,\s*\.technical-links a\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(css, /\.identity-main h1[^{]*\{[^}]*overflow-wrap:\s*anywhere/s);
-  assert.match(css, /\.prose-copy,\s*\.entry-body\s*\{[^}]*overflow-wrap:\s*anywhere/s);
-  assert.match(css, /@media\s*\(max-width:\s*900px\)\s*\{[^}]*\.identity-block\s*\{[^}]*grid-template-columns:\s*1fr/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*?\.public-nav\s*\{[^}]*flex-direction:\s*column/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*?\.public-nav-actions,\s*\.public-nav-actions \.button\s*\{[^}]*width:\s*100%/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*?\.introduction\s*\{[^}]*grid-template-columns:\s*1fr/s);
+  assert.match(css, /\.presence-heading h1\s*\{[^}]*font-size:\s*2rem[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.presence-summary\s*\{[^}]*white-space:\s*pre-wrap[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.presence-about-copy\s*\{[^}]*white-space:\s*pre-wrap[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.public-nav-inner\s*\{[^}]*min-height:\s*60px[^}]*flex-wrap:\s*nowrap/s);
+  assert.match(css, /\.public-frame, \.public-presence-column, \.public-wide-content, \.permalink-content\s*\{[^}]*safe-area-inset-left[^}]*safe-area-inset-right/s);
+  assert.match(css, /\.presence-identity-field\s*\{[^}]*height:\s*108px[^}]*background:\s*var\(--accent\)/s);
+  assert.match(css, /\.presence-identity-field::before\s*\{[^}]*background:\s*rgb\(255 255 255 \/ 18%\)/s);
+  assert.match(css, /\.presence-identity-field::after\s*\{[^}]*background:\s*rgb\(0 0 0 \/ 12%\)/s);
+  assert.match(css, /\.presence-identity-tile\s*\{[^}]*width:\s*88px[^}]*height:\s*88px[^}]*background:\s*var\(--accent\)[^}]*color:\s*var\(--accent-contrast\)/s);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*?\.entry-card\s*\{[^}]*grid-template-columns:\s*1fr/s);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);

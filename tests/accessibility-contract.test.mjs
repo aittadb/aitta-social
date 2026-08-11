@@ -32,7 +32,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<time[^>]+datetime=/i);
     assert.match(
       html,
-      /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]+aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage presence as owner<\/a>/i,
+      /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]+aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i,
     );
     assert.doesNotMatch(html, />Sign in<\/a>|Owner access/i);
     assert.match(html, /<strong>\s*<a[^>]+href="https:\/\/aitta\.social"[^>]*>AittaSocial<\/a>\s*<\/strong>/i);
@@ -61,7 +61,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /href="\/owner"[^>]+aria-label="Manage presence as owner — open local sole-owner administration"[^>]*>Manage presence as owner<\/a>/i);
+    assert.match(html, /href="\/owner"[^>]+aria-label="Manage presence as owner — open local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/i);
   });
 
@@ -118,7 +118,7 @@ test("presence and update language stays clear without obsolete Hub controls", a
     const publicHtml = await publicResponse.text();
     assert.match(publicHtml, />Updates<\/h2>/i);
     assert.match(publicHtml, />Read update<\/a>/i);
-    assert.match(publicHtml, />Manage presence as owner<\/a>/i);
+    assert.match(publicHtml, /aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(publicHtml, />Entries<\/h2>|>Read entry<\/a>|>Sign in<\/a>/i);
 
     const ownerResponse = await fetchApp("/owner", {

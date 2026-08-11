@@ -51,7 +51,7 @@ test("a truly unconfigured deployment leads with the exact prompt and published-
   assert.match(html, /<label[^>]+for="deployment-prompt"[^>]*>Prompt for ChatGPT<\/label>/i);
   assert.match(html, /<textarea(?=[^>]+id="deployment-prompt")(?=[^>]+readonly)/i);
   assert.match(html, /href="\/signin-with-chatgpt\?return_to=%2Fowner"/i);
-  assert.match(html, />Set up this presence<\/a>/i);
+  assert.match(html, /aria-label="Set up this presence — sign in with ChatGPT for local sole-owner administration"[^>]*>Set up<\/a>/i);
   assert.match(html, /Visible public update/i);
   assert.doesNotMatch(
     html,
@@ -70,7 +70,7 @@ test("the prompt reveals no owner authorization result", async (t) => {
     const html = await response.text();
     assert.equal(response.status, 200);
     assert.equal(readPrompt(html), deploymentPrompt);
-    assert.match(html, /href="\/owner"[^>]*>Set up this presence<\/a>/i);
+    assert.match(html, /href="\/owner"[^>]+aria-label="Set up this presence — open local sole-owner administration"[^>]*>Set up<\/a>/i);
     assert.doesNotMatch(html, new RegExp(ownerEmail.replaceAll(".", "\\."), "i"));
   });
 
@@ -81,7 +81,7 @@ test("the prompt reveals no owner authorization result", async (t) => {
     });
     const publicHtml = await publicResponse.text();
     assert.equal(readPrompt(publicHtml), deploymentPrompt);
-    assert.match(publicHtml, /href="\/owner"[^>]*>Set up this presence<\/a>/i);
+    assert.match(publicHtml, /href="\/owner"[^>]+aria-label="Set up this presence — open local sole-owner administration"[^>]*>Set up<\/a>/i);
     assert.doesNotMatch(publicHtml, /you are the owner|owner verified/i);
 
     const ownerResponse = await fetchApp("/owner", {
@@ -168,7 +168,8 @@ test("the prompt surface stays native, selectable, responsive, and accessible", 
   assert.match(css, /\.template-start\s*\{[^}]*grid-template-columns:\s*minmax\(0,/s);
   assert.match(css, /\.deployment-prompt textarea\s*\{[^}]*width:\s*100%[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*\.template-start\s*\{[^}]*grid-template-columns:\s*1fr/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.public-nav-actions \.button\s*\{[^}]*width:\s*100%/s);
+  assert.match(css, /\.public-nav-inner\s*\{[^}]*min-height:\s*60px[^}]*flex-wrap:\s*nowrap/s);
+  assert.match(css, /\.public-nav-action\s*\{[^}]*min-height:\s*44px[^}]*white-space:\s*nowrap/s);
   assert.match(css, /:focus-visible\s*\{[^}]*outline:\s*3px/s);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);

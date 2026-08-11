@@ -40,7 +40,7 @@ test("signed-out visitors receive the public presence HTML and only published co
   assert.match(html, /Public Ada/);
   assert.match(html, /Visible entry/);
   assert.match(html, /PUBLIC_BODY_CANARY/);
-  assert.match(html, />Manage presence as owner<\/a>/);
+  assert.match(html, /aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/);
   assert.match(html, /\/signin-with-chatgpt\?return_to=%2Fowner/);
   assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/);
   assert.doesNotMatch(html, /DRAFT_TITLE_PRIVATE_CANARY|DRAFT_BODY_PRIVATE_CANARY/);
@@ -76,7 +76,8 @@ test("public HTML is category-neutral while protocol 1.0 retains a legacy accoun
   });
   assert.equal(htmlResponse.status, 200);
   const html = await htmlResponse.text();
-  assert.match(html, />Public presence</i);
+  assert.match(html, /class="presence-identity"/i);
+  assert.doesNotMatch(html, />Public presence</i);
   assert.doesNotMatch(html, />Company presence</i);
   assert.doesNotMatch(html, />Presence type</i);
 

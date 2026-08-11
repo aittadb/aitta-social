@@ -25,7 +25,14 @@ import {
 } from "./helpers/local-d1-upgrade.mjs";
 
 const DEFAULT_ACCENT = "#31554d";
-const LIGHT_SURFACES = ["#eef0eb", "#f3f0e8", "#f7f7f3", "#fbfaf6", "#ffffff"];
+const LIGHT_SURFACES = [
+  "#eef0eb",
+  "#f3f0e8",
+  "#f7f7f3",
+  "#fbfaf6",
+  "#ffffff",
+  "#fffcf5",
+];
 const PUBLISHED_ID = "accent-published";
 
 test("the deterministic accent rule preserves safe colors and adjusts unsafe colors", () => {
@@ -230,6 +237,8 @@ test("the owner preview uses the shared rule and forced colors stay browser-owne
   assert.match(css, /\.identity-draft-preview\s*\{[^}]*background:\s*#fff(?:;|\s|\})/s);
   assert.equal(cssCustomProperty(css, "accent-contrast"), LIGHT_SURFACES[4]);
   assert.match(css, /\.button\s*\{[^}]*color:\s*var\(--accent-contrast\)/s);
+  assert.match(css, /\.public-shell, \.permalink-shell\s*\{[^}]*--paper:\s*#f3f0e8[^}]*--paper-raised:\s*#fffcf5/s);
+  assert.match(css, /\.presence-identity-tile\s*\{[^}]*background:\s*var\(--accent\)[^}]*color:\s*var\(--accent-contrast\)/s);
 });
 
 async function storedAccent(db) {
