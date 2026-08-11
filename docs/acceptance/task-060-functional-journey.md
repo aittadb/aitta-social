@@ -5,7 +5,9 @@ journeys, migration review, and full repository validation all pass.
 
 This proof is local-only. It does not read or package the ignored active
 hosting binding, deploy a Site, mutate hosted D1 data or runtime settings,
-change access, DNS, or a custom domain, or contact an external service.
+change access, DNS, or a custom domain, or contact Sites, Hub, or another
+application endpoint. The production dependency audit is the sole read-only
+external registry check.
 
 ## Candidate provenance
 
@@ -80,8 +82,9 @@ accepted as a recorded correction.
 
 ## Security, privacy, and external-state review
 
-- Fresh and historical draft title/body canaries are checked across public
-  HTML, unknown permalinks, detail JSON, and collection JSON.
+- The fresh draft body canary and historical draft identifier, title, and body
+  canaries are checked across public HTML, unknown permalinks, detail JSON,
+  and collection JSON.
 - Owner and missing-owner denial paths are checked before and after attempted
   mutation against an exact D1 snapshot.
 - Retired Hub origin and credential canaries are hostile inert inputs. They
