@@ -377,7 +377,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .owner-form { padding-top: 1rem; }
 .identity-form-readiness { align-items: center; }
 .identity-form-readiness > .text-link { justify-self: end; }
-.identity-draft-preview { margin: 2rem 0 3rem; padding: 2rem; border: 1px solid #cfd2cc; border-left: 6px solid var(--preview-accent, var(--accent)); background: #fff; }
+.identity-draft-preview { margin: 2rem 0 3rem; padding: 2rem; border: 1px solid #cfd2cc; border-left: 6px solid var(--accent); background: #fff; }
 .identity-draft-preview small { color: var(--muted); }
 .owner-form fieldset { margin: 0; padding: 0 0 3rem; border: 0; }
 .owner-form fieldset + fieldset { padding-top: 3rem; border-top: 1px solid #cfd2cc; }

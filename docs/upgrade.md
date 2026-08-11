@@ -64,6 +64,16 @@ boundaries:
 - protected runtime canonical configuration taking precedence over the stored
   profile fallback without exposing the raw setting.
 
+Presentation rendering does not migrate or normalize the stored accent. The
+current candidate reopens a disposable copy of the frozen historical fixture,
+and the focused accent proof additionally places an invalid legacy value in
+that persisted row before close and reopen. Public and owner style properties
+then use the deterministic safe fallback while D1 and the existing protocol
+1.0 presentation field retain the byte-identical stored value. Page reads,
+preview, and reload perform no repair write. This is a rendering decision only:
+there is no schema, migration, runtime configuration, authentication, or public
+envelope change.
+
 A successfully migrated but empty database is a **fresh** presence: after the
 empty D1 read succeeds, the public page may show the leading deployment prompt
 and neutral `noindex, nofollow` metadata. An **upgraded** presence retains its

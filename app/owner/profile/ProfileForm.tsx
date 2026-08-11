@@ -2,6 +2,7 @@
 
 import { useState, type CSSProperties, type FormEvent } from "react";
 import type { IdentityReadiness } from "@/lib/identity-readiness";
+import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { ProfileInput } from "@/lib/types";
 import { classifyOwnerMutationResponse } from "../_components/owner-mutation-outcome";
 
@@ -117,7 +118,7 @@ export function ProfileForm({
       <aside
         className="identity-draft-preview"
         aria-labelledby="identity-draft-preview-title"
-        style={{ "--preview-accent": safePreviewAccent(preview.accentColor) } as CSSProperties}
+        style={{ "--accent": resolvePresentationAccent(preview.accentColor) } as CSSProperties}
       >
         <div>
           <p className="eyebrow">{dirty ? "Unsaved form preview" : profile ? "Saved Identity preview" : "New Identity preview"}</p>
@@ -216,10 +217,6 @@ function requiredCount(preview: DraftPreview): number {
   return [preview.displayName, preview.shortDescription, preview.introduction, preview.canonicalUrl]
     .filter((value) => value.trim().length > 0)
     .length;
-}
-
-function safePreviewAccent(value: string): string {
-  return /^#[0-9a-f]{6}$/i.test(value) ? value : "#31554d";
 }
 
 function Field({ label, name, type = "text", ...props }: { label: string; name: string; type?: string; [key: string]: unknown }) {

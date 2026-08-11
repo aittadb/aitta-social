@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getEntry, getProfile } from "@/db/repository";
 import {
   publicEntryMetadata,
   unavailableEntryMetadata,
 } from "@/lib/public-metadata";
+import { resolvePresentationAccent } from "@/lib/presentation-accent";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +32,10 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
   const [entry, profile] = await Promise.all([getEntry(id, true), getProfile()]);
   if (!entry) notFound();
   return (
-    <main className="permalink-shell" style={{ "--accent": profile?.accentColor ?? "#31554d" } as React.CSSProperties}>
+    <main
+      className="permalink-shell"
+      style={{ "--accent": resolvePresentationAccent(profile?.accentColor) } as CSSProperties}
+    >
       <nav className="permalink-nav" aria-label="Update navigation">
         <a className="wordmark" href="/">{profile?.displayName ?? "Presence"}</a>
         <a className="text-link" href="/">All updates</a>
