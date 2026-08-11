@@ -26,17 +26,21 @@ migration and protocol decisions, documentation, and decisive evidence.
   They return to this queue only one bounded vertical increment at a time after
   their exact external contract or service prerequisite exists; endpoints,
   claims, tokens, and data ownership must never be guessed.
-- The live deployment and current source share the same public visual
-  implementation: a large editorial identity hero, numbered Introduction, and
-  article-like entry previews place updates below the first phone viewport.
-  The accepted next increment replaces that hierarchy with a compact,
-  identity-led mobile presence without changing data, authentication, public
-  contracts, metadata, hosting, or the private owner workspace.
-- The planning checkout must pass the instruction, license, plan, instance,
-  runtime, D1 migration, type, lint, production-build, and complete test gates.
-  The 34 former Hub and network tasks remain future provenance under
-  `ROADMAP-004` through `ROADMAP-008`, while more speculative lifecycle and
-  suggestion work remains in `BACKLOG.md`.
+- The live deployment remains the read-only pre-redesign visual baseline. The
+  current `develop` source now uses the accepted compact, identity-led mobile
+  presence documented in `docs/acceptance/task-156-mobile-presence-redesign.md`;
+  the redesign was deliberately not deployed and changed no data,
+  authentication, public contract, metadata, hosting, or private owner
+  workspace.
+- The planning checkout passes `npm run validate` with the instruction,
+  license, plan, instance, runtime, D1 migration, type, lint, production-build,
+  and 191 test gates green; `npm audit --omit=dev` reports no production
+  dependency advisory.
+- The accepted mobile-presence increment is complete, so the active queue is
+  intentionally empty. The 34 former Hub and network tasks remain future
+  provenance under `ROADMAP-004` through `ROADMAP-008`, while more speculative
+  lifecycle and suggestion work remains in `BACKLOG.md`. Promote only the next
+  immediately useful, contract-backed vertical increment when it is concrete.
 
 ## Active queue
 
@@ -47,4 +51,6 @@ are disjoint. Each task owns one bounded outcome plus its tests, documentation,
 and migration/configuration decision; split it again before implementation if
 those cannot land as one focused reviewable commit.
 
-- [ ] **TASK-156 — Prove the mobile-first public redesign across content and accessibility boundaries.** Correct and certify the integrated public homepage and permalink redesign through one production-equivalent local rendered acceptance matrix without deployment. DoD: a representative populated homepage and permalink pass at 320×568, 360×800, 390×844, 430×932, 768×1024, 1024×768, and 1440×900; focused 320×568 and 1440×900 boundary fixtures cover no profile, no/one/many updates, a 100-character name, long description/About, missing details, eight links, long unbroken strings, every update kind, visible/hidden attribution, and published/draft/unknown/not-found permalinks; 390×844 additionally shows the top row, identity, featured/About information, Updates heading, and meaningful first-update content, while 320×568 shows the first update's beginning and identity row; every row has no horizontal overflow, clipping, obscured focus, cutout collision, fake control, or console error and passes semantic order, native keyboard navigation, visible/forced-color focus, 44-pixel touch targets, text/control contrast, enlarged text, 400-percent reflow equivalence, reduced motion, and coarse-pointer checks; live-before and exact-candidate-after images are captured only as untracked owner-review artifacts at 390×844 and 1440×900, while committed evidence records identity-free measurements and artifact digests plus meaningful source/live differences; navigation is proven on the local packaged Worker preview because deployment is prohibited, public API/privacy/metadata/CSP behavior is unchanged, `npm run db:generate` produces no migration, `npm run validate`, `npm audit --omit=dev`, and `git diff --check` pass, and the acceptance record names exact commit/evidence and any residual limitation while making no Site, data, settings, access, DNS, domain, Hub, sibling-repository, main, or deployment change. Depends on: TASK-155.
+There is no accepted unfinished task. Promote only the next smallest meaningful
+increment from `ROADMAP.md` or `BACKLOG.md` after its prerequisites and binary
+definition of done are concrete.
