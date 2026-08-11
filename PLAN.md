@@ -13,12 +13,13 @@ migration and protocol decisions, documentation, and decisive evidence.
   sole-owner boundary, draft privacy, deployment-owned D1, native navigation,
   responsive behavior, and Hub-failure isolation are working and remain in
   scope without being rewritten.
-- The deployed Site version 6 uses product source commit
-  `3d028321f26cda7ce1e4cdbffc64406bb52e4ff5`; the current reviewed feature
-  source includes the completed presence-first language, metadata, hierarchy,
-  onboarding, runtime-customization, reproducibility, and upgrade work recorded
-  in `CHANGELOG.md`. The older live version predates those source corrections;
-  hosted alignment belongs only to the separately approved TASK-061 checkpoint.
+- The deployed Site version 7 uses the exact reviewed and pushed `develop`
+  source commit `a14fb61bd43c372d12fed02365020f4cc77c6b57`. The
+  presence-first language, metadata, hierarchy, onboarding,
+  runtime-customization, reproducibility, upgrade, security, and rendered
+  accessibility work is aligned with the live checkpoint recorded in
+  `docs/checkpoint.md` and `CHANGELOG.md`; `main` remains untouched pending a
+  later owner-reviewed pull request.
 - No accepted presence-consumable Hub contract currently exists. Secure Hub
   registration, verified discovery, Follow and Unfollow, and a private
   followed-update reader therefore remain future direction in `ROADMAP.md`.
@@ -29,12 +30,11 @@ migration and protocol decisions, documentation, and decisive evidence.
   license, plan, instance, runtime, D1 migration, type, lint, production-build,
   and 188 test gates green; `npm audit --omit=dev` reports no production
   dependency advisory.
-- The current increment is deliberately smaller than the full social roadmap:
-  finish the production-equivalent presence-first acceptance matrices, then
-  save and inspect one separately approved Sites checkpoint. The 34 former Hub
-  and network tasks are preserved as unfinished provenance under
-  `ROADMAP-004` through `ROADMAP-008`, while more speculative lifecycle and
-  suggestion work remains in `BACKLOG.md`.
+- The accepted presence-first increment is complete, so the active queue is
+  intentionally empty. The 34 former Hub and network tasks remain future
+  provenance under `ROADMAP-004` through `ROADMAP-008`, while more speculative
+  lifecycle and suggestion work remains in `BACKLOG.md`. Promote only the next
+  immediately useful, contract-backed vertical increment when it is concrete.
 
 ## Active queue
 
@@ -45,4 +45,6 @@ are disjoint. Each task owns one bounded outcome plus its tests, documentation,
 and migration/configuration decision; split it again before implementation if
 those cannot land as one focused reviewable commit.
 
-- [ ] **TASK-061 — Save and inspect an explicitly approved presence-first Sites checkpoint.** Split from release acceptance: only with separate owner approval, package and deploy the exact reviewed commit to the one existing Site without changing content, D1 data, protected settings, access, DNS or custom domains. DoD: verify deployment status and commit provenance; repeat configured public/owner/metadata/API/navigation and focused accessibility smoke checks; prove the setup prompt is absent on the configured Site; record checkpoint URL and residual uncertainty; make no unapproved external mutation; and pass post-deployment status checks. Depends on: TASK-060, TASK-136, TASK-137.
+There is no accepted unfinished task. Promote only the next smallest meaningful
+increment from `ROADMAP.md` or `BACKLOG.md` after its prerequisites and binary
+definition of done are concrete.
