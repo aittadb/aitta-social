@@ -36,7 +36,12 @@ test("primary headings use one restrained responsive scale", async () => {
   );
   assert.match(
     css,
-    /\.owner-page-header h1\s*\{[^}]*font-size:\s*clamp\(2\.25rem, 3\.5vw, 3\.5rem\)/s,
+    /\.owner-page-header h1\s*\{[^}]*font-size:\s*clamp\(2\.25rem, 3\.5vw, 3\.5rem\)[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
+  );
+  assert.match(
+    css,
+    /\.owner-page-header > div:first-child\s*\{[^}]*min-width:\s*0[^}]*max-width:\s*760px/s,
+    "a maximum-length owner Identity must shrink and wrap inside the header",
   );
   assert.doesNotMatch(
     css,
@@ -57,6 +62,19 @@ test("primary headings use one restrained responsive scale", async () => {
     css,
     /\.entry-card h3\s*\{[^}]*font-size:\s*clamp\(1\.7rem, 3vw, 2\.8rem\)/s,
   );
+  assert.match(
+    css,
+    /\.owner-section h2\s*\{[^}]*font-size:\s*clamp\(1\.75rem, 2\.5vw, 2\.5rem\)/s,
+  );
+
+  for (const width of [320, 640, 900, 1024, 1280, 1600, 2560]) {
+    const publicH1 = clampPixels(2.5, 5, 4.5, width);
+    const publicH2 = clampPixels(2, 4, 3.4, width);
+    const ownerH1 = clampPixels(2.25, 3.5, 3.5, width);
+    const ownerH2 = clampPixels(1.75, 2.5, 2.5, width);
+    assert.ok(publicH1 > publicH2, `public h1 must exceed h2 at ${width}px`);
+    assert.ok(ownerH1 > ownerH2, `owner h1 must exceed h2 at ${width}px`);
+  }
 });
 
 test("every primary headline surface keeps semantic text and private values out", async () => {
@@ -108,4 +126,8 @@ async function html(path, env, headers = {}) {
     headers: { accept: "text/html", ...headers },
   });
   return response.text();
+}
+
+function clampPixels(minRem, preferredVw, maxRem, width) {
+  return Math.min(maxRem * 16, Math.max(minRem * 16, width * preferredVw / 100));
 }

@@ -11,13 +11,17 @@ navigation, stored preference, or route behavior.
 - Public unavailable, 404, and owner-access states:
   `clamp(2.25rem, 4vw, 3.75rem)`.
 - Owner workspace page headings: `clamp(2.25rem, 3.5vw, 3.5rem)`.
+- Owner workspace section headings: `clamp(1.75rem, 2.5vw, 2.5rem)`.
 
+The owner section scale stays below its page h1 across all supported widths.
 The previous 640-pixel rules that could enlarge public Identity, setup, and
 permalink headings to 5rem are removed. Existing serif treatment, line height,
 balanced text, anywhere wrapping, semantic heading levels, section headings,
 update-card titles, native anchors, and focus behavior are unchanged.
 The repeated navigation wordmark is bounded and may ellipsize a maximum-length
 name; the complete Identity remains available in the wrapping primary heading.
+The owner header's text column may shrink below its intrinsic content width, so
+an unbroken maximum-length Identity wraps instead of widening the workspace.
 
 ## Automated evidence
 
@@ -25,11 +29,12 @@ name; the complete Identity remains available in the wrapping primary heading.
 breakpoint enlargement, and protects the existing section/update typography.
 It renders configured public Identity and maximum-length permalink headings,
 unconfigured setup, public-not-found, owner-access, and authorized owner page
-states, while proving their semantic heading text and private-canary exclusion.
+states, while proving their semantic heading text, shrink-and-wrap boundary,
+and private-canary exclusion.
 
 ## Rendered evidence
 
-Implementation candidate `69c349ad445b42d3e9adadf28251c56b5f8c5aaa`
+Initial implementation candidate `69c349ac31e32d1645b84b2a68ec57e9d9054716`
 was built and opened against disposable loopback-only D1 fixtures in Chrome
 151.0.0.0 through the in-app browser. The earlier exact-base measurements and
 corrected sizes were:
