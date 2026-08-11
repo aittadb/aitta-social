@@ -25,14 +25,14 @@ test("complete Identity leads from a new draft through public preview and back t
   });
 
   const emptyDashboard = await ownerPage(env);
-  assert.match(emptyDashboard, /Create a private first draft/i);
+  assert.match(emptyDashboard, /Create your first update/i);
   assert.match(emptyDashboard, /href="\/owner\/entries\/new"[^>]*>Create first draft/i);
   assert.equal(countMatches(ownerPageHeader(emptyDashboard), /<a class="button"/gi), 1);
   assert.equal(countMatches(emptyDashboard, />Create first draft<\/a>/gi), 1);
-  assert.equal(countMatches(emptyDashboard, />Preview public presence<\/a>/gi), 1);
+  assert.equal(countMatches(emptyDashboard, /<a class="button"/gi), 1);
   assert.doesNotMatch(emptyDashboard, />Create update<\/a>|>Create the first draft<\/a>/i);
-  const emptyPanel = firstUpdatePanel(emptyDashboard);
-  assert.equal(countMatches(emptyPanel, /<a /gi), 1);
+  const emptyPanel = nextStepPanel(emptyDashboard);
+  assert.equal(countMatches(emptyPanel, /<a /gi), 0);
   assert.doesNotMatch(emptyPanel, /owner\/entries\/new|Create first draft|class="button"/i);
   assert.equal(db.mutations.length, 0);
 
@@ -56,7 +56,7 @@ test("complete Identity leads from a new draft through public preview and back t
   assert.equal(leaveDashboard.status, 200);
 
   const resumedDashboard = await ownerPage(env);
-  assert.match(resumedDashboard, /Resume your saved draft/i);
+  assert.match(resumedDashboard, /Continue your first draft/i);
   assert.match(resumedDashboard, /remains private until you publish it/i);
   assert.match(
     resumedDashboard,
@@ -64,7 +64,7 @@ test("complete Identity leads from a new draft through public preview and back t
   );
   assert.equal(countMatches(ownerPageHeader(resumedDashboard), /<a class="button"/gi), 1);
   assert.equal(countMatches(resumedDashboard, />Resume first draft<\/a>/gi), 1);
-  assert.equal(countMatches(firstUpdatePanel(resumedDashboard), /<a /gi), 0);
+  assert.equal(countMatches(nextStepPanel(resumedDashboard), /<a /gi), 0);
 
   await assertDraftIsPubliclyUnknown(env, created.id, privateCanary);
 
@@ -82,13 +82,9 @@ test("complete Identity leads from a new draft through public preview and back t
   assert.match(publishedDashboard, /href="\/"[^>]*>Preview public presence/i);
   assert.equal(countMatches(ownerPageHeader(publishedDashboard), /<a class="button"/gi), 1);
   assert.equal(countMatches(publishedDashboard, />Preview public presence<\/a>/gi), 1);
-  assert.match(
-    publishedDashboard,
-    new RegExp(`href="/entries/${created.id}"[^>]*>Open first update permalink`, "i"),
-  );
-  const publishedPanel = firstUpdatePanel(publishedDashboard);
-  assert.equal(countMatches(publishedPanel, /<a /gi), 1);
-  assert.doesNotMatch(publishedPanel, /href="\/"|class="button"/i);
+  const publishedPanel = nextStepPanel(publishedDashboard);
+  assert.equal(countMatches(publishedPanel, /<a /gi), 0);
+  assert.doesNotMatch(publishedPanel, /class="button"/i);
   assert.match(publishedDashboard, />Edit<|>Unpublish</i);
 
   const [publicHome, publicPermalink, publicApi] = await Promise.all([
@@ -113,13 +109,13 @@ test("complete Identity leads from a new draft through public preview and back t
   assert.equal((await responseJson(unpublishedResponse)).data.state, "draft");
 
   const resumedAfterUnpublish = await ownerPage(env);
-  assert.match(resumedAfterUnpublish, /Resume your saved draft/i);
+  assert.match(resumedAfterUnpublish, /Continue your first draft/i);
   assert.match(
     resumedAfterUnpublish,
     new RegExp(`href="/owner/entries/${created.id}"[^>]*>Resume first draft`, "i"),
   );
   assert.equal(countMatches(ownerPageHeader(resumedAfterUnpublish), /<a class="button"/gi), 1);
-  assert.equal(countMatches(firstUpdatePanel(resumedAfterUnpublish), /<a /gi), 0);
+  assert.equal(countMatches(nextStepPanel(resumedAfterUnpublish), /<a /gi), 0);
   await assertDraftIsPubliclyUnknown(env, created.id, privateCanary);
 });
 
@@ -133,10 +129,11 @@ test("Identity remains the primary journey until its server-derived requirements
   const html = await ownerPage(env);
 
   assert.match(html, /Finish your identity/i);
-  assert.match(html, /Canonical URL needed/i);
+  assert.match(html, /Add a canonical URL/i);
   assert.match(html, /href="\/owner\/profile"[^>]*>Finish identity/i);
   assert.equal(countMatches(ownerPageHeader(html), /<a class="button"/gi), 1);
-  assert.doesNotMatch(html, /first-update-journey|Resume your saved draft|Create a private first draft/i);
+  assert.doesNotMatch(html, /Resume your saved draft|Create a private first draft/i);
+  assert.equal(countMatches(nextStepPanel(html), /<a /gi), 0);
   assert.equal(db.queries.filter(isBoundedFirstStateQuery).length, 0);
   assert.equal(db.mutations.length, 0);
 });
@@ -193,8 +190,8 @@ test("first-update resume and permalink selection stay stable across edits and c
     ],
   });
   const publishedHtml = await ownerPage(makeEnv({ db: publishedDb, ownerEmail }));
-  assert.match(publishedHtml, /href="\/entries\/published-a"[^>]*>Open first update permalink/i);
-  assert.doesNotMatch(publishedHtml, /href="\/entries\/published-b"[^>]*>Open first update permalink/i);
+  assert.match(publishedHtml, /Your first update is public/i);
+  assert.equal(publishedDb.queries.filter(isBoundedFirstStateQuery).length, 2);
 });
 
 test("bounded state queries keep the journey truthful beyond the 200-row management list", async (t) => {
@@ -242,7 +239,6 @@ test("bounded state queries keep the journey truthful beyond the 200-row managem
     });
     const html = await ownerPage(makeEnv({ db, ownerEmail }));
     assert.match(html, /Your first update is public/i);
-    assert.match(html, /href="\/entries\/beyond-cap-published"[^>]*>Open first update permalink/i);
     assert.doesNotMatch(html, /Beyond-cap published update/i);
     assert.equal(db.queries.filter(isBoundedFirstStateQuery).length, 2);
   });
@@ -256,7 +252,7 @@ test("only the configured owner sees the D1-backed first-update journey and page
       entries: [entryRow({ state: "draft", title: privateCanary, published_at: null })],
     });
     const html = await ownerPage(makeEnv({ db, ownerEmail }));
-    assert.match(html, /Resume your saved draft/i);
+    assert.match(html, /Continue your first draft/i);
     assert.match(html, new RegExp(privateCanary));
     assert.equal(db.mutations.length, 0);
   });
@@ -294,25 +290,32 @@ test("only the configured owner sees the D1-backed first-update journey and page
   });
 });
 
-test("first-update guidance uses bounded prepared reads, native semantic links, and existing responsive accessibility contracts", async () => {
+test("the single next-step panel uses bounded reads and compact responsive accessibility contracts", async () => {
   const [pageSource, repositorySource, css] = await Promise.all([
     readFile(new URL("../app/owner/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../db/repository.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
-  assert.match(pageSource, /<section[\s\S]*className="identity-readiness identity-readiness-complete first-update-journey"[\s\S]*aria-labelledby="first-update-journey-title"/);
-  assert.match(pageSource, /<h2 id="first-update-journey-title">/);
-  assert.match(pageSource, /<a className="text-link" href="\/">Preview public presence<\/a>/);
-  assert.match(pageSource, /<a className="text-link" href=\{`\/entries\/\$\{journey\.entry\.id\}`\}>/);
+  assert.match(pageSource, /className=\{`owner-next-step owner-next-step-\$\{readiness\.state\}`\}/);
+  assert.match(pageSource, /aria-labelledby="owner-next-step-title"/);
+  assert.match(pageSource, /<h2 id="owner-next-step-title">/);
+  assert.match(pageSource, /<progress id="identity-progress" max="2" value=\{progress\}>/);
+  assert.doesNotMatch(pageSource, /first-update-journey|IdentityReadinessPanel|FirstUpdateJourneyPanel/);
+  const nextStepSource = pageSource.slice(
+    pageSource.indexOf("function OwnerNextStep"),
+    pageSource.indexOf("function nextStepContent"),
+  );
+  assert.doesNotMatch(nextStepSource, /<a\b/);
   assert.doesNotMatch(pageSource, /next\/link|localStorage|sessionStorage/i);
   assert.match(repositorySource, /\.prepare\(`\$\{ENTRY_SELECT\}[\s\S]*WHERE state = \?[\s\S]*ORDER BY created_at ASC, id ASC[\s\S]*LIMIT 1`\)[\s\S]*\.bind\(state\)[\s\S]*\.first<EntryRow>\(\)/);
   assert.match(css, /\.button\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.text-link\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /:focus-visible\s*\{[^}]*outline:\s*3px/s);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-content\s*\{[^}]*width:\s*calc\(100% - 28px\)/);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-readiness[^}]*grid-template-columns:\s*1fr/);
-  assert.match(css, /\.owner-frame\s*\{[^}]*grid-template-columns:\s*220px minmax\(0, 1fr\)/s);
+  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-next-step\s*\{[^}]*grid-template-columns:\s*1fr/);
+  assert.match(css, /\.owner-frame\s*\{[^}]*min-height:\s*calc\(100vh - 165px - env\(safe-area-inset-top\)\)/s);
+  assert.doesNotMatch(css, /grid-template-columns:\s*220px|min-height:\s*72px/);
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 });
 
@@ -348,9 +351,9 @@ async function assertDraftIsPubliclyUnknown(env, id, privateCanary) {
   assert.doesNotMatch(await home.text(), new RegExp(privateCanary));
 }
 
-function firstUpdatePanel(html) {
-  const match = html.match(/<section[^>]+first-update-journey[^>]*>[\s\S]*?<\/section>/i);
-  assert.ok(match, "expected the first-update journey panel");
+function nextStepPanel(html) {
+  const match = html.match(/<section[^>]+owner-next-step[^>]*>[\s\S]*?<\/section>/i);
+  assert.ok(match, "expected the next-step panel");
   return match[0];
 }
 

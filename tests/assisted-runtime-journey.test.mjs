@@ -62,7 +62,8 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   assert.match(reloadedIdentity, /https:\/\/runtime\.example\/presence/i);
   assert.match(reloadedIdentity, /Fallback canonical presence URL/i);
   assert.match(reloadedIdentity, /value="https:\/\/stored\.example\/fallback"/i);
-  assert.match(reloadedIdentity, new RegExp(ownerIdentityCanary, "i"));
+  assert.doesNotMatch(reloadedIdentity, new RegExp(ownerIdentityCanary, "i"));
+  assert.match(reloadedIdentity, /<a class="owner-wordmark" href="\/owner">Manage<\/a>/i);
 
   const create = await fetchApp("/api/private/entries", {
     env,
@@ -379,7 +380,7 @@ test("a maximum-length unbroken owner title and the full action set retain shrin
   assert.equal(countMatches(row, /class="button button-small/g), 4);
 
   assert.match(css, /\.owner-entry-copy\s*\{[^}]*min-width:\s*0/s);
-  assert.match(css, /\.owner-entry-copy h3 a\s*\{[^}]*min-height:\s*44px[^}]*display:\s*inline-block[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.owner-entry-copy h3 a\s*\{[^}]*min-height:\s*var\(--control-min-height\)[^}]*display:\s*inline-flex[^}]*align-items:\s*center[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.entry-actions\s*\{[^}]*min-width:\s*0/s);
   assert.match(css, /\.public-nav-actions, \.button-row, \.entry-actions, \.form-footer\s*\{[^}]*flex-wrap:\s*wrap/s);
 });
@@ -396,7 +397,7 @@ test("the complete native checkbox label retains its owner touch-target source c
 
   const labelRule = css.match(/\.check-field\s*\{([^}]*)\}/s);
   assert.ok(labelRule, "the enclosing checkbox label needs a shared source rule");
-  assert.match(labelRule[1], /min-height:\s*44px/);
+  assert.match(labelRule[1], /min-height:\s*var\(--control-min-height\)/);
   assert.match(labelRule[1], /display:\s*flex/);
   assert.match(labelRule[1], /align-items:\s*flex-start/);
 

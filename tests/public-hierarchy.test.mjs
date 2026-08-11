@@ -290,7 +290,7 @@ test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom
   const focusDark = customProperty(css, "focus-dark");
   const focusLight = customProperty(css, "focus-light");
   const paper = customProperty(css, "paper");
-  const ownerInk = customProperty(css, "owner-ink");
+  const ownerInk = customProperty(css, "ink");
   assert.ok(contrastRatio(focusDark, paper) >= 3, "dark focus ring must contrast with the light public canvas");
   assert.ok(contrastRatio(focusLight, ownerInk) >= 3, "light focus halo must contrast with dark owner surfaces");
   assert.ok(contrastRatio(focusDark, focusLight) >= 3, "the two focus layers must remain distinguishable");
@@ -334,19 +334,20 @@ test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom
 test("normal form-control boundaries preserve non-text contrast", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const sharedControls = css.match(
-    /\.field input, \.field textarea, \.field select\s*\{[^}]*border:\s*1px solid (#[0-9a-f]{6})[^}]*background:\s*(#[0-9a-f]{6}|#[0-9a-f]{3})[^}]*\}/is,
+    /\.field input, \.field textarea, \.field select\s*\{[^}]*border:\s*1px solid var\(--ink\)[^}]*background:\s*var\(--paper-raised\)[^}]*\}/is,
   );
-  const ownerCanvas = css.match(/\.owner-shell\s*\{[^}]*background:\s*(#[0-9a-f]{6})/i);
+  const ownerCanvas = css.match(/\.owner-shell\s*\{[^}]*background:\s*var\(--paper\)/i);
   assert.ok(sharedControls, "missing the shared input, textarea, and select colors");
   assert.ok(ownerCanvas, "missing the adjacent owner canvas color");
-  const controlBorder = sharedControls[1];
-  const controlFill = expandHex(sharedControls[2]);
+  const controlBorder = customProperty(css, "ink");
+  const controlFill = customProperty(css, "paper-raised");
+  const ownerFill = customProperty(css, "paper");
   assert.ok(
     contrastRatio(controlBorder, controlFill) >= 3,
     "shared control border must contrast with its fill",
   );
   assert.ok(
-    contrastRatio(controlBorder, ownerCanvas[1]) >= 3,
+    contrastRatio(controlBorder, ownerFill) >= 3,
     "shared control border must contrast with the owner canvas",
   );
   assert.doesNotMatch(sharedControls[0], /\b(?:filter|opacity|forced-color-adjust)\s*:/i);
@@ -386,12 +387,6 @@ function customProperty(css, name) {
   const match = css.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, "i"));
   assert.ok(match, `missing --${name} color token`);
   return match[1];
-}
-
-function expandHex(value) {
-  return value.length === 4
-    ? `#${value.slice(1).split("").map((channel) => channel.repeat(2)).join("")}`
-    : value;
 }
 
 function contrastRatio(first, second) {

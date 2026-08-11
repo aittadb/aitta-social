@@ -22,10 +22,11 @@ field.
 ## Identity composition
 
 The public canvas uses warm cream `#f3f0e8`, off-white `#fffcf5`, near-black
-green `#181b17`, moss-grey `#667067`, and warm-stone `#d9d5c9`. These values are
-scoped to public shells, so the visually separate owner workspace keeps its
-existing palette and typography. Public identity and navigation use the one
-Geist-derived sans-serif family.
+green `#181b17`, moss-grey `#667067`, and warm-stone `#d9d5c9`. Public shells
+scope their exact surface variants. The composition remains visually separate
+from the private owner workspace, while both surfaces reuse the small semantic
+paper, raised-paper, ink, muted-text, separator, focus, and action vocabulary.
+Public identity and navigation use the one Geist-derived sans-serif family.
 
 The Identity begins with a solid configured accent field. Two clipped CSS
 forms—one light circular form and one darker softened rectangle—supply the
@@ -153,24 +154,40 @@ and the application never disables system color adjustment.
 
 ## Owner Identity journey
 
-The visually distinct owner workspace presents fresh, incomplete, and complete
-Identity readiness derived from saved server state. Its primary next action is
-Identity setup while fresh or incomplete, and public preview when complete;
-update creation remains in the existing update controls rather than being
-presented as Identity completion. The form pairs saved readiness with a clearly
-labeled transient preview and native progress elements. Saving reloads the
-server-derived state, while a reload before saving discards the preview.
+The visually distinct owner workspace uses a neutral 60-pixel application
+header with `Manage` and a quiet `View presence` link. A separate, horizontally
+scrollable, non-wrapping route bar contains exactly three destinations: Home,
+Identity, and New update. `Sign out` stays in the compact private-workspace
+footer rather than becoming a route destination or menu item. The accepted
+`displayName` shell input remains compatible with callers but authenticated
+ChatGPT display names are not rendered.
+
+Owner Home presents fresh, incomplete, and complete Identity readiness derived
+from saved server state. It renders exactly one state-derived primary action:
+Identity setup while fresh, Identity repair while incomplete, first-draft
+creation or resume while unpublished, and public preview after the first
+publication. One compact `owner-next-step` panel combines status, guidance,
+the existing two-step native progress semantics, and the effective public URL
+when present. It contains no competing action. Counts, update rows, update
+actions, and their text status remain available below in a compact sans-serif
+hierarchy; the empty state does not reserve a large blank panel.
+
+The Identity form still pairs saved readiness with a clearly labeled transient
+preview and native progress elements. Saving reloads the server-derived state,
+while a reload before saving discards the preview.
 The saved and live accent preview uses the same derived `--accent` as public
 rendering, including its border, label, and native progress accent. The color
 input continues to represent the owner's stored preference rather than the
 derived rendering color.
 
-The normalized effective public URL is shown with a safe runtime-override or
-stored-fallback explanation. Raw runtime configuration, request hosts, ChatGPT
-identity, drafts, and Hub state never become Identity defaults. The owner grids
-collapse to one column at the narrow breakpoint;
-native links, buttons, and fields retain keyboard focus behavior and at least
-44-pixel interactive height.
+The normalized effective public URL is shown as compact secondary text with a
+safe protected-setting or saved-Identity explanation. Raw runtime
+configuration, request hosts, ChatGPT identity, drafts, and Hub state never
+become Identity defaults. At 320 pixels the route bar remains one line and may
+scroll horizontally, the three-column summary remains compact, and bounded
+owner panels stack where necessary. Native links, buttons, and fields retain
+keyboard focus behavior and at least 44-pixel interactive height. The 60-pixel
+header also accounts for a device safe-area inset at its top edge.
 
 When a protected runtime canonical URL is effective, the editable field is
 named as the saved fallback and explains that saving it cannot change the

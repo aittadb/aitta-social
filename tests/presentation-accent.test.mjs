@@ -230,11 +230,14 @@ test("the owner preview uses the shared rule and forced colors stay browser-owne
   assert.doesNotMatch(`${profileForm}\n${css}`, /preview-accent|safePreviewAccent/);
   assert.match(css, /@media\s*\(forced-colors:\s*active\)/);
   assert.doesNotMatch(css, /forced-color-adjust:\s*none/i);
-  assert.equal(cssCustomProperty(css, "owner-panel"), LIGHT_SURFACES[0]);
+  assert.doesNotMatch(css, /--owner-(?:ink|panel)\s*:/);
   assert.equal(cssCustomProperty(css, "paper"), LIGHT_SURFACES[1]);
-  assert.match(css, /\.owner-shell\s*\{[^}]*background:\s*#f7f7f3/s);
+  assert.match(css, /\.owner-shell\s*\{[^}]*background:\s*var\(--paper\)[^}]*color:\s*var\(--ink\)/s);
   assert.equal(cssCustomProperty(css, "paper-raised"), LIGHT_SURFACES[3]);
-  assert.match(css, /\.identity-draft-preview\s*\{[^}]*background:\s*#fff(?:;|\s|\})/s);
+  assert.match(css, /\.identity-draft-preview\s*\{[^}]*background:\s*var\(--paper-raised\)/s);
+  assert.match(css, /\.owner-next-step\s*\{[^}]*border:\s*1px solid var\(--line\)[^}]*border-radius:\s*6px[^}]*background:\s*var\(--paper-raised\)/s);
+  assert.match(css, /\.owner-summary\s*\{[^}]*border:\s*1px solid var\(--line\)[^}]*border-radius:\s*6px[^}]*background:\s*var\(--paper-raised\)/s);
+  assert.match(css, /\.owner-empty\s*\{[^}]*border:\s*1px solid var\(--line\)[^}]*border-radius:\s*6px[^}]*background:\s*var\(--paper-raised\)/s);
   assert.equal(cssCustomProperty(css, "accent-contrast"), LIGHT_SURFACES[4]);
   assert.match(css, /\.button\s*\{[^}]*color:\s*var\(--accent-contrast\)/s);
   assert.match(css, /\.public-shell, \.permalink-shell\s*\{[^}]*--paper:\s*#f3f0e8[^}]*--paper-raised:\s*#fffcf5/s);

@@ -1,35 +1,29 @@
 import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
 
-export function OwnerShell({
-  displayName,
-  current,
-  children,
-}: {
+export function OwnerShell(props: {
   displayName: string;
   current: "overview" | "profile" | "entries";
   children: React.ReactNode;
 }) {
+  const { current, children } = props;
   return (
     <main className="owner-shell">
       <header className="owner-topbar">
-        <div>
-          <a className="owner-wordmark" href="/owner">AittaSocial</a>
-          <span className="owner-badge">Owner workspace</span>
-        </div>
-        <div className="owner-session">
-          <span className="owner-user">{displayName}</span>
-          <a href={chatGPTSignOutPath("/")}>Sign out</a>
-        </div>
+        <a className="owner-wordmark" href="/owner">Manage</a>
+        <a className="owner-public-link" href="/">View presence</a>
       </header>
+      <nav className="owner-nav" aria-label="Owner navigation">
+        <OwnerNavLink href="/owner" active={current === "overview"}>Home</OwnerNavLink>
+        <OwnerNavLink href="/owner/profile" active={current === "profile"}>Identity</OwnerNavLink>
+        <OwnerNavLink href="/owner/entries/new" active={current === "entries"}>New update</OwnerNavLink>
+      </nav>
       <div className="owner-frame">
-        <nav className="owner-nav" aria-label="Owner navigation">
-          <OwnerNavLink href="/owner" active={current === "overview"}>Your presence</OwnerNavLink>
-          <OwnerNavLink href="/owner/profile" active={current === "profile"}>Identity</OwnerNavLink>
-          <OwnerNavLink href="/owner/entries/new" active={current === "entries"}>New update</OwnerNavLink>
-          <a className="owner-public-link" href="/">View public presence ↗</a>
-        </nav>
         <div className="owner-content">{children}</div>
       </div>
+      <footer className="owner-footer">
+        <span>Private owner workspace</span>
+        <a href={chatGPTSignOutPath("/")}>Sign out</a>
+      </footer>
     </main>
   );
 }

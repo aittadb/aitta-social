@@ -39,8 +39,7 @@ export default async function OwnerDashboard() {
         </a>
       </header>
 
-      <IdentityReadinessPanel readiness={readiness} />
-      <FirstUpdateJourneyPanel journey={firstUpdate} />
+      <OwnerNextStep readiness={readiness} journey={firstUpdate} />
 
       <section className="owner-summary" aria-label="Presence summary">
         <Summary label="Identity" value={readiness.state === "complete" ? "Ready" : readiness.state === "incomplete" ? "Incomplete" : "Not started"} />
@@ -93,89 +92,81 @@ function deriveFirstUpdateJourney(
   return firstDraft ? { state: "draft", entry: firstDraft } : { state: "empty" };
 }
 
-function FirstUpdateJourneyPanel({ journey }: { journey: FirstUpdateJourney }) {
-  if (journey.state === "identity") return null;
-
-  const content = firstUpdateContent(journey);
-  return (
-    <section
-      className="identity-readiness identity-readiness-complete first-update-journey"
-      aria-labelledby="first-update-journey-title"
-    >
-      <div>
-        <p className="eyebrow">First update</p>
-        <h2 id="first-update-journey-title">{content.title}</h2>
-        <p>{content.message}</p>
-      </div>
-      {journey.state === "published" ? (
-        <div className="identity-readiness-actions">
-          <a className="text-link" href={`/entries/${journey.entry.id}`}>Open first update permalink</a>
-        </div>
-      ) : journey.state === "empty" ? (
-        <div className="identity-readiness-actions">
-          <a className="text-link" href="/">Preview public presence</a>
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
-function firstUpdateContent(journey: Exclude<FirstUpdateJourney, { state: "identity" }>): {
-  title: string;
-  message: string;
-} {
-  if (journey.state === "empty") {
-    return {
-      title: "Create a private first draft",
-      message: "Your Identity is ready. Start one update and review it privately before choosing to publish.",
-    };
-  }
-  if (journey.state === "draft") {
-    return {
-      title: "Resume your saved draft",
-      message: "This draft is stored in this presence and remains private until you publish it.",
-    };
-  }
-  return {
-    title: "Your first update is public",
-    message: "The published update is visible on your public presence and at its stable permalink.",
-  };
-}
-
-function IdentityReadinessPanel({ readiness }: { readiness: IdentityReadiness }) {
-  const complete = readiness.state === "complete";
+function OwnerNextStep({
+  readiness,
+  journey,
+}: {
+  readiness: IdentityReadiness;
+  journey: FirstUpdateJourney;
+}) {
+  const content = nextStepContent(readiness, journey);
   const progress = readiness.requirementsComplete;
   return (
-    <section className={`identity-readiness identity-readiness-${readiness.state}`} aria-labelledby="identity-readiness-title">
+    <section
+      className={`owner-next-step owner-next-step-${readiness.state}`}
+      aria-labelledby="owner-next-step-title"
+    >
       <div>
-        <p className="eyebrow">Identity setup</p>
-        <h2 id="identity-readiness-title">{complete ? "Ready for public review" : readiness.state === "incomplete" ? "Canonical URL needed" : "Start with the public Identity"}</h2>
-        <p>{readinessMessage(readiness)}</p>
+        <p className="eyebrow">Next step · {content.status}</p>
+        <h2 id="owner-next-step-title">{content.title}</h2>
+        <p>{content.message}</p>
         {readiness.canonicalUrl ? (
           <p className="effective-canonical">
-            <span>Effective public URL · {readiness.canonicalSource === "runtime" ? "protected Site setting" : "saved Identity fallback"}</span>
+            <span>Public URL · {readiness.canonicalSource === "runtime" ? "protected Site setting" : "saved Identity"}</span>
             <code>{readiness.canonicalUrl}</code>
           </p>
         ) : null}
       </div>
-      <div className="identity-readiness-actions">
+      <div className="owner-next-step-progress">
         <label htmlFor="identity-progress">Identity readiness: {progress} of 2 requirements complete</label>
         <progress id="identity-progress" max="2" value={progress}>{progress} of 2</progress>
-        <a className="text-link" href="/owner/profile">{complete ? "Review Identity settings" : "Continue Identity setup"}</a>
       </div>
     </section>
   );
+}
+
+function nextStepContent(readiness: IdentityReadiness, journey: FirstUpdateJourney): {
+  status: string;
+  title: string;
+  message: string;
+} {
+  if (journey.state === "identity") {
+    return {
+      status: readiness.state === "incomplete" ? "Identity incomplete" : "Identity not started",
+      title: readiness.state === "incomplete" ? "Add a canonical URL" : "Set up your public Identity",
+      message: readinessMessage(readiness),
+    };
+  }
+  if (journey.state === "empty") {
+    return {
+      status: "Identity ready",
+      title: "Create your first update",
+      message: "Start with a private draft. Nothing becomes public until you publish it.",
+    };
+  }
+  if (journey.state === "draft") {
+    return {
+      status: "Draft saved privately",
+      title: "Continue your first draft",
+      message: "Your work is stored in this presence and remains private until you publish it.",
+    };
+  }
+  return {
+    status: "Published",
+    title: "Your first update is public",
+    message: "It is visible on your public presence. You can keep managing every update below.",
+  };
 }
 
 function dashboardIntroduction(
   state: IdentityReadiness["state"],
   firstUpdate: FirstUpdateJourney,
 ): string {
-  if (firstUpdate.state === "empty") return "Identity is ready. Create one private draft, review it, and publish only when it is ready.";
-  if (firstUpdate.state === "draft") return "Your first draft is saved in this presence and ready to resume without starting over.";
-  if (firstUpdate.state === "published") return "Your first public update is complete. Preview it while the existing update controls remain available below.";
-  if (state === "incomplete") return "Saved Identity content is available, but public links need a valid canonical URL before this presence is ready.";
-  return "The Site should remain private until the sole owner and public Identity are configured and tested.";
+  if (firstUpdate.state === "empty") return "Identity is ready. Begin with one private draft.";
+  if (firstUpdate.state === "draft") return "Continue your private draft or manage the updates below.";
+  if (firstUpdate.state === "published") return "Review your public presence or manage the updates below.";
+  if (state === "incomplete") return "Finish Identity before creating your first public update.";
+  return "Set up Identity before creating your first public update.";
 }
 
 function dashboardPrimaryAction(
@@ -195,15 +186,15 @@ function dashboardPrimaryAction(
 function readinessMessage(readiness: IdentityReadiness): string {
   if (readiness.state === "fresh") {
     return readiness.canonicalSource === "runtime"
-      ? "A protected canonical URL is ready. Add and save the public Identity to complete setup."
-      : "Add the public Identity and a canonical HTTPS URL. Unsaved form work is not a durable setup state.";
+      ? "A protected public URL is ready. Add and save the public Identity to finish setup."
+      : "Add the public Identity and a canonical HTTPS URL.";
   }
   if (readiness.state === "incomplete") {
-    return "The stored Identity is preserved, but no valid configured canonical URL is available. Update Identity to restore public canonical links.";
+    return "Your saved Identity needs a valid canonical HTTPS URL for public links.";
   }
   return readiness.canonicalSource === "runtime"
-    ? "Identity is saved. Public links use the normalized protected runtime canonical URL."
-    : "Identity is saved. Public links use the normalized canonical URL stored with Identity.";
+    ? "Identity is ready and public links use the protected Site URL."
+    : "Identity is ready and public links use its saved canonical URL.";
 }
 
 function Summary({ label, value }: { label: string; value: string }) {

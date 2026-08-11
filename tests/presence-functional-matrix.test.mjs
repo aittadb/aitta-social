@@ -135,7 +135,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
   assertConfiguredPresence(configuredHome);
   assertNoLeadingPrompt(configuredHome);
   const configuredOwner = await html(worker, "/owner", identityHeaders(OWNER_EMAIL));
-  assert.match(configuredOwner, /Create a private first draft/i);
+  assert.match(configuredOwner, /Create your first update/i);
   assert.match(configuredOwner, /href="\/owner\/entries\/new"[^>]*>Create first draft/i);
 
   const createDraft = await worker.fetch("/api/private/entries", {

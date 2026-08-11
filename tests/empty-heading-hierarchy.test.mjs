@@ -21,11 +21,7 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
   );
   assert.match(
     css,
-    /\.owner-section h2\s*\{[^}]*font-size:\s*clamp\(2rem, 4vw, 3\.4rem\)/s,
-  );
-  assert.match(
-    css,
-    /\.owner-section h2\s*\{[^}]*font-size:\s*clamp\(1\.75rem, 2\.5vw, 2\.5rem\)/s,
+    /\.owner-section h2\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*clamp\(1\.35rem, 2\.5vw, 1\.65rem\)/s,
   );
   assert.match(
     css,
@@ -33,14 +29,14 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
   );
   assert.match(
     css,
-    /\.owner-empty h3\s*\{[^}]*font-size:\s*clamp\(1\.5rem, 2vw, 1\.75rem\)[^}]*line-height:\s*1\.15[^}]*overflow-wrap:\s*anywhere/s,
+    /\.owner-empty h3\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*1\.05rem[^}]*line-height:\s*1\.25[^}]*overflow-wrap:\s*anywhere/s,
   );
 
   for (const width of [320, 640, 900, 1280, 1600, 2560]) {
     const publicH2 = 1.5 * 16;
     const publicEmptyH3 = 1 * 16;
-    const ownerH2 = clampPixels(1.75, 2.5, 2.5, width);
-    const ownerEmptyH3 = clampPixels(1.5, 2, 1.75, width);
+    const ownerH2 = clampPixels(1.35, 2.5, 1.65, width);
+    const ownerEmptyH3 = 1.05 * 16;
 
     assert.ok(
       publicEmptyH3 < publicH2,
@@ -76,8 +72,8 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
   );
   assert.match(
     css,
-    /\.owner-entry-copy h3\s*\{[^}]*font-size:\s*1\.4rem/s,
-    "populated owner-row typography must stay unchanged",
+    /\.owner-entry-copy h3\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*1\.05rem/s,
+    "populated owner-row typography must use the compact owner hierarchy",
   );
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /@media\s*\(forced-colors:\s*active\)/);
