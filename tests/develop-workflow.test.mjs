@@ -25,6 +25,9 @@ test("feature and release integration use the explicit develop boundary", async 
   assert.match(agents, /Only the integration owner serializes\s+validated task commits/i);
   assert.match(agents, /must not push to, merge, or\s+otherwise update `main` directly/i);
   assert.match(readme, /`develop` is the shared Git workspace/i);
+  assert.match(readme, /Sites checkpoint may use an exact validated and\s+pushed `develop` commit/i);
   assert.match(deployment, /`develop` is the shared integration workspace/i);
+  assert.match(deployment, /accepted maintained Sites source branch/i);
+  assert.match(agents, /`develop` is an accepted maintained source branch for Sites checkpoints/i);
   assert.match(reproducibility, /never relabel a feature-branch result as `develop` or `main`/i);
 });

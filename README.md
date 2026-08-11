@@ -189,7 +189,9 @@ owner-reviewed pull request using **Rebase and merge**; do not update `main`
 directly. After feature integration, start follow-up work on a fresh branch
 from updated `develop`. After a release merge, wait until the owner refreshes
 `develop` from updated `main` so source and Sites checkpoint provenance remain
-exact.
+exact. An explicitly approved Sites checkpoint may use an exact validated and
+pushed `develop` commit before that later `main` pull request; it must be
+recorded as `develop`, not relabeled as `main`.
 
 See [local development](docs/local-development.md) for fixtures and validation,
 [in-place upgrade preservation](docs/upgrade.md) for the local historical-state
