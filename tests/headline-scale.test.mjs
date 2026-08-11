@@ -20,11 +20,11 @@ test("primary headings use one restrained responsive scale", async () => {
 
   assert.match(
     css,
-    /\.template-introduction h1, \.state-page h1, \.owner-access-state h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)[^}]*line-height:\s*0\.92[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
+    /\.state-page h1, \.owner-access-state h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)[^}]*line-height:\s*0\.92[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
   );
   assert.match(
     css,
-    /\.presence-heading h1\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*2rem[^}]*line-height:\s*1\.06[^}]*overflow-wrap:\s*anywhere/s,
+    /\.presence-heading h1\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*1\.875rem[^}]*line-height:\s*1\.06[^}]*overflow-wrap:\s*anywhere/s,
   );
   assert.match(
     css,
@@ -32,7 +32,7 @@ test("primary headings use one restrained responsive scale", async () => {
   );
   assert.match(
     css,
-    /\.template-introduction h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 4\.5vw, 4rem\)/s,
+    /\.template-introduction h1\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*clamp\(1\.875rem, 4vw, 2\.375rem\)[^}]*line-height:\s*1\.06[^}]*overflow-wrap:\s*anywhere/s,
   );
   assert.match(
     css,
@@ -82,7 +82,7 @@ test("primary headings use one restrained responsive scale", async () => {
   for (const width of [320, 640, 900, 1024, 1280, 1600, 2560]) {
     const ownerH1 = clampPixels(2.25, 3.5, 3.5, width);
     const ownerH2 = clampPixels(1.75, 2.5, 2.5, width);
-    const publicH1 = width < 768 ? 2 * 16 : 2.375 * 16;
+    const publicH1 = width < 768 ? 1.875 * 16 : 2.375 * 16;
     assert.ok(publicH1 >= 30 && publicH1 <= 40, `public Identity h1 must stay within its compact range at ${width}px`);
     assert.ok(ownerH1 > ownerH2, `owner h1 must exceed h2 at ${width}px`);
   }

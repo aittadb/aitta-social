@@ -61,7 +61,7 @@ test("empty-state h3 scales remain below their Updates h2 at every review width"
 
   assert.match(
     css,
-    /\.presence-heading h1\s*\{[^}]*font-size:\s*2rem[^}]*overflow-wrap:\s*anywhere/s,
+    /\.presence-heading h1\s*\{[^}]*font-size:\s*1\.875rem[^}]*overflow-wrap:\s*anywhere/s,
     "the compact public Identity headline must remain bounded and wrapping",
   );
   assert.match(
