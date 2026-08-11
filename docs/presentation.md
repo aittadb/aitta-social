@@ -1,113 +1,107 @@
 # Public presence presentation
 
-The default public page describes the represented presence before it exposes
-software or protocol details. Its semantic and visual order is:
+The default is a presence rather than an editorial page. The configured public
+home and every published permalink now share one compact product frame:
 
-1. public identity: display name, short description, location, website, and
-   external links;
-2. featured information: the configured introduction;
-3. recent updates: the existing published-entry collection in deterministic
-   newest-first order; and
-4. restrained footer context: optional AittaSocial attribution and technical
-   links to the discovery manifest and versioned JSON resources.
+1. a 60-pixel single-line header containing the bounded presence name and one
+   quiet real action;
+2. the configured Identity, with a shallow accent field, initials tile,
+   display name, short description, optional public details, and About content;
+3. the existing deterministic newest-first published-update collection; and
+4. a restrained shared footer containing optional AittaSocial/source
+   attribution and the existing discovery and JSON resources.
 
 The manifest and JSON resources remain directly usable, but they are secondary
-to the represented presence and are not primary navigation or update-heading
-actions. Moving their links changes no route, response, cache policy, schema,
-migration, or protocol 1.0 field.
+to the represented presence and never compete with Identity or updates. The
+permalink keeps its existing published content and controls inside the same
+header and footer frame. These presentation changes do not alter a route,
+response, cache policy, metadata projection, schema, migration, or protocol 1.0
+field.
 
-Before an Identity exists, the reusable template has a deliberately different
-first-content hierarchy:
+## Identity composition
 
-1. a plain-language heading explaining that one ChatGPT prompt creates a
-   presence;
-2. the exact short README prompt in a labeled, selectable, read-only field;
-3. a clear native link into the normal local owner sign-in/management path;
-4. any already-published updates, still using the same published-only query;
-   and
-5. the existing restrained footer context.
+The public canvas uses warm cream `#f3f0e8`, off-white `#fffcf5`, near-black
+green `#181b17`, moss-grey `#667067`, and warm-stone `#d9d5c9`. These values are
+scoped to public shells, so the visually separate owner workspace keeps its
+existing palette and typography. Public identity and navigation use the one
+Geist-derived sans-serif family.
 
-This template-first state is selected only by a successful D1 read returning no
-profile. Once Identity is saved, the prompt, setup heading, and setup action are
-absent and the represented presence regains the normal hierarchy above. A D1
-failure renders a fixed temporary-unavailable state instead of the creation
-prompt. Optional Hub availability never selects any of these states.
+The Identity begins with a solid configured accent field. Two clipped CSS
+forms—one light circular form and one darker softened rectangle—supply the
+default graphic language without an image, gradient, remote asset, upload, or
+new profile field. They are decorative and hidden from the accessibility tree.
+A rounded-square initials tile crosses the field boundary. It derives up to two
+Unicode letters or numbers from the first and last display-name words, or the
+first two useful characters of a one-word name. The tile is also decorative
+because the adjacent h1 carries the complete Identity.
+
+At phone sizes the field is 108 pixels high, the tile is 88 pixels, and the
+display name is 2rem (32 pixels). At 768 pixels and above they become 120, 96,
+and 2.375rem (38 pixels). The full heading wraps anywhere; only the repeated
+header name may ellipsize, while retaining its complete text as its accessible
+name.
+
+Location, website, and up to eight external links render only when present.
+Each detail is a wrapping row with a 44-pixel link target; external public links
+stay native anchors and carry `me noopener noreferrer`. If every optional detail
+is absent, no empty aside, separator, placeholder, or reserved column is
+rendered.
+
+About shows an introduction of at most 220 Unicode characters in full. Longer
+content shows a useful summary ending at a word or line boundary when one
+exists after the first 120 characters, followed by a native 44-pixel
+`Read full About` disclosure containing the complete unchanged introduction.
+This retains keyboard operation and all owner content without client state or
+silent truncation. An empty historical introduction renders no About region.
 
 ## Content states
 
-A configured presence remains intentional when it has no published updates.
-Its identity and introduction stand on their own, followed by an explicit empty
-state. Drafts never affect the public hierarchy, counts, links, or wording. All
-four supported update kinds use the same recent-update list and public
-permalink model.
+Before an Identity exists, the reusable template keeps its established setup
+semantics: the exact README prompt remains in a labeled, selectable, read-only
+field; the compact header exposes the same normal local owner destination; and
+any published updates still use the published-only query. A successful D1 read
+with no profile is the only condition that selects this state. D1 failure still
+renders the fixed temporary-unavailable state rather than setup guidance.
 
-If D1 is unavailable, the fixed temporary-unavailable state remains the safe
-public fallback and is not presented as new setup. Optional Hub configuration
-or failure does not participate in public profile or published-update
-rendering.
+A configured presence remains intentional with no published updates. Its
+Identity and About content stand on their own before the existing explicit
+empty state. Drafts never affect public hierarchy, counts, links, or wording.
+Optional Hub availability never selects or modifies any public state.
 
 ## Accessibility and responsive behavior
 
-The source order matches the reading and focus order. The page uses one public
-identity heading followed by labeled featured-information and recent-update
-sections, a list for updates, native anchors, and separately labeled primary and
-technical navigation landmarks.
+Source order matches reading and focus order: shared navigation, one Identity
+h1, optional detail and About regions, Updates, then the shared technical
+footer. All routes use native anchors. The header stays one unwrapped line at
+320 pixels; the presence name is the only flexible item and the short visible
+management label retains the complete sole-owner-administration accessible
+name. It is not fixed or sticky and therefore cannot obscure focused content.
 
-Primary headings use a restrained display scale instead of filling most of the
-viewport. Public Identity and permalink headings stay between 2.5rem and
-4.5rem; the narrower setup column tops out at 4rem; public error and owner
-access headings stay between 2.25rem and 3.75rem; and owner workspace page
-headings stay between 2.25rem and 3.5rem. Narrow layouts use those same fluid
-bounds rather than a breakpoint that enlarges text. Section headings and update
-titles retain a smaller hierarchy; the owner Updates heading uses a bounded
-1.75rem-to-2.5rem scale so it never overtakes the owner page h1. Balanced lines and anywhere
-wrapping remain available for long names and titles.
-The repeated navigation wordmark remains a single concise line and truncates
-only that repeated label when a maximum-length Identity would otherwise widen
-the page; the full name remains present in the primary heading.
+Public frame padding is 16 pixels or the larger device safe-area inset on each
+edge. Interactive targets retain at least 44 CSS pixels, the existing two-layer
+focus indicator, and a system Highlight outline in forced colors. Decorative
+identity forms disappear in forced colors, while the field and tile retain
+system-visible boundaries. Long names, descriptions, translated text, About
+content, labels, hosts, URLs, and update copy wrap rather than widen the page.
+A 320-pixel viewport remains equivalent to a 1280-pixel desktop reflowed at 400
+percent. Reduced-motion preferences still disable smooth scrolling and all
+animation or transition.
 
-Public interactive targets have at least 44 CSS pixels of height and retain a
-two-layer dark/light focus indicator. Its dark ring contrasts with the light
-public canvas, its light halo contrasts with dark owner surfaces, and a
-forced-colors override uses the system highlight color. Long names,
-descriptions, translated text, links, and update copy wrap rather than expand
-the viewport. At narrow effective viewports—including a 320-pixel viewport,
-which is the effective layout width produced by enlarging a 1280-pixel desktop
-viewport to 400 percent—the navigation, identity, featured information,
-updates, empty state, and footer become single-column layouts. Reduced-motion
-preferences disable smooth scrolling and animation.
-
-The prompt itself is a native read-only textarea. Its visible label and help
-text make manual selection and copying available without a script-only control;
-keyboard selection and platform copy commands therefore remain available on
-every browser. The field fills its bounded column, wraps long text, and becomes
-single-column with the introduction at the 900-pixel breakpoint. The 320-pixel
-and effective 400-percent-zoom layouts use the same narrow rules and cannot
-expand the viewport.
+The setup prompt remains a native read-only textarea. Its visible label and help
+text preserve manual selection and platform copy commands. Its existing
+two-column layout becomes one column at 900 pixels, while the shared header
+remains compact at every width.
 
 The configured accent remains a constrained preference rather than a theme or
-arbitrary style input. New owner writes still accept and store only a
-six-digit hex color, and protocol 1.0 returns that exact stored preference. At
-render time, one shared resolver validates the stored value and derives the
-color used by `--accent` on the public page, update permalink, and owner
-preview. It never writes the derived color back to D1. An invalid legacy value
-falls back to `#31554d` before reaching a style property.
-
-The resolver uses the WCAG relative-luminance and contrast-ratio formulas. A
-valid color that has at least 4.5:1 contrast against `#eef0eb`, the darkest
-supported light canvas, keeps the same color after lower-case normalization,
-without tonal adjustment. Otherwise its 8-bit sRGB channels
-are interpolated toward `#31554d` in 255 deterministic steps. At step `n`, each
-channel is `Math.round(source + (target - source) * n / 255)`; JavaScript's
-positive-number half ties round upward. The first candidate meeting 4.5:1 is
-used, and the reviewed default is the terminating fallback. The other light
-surfaces are `#f3f0e8`, `#f7f7f3`, `#fbfaf6`, and white, so the darkest-canvas
-check conservatively covers accent text and decoration on every canvas as well
-as white text on an accent-filled button. Forced-colors mode remains owned by
-the browser; the application does not disable system color adjustment.
-
-No image, gradient, theme engine, arbitrary HTML, or client-side layout state
-is required.
+arbitrary style input. New owner writes still accept and store only a six-digit
+hex color, and protocol 1.0 returns that exact stored preference. One shared
+resolver derives the `--accent` used by the public home, permalink, and owner
+preview without writing it back to D1. It keeps a valid color only when it has
+at least 4.5:1 contrast against `#eef0eb`, still the darkest supported light
+surface; otherwise it deterministically moves the value toward `#31554d`.
+This also keeps the initials tile's white text readable. Invalid historical
+values fail closed to that reviewed default. Forced colors remain browser-owned
+and the application never disables system color adjustment.
 
 ## Owner Identity journey
 

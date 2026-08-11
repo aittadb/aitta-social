@@ -6,6 +6,11 @@ import { publicPresenceMetadata } from "@/lib/public-metadata";
 import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { Entry, Profile } from "@/lib/types";
 import { DeploymentPrompt } from "./_components/DeploymentPrompt";
+import {
+  PresenceIdentityTile,
+  PublicFooter,
+  PublicPresenceHeader,
+} from "./_components/PublicPresenceFrame";
 
 export const dynamic = "force-dynamic";
 
@@ -37,51 +42,36 @@ export default async function Home() {
 
   return (
     <main className={`public-shell density-${profile.density}`} style={style}>
-      <header className="public-nav" aria-label="Presence navigation">
-        <a className="wordmark" href="#account">{profile.displayName}</a>
-        <nav className="public-nav-actions" aria-label="Presence actions">
-          <a
-            className="button button-quiet"
-            href={user ? "/owner" : chatGPTSignInPath("/owner")}
-            aria-label={user ? "Manage presence as owner — open local sole-owner administration" : "Manage presence as owner — sign in with ChatGPT for local sole-owner administration"}
-          >
-            Manage presence as owner
-          </a>
-        </nav>
-      </header>
+      <PublicPresenceHeader
+        displayName={profile.displayName}
+        identityHref="#account"
+        label="Presence navigation"
+        actionsLabel="Presence actions"
+        action={{
+          href: user ? "/owner" : chatGPTSignInPath("/owner"),
+          label: "Manage",
+          accessibleName: user
+            ? "Manage presence as owner — open local sole-owner administration"
+            : "Manage presence as owner — sign in with ChatGPT for local sole-owner administration",
+        }}
+      />
 
-      <section className="identity-block" id="account" aria-labelledby="account-name">
-        <div className="identity-main">
-          <p className="eyebrow">Public presence</p>
-          <h1 id="account-name">{profile.displayName}</h1>
-          <p className="identity-summary">
-            {profile.shortDescription}
-          </p>
-        </div>
-        <aside className="identity-details" aria-label="Presence details">
-          {profile.location && <Detail label="Location" value={profile.location} />}
-          {profile.website && (
-            <Detail label="Website" value={<a href={profile.website} rel="me">{readableHost(profile.website)}</a>} />
-          )}
-          {profile.externalLinks.map((link) => (
-            <Detail key={`${link.label}-${link.url}`} label={link.label} value={<a href={link.url} rel="me">Open link</a>} />
-          ))}
-        </aside>
-      </section>
-
-      {profile.introduction && (
-        <section className="introduction" aria-labelledby="introduction-title">
-          <p className="section-index" aria-hidden="true">01</p>
-          <div>
-            <p className="eyebrow">Featured information</p>
-            <h2 id="introduction-title">Introduction</h2>
-            <p className="prose-copy">{profile.introduction}</p>
+      <div className="public-presence-column">
+        <section className="presence-identity" id="account" aria-labelledby="account-name">
+          <div className="presence-identity-field" aria-hidden="true" />
+          <div className="presence-profile">
+            <PresenceIdentityTile displayName={profile.displayName} />
+            <div className="presence-heading">
+              <h1 id="account-name">{profile.displayName}</h1>
+              <p className="presence-summary">{profile.shortDescription}</p>
+            </div>
+            <PresenceDetails profile={profile} />
+            <About introduction={profile.introduction} />
           </div>
         </section>
-      )}
 
-      <EntriesSection entries={entries} configured />
-
+        <EntriesSection entries={entries} configured />
+      </div>
       <PublicFooter profile={profile} />
     </main>
   );
@@ -105,34 +95,35 @@ function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedI
   const ownerPath = signedIn ? "/owner" : chatGPTSignInPath("/owner");
   return (
     <main className="public-shell density-comfortable template-shell">
-      <header className="public-nav" aria-label="Presence setup navigation">
-        <a className="wordmark" href="#start">AittaSocial</a>
-        <nav className="public-nav-actions" aria-label="Presence setup actions">
-          <a
-            className="button button-quiet"
-            href={ownerPath}
-            aria-label={signedIn
-              ? "Set up this presence — open local sole-owner administration"
-              : "Set up this presence — sign in with ChatGPT for local sole-owner administration"}
-          >
-            Set up this presence
-          </a>
-        </nav>
-      </header>
+      <PublicPresenceHeader
+        displayName="AittaSocial"
+        identityHref="#start"
+        label="Presence setup navigation"
+        actionsLabel="Presence setup actions"
+        action={{
+          href: ownerPath,
+          label: "Set up",
+          accessibleName: signedIn
+            ? "Set up this presence — open local sole-owner administration"
+            : "Set up this presence — sign in with ChatGPT for local sole-owner administration",
+        }}
+      />
 
-      <section className="template-start" id="start" aria-labelledby="template-title">
-        <div className="template-introduction">
-          <p className="eyebrow">Start with one prompt</p>
-          <h1 id="template-title">Create your own presence</h1>
-          <p className="identity-summary">
-            Give this prompt to ChatGPT. It will keep setup private, reuse the right Site,
-            and guide you through the first Identity.
-          </p>
-        </div>
-        <DeploymentPrompt />
-      </section>
+      <div className="public-wide-content">
+        <section className="template-start" id="start" aria-labelledby="template-title">
+          <div className="template-introduction">
+            <p className="eyebrow">Start with one prompt</p>
+            <h1 id="template-title">Create your own presence</h1>
+            <p className="identity-summary">
+              Give this prompt to ChatGPT. It will keep setup private, reuse the right Site,
+              and guide you through the first Identity.
+            </p>
+          </div>
+          <DeploymentPrompt />
+        </section>
 
-      <EntriesSection entries={entries} configured={false} />
+        <EntriesSection entries={entries} configured={false} />
+      </div>
       <PublicFooter profile={null} />
     </main>
   );
@@ -188,34 +179,6 @@ function EntriesSection({ entries, configured }: { entries: Entry[]; configured:
   );
 }
 
-function PublicFooter({ profile }: { profile: Profile | null }) {
-  return (
-    <footer className="public-footer">
-      <span className="public-footer-name">{profile?.displayName ?? "Independent presence"}</span>
-      <div className="public-footer-context">
-        {!profile?.hidePoweredBy && (
-          <span className="public-attribution">
-            Powered by <strong><a href="https://aitta.social">AittaSocial</a></strong>
-            {" · "}
-            <a
-              href="https://github.com/aittadb/aitta-social"
-              aria-label="AittaSocial source on GitHub"
-            >
-              GitHub
-            </a>
-          </span>
-        )}
-        <nav className="technical-links" aria-label="Technical resources">
-          <span>Technical</span>
-          <a href="/.well-known/aitta-social.json">Manifest</a>
-          <a href="/api/v1/site">Profile JSON</a>
-          <a href="/api/v1/entries">Updates JSON</a>
-        </nav>
-      </div>
-    </footer>
-  );
-}
-
 function EntryCard({ entry, index }: { entry: Entry; index: number }) {
   const label = entry.title ?? entry.body.split(/\n/, 1)[0].slice(0, 90);
   return (
@@ -241,8 +204,69 @@ function EntryCard({ entry, index }: { entry: Entry; index: number }) {
   );
 }
 
-function Detail({ label, value }: { label: string; value: React.ReactNode }) {
-  return <p className="detail"><span>{label}</span><strong>{value}</strong></p>;
+function PresenceDetails({ profile }: { profile: Profile }) {
+  if (!profile.location && !profile.website && profile.externalLinks.length === 0) {
+    return null;
+  }
+
+  return (
+    <aside className="presence-details" aria-label="Presence details">
+      {profile.location && <PresenceDetail label="Location" value={profile.location} />}
+      {profile.website && (
+        <PresenceDetail
+          label="Website"
+          value={<a href={profile.website} rel="me noopener noreferrer">{readableHost(profile.website)}</a>}
+        />
+      )}
+      {profile.externalLinks.map((link) => (
+        <PresenceDetail
+          key={`${link.label}-${link.url}`}
+          label={link.label}
+          value={<a href={link.url} rel="me noopener noreferrer">{readableHost(link.url)}</a>}
+        />
+      ))}
+    </aside>
+  );
+}
+
+function PresenceDetail({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <p className="presence-detail">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </p>
+  );
+}
+
+function About({ introduction }: { introduction: string }) {
+  if (!introduction.trim()) return null;
+
+  const summary = summarizeAbout(introduction);
+  return (
+    <section className="presence-about" aria-labelledby="about-title">
+      <h2 id="about-title">About</h2>
+      {summary === introduction ? (
+        <p className="presence-about-copy">{introduction}</p>
+      ) : (
+        <>
+          <p className="presence-about-copy">{summary}</p>
+          <details>
+            <summary>Read full About</summary>
+            <p className="presence-about-copy presence-about-full">{introduction}</p>
+          </details>
+        </>
+      )}
+    </section>
+  );
+}
+
+function summarizeAbout(value: string): string {
+  const characters = Array.from(value);
+  if (characters.length <= 220) return value;
+
+  const candidate = characters.slice(0, 217).join("").trimEnd();
+  const boundary = Math.max(candidate.lastIndexOf(" "), candidate.lastIndexOf("\n"));
+  return `${boundary >= 120 ? candidate.slice(0, boundary).trimEnd() : candidate}…`;
 }
 
 function excerpt(value: string): string {

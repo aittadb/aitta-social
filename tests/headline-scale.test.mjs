@@ -20,7 +20,15 @@ test("primary headings use one restrained responsive scale", async () => {
 
   assert.match(
     css,
-    /\.identity-main h1, \.template-introduction h1, \.permalink-entry h1, \.state-page h1, \.owner-access-state h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)[^}]*line-height:\s*0\.92[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
+    /\.template-introduction h1, \.permalink-entry h1, \.state-page h1, \.owner-access-state h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)[^}]*line-height:\s*0\.92[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
+  );
+  assert.match(
+    css,
+    /\.presence-heading h1\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*2rem[^}]*line-height:\s*1\.06[^}]*overflow-wrap:\s*anywhere/s,
+  );
+  assert.match(
+    css,
+    /@media\s*\(min-width:\s*768px\)[\s\S]*\.presence-heading h1\s*\{[^}]*font-size:\s*2\.375rem/s,
   );
   assert.match(
     css,
@@ -45,18 +53,18 @@ test("primary headings use one restrained responsive scale", async () => {
   );
   assert.doesNotMatch(
     css,
-    /@media\s*\(max-width:\s*640px\)[\s\S]*?(?:identity-main|template-introduction|permalink-entry) h1[^}]*font-size:/,
+    /@media\s*\(max-width:\s*640px\)[\s\S]*?(?:presence-heading|template-introduction|permalink-entry) h1[^}]*font-size:/,
     "the narrow layout must not enlarge a primary heading",
   );
   assert.match(
     css,
-    /\.wordmark\s*\{[^}]*max-width:\s*min\(45vw, 36rem\)[^}]*overflow:\s*hidden[^}]*text-overflow:\s*ellipsis[^}]*white-space:\s*nowrap/s,
+    /\.wordmark\s*\{[^}]*flex:\s*1 1 auto[^}]*min-width:\s*0[^}]*overflow:\s*hidden[^}]*text-overflow:\s*ellipsis[^}]*white-space:\s*nowrap/s,
     "a maximum-length Identity must not expand public navigation",
   );
 
   assert.match(
     css,
-    /\.introduction h2, \.section-heading h2, \.owner-section h2\s*\{[^}]*font-size:\s*clamp\(2rem, 4vw, 3\.4rem\)/s,
+    /\.section-heading h2, \.owner-section h2\s*\{[^}]*font-size:\s*clamp\(2rem, 4vw, 3\.4rem\)/s,
   );
   assert.match(
     css,
@@ -68,11 +76,10 @@ test("primary headings use one restrained responsive scale", async () => {
   );
 
   for (const width of [320, 640, 900, 1024, 1280, 1600, 2560]) {
-    const publicH1 = clampPixels(2.5, 5, 4.5, width);
-    const publicH2 = clampPixels(2, 4, 3.4, width);
     const ownerH1 = clampPixels(2.25, 3.5, 3.5, width);
     const ownerH2 = clampPixels(1.75, 2.5, 2.5, width);
-    assert.ok(publicH1 > publicH2, `public h1 must exceed h2 at ${width}px`);
+    const publicH1 = width < 768 ? 2 * 16 : 2.375 * 16;
+    assert.ok(publicH1 >= 30 && publicH1 <= 40, `public Identity h1 must stay within its compact range at ${width}px`);
     assert.ok(ownerH1 > ownerH2, `owner h1 must exceed h2 at ${width}px`);
   }
 });
