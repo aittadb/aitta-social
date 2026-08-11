@@ -88,6 +88,12 @@ release merge, checkpoint work waits until the owner refreshes
 `origin/develop` from updated `origin/main`; it never reuses the pre-merge
 branch or labels its commit as the merged source.
 
+`develop` is also an accepted maintained Sites source branch. Once a checkpoint
+has its own explicit approval, its exact validated and pushed `develop` commit
+may be packaged and deployed without waiting for the later pull request to
+`main`. Record the configured branch and commit truthfully; never label that
+checkpoint as `main`.
+
 ## 3. Create the first private checkpoint
 
 Save and deploy a private version. Wait for Sites deployment status to report a

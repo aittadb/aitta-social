@@ -195,6 +195,10 @@ file. Keep this file strictly below 32,000 bytes and run
 - A Sites archive and its `commit_sha` must identify the exact validated commit
   on the configured source branch. Never mislabel a feature-branch archive as
   `main` or bypass source-provenance checks.
+- `develop` is an accepted maintained source branch for Sites checkpoints. An
+  explicitly approved checkpoint may package and deploy its exact validated,
+  pushed commit without waiting for promotion to `main`; record it as
+  `develop`, never as `main`.
 - Never weaken a production boundary for tests. Include private canaries in
   public-projection tests.
 - `PLAN.md` contains only accepted unfinished work required for the smallest
