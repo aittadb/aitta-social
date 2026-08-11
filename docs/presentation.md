@@ -72,10 +72,29 @@ single-column with the introduction at the 900-pixel breakpoint. The 320-pixel
 and effective 400-percent-zoom layouts use the same narrow rules and cannot
 expand the viewport.
 
-The configured accent remains a constrained decorative preference. Essential
-public labels use the stable foreground colors instead of depending on an
-owner-selected accent for readable contrast. No image, gradient, theme engine,
-arbitrary HTML, or client-side layout state is required.
+The configured accent remains a constrained preference rather than a theme or
+arbitrary style input. New owner writes still accept and store only a
+six-digit hex color, and protocol 1.0 returns that exact stored preference. At
+render time, one shared resolver validates the stored value and derives the
+color used by `--accent` on the public page, update permalink, and owner
+preview. It never writes the derived color back to D1. An invalid legacy value
+falls back to `#31554d` before reaching a style property.
+
+The resolver uses the WCAG relative-luminance and contrast-ratio formulas. A
+valid color that has at least 4.5:1 contrast against `#eef0eb`, the darkest
+supported light canvas, keeps the same color after lower-case normalization,
+without tonal adjustment. Otherwise its 8-bit sRGB channels
+are interpolated toward `#31554d` in 255 deterministic steps. At step `n`, each
+channel is `Math.round(source + (target - source) * n / 255)`; JavaScript's
+positive-number half ties round upward. The first candidate meeting 4.5:1 is
+used, and the reviewed default is the terminating fallback. The other light
+surfaces are `#f3f0e8`, `#f7f7f3`, `#fbfaf6`, and white, so the darkest-canvas
+check conservatively covers accent text and decoration on every canvas as well
+as white text on an accent-filled button. Forced-colors mode remains owned by
+the browser; the application does not disable system color adjustment.
+
+No image, gradient, theme engine, arbitrary HTML, or client-side layout state
+is required.
 
 ## Owner Identity journey
 
@@ -86,6 +105,10 @@ update creation remains in the existing update controls rather than being
 presented as Identity completion. The form pairs saved readiness with a clearly
 labeled transient preview and native progress elements. Saving reloads the
 server-derived state, while a reload before saving discards the preview.
+The saved and live accent preview uses the same derived `--accent` as public
+rendering, including its border, label, and native progress accent. The color
+input continues to represent the owner's stored preference rather than the
+derived rendering color.
 
 The normalized effective public URL is shown with a safe runtime-override or
 stored-fallback explanation. Raw runtime configuration, request hosts, ChatGPT
@@ -140,3 +163,12 @@ selection, visible labeling, native navigation, focus, touch sizing, wide and
 narrow grids, overflow wrapping, reduced motion, and the no-gradient boundary.
 This presentation adds no schema, migration, private write, public API, or
 protocol change.
+
+The focused runtime-accent contract additionally checks the black and white
+extremes, the adjacent `#6d6d6d`/`#6e6e6e` threshold, fixed interpolation
+outputs, invalid and malicious legacy strings, every supported light surface,
+accepted-write storage and protocol preservation, public and owner rendering,
+reload/no-clobber behavior, private canaries, forced-colors source behavior,
+and a frozen historical D1 fixture reopened with a malformed stored accent.
+The full upgrade-preservation suite remains the migration-tail and before/after
+proof.

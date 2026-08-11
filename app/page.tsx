@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getProfile, listPublishedEntries } from "@/db/repository";
 import { chatGPTSignInPath, getChatGPTUser } from "./chatgpt-auth";
 import { publicPresenceMetadata } from "@/lib/public-metadata";
+import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { Entry, Profile } from "@/lib/types";
 import { DeploymentPrompt } from "./_components/DeploymentPrompt";
 
@@ -30,8 +31,9 @@ export default async function Home() {
     return <UnconfiguredPresence entries={entries} signedIn={Boolean(user)} />;
   }
 
-  const accent = profile.accentColor;
-  const style = { "--accent": accent } as CSSProperties;
+  const style = {
+    "--accent": resolvePresentationAccent(profile.accentColor),
+  } as CSSProperties;
 
   return (
     <main className={`public-shell density-${profile.density}`} style={style}>
