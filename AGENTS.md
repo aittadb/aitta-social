@@ -225,19 +225,27 @@ file. Keep this file strictly below 32,000 bytes and run
   implemented, reviewed, rolled back, externally approved, or blocked
   independently, keep the existing stable ID for the first narrow outcome,
   assign new monotonically increasing IDs to the others, and rewrite downstream
-  dependencies before implementation. Never reuse an omitted or archived ID,
-  renumber history, or split one outcome into separate implementation, test,
-  security, migration, documentation, or deployment-inspection phases.
+  dependencies before implementation. Prefer the smallest independently
+  demonstrable increment so each completed row makes visible product or
+  contract progress. Never reuse an omitted or archived ID, renumber history,
+  or split one outcome into separate implementation, test, security, migration,
+  documentation, or deployment-inspection phases.
 - Each active task must fit one focused reviewable commit and own one meaningful
   vertical outcome plus its relevant negative tests or security review,
   documentation, and migration or configuration decision. Its DoD must be
-  binary and achievable from named evidence; a task cannot complete merely by
-  creating a follow-up for work its own outcome requires. A contract-pin or
-  conformance task covers one versioned operation or one deliberately shared
-  envelope; a hosted checkpoint covers one explicitly approved external
-  mutation or cohesive read-only journey; an acceptance task covers one
-  coherent matrix. Bundle outcomes only when separating them would leave
-  unusable evidence or require duplicating the same irreversible action.
+  binary and achievable from named evidence; an implementation task cannot
+  complete merely by creating a follow-up for work its own outcome requires. A
+  contract-pin or conformance task covers one versioned operation or one
+  deliberately shared envelope; a hosted checkpoint covers one explicitly
+  approved external mutation or cohesive read-only journey; an acceptance task
+  covers one coherent matrix. Bundle outcomes only when separating them would
+  leave unusable evidence or require duplicating the same irreversible action.
+- Where implementation scope is genuinely unknown, an accepted refinement task
+  may be a standalone outcome only when its binary DoD is specific
+  dependency-ordered next task rows or a specific external blocker. It makes no
+  product change and never substitutes for implementation, test, security, or
+  documentation phases. Do not use refinement work when current evidence is
+  already sufficient to split the implementation directly.
 - Record only direct prerequisites in `Depends on`; remove transitive or
   redundant edges and never use a broad acceptance or checkpoint task where a
   narrower prerequisite is sufficient. Tasks with no dependency path may run
