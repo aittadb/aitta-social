@@ -252,7 +252,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-bottom: 1px solid var(--line);
 }
 .empty-mark { margin: 0; color: var(--accent); font-family: var(--serif); font-size: 8rem; line-height: 1; }
-.empty-public h3 { margin: 0; font-family: var(--serif); font-size: 2.4rem; font-weight: 500; }
+.empty-public h3 { margin: 0; font-family: var(--serif); font-size: clamp(1.65rem, 2.5vw, 2.25rem); font-weight: 500; line-height: 1.15; overflow-wrap: anywhere; }
 .empty-public p:not(.empty-mark) { max-width: 600px; color: var(--muted); }
 .public-footer {
   min-height: 110px;
@@ -372,7 +372,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .state { padding: 0.16rem 0.36rem; border: 1px solid #c2c8c4; border-radius: 4px; }
 .state-published { border-color: #79a091; color: #235b47; }
 .owner-empty { min-height: 260px; display: grid; place-content: center; justify-items: start; padding: 2rem; border: 1px solid #cfd2cc; background: #fff; }
-.owner-empty h3 { margin: 0; font-family: var(--serif); font-size: 2rem; }
+.owner-empty h3 { margin: 0; font-family: var(--serif); font-size: clamp(1.5rem, 2vw, 1.75rem); line-height: 1.15; overflow-wrap: anywhere; }
 .owner-empty p { max-width: 520px; color: var(--muted); }
 .entry-actions { min-width: 0; justify-content: end; }
 .entry-actions .form-status { flex: 1 0 100%; overflow-wrap: anywhere; text-align: right; }
