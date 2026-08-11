@@ -81,8 +81,8 @@ credential. Removing or rotating the setting removes or changes the field on
 the next deployment.
 
 The manifest must never include the owner email, any ChatGPT identity field,
-the Hub deployment credential, runtime secrets, drafts, local authorization
-state, database identifiers, hosting identifiers, or private endpoints.
+any future Hub credential, runtime secrets, drafts, local authorization state,
+database identifiers, hosting identifiers, or private endpoints.
 
 If the profile is absent, discovery returns `404` with
 `profile_not_configured`. If no valid protected/profile canonical URL is
@@ -282,26 +282,15 @@ the configured canonical URL is missing or invalid.
 
 ## Private operations are not public protocol
 
-Owner writes and Hub setup live behind independently authorized private routes.
-They are not part of `/api/v1` and clients must not treat them as network
-identity endpoints.
+Owner writes live behind independently authorized private routes. They are not
+part of `/api/v1` and clients must not treat them as network identity endpoints.
 
-The POC's `POST /api/private/hub/test` is a provisional presence-owned manual
-challenge and root bearer probe, not an established AittaSocial Hub API
-contract or verified connection. It accepts no destination or request body.
-Server-side code
-validates `AITTA_SOCIAL_HUB_URL` as an HTTPS origin without credentials, query,
-or fragment, then sends a short-timeout `GET` to that configured origin root
-with `Accept: application/json` and the protected deployment credential in the
-`Authorization: Bearer ...` header. It never returns or logs the Hub response
-body.
-
-Only the safe result categories `connected` (2xx), `credentialRejected`
-(401/403), `reachable` (another HTTP response), and `unavailable` (network
-failure or timeout) may reach the owner interface. None of these categories is
-trusted network authentication, and probe failure has no effect on public
-reads. This setup remains provisional until an accepted versioned Hub contract
-replaces it.
+The POC has no private Hub route, configured Hub destination, deployment
+credential, outbound probe, registration, or connection behavior. The optional
+public `hubVerificationChallenge` described above is only manifest data for a
+control-of-deployment check. It never authorizes a request or causes this
+deployment to contact Hub. Any future Hub operation requires a separately
+accepted versioned contract; public reads remain independent of Hub.
 
 ## HTML document metadata is not protocol 1.0
 

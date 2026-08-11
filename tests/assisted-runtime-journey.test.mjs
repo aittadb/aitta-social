@@ -20,7 +20,6 @@ const ownerEmail = "owner@example.com";
 
 test("one authorized browser journey customizes D1, reviews a draft, publishes, previews signed out, and rolls back", async () => {
   const draftCanary = "ASSISTED_PRIVATE_DRAFT_CANARY";
-  const credentialCanary = "ASSISTED_HUB_CREDENTIAL_CANARY";
   const ownerIdentityCanary = "ASSISTED_CHATGPT_IDENTITY_CANARY";
   const publicBody = "A reviewed update made public only after owner confirmation.";
   const db = new FakeD1({ profile: null, entries: [] });
@@ -28,8 +27,6 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     db,
     ownerEmail,
     canonicalUrl: " https://RUNTIME.example/presence/// ",
-    hubUrl: "https://offline-hub.invalid",
-    deploymentCredential: credentialCanary,
   });
 
   const identity = validProfileInput({
@@ -66,7 +63,6 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   assert.match(reloadedIdentity, /Fallback canonical presence URL/i);
   assert.match(reloadedIdentity, /value="https:\/\/stored\.example\/fallback"/i);
   assert.match(reloadedIdentity, new RegExp(ownerIdentityCanary, "i"));
-  assert.doesNotMatch(reloadedIdentity, new RegExp(`${credentialCanary}|offline-hub\\.invalid`, "i"));
 
   const create = await fetchApp("/api/private/entries", {
     env,
@@ -121,7 +117,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   assert.match(publicHtml, /density-compact/i);
   assert.match(publicHtml, /--accent:#6a4b35/i);
   assert.doesNotMatch(publicHtml, /Powered by AittaSocial/i);
-  assert.doesNotMatch(publicHtml, new RegExp(`${draftCanary}|${credentialCanary}|${ownerIdentityCanary}|owner@example\\.com|offline-hub\\.invalid`, "i"));
+  assert.doesNotMatch(publicHtml, new RegExp(`${draftCanary}|${ownerIdentityCanary}|owner@example\\.com`, "i"));
 
   const publicSite = (await responseJson(siteApi)).data;
   assert.equal(publicSite.canonicalUrl, "https://runtime.example/presence");
@@ -348,18 +344,14 @@ test("repeated dashboard controls have distinct accessible names without leaking
       entryRow({ id: secondId, title: "Shared working title", body: privateCanary, state: "draft", published_at: null }),
     ],
   });
-  const html = await ownerHtml("/owner", makeEnv({
-    db,
-    ownerEmail,
-    deploymentCredential: "REPEATED_ACTION_CREDENTIAL_CANARY",
-  }));
+  const html = await ownerHtml("/owner", makeEnv({ db, ownerEmail }));
   assert.match(html, new RegExp(`aria-label="Actions for Shared working title, update ${firstId}"`, "i"));
   assert.match(html, new RegExp(`aria-label="Actions for Shared working title, update ${secondId}"`, "i"));
   assert.match(html, new RegExp(`aria-label="Publish Shared working title, update ${firstId}"`, "i"));
   assert.match(html, new RegExp(`aria-label="Publish Shared working title, update ${secondId}"`, "i"));
   assert.notEqual(firstId, secondId);
   assert.equal(firstId.slice(-8), secondId.slice(-8));
-  assert.doesNotMatch(html, /REPEATED_ACTION_CREDENTIAL_CANARY|owner@example\.com/i);
+  assert.doesNotMatch(html, /owner@example\.com/i);
 });
 
 test("a maximum-length unbroken owner title and the full action set retain shrink and wrap source contracts", async () => {

@@ -17,31 +17,31 @@ const ownerEmail = "owner@example.com";
 
 test("owner matching is normalized and remains a sole-owner server decision", async (t) => {
   await t.test("case and surrounding whitespace are normalized", async () => {
-    const response = await fetchApp("/api/private/hub/test", {
-      env: makeEnv({ ownerEmail: "  OWNER@Example.COM  " }),
-      method: "POST",
+    const db = new FakeD1({ profile: null });
+    const response = await fetchApp("/api/private/profile", {
+      env: makeEnv({ db, ownerEmail: "  OWNER@Example.COM  " }),
+      method: "PUT",
       headers: {
         ...ownerHeaders("owner@example.com"),
         origin: "https://account.example",
+        "content-type": "application/json",
       },
+      body: JSON.stringify(validProfileInput()),
     });
-    assert.equal(response.status, 200);
-    assert.deepEqual(await responseJson(response), {
-      data: {
-        status: "unavailable",
-        message: "Add the Hub URL and deployment credential in protected runtime settings.",
-      },
-    });
+    assert.equal(response.status, 204);
+    assert.equal(db.mutations.length, 1);
   });
 
   await t.test("a different signed-in identity receives no administration", async () => {
-    const response = await fetchApp("/api/private/hub/test", {
+    const response = await fetchApp("/api/private/profile", {
       env: makeEnv({ ownerEmail }),
-      method: "POST",
+      method: "PUT",
       headers: {
         ...ownerHeaders("someone-else@example.com"),
         origin: "https://account.example",
+        "content-type": "application/json",
       },
+      body: JSON.stringify(validProfileInput()),
     });
     assert.equal(response.status, 403);
     assert.deepEqual(await responseJson(response), {
@@ -50,10 +50,11 @@ test("owner matching is normalized and remains a sole-owner server decision", as
   });
 
   await t.test("a signed-out visitor is challenged without leaking the owner", async () => {
-    const response = await fetchApp("/api/private/hub/test", {
+    const response = await fetchApp("/api/private/profile", {
       env: makeEnv({ ownerEmail }),
-      method: "POST",
-      headers: { origin: "https://account.example" },
+      method: "PUT",
+      headers: { origin: "https://account.example", "content-type": "application/json" },
+      body: JSON.stringify(validProfileInput()),
     });
     assert.equal(response.status, 401);
     const source = JSON.stringify(await responseJson(response));
@@ -66,13 +67,15 @@ test("owner matching is normalized and remains a sole-owner server decision", as
     ["invalid", "not-an-email"],
   ]) {
     await t.test(`${label} owner configuration safely disables administration`, async () => {
-      const response = await fetchApp("/api/private/hub/test", {
+      const response = await fetchApp("/api/private/profile", {
         env: makeEnv({ ownerEmail: configured }),
-        method: "POST",
+        method: "PUT",
         headers: {
           ...ownerHeaders(ownerEmail),
           origin: "https://account.example",
+          "content-type": "application/json",
         },
+        body: JSON.stringify(validProfileInput()),
       });
       assert.equal(response.status, 503);
       const source = JSON.stringify(await responseJson(response));
@@ -116,12 +119,19 @@ test("the same-origin gate runs before identity and database mutation", async (t
   }
 
   await t.test("Sec-Fetch-Site explicitly permits a same-origin request without Origin", async () => {
-    const response = await fetchApp("/api/private/hub/test", {
-      env: makeEnv({ ownerEmail }),
-      method: "POST",
-      headers: { ...ownerHeaders(ownerEmail), "sec-fetch-site": "same-origin" },
+    const db = new FakeD1({ profile: null });
+    const response = await fetchApp("/api/private/profile", {
+      env: makeEnv({ db, ownerEmail }),
+      method: "PUT",
+      headers: {
+        ...ownerHeaders(ownerEmail),
+        "sec-fetch-site": "same-origin",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(validProfileInput()),
     });
-    assert.equal(response.status, 200);
+    assert.equal(response.status, 204);
+    assert.equal(db.mutations.length, 1);
   });
 });
 
@@ -132,7 +142,6 @@ test("every private mutation route independently rejects a non-owner before touc
     ["edit entry", "PUT", "/api/private/entries/entry-1", validEntryInput()],
     ["delete entry", "DELETE", "/api/private/entries/entry-1", undefined],
     ["change publication state", "PUT", "/api/private/entries/entry-1/state", { state: "published" }],
-    ["test Hub", "POST", "/api/private/hub/test", undefined],
   ];
 
   for (const [label, method, path, payload] of routes) {

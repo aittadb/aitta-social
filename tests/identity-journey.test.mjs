@@ -175,8 +175,6 @@ test("successful save resumes from D1 and never derives public Identity from Cha
     db,
     ownerEmail,
     canonicalUrl: "https://CANONICAL.example/presence///",
-    deploymentCredential: "DEPLOYMENT_CREDENTIAL_CANARY",
-    hubUrl: "https://offline-hub.invalid",
   });
   const input = validProfileInput({
     displayName: "Saved Presence Identity",
@@ -203,7 +201,7 @@ test("successful save resumes from D1 and never derives public Identity from Cha
   assert.match(profileHtml, /Saved Presence Identity/i);
   assert.match(profileHtml, /https:\/\/canonical\.example\/presence/i);
   assert.match(profileHtml, /name="canonicalUrl"[^>]+value="https:\/\/stored\.example\/fallback"/i);
-  assert.doesNotMatch(profileHtml, /DRAFT_IDENTITY_CANARY|DRAFT_BODY_CANARY|DEPLOYMENT_CREDENTIAL_CANARY|offline-hub\.invalid/i);
+  assert.doesNotMatch(profileHtml, /DRAFT_IDENTITY_CANARY|DRAFT_BODY_CANARY/i);
 
   const publicResponse = await fetchApp("/", {
     env,
@@ -213,7 +211,7 @@ test("successful save resumes from D1 and never derives public Identity from Cha
   assert.equal(publicResponse.status, 200);
   const publicHtml = await publicResponse.text();
   assert.match(publicHtml, /Saved Presence Identity/i);
-  assert.doesNotMatch(publicHtml, /CHATGPT_IDENTITY_CANARY|owner@example\.com|DRAFT_IDENTITY_CANARY|DRAFT_BODY_CANARY|DEPLOYMENT_CREDENTIAL_CANARY|offline-hub\.invalid|hostile-request\.example/i);
+  assert.doesNotMatch(publicHtml, /CHATGPT_IDENTITY_CANARY|owner@example\.com|DRAFT_IDENTITY_CANARY|DRAFT_BODY_CANARY|hostile-request\.example/i);
 });
 
 test("Identity journey remains semantic, touch-friendly, responsive, and motion-safe", async () => {
@@ -227,8 +225,8 @@ test("Identity journey remains semantic, touch-friendly, responsive, and motion-
   assert.match(formSource, /onInput=\{updatePreview\}/);
   assert.match(formSource, /temporary until Save identity succeeds/i);
   assert.doesNotMatch(formSource, /localStorage|sessionStorage|accountType|next\/link/i);
-  assert.match(shellSource, /owner-nav-label">Advanced</);
-  assert.match(shellSource, /Advanced<\/span>[\s\S]*Provisional Hub setup/);
+  assert.match(shellSource, />Your presence<\/OwnerNavLink>[\s\S]*>Identity<\/OwnerNavLink>[\s\S]*>New update<\/OwnerNavLink>[\s\S]*>View public presence ↗<\/a>/);
+  assert.doesNotMatch(shellSource, /Advanced|owner\/hub|Provisional Hub setup|current:\s*[^;]*"hub"/);
   assert.match(css, /\.field input, \.field textarea, \.field select\s*\{[^}]*min-height:\s*48px/s);
   assert.match(css, /\.text-link\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.owner-wordmark, \.owner-session a\s*\{[^}]*min-height:\s*44px/s);

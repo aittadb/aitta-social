@@ -25,18 +25,16 @@ npm run dev
 Open the exact local URL printed by the development server. Do not assume a
 port or scan for one.
 
-`.env.local` is ignored. Use only fixture identities and credentials in it; do
-not copy a real owner email, a production deployment credential, or hosted
-runtime secrets into the repository or a shared test log.
+`.env.local` is ignored. Use only fixture identities and runtime values in it;
+do not copy a real owner email or hosted runtime secrets into the repository or
+a shared test log.
 
 The committed `.env.example` documents these local inputs:
 
 ```text
 AITTA_SOCIAL_OWNER_EMAIL=owner@example.test
 AITTA_SOCIAL_CANONICAL_URL=https://account.example
-AITTA_SOCIAL_HUB_URL=https://hub.example
 AITTA_SOCIAL_HUB_CHALLENGE=
-AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL=
 AITTA_SOCIAL_DEV_AUTH_EMAIL=owner@example.test
 ```
 
@@ -173,7 +171,8 @@ POC includes:
   when setup is incomplete or private, draft/private-canary exclusion from head
   tags, and the absence of runtime asset-resolution code;
 - deterministic `page`/`pageSize` pagination;
-- Hub HTTPS-origin and credential confinement plus timeout isolation; and
+- exact public challenge projection plus retired Hub-route and outbound-request
+  absence; and
 - semantic, labeled, keyboard-usable public and owner interfaces.
 
 The assisted-runtime fixture drives the compiled Worker through Identity and
@@ -209,15 +208,10 @@ explanation, Your presence, editor validation, narrow/mobile layout, zoom,
 visible focus, and reduced motion. Fix failures in implementation, tests, and
 the relevant documentation together.
 
-## Local Hub testing
+## Local Hub-boundary testing
 
-Hub integration is optional. The current manual challenge and root bearer probe
-is provisional setup, not a verified connection. Because there is no
-established Hub API contract for this POC, local tests should use a controlled
-fake fetch at the server boundary, not a real external destination or
-credential. Assert the exact configured HTTPS origin, manual redirect behavior,
-authorization-header confinement, short timeout, ignored response body, safe
-result categories, and continued public reads during every failure.
-
-Do not add an environment switch that sends a production credential to a
-browser-selected or non-HTTPS test service.
+Public reads do not contact Hub. The only current Hub-related runtime input is
+the optional public protocol 1.0 verification challenge. Local tests cover its
+exact omission and inclusion in the discovery manifest and prove that owner and
+public routes add no Hub destination, credential-bearing request, or outbound
+probe. Do not invent a test-only network path or authentication bypass.

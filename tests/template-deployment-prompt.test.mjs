@@ -14,7 +14,6 @@ import {
 const ownerEmail = "owner@example.com";
 const otherEmail = "other@example.com";
 const ownerCanary = "TEMPLATE_OWNER_PRIVATE_CANARY@example.test";
-const credentialCanary = "TEMPLATE_CREDENTIAL_PRIVATE_CANARY";
 const draftTitle = "TEMPLATE_DRAFT_TITLE_PRIVATE_CANARY";
 const draftBody = "TEMPLATE_DRAFT_BODY_PRIVATE_CANARY";
 const deploymentPrompt = JSON.parse(
@@ -38,8 +37,6 @@ test("a truly unconfigured deployment leads with the exact prompt and published-
         ],
       }),
       ownerEmail: ownerCanary,
-      hubUrl: "https://offline-hub.invalid",
-      deploymentCredential: credentialCanary,
     }),
     headers: { accept: "text/html" },
   });
@@ -58,7 +55,7 @@ test("a truly unconfigured deployment leads with the exact prompt and published-
   assert.match(html, /Visible public update/i);
   assert.doesNotMatch(
     html,
-    new RegExp([draftTitle, draftBody, ownerCanary, credentialCanary, "offline-hub\\.invalid"].join("|"), "i"),
+    new RegExp([draftTitle, draftBody, ownerCanary].join("|"), "i"),
   );
 });
 
@@ -125,7 +122,6 @@ test("a configured deployment leads with its Identity and contains no setup prom
         entries: [entryRow({ title: "Configured public update" })],
       }),
       ownerEmail: ownerCanary,
-      deploymentCredential: credentialCanary,
     }),
     headers: { accept: "text/html" },
   });
@@ -135,7 +131,7 @@ test("a configured deployment leads with its Identity and contains no setup prom
   assert.match(html, /<h1[^>]*>Configured Presence<\/h1>/i);
   assert.ok(html.indexOf("Configured Presence") < html.indexOf("Configured public update"));
   assert.doesNotMatch(html, /@Sites|Create your own presence|Prompt for ChatGPT|Set up this presence/i);
-  assert.doesNotMatch(html, /CONFIGURED_PROFILE_PRIVATE_CANARY|TEMPLATE_(?:OWNER|CREDENTIAL)_PRIVATE_CANARY/i);
+  assert.doesNotMatch(html, /CONFIGURED_PROFILE_PRIVATE_CANARY|TEMPLATE_OWNER_PRIVATE_CANARY/i);
 });
 
 test("a D1 failure is not presented as a new Site", async () => {
@@ -145,7 +141,7 @@ test("a D1 failure is not presented as a new Site", async () => {
     },
   };
   const response = await fetchApp("/", {
-    env: makeEnv({ db: failingDb, ownerEmail: ownerCanary, deploymentCredential: credentialCanary }),
+    env: makeEnv({ db: failingDb, ownerEmail: ownerCanary }),
     headers: { accept: "text/html" },
   });
 
@@ -154,7 +150,7 @@ test("a D1 failure is not presented as a new Site", async () => {
   assert.match(html, /This presence cannot be loaded right now/i);
   assert.match(html, /Try again/i);
   assert.doesNotMatch(html, /@Sites|Create your own presence|Prompt for ChatGPT|D1 unavailable private canary/i);
-  assert.doesNotMatch(html, /TEMPLATE_(?:OWNER|CREDENTIAL)_PRIVATE_CANARY/i);
+  assert.doesNotMatch(html, /TEMPLATE_OWNER_PRIVATE_CANARY/i);
 });
 
 test("the prompt surface stays native, selectable, responsive, and accessible", async () => {

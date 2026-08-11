@@ -258,20 +258,14 @@ export function makeEnv({
   db = new FakeD1(),
   ownerEmail,
   canonicalUrl,
-  hubUrl,
   hubChallenge,
-  deploymentCredential,
 } = {}) {
   return {
     DB: db,
     ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) },
     ...(ownerEmail === undefined ? {} : { AITTA_SOCIAL_OWNER_EMAIL: ownerEmail }),
     ...(canonicalUrl === undefined ? {} : { AITTA_SOCIAL_CANONICAL_URL: canonicalUrl }),
-    ...(hubUrl === undefined ? {} : { AITTA_SOCIAL_HUB_URL: hubUrl }),
     ...(hubChallenge === undefined ? {} : { AITTA_SOCIAL_HUB_CHALLENGE: hubChallenge }),
-    ...(deploymentCredential === undefined
-      ? {}
-      : { AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL: deploymentCredential }),
   };
 }
 

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -12,7 +12,8 @@ import {
 } from "./helpers/worker-harness.mjs";
 
 const ownerEmail = "owner@example.com";
-const credential = "HUB_CREDENTIAL_MUST_STAY_SERVER_SIDE";
+const retiredOriginCanary = "https://retired-hub-origin-canary.example";
+const retiredCredentialCanary = "RETIRED_HUB_CREDENTIAL_MUST_NEVER_ESCAPE";
 
 test("profile writes normalize canonical/public URLs and persist only validated fields", async () => {
   const db = new FakeD1({ profile: null });
@@ -187,187 +188,182 @@ test("entry validation keeps the single flexible model bounded", async (t) => {
   }
 });
 
-test("Hub probe confines the credential to the configured HTTPS origin", async () => {
+test("retired Hub surfaces are identical 404s and never make an outbound request", async (t) => {
+  const contexts = [
+    ["signed out", makeEnv({ ownerEmail }), {}],
+    ["owner", makeEnv({ ownerEmail }), mutationHeaders(ownerEmail)],
+    ["non-owner", makeEnv({ ownerEmail }), mutationHeaders("other@example.com")],
+    ["missing owner", makeEnv(), mutationHeaders(ownerEmail)],
+  ];
+  const variants = [
+    ["owner GET", "/owner/hub?destination=https%3A%2F%2Fattacker.example", "GET", undefined],
+    ["owner POST", "/owner/hub?destination=https%3A%2F%2Fattacker.example", "POST", { destination: "https://attacker.example" }],
+    ["private GET", "/api/private/hub/test?destination=https%3A%2F%2Fattacker.example", "GET", undefined],
+    ["private POST", "/api/private/hub/test?destination=https%3A%2F%2Fattacker.example", "POST", { destination: "https://attacker.example" }],
+  ];
+  const originalFetch = globalThis.fetch;
+  const originalConsole = Object.fromEntries(
+    ["log", "info", "warn", "error"].map((level) => [level, console[level]]),
+  );
   const calls = [];
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (target, init) => {
-    calls.push({ target, init });
-    return {
-      ok: true,
-      status: 200,
-      text() {
-        throw new Error("Hub response bodies must not be consumed");
-      },
-      json() {
-        throw new Error("Hub response bodies must not be consumed");
-      },
-    };
+  const logs = [];
+  globalThis.fetch = async (...args) => {
+    calls.push(args);
+    throw new Error("A retired Hub route must never make an outbound request.");
   };
+  for (const level of Object.keys(originalConsole)) {
+    console[level] = (...args) => logs.push([level, ...args.map(String)]);
+  }
 
   try {
-    const response = await fetchApp("/api/private/hub/test", {
-      env: makeEnv({
-        ownerEmail,
-        hubUrl: "https://hub.example.test",
-        deploymentCredential: credential,
-      }),
-      method: "POST",
-      headers: { ...mutationHeaders(ownerEmail), "content-type": undefined },
-    });
-    assert.equal(response.status, 200);
-    assert.equal(response.headers.get("cache-control"), "no-store");
-    const body = await responseJson(response);
-    assert.deepEqual(body, {
-      data: {
-        status: "connected",
-        message: "The configured Hub accepted the probe.",
-      },
-    });
-    assert.equal(calls.length, 1);
-    assert.equal(calls[0].target, "https://hub.example.test/");
-    assert.equal(calls[0].init.method, "GET");
-    assert.equal(calls[0].init.redirect, "manual");
-    assert.equal(calls[0].init.headers.Accept, "application/json");
-    assert.equal(calls[0].init.headers.Authorization, `Bearer ${credential}`);
-    assert.ok(calls[0].init.signal instanceof AbortSignal);
-    assert.doesNotMatch(JSON.stringify(body), new RegExp(credential));
+    let baseline;
+    for (const [label, baseEnv, identityHeaders] of contexts) {
+      await t.test(label, async () => {
+        const env = {
+          ...baseEnv,
+          AITTA_SOCIAL_HUB_URL: retiredOriginCanary,
+          AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL: retiredCredentialCanary,
+        };
+        const projections = [];
+        for (const [variant, path, method, body] of variants) {
+          const response = await fetchApp(path, {
+            env,
+            method,
+            headers: {
+              accept: "text/html",
+              ...identityHeaders,
+              ...(body === undefined ? {} : { "content-type": "application/json" }),
+            },
+            ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+          });
+          const projection = {
+            variant,
+            status: response.status,
+            contentType: response.headers.get("content-type"),
+            location: response.headers.get("location"),
+            cacheControl: response.headers.get("cache-control"),
+            body: await response.text(),
+          };
+          assert.equal(projection.status, 404);
+          assert.equal(projection.location, null);
+          const serialized = JSON.stringify(projection);
+          assert.doesNotMatch(serialized, /retired-hub-origin-canary/i);
+          assert.doesNotMatch(serialized, /RETIRED_HUB_CREDENTIAL/i);
+          assert.doesNotMatch(serialized, /Provisional Hub setup|Hub probe|deployment credential/i);
+          projections.push(projection);
+        }
+        if (baseline === undefined) baseline = projections;
+        else assert.deepEqual(projections, baseline);
+      });
+    }
+    assert.equal(calls.length, 0);
+    const serializedLogs = JSON.stringify(logs);
+    assert.doesNotMatch(serializedLogs, /retired-hub-origin-canary/i);
+    assert.doesNotMatch(serializedLogs, /RETIRED_HUB_CREDENTIAL/i);
   } finally {
     globalThis.fetch = originalFetch;
+    for (const [level, method] of Object.entries(originalConsole)) console[level] = method;
   }
 });
 
-test("Hub probe accepts an empty transport stream but no request content", async () => {
+test("public reads and the protocol 1.0 challenge remain Hub-independent", async () => {
+  const challenge = "PUBLIC_CHALLENGE_REMAINS_PROTOCOL_1_0";
+  const env = {
+    ...makeEnv({ hubChallenge: challenge }),
+    AITTA_SOCIAL_HUB_URL: retiredOriginCanary,
+    AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL: retiredCredentialCanary,
+  };
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => new Response(null, { status: 200 });
-  try {
-    const response = await fetchApp("/api/private/hub/test", {
-      env: makeEnv({
-        ownerEmail,
-        hubUrl: "https://hub.example.test",
-        deploymentCredential: credential,
-      }),
-      method: "POST",
-      headers: { ...mutationHeaders(ownerEmail), "content-type": undefined },
-      body: new Uint8Array(),
-    });
-    assert.equal(response.status, 200);
-    assert.equal((await responseJson(response)).data.status, "connected");
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test("Hub destination cannot come from the browser and invalid configured destinations receive no credential", async (t) => {
-  const originalFetch = globalThis.fetch;
+  const originalConsole = Object.fromEntries(
+    ["log", "info", "warn", "error"].map((level) => [level, console[level]]),
+  );
+  const logs = [];
   let calls = 0;
   globalThis.fetch = async () => {
     calls += 1;
-    return new Response(null, { status: 200 });
+    throw new Error("Public reads must not contact Hub.");
   };
+  for (const level of Object.keys(originalConsole)) {
+    console[level] = (...args) => logs.push([level, ...args.map(String)]);
+  }
 
   try {
-    await t.test("browser-supplied destination/body is rejected", async () => {
-      const response = await fetchApp("/api/private/hub/test", {
-        env: makeEnv({
-          ownerEmail,
-          hubUrl: "https://hub.example.test",
-          deploymentCredential: credential,
-        }),
-        method: "POST",
-        headers: mutationHeaders(ownerEmail),
-        body: JSON.stringify({ destination: "https://attacker.example/collect" }),
-      });
-      assert.equal(response.status, 400);
-      assert.deepEqual(await responseJson(response), {
-        error: "This operation accepts no request body.",
-      });
-      assert.equal(calls, 0);
-    });
-
-    for (const invalidHubUrl of [
-      "http://hub.example.test",
-      "https://hub.example.test/probe",
-      "https://hub.example.test/?next=https://attacker.example",
-      "https://user:pass@hub.example.test",
-      "https://hub.example.test/#fragment",
-    ]) {
-      await t.test(`rejects ${invalidHubUrl}`, async () => {
-        const response = await fetchApp("/api/private/hub/test", {
-          env: makeEnv({
-            ownerEmail,
-            hubUrl: invalidHubUrl,
-            deploymentCredential: credential,
-          }),
-          method: "POST",
-          headers: { ...mutationHeaders(ownerEmail), "content-type": undefined },
-        });
-        assert.equal(response.status, 200);
-        const body = await responseJson(response);
-        assert.equal(body.data.status, "unavailable");
-        assert.equal(body.data.message, "The Hub URL must be a plain HTTPS origin.");
-        assert.doesNotMatch(JSON.stringify(body), new RegExp(credential));
-        assert.equal(calls, 0);
-      });
+    const responses = await Promise.all([
+      fetchApp("/", { env, headers: { accept: "text/html" } }),
+      fetchApp("/api/v1/site", { env }),
+      fetchApp("/.well-known/aitta-social.json", { env }),
+    ]);
+    assert.deepEqual(responses.map(({ status }) => status), [200, 200, 200]);
+    const bodies = await Promise.all(responses.map((response) => response.text()));
+    const [html, site, manifest] = bodies;
+    for (const [index, body] of bodies.entries()) {
+      const serialized = `${JSON.stringify([...responses[index].headers])}\n${body}`;
+      assert.doesNotMatch(serialized, /retired-hub-origin-canary/i);
+      assert.doesNotMatch(serialized, /RETIRED_HUB_CREDENTIAL/i);
     }
+    assert.doesNotMatch(html, new RegExp(challenge));
+    assert.doesNotMatch(site, new RegExp(challenge));
+    assert.equal(JSON.parse(manifest).hubVerificationChallenge, challenge);
+    assert.equal(calls, 0);
+    const serializedLogs = JSON.stringify(logs);
+    assert.doesNotMatch(serializedLogs, /retired-hub-origin-canary/i);
+    assert.doesNotMatch(serializedLogs, /RETIRED_HUB_CREDENTIAL/i);
   } finally {
     globalThis.fetch = originalFetch;
+    for (const [level, method] of Object.entries(originalConsole)) console[level] = method;
   }
 });
 
-test("Hub unavailability is coarse, secret-free, and cannot take public reads offline", async () => {
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => {
-    throw new Error(`network failure involving ${credential}`);
-  };
-
-  const env = makeEnv({
-    ownerEmail,
-    hubUrl: "https://hub.example.test",
-    deploymentCredential: credential,
-  });
-
-  try {
-    const probe = await fetchApp("/api/private/hub/test", {
-      env,
-      method: "POST",
-      headers: { ...mutationHeaders(ownerEmail), "content-type": undefined },
-    });
-    assert.equal(probe.status, 200);
-    const body = await responseJson(probe);
-    assert.deepEqual(body, {
-      data: {
-        status: "unavailable",
-        message: "The Hub could not be reached. Public presence pages remain available.",
-      },
-    });
-    assert.doesNotMatch(JSON.stringify(body), new RegExp(credential));
-
-    const site = await fetchApp("/api/v1/site", { env });
-    assert.equal(site.status, 200);
-    assert.doesNotMatch(JSON.stringify(await responseJson(site)), new RegExp(credential));
-
-    const account = await fetchApp("/", { env, headers: { accept: "text/html" } });
-    assert.equal(account.status, 200);
-    assert.doesNotMatch(await account.text(), new RegExp(credential));
-  } finally {
-    globalThis.fetch = originalFetch;
+test("retired Hub implementation and identifiers are absent from current build output", async () => {
+  for (const path of [
+    "../lib/hub.ts",
+    "../app/api/private/hub/test/route.ts",
+    "../app/owner/hub/page.tsx",
+    "../app/owner/hub/HubTest.tsx",
+  ]) {
+    await assert.rejects(readFile(new URL(path, import.meta.url), "utf8"), { code: "ENOENT" });
   }
-});
 
-test("Hub credential handling has no client or logging path", async () => {
-  const [hubSource, routeSource, clientSource] = await Promise.all([
-    readFile(new URL("../lib/hub.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/api/private/hub/test/route.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/owner/hub/HubTest.tsx", import.meta.url), "utf8"),
+  const sources = await Promise.all([
+    readFile(new URL("../.env.example", import.meta.url), "utf8"),
+    readFile(new URL("../AGENTS.md", import.meta.url), "utf8"),
+    readFile(new URL("../README.md", import.meta.url), "utf8"),
+    readFile(new URL("../lib/runtime.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/OwnerShell.tsx", import.meta.url), "utf8"),
+    readTree(new URL("../app/", import.meta.url)),
+    readTree(new URL("../lib/", import.meta.url)),
+    ...[
+      "deployment.md",
+      "local-development.md",
+      "presentation.md",
+      "privacy.md",
+      "protocol.md",
+      "security.md",
+    ].map((path) => readFile(new URL(`../docs/${path}`, import.meta.url), "utf8")),
+    readTree(new URL("../dist/client/", import.meta.url)),
+    readTree(new URL("../dist/server/", import.meta.url)),
   ]);
-
-  assert.match(hubSource, /Authorization:\s*`Bearer \$\{settings\.deploymentCredential\}`/);
-  assert.match(hubSource, /redirect:\s*"manual"/);
-  assert.match(hubSource, /AbortSignal\.timeout\(5000\)/);
-  assert.doesNotMatch(`${hubSource}\n${routeSource}`, /console\s*\./);
+  const currentOutput = sources.join("\n");
   assert.doesNotMatch(
-    clientSource,
-    /AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL|deploymentCredential|Authorization|Bearer/i,
+    currentOutput,
+    /AITTA_SOCIAL_HUB_URL|AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL|deploymentCredential|\/api\/private\/hub\/test|\/owner\/hub|HubTest|Provisional Hub setup/,
   );
-  assert.doesNotMatch(routeSource, /request\.(?:json|text|formData)\s*\(/);
+  assert.doesNotMatch(currentOutput, /retired-hub-origin-canary|RETIRED_HUB_CREDENTIAL/i);
 });
+
+async function readTree(root) {
+  const contents = [];
+  for (const entry of await readdir(root, { withFileTypes: true })) {
+    const url = new URL(entry.name, root);
+    if (entry.isDirectory()) {
+      contents.push(await readTree(new URL(`${entry.name}/`, root)));
+    } else {
+      try {
+        contents.push(await readFile(url, "utf8"));
+      } catch {
+        // Binary fonts and other non-text assets have no executable route surface.
+      }
+    }
+  }
+  return contents.join("\n");
+}

@@ -89,9 +89,8 @@ server-derived state, while a reload before saving discards the preview.
 
 The normalized effective public URL is shown with a safe runtime-override or
 stored-fallback explanation. Raw runtime configuration, request hosts, ChatGPT
-identity, drafts, and Hub state never become Identity defaults. Provisional Hub
-setup appears below an **Advanced** navigation label and is not part of Identity
-readiness. The owner grids collapse to one column at the narrow breakpoint;
+identity, drafts, and Hub state never become Identity defaults. The owner grids
+collapse to one column at the narrow breakpoint;
 native links, buttons, and fields retain keyboard focus behavior and at least
 44-pixel interactive height.
 

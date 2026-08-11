@@ -111,9 +111,7 @@ source file, migration, screenshot, or chat response.
 | --- | --- |
 | `AITTA_SOCIAL_OWNER_EMAIL` | Owner enters their verified ChatGPT email directly in protected settings. Required for all writes. Do not infer it from the Site owner/access record; that hosting identity may differ. |
 | `AITTA_SOCIAL_CANONICAL_URL` | Set to the normalized canonical HTTPS deployment URL. Use the private Sites URL until the owner later approves and configures another canonical domain. |
-| `AITTA_SOCIAL_HUB_URL` | Optional HTTPS Hub origin; no path, credentials, query, or fragment. |
 | `AITTA_SOCIAL_HUB_CHALLENGE` | Optional current verification challenge. It becomes public in discovery after redeployment. |
-| `AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL` | Optional protected secret issued by Hub. It never becomes public. |
 
 Redeploy privately after a runtime-setting change that must reach the deployed
 server. Verify status again before testing. Never print a setting value while
@@ -158,9 +156,9 @@ The effective canonical URL follows one server-owned rule: a valid normalized
 `AITTA_SOCIAL_CANONICAL_URL` takes precedence, otherwise the normalized URL
 stored with Identity is the fallback. The owner workspace may show that
 normalized effective public URL and whether the protected runtime override or
-stored fallback selected it. It never prints an invalid/raw runtime value. Hub
-setup remains a separately labeled advanced, provisional destination and does
-not participate in Identity readiness or public preview.
+stored fallback selected it. It never prints an invalid/raw runtime value.
+There is no current owner Hub control or connection state, and Hub does not
+participate in Identity readiness or public preview.
 
 Identity and update writes use the stable profile and entry models in this
 deployment's D1 database and do not require another deployment after each edit.
@@ -253,7 +251,7 @@ Before public release, verify:
 - profile- and published-update-derived document metadata, neutral unconfigured
   `noindex, nofollow` metadata, hostile request-host rejection, and absence of
   image references when no direct checked-in identity asset exists; and
-- public presence reads while the optional Hub test times out or fails.
+- public presence reads without any Hub request or configuration.
 
 A private Sites access policy may prevent anonymous traffic from reaching the
 application at all. Do not temporarily publish the Site to work around that
@@ -261,48 +259,21 @@ boundary. Use the local/automated signed-out fixture until the owner explicitly
 approves public access. Hosting privacy and application authorization are both
 required during setup.
 
-## 7. Optional provisional AittaSocial Hub setup
+## 7. Optional public verification challenge
 
-The presence remains fully readable without this section. AittaSocial Hub is a
-separate service and must treat every presence deployment as an untrusted
-external website.
+The presence remains fully readable without this setting. The POC has no Hub
+registration, private Hub control, configured Hub destination, deployment
+credential, or outbound probe. Do not invent any of those behaviors without a
+separately accepted versioned contract.
 
-This is a manual challenge and root bearer probe only. It does not register the
-presence, establish network membership or a session, or create a trusted Hub
-connection. Keep it visibly provisional until an accepted versioned Hub
-contract replaces the entire flow; do not extend it by guessing Hub endpoints,
-claims, or credential semantics.
-
-1. Configure and privately deploy this presence, including its owner and
-   canonical URL.
-2. Open AittaSocial Hub separately.
-3. Sign in with ChatGPT at Hub; that Hub sign-in, not this presence's local
-   sign-in, establishes any network-user identity.
-4. Submit this deployment's canonical URL to Hub.
-5. Receive an opaque verification challenge from Hub.
-6. Save the challenge as `AITTA_SOCIAL_HUB_CHALLENGE` in this Site's protected
-   runtime settings.
-7. Redeploy privately and verify that
-   `/.well-known/aitta-social.json` exposes exactly the current challenge and no
-   protected values.
-8. Ask Hub to retrieve and verify the manifest.
-9. Receive a deployment credential from Hub and save it as the protected
-   `AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL` secret. Never paste it into the owner
-   page or browser.
-10. Configure `AITTA_SOCIAL_HUB_URL` as the exact HTTPS Hub origin, redeploy,
-    and run the owner-only transport probe at `/owner/hub`.
-
-The POC transport test is provisional because Hub has no established API
-contract for it. `POST /api/private/hub/test` accepts no request body or
-destination. Server code sends a short-timeout `GET` to the configured HTTPS
-origin root with `Accept: application/json` and the deployment credential in an
-`Authorization: Bearer ...` header. It does not follow redirects with the
-credential and does not read, return, or log the response body.
-
-The internal result is one of `connected`, `credentialRejected`, `reachable`,
-or `unavailable`. These categories describe transport/credential-probe results;
-even `connected` is not a verified connection or trusted network
-authentication. They do not affect public presence operation.
+Leave `AITTA_SOCIAL_HUB_CHALLENGE` empty unless a separately accepted
+verification process supplies an opaque current challenge. If one is supplied,
+save it in protected runtime settings, redeploy privately, and verify that
+`/.well-known/aitta-social.json` exposes exactly that value and no protected
+data. The public challenge proves only that someone could modify the deployment
+at verification time. It is not authentication, registration, network
+membership, a session, or a trusted connection. Remove it and redeploy when it
+is no longer current.
 
 ## 8. Inspect and save the review checkpoint
 
@@ -316,7 +287,7 @@ Start the Sites agent preview and inspect at least:
   targets, and reduced-motion behavior;
 - missing-owner guidance;
 - Your presence, Identity form, update editor, state transitions, delete
-  confirmation, and provisional Hub setup/status; and
+  confirmation, and native owner navigation; and
 - a signed-in non-owner and signed-out public response using the safe test
   boundary described above.
 

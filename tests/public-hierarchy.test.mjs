@@ -11,7 +11,6 @@ import {
 } from "./helpers/worker-harness.mjs";
 
 const ownerCanary = "HIERARCHY_OWNER_PRIVATE_CANARY@example.test";
-const credentialCanary = "HIERARCHY_CREDENTIAL_PRIVATE_CANARY";
 const longVisibleHost = `${"public-presence-segment.".repeat(8)}example.test`;
 const longUnbrokenCopy = "pitkajulkinenpaivitysteksti".repeat(14);
 
@@ -75,8 +74,6 @@ test("the public presence leads with identity, featured information, and recent 
         entries,
       }),
       ownerEmail: ownerCanary,
-      hubUrl: "https://unavailable-hub.example",
-      deploymentCredential: credentialCanary,
     }),
     headers: { accept: "text/html" },
   });
@@ -129,18 +126,16 @@ test("the public presence leads with identity, featured information, and recent 
   assert.match(html, new RegExp("very-long-public-resource-segment/".repeat(9)));
   assert.doesNotMatch(
     html,
-    /HIERARCHY_(?:DRAFT_TITLE|DRAFT_BODY|PROFILE|OWNER|CREDENTIAL)_PRIVATE_CANARY/i,
+    /HIERARCHY_(?:DRAFT_TITLE|DRAFT_BODY|PROFILE|OWNER)_PRIVATE_CANARY/i,
   );
   assert.doesNotMatch(html, />Company presence|>Presence type|accountType/i);
 });
 
-test("an empty presence stays intentional and independent of optional Hub availability", async () => {
+test("an empty presence stays intentional without Hub", async () => {
   const response = await fetchApp("/", {
     env: makeEnv({
       db: new FakeD1({ entries: [] }),
       ownerEmail: ownerCanary,
-      hubUrl: "https://unavailable-hub.example",
-      deploymentCredential: credentialCanary,
     }),
     headers: { accept: "text/html" },
   });
@@ -153,7 +148,7 @@ test("an empty presence stays intentional and independent of optional Hub availa
   assert.match(html, /No published updates yet/);
   assert.match(html, /presence already stands on its own/i);
   assert.match(html, /aria-label="Technical resources"/);
-  assert.doesNotMatch(html, /unavailable-hub|HIERARCHY_(?:OWNER|CREDENTIAL)_PRIVATE_CANARY/i);
+  assert.doesNotMatch(html, /HIERARCHY_OWNER_PRIVATE_CANARY/i);
 });
 
 test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom, and motion boundaries", async () => {

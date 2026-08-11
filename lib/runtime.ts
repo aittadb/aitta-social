@@ -3,17 +3,13 @@ import { env } from "cloudflare:workers";
 export type RuntimeSettings = {
   ownerEmail: string | null;
   canonicalUrl: string | null;
-  hubUrl: string | null;
   hubChallenge: string | null;
-  deploymentCredential: string | null;
 };
 
 type SiteEnv = {
   AITTA_SOCIAL_OWNER_EMAIL?: string;
   AITTA_SOCIAL_CANONICAL_URL?: string;
-  AITTA_SOCIAL_HUB_URL?: string;
   AITTA_SOCIAL_HUB_CHALLENGE?: string;
-  AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL?: string;
   AITTA_SOCIAL_DEV_AUTH_EMAIL?: string;
 };
 
@@ -22,9 +18,7 @@ export function getRuntimeSettings(): RuntimeSettings {
   return {
     ownerEmail: optional(values.AITTA_SOCIAL_OWNER_EMAIL),
     canonicalUrl: optional(values.AITTA_SOCIAL_CANONICAL_URL),
-    hubUrl: optional(values.AITTA_SOCIAL_HUB_URL),
     hubChallenge: optional(values.AITTA_SOCIAL_HUB_CHALLENGE),
-    deploymentCredential: optional(values.AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL),
   };
 }
 

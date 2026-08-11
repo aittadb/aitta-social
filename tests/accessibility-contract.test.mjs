@@ -104,7 +104,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
   });
 });
 
-test("presence language and provisional Hub copy do not overclaim identity or connection", async (t) => {
+test("presence and update language stays clear without obsolete Hub controls", async (t) => {
   await t.test("public and owner surfaces use presence and update language", async () => {
     const env = makeEnv({
       db: new FakeD1({ entries: [entryRow()] }),
@@ -132,31 +132,7 @@ test("presence language and provisional Hub copy do not overclaim identity or co
     assert.match(ownerHtml, />Create update<\/a>/i);
     assert.match(ownerHtml, /aria-label="Presence summary"/i);
     assert.doesNotMatch(ownerHtml, /Deployment overview|Account summary|>Entries<\/h2>|>Create entry<\/a>/i);
-  });
-
-  await t.test("the owner sees only a provisional Hub diagnostic", async () => {
-    const response = await fetchApp("/owner/hub", {
-      env: makeEnv({ ownerEmail }),
-      headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
-    });
-    assert.equal(response.status, 200);
-    const html = await response.text();
-    assert.match(html, /<h1>Provisional Hub setup<\/h1>/i);
-    assert.match(html, /manual challenge and root probe do not establish a trusted Hub connection or network identity/i);
-    assert.match(html, /successful root response is not a completed Hub connection/i);
-    assert.match(html, /<button[^>]+type="button"[^>]*>Run provisional Hub probe<\/button>/i);
-    assert.doesNotMatch(html, /<h1>AittaSocial Hub setup<\/h1>|>Test Hub connection<\/button>/i);
-  });
-
-  await t.test("a different signed-in user cannot see Hub settings or the provisional control", async () => {
-    const response = await fetchApp("/owner/hub", {
-      env: makeEnv({ ownerEmail }),
-      headers: { accept: "text/html", ...ownerHeaders("other@example.com") },
-    });
-    assert.equal(response.status, 200);
-    const html = await response.text();
-    assert.match(html, /This presence is not yours to administer/i);
-    assert.doesNotMatch(html, /Protected setting status|Provisional setup sequence|Run provisional Hub probe/i);
+    assert.doesNotMatch(ownerHtml, /owner\/hub|Advanced|Provisional Hub setup|Hub probe/i);
   });
 });
 
@@ -210,20 +186,20 @@ test("CSS preserves responsive, reduced-motion, focus, touch-target, and no-grad
   assert.match(css, /@media\s*\(max-width:\s*900px\)/);
   assert.match(css, /@media\s*\(max-width:\s*640px\)/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
-  assert.match(css, /\.field-grid-two,\s*\.runtime-grid\s*\{\s*grid-template-columns:\s*1fr/s);
+  assert.match(css, /\.field-grid-two\s*\{\s*grid-template-columns:\s*1fr/s);
   assert.match(css, /\.owner-page-header\s*\{[^}]*flex-direction:\s*column/s);
+  assert.doesNotMatch(css, /owner-nav-label|runtime-grid|runtime-status|setup-steps|hub-test|setting-(?:ready|needed)|safe-note/);
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 });
 
 test("client mutation controls announce status and use semantic form controls", async () => {
-  const [actions, entryForm, profileForm, hubTest] = await Promise.all([
+  const [actions, entryForm, profileForm] = await Promise.all([
     readFile(new URL("../app/owner/_components/EntryActions.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/entries/EntryForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/profile/ProfileForm.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/owner/hub/HubTest.tsx", import.meta.url), "utf8"),
   ]);
 
-  for (const source of [actions, entryForm, profileForm, hubTest]) {
+  for (const source of [actions, entryForm, profileForm]) {
     assert.match(source, /role="status"/);
     assert.match(source, /aria-live="polite"/);
   }
@@ -237,8 +213,6 @@ test("client mutation controls announce status and use semantic form controls", 
   assert.match(profileForm, /<legend>Public details<\/legend>/);
   assert.match(profileForm, /<legend>Presentation<\/legend>/);
   assert.doesNotMatch(profileForm, /accountType|name="accountType"|>Presence type/);
-  assert.match(hubTest, /Provisional probe result:/);
-  assert.match(hubTest, /catch \{ setStatus\("Provisional probe result:/);
 });
 
 test("route navigation stays native and cannot be intercepted by the hosted client router", async () => {

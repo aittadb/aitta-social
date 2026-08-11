@@ -161,6 +161,8 @@ test("the clean-source proof is inert, value-based, versioned, and separately ho
   assert.match(script, /run\("git", \["archive", "--format=tar"/);
   assert.match(script, /assertAbsent\(activeHostingPath/);
   assert.match(script, /project_id: null, d1: "DB", r2: null/);
+  assert.match(script, /Retired keys are hostile build-time inputs, not supported configuration/);
+  assert.match(script, /AITTA_SOCIAL_HUB_URL: `https:\/\/\$\{canaries\[2\]\}`/);
   assert.match(script, /AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL: canaries\[4\]/);
   assert.match(script, /\["dist", "\.next", "\.vinext", "\.wrangler"\]/);
   assert.match(script, /assertValuesAbsent\(outputFiles/);

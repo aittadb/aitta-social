@@ -10,7 +10,6 @@ import {
   responseJson,
 } from "./helpers/worker-harness.mjs";
 
-const credentialCanary = "DEPLOYMENT_CREDENTIAL_PRIVATE_CANARY";
 const ownerCanary = "owner-private-canary@example.test";
 
 test("signed-out visitors receive the public presence HTML and only published content", async () => {
@@ -31,7 +30,6 @@ test("signed-out visitors receive the public presence HTML and only published co
     env: makeEnv({
       db,
       ownerEmail: ownerCanary,
-      deploymentCredential: credentialCanary,
     }),
     headers: { accept: "text/html" },
   });
@@ -47,7 +45,6 @@ test("signed-out visitors receive the public presence HTML and only published co
   assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/);
   assert.doesNotMatch(html, /DRAFT_TITLE_PRIVATE_CANARY|DRAFT_BODY_PRIVATE_CANARY/);
   assert.doesNotMatch(html, new RegExp(ownerCanary, "i"));
-  assert.doesNotMatch(html, new RegExp(credentialCanary));
 });
 
 test("a presence with no updates still has an intentional public empty state", async () => {
@@ -197,7 +194,6 @@ test("site API uses an explicit public allowlist and canonical configured links"
       db: new FakeD1({ profile }),
       ownerEmail: ownerCanary,
       canonicalUrl: "https://CANONICAL.example/account///",
-      deploymentCredential: credentialCanary,
     }),
   });
   assert.equal(response.status, 200);
@@ -227,7 +223,6 @@ test("site API uses an explicit public allowlist and canonical configured links"
   const serialized = JSON.stringify(body);
   assert.doesNotMatch(serialized, /PROFILE_ROW_SECRET|PRIVATE_CREATED_CANARY|PRIVATE_UPDATED_CANARY/);
   assert.doesNotMatch(serialized, new RegExp(ownerCanary, "i"));
-  assert.doesNotMatch(serialized, new RegExp(credentialCanary));
   assert.doesNotMatch(serialized, /untrusted-request-host/i);
 });
 
@@ -236,7 +231,6 @@ test("discovery manifest has a stable allowlist and exposes only an explicitly c
     db: new FakeD1({ profile: profileRow({ private_canary: "MANIFEST_PROFILE_SECRET" }) }),
     ownerEmail: ownerCanary,
     canonicalUrl: "https://canonical.example/account",
-    deploymentCredential: credentialCanary,
   };
 
   await t.test("challenge absent", async () => {
@@ -265,7 +259,6 @@ test("discovery manifest has a stable allowlist and exposes only an explicitly c
     const serialized = JSON.stringify(body);
     assert.doesNotMatch(serialized, /MANIFEST_PROFILE_SECRET/);
     assert.doesNotMatch(serialized, new RegExp(ownerCanary, "i"));
-    assert.doesNotMatch(serialized, new RegExp(credentialCanary));
   });
 
   await t.test("challenge present without other protected settings", async () => {
@@ -274,7 +267,6 @@ test("discovery manifest has a stable allowlist and exposes only an explicitly c
     });
     const body = await responseJson(response);
     assert.equal(body.hubVerificationChallenge, "challenge-public-proof");
-    assert.doesNotMatch(JSON.stringify(body), new RegExp(credentialCanary));
   });
 });
 

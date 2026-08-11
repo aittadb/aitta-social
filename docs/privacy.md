@@ -33,9 +33,7 @@ browser storage and Hub are not content stores for this deployment.
 | --- | --- | --- |
 | `AITTA_SOCIAL_OWNER_EMAIL` | Exact normalized local owner authorization | None; never disclosed |
 | `AITTA_SOCIAL_CANONICAL_URL` | Canonical public resource URLs | The normalized canonical URL is public |
-| `AITTA_SOCIAL_HUB_URL` | Pins the optional server-side Hub destination | Only a coarse transport result is shown to the owner |
 | `AITTA_SOCIAL_HUB_CHALLENGE` | Allows Hub to verify deployment control | Public in the manifest only while explicitly configured |
-| `AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL` | Authenticates the deployment's provisional server-side Hub probe | None; never disclosed |
 
 Protected runtime values are not persisted to profile or entry tables. Do not
 copy them into source, migrations, committed fixtures, screenshots, URLs, or
@@ -121,13 +119,13 @@ identity claim.
 
 Public serializers use explicit allowlists documented in
 [protocol.md](protocol.md). They do not include owner email, ChatGPT identity,
-drafts, internal state, deployment credentials, runtime secrets, Hub response
-bodies, database identifiers, hosting identifiers, or private route data.
+drafts, internal state, runtime secrets, database identifiers, hosting
+identifiers, or private route data.
 
 ## Private data
 
-Owner-only surfaces may display profile drafts, draft entries, local editing
-state retrieved from D1, and safe setup/connection categories. A signed-in
+Owner-only surfaces may display profile drafts, draft entries, and local editing
+state retrieved from D1. A signed-in
 visitor who is not the configured owner receives none of that data.
 
 The Identity form's live preview and required-field count are transient
@@ -170,23 +168,18 @@ Missing owner configuration disables all writes. It does not cause the
 application to reveal expected configuration values or treat the first visitor
 as an owner.
 
-## Optional Hub data flow
+## Optional Hub verification data
 
-Public presence reads do not contact Hub.
+Public presence reads do not contact Hub. The POC has no configured Hub
+destination, deployment credential, outbound probe, registration, or connection
+data flow.
 
-During the owner-initiated provisional transport test, server code sends only
-an HTTP request to the exact configured HTTPS Hub origin. The deployment
-credential is confined to the server-side `Authorization` header. The presence
-does not send profile content, entries, drafts, owner email, ChatGPT identity,
-or a browser-chosen destination. It does not read or retain the response body;
-the interface receives only a coarse safe status category.
-
-The public verification manifest lets Hub retrieve the configured challenge.
-That challenge is intentionally public and is not personal identity or an
-authentication session. This manual setup is not a verified Hub connection and
-must remain provisional until an accepted versioned Hub contract replaces it.
-Hub's own network-user registration, directory, credentials, and future
-sessions are separate Hub data handling.
+The public verification manifest exposes the configured challenge when present.
+That challenge is intentionally public, proves only control of this deployment
+at verification time, and is not personal identity, authentication, a network
+session, or a trusted connection. Hub's own future registration, directory,
+credentials, and sessions require a separately accepted contract and are not
+this deployment's current data handling.
 
 ## Retention and control
 
@@ -198,7 +191,7 @@ sessions are separate Hub data handling.
   provider-level recovery retention, if any, are outside this application's
   direct control.
 - Removing the Hub challenge setting removes it from the next deployed
-  manifest. Removing the deployment credential disables authenticated probes.
+  manifest.
 - Deleting or decommissioning the Site and its D1 resource is a hosting-level
   owner operation and should be checked against the owner's retention needs.
 
@@ -222,10 +215,10 @@ data flow.
 ## Logs and errors
 
 Application logs and browser errors must not contain email addresses,
-authentication headers, Hub credentials, runtime setting values, request
-bodies, entry drafts, SQL text with values, or Hub response bodies. Safe errors
-use fixed categories and may include a generated correlation identifier that
-contains no embedded user data.
+authentication headers, runtime secrets, runtime setting values, request
+bodies, entry drafts, or SQL text with values. Safe errors use fixed categories
+and may include a generated correlation identifier that contains no embedded
+user data.
 
 Tests use obvious private canary values and assert that public HTML, JSON,
 headers, errors, and logs do not contain them. Production authorization is not

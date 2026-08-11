@@ -174,6 +174,7 @@ try {
     [
       `AITTA_SOCIAL_OWNER_EMAIL=${canaries[0]}`,
       `AITTA_SOCIAL_CANONICAL_URL=https://${canaries[1]}`,
+      // Retired keys are hostile build-time inputs, not supported configuration.
       `AITTA_SOCIAL_HUB_URL=https://${canaries[2]}`,
       `AITTA_SOCIAL_HUB_CHALLENGE=${canaries[3]}`,
       `AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL=${canaries[4]}`,
@@ -189,6 +190,7 @@ try {
       ...process.env,
       AITTA_SOCIAL_OWNER_EMAIL: canaries[0],
       AITTA_SOCIAL_CANONICAL_URL: `https://${canaries[1]}`,
+      // Retired keys remain hostile canaries so generated output proves it ignores them.
       AITTA_SOCIAL_HUB_URL: `https://${canaries[2]}`,
       AITTA_SOCIAL_HUB_CHALLENGE: canaries[3],
       AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL: canaries[4],

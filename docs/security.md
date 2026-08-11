@@ -14,8 +14,8 @@ trusted network authentication or network membership.
 | ChatGPT Sites dispatcher | Injecting authenticated-user headers and operating sign-in routes | Establishing local owner status or AittaSocial network identity |
 | AittaSocial server code | Validating inputs, authorizing each operation, projecting public data, using protected settings | Assuming an earlier page check covers a later write |
 | Deployment-owned D1 | Persisting validated profile, entry, and minimal local configuration records | Producing a safe public response without an explicit projection |
-| Protected runtime settings | Supplying local owner and optional Hub configuration to server code | Browser-visible configuration or publishable content |
-| AittaSocial Hub | Optional registration, discovery, verification, credentials, and future network sessions | Availability required for public reads; trusted claims from a presence deployment |
+| Protected runtime settings | Supplying local owner, canonical URL, and optional public verification challenge to server code | Browser-visible configuration beyond documented public effects or publishable content |
+| Future AittaSocial Hub contract | Optional registration, discovery, verification, credentials, and future network sessions | Current implementation authority; availability required for public reads; trusted claims from a presence deployment |
 | This presence deployment | Its own profile, updates, presentation, and local owner actions | Network-user authentication or authority over another deployment |
 
 ChatGPT Sites access policy is a hosting boundary. Keeping a Site private during
@@ -114,9 +114,8 @@ AittaSocial network sign-in or membership.
 
 - `/`, `/entries/{id}`, `/.well-known/aitta-social.json`, and `/api/v1/*` are
   anonymous-compatible and expose only the public profile or published entries.
-- `/owner`, `/owner/profile`, `/owner/entries/new`,
-  `/owner/entries/{id}`, and `/owner/hub` require current server-side owner
-  authorization.
+- `/owner`, `/owner/profile`, `/owner/entries/new`, and
+  `/owner/entries/{id}` require current server-side owner authorization.
 - `/api/private/*` is not a public API. Every request independently requires
   current server-side owner authorization and strict method, media-type, and
   input validation.
@@ -136,8 +135,7 @@ and pagination effects are private.
   the only limit. Then parse unknown input through a strict schema that rejects
   unknown enum values, oversized strings, unsupported URL schemes, invalid
   timestamps, malformed identifiers, and extra security-sensitive fields.
-  Private JSON bodies are limited to 64 KiB of UTF-8; the Hub probe is bodyless
-  and rejects any supplied body.
+  Private JSON mutation bodies are limited to 64 KiB of UTF-8.
 - Treat profile introduction and entry body as text. Escape it during HTML
   rendering; do not accept executable markup in the POC.
 - Permit only reviewed `http:` or `https:` destinations for public website,
@@ -230,42 +228,26 @@ abstraction for this boundary.
 
 ## Hub boundary
 
-Hub is an optional trusted central service, but a presence deployment is an
+Hub is optional future infrastructure, and a presence deployment is an
 untrusted external website from Hub's perspective. Local ChatGPT authentication
 claims from this presence must not be sent to Hub as proof of a network user.
 
-The protected Hub probe follows these constraints:
-
-- `AITTA_SOCIAL_HUB_URL` must parse as an HTTPS origin with no username,
-  password, path beyond `/`, query, or fragment.
-- The browser supplies no Hub destination. Server code derives the request only
-  from the protected configured origin.
-- The deployment credential is read only on the server and sent only in an
-  `Authorization: Bearer ...` header to that exact origin.
-- Redirects are not followed with the credential. A redirect is categorized as
-  a reachable response, not as permission to contact another origin.
-- The request has a short timeout, asks for JSON, and never reads, relays, or
-  logs the response body.
-- The owner sees only `connected`, `credentialRejected`, `reachable`, or
-  `unavailable`. Safe messages contain no URL details, headers, response body,
-  stack, credential fragment, or environment value.
-- A timeout, DNS failure, invalid response, missing configuration, or Hub
-  outage cannot change the status of public presence or update reads.
-
-This manual challenge and root bearer probe is provisional Hub setup owned by
-the presence POC. It must remain labeled as such until an accepted versioned
-Hub contract replaces it. Its internal `connected` result is transport-only;
-it is not registration, a verified connection, network membership, a network
-session, or trusted authentication.
+The only current Hub-related input is the optional public protocol 1.0
+verification challenge. It is projected through the manifest allowlist and
+proves only control of the deployment at verification time. It never authorizes
+a request. The application has no private Hub route, configured Hub origin,
+deployment credential, outbound probe, registration, connection state, or safe
+status category. No browser or server path may invent one before an exact
+versioned Hub contract is accepted and promoted to `PLAN.md`. Hub absence or
+failure cannot change public presence or update reads.
 
 ## Secrets and operational output
 
-Treat `AITTA_SOCIAL_OWNER_EMAIL` and
-`AITTA_SOCIAL_DEPLOYMENT_CREDENTIAL` as protected values. Treat Hub and
-canonical configuration as server-owned even when their non-secret effects are
-public. Never include protected values in HTML, hydration data, client bundles,
-URLs, thrown messages, telemetry, snapshots, fixtures committed to the
-repository, or deployment output.
+Treat `AITTA_SOCIAL_OWNER_EMAIL` and runtime secrets as protected values. Treat
+canonical and challenge configuration as server-owned even when their
+documented non-secret effects are public. Never include protected values in
+HTML, hydration data, client bundles, URLs, thrown messages, telemetry,
+snapshots, fixtures committed to the repository, or deployment output.
 
 Errors sent to a browser use fixed safe categories. Server diagnostics may
 record an operation category and generated correlation identifier, but not
@@ -279,9 +261,10 @@ access, another signed-in user, missing owner setting, every independently
 authorized write, forged client fields, draft privacy, exact public projections,
 canonical URL rejection/normalization, hostile-host metadata, neutral
 unconfigured metadata, draft/private-canary absence from head tags, checked-in
-asset packaging, manifest canary exclusion, deterministic pagination, Hub URL
-pinning, redirect confinement, credential/error/log redaction, timeout
-behavior, and public reads during Hub failure.
+asset packaging, manifest canary exclusion, deterministic pagination, exact
+verification-challenge projection, retired Hub-route absence without redirect
+or outbound fetch, obsolete-setting canary exclusion from built output, and
+public reads without Hub.
 
 Use explicit request fixtures or a development-only identity injection boundary
 in tests. Never add a production bypass, magic owner address, or client-only
