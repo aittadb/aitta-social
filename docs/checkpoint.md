@@ -7,7 +7,60 @@ setting values, authenticated email addresses, credentials, database IDs, Site
 project IDs, deployment IDs, source-repository credentials, or private update
 text. The owner-approved personal hostname is the only connected custom domain.
 
-## Presence-first checkpoint — 2026-08-11
+## Mobile-presence checkpoint — Site version 8 (2026-08-11)
+
+### Source, deployment, and preserved state
+
+- The one existing Site was reused. Sites saved and successfully deployed
+  version 8 from exact owner-reviewed `main` commit
+  `18fa16dc967d8502c17afb2bd3cc28518039a172`; the saved version and terminal
+  deployment both identify that source and report `succeeded`.
+- Both `https://aittasocial.jaakko-heusala.chatgpt.site` and
+  `https://jhh.aitta.social` serve the new compact mobile-presence composition,
+  while the configured canonical authority remains the custom hostname.
+- Public access revision 4, the one owner grant with no groups or external
+  visitors, protected-environment revision 5 and its two value-safe key
+  records, the `DB` binding with null R2, and the one active custom hostname
+  with active provider and TLS status were identical before and after.
+- No access, environment, content, D1, binding, DNS, domain, or Hub mutation was
+  made. Read-only public projections were semantically identical, no hosted
+  form was submitted, and no private update fact is recorded here.
+
+### Public, owner, and accessibility proof
+
+- Both roots return configured `200` HTML with `no-store, must-revalidate`, the
+  fixed CSP, same-origin assets, bounded canonical metadata, and the compact
+  header, graphical Identity field, initials tile, About area, and
+  identity-linked update stream. The old editorial labels, numbering, and
+  generic call to action are absent.
+- Manifest, site, collection, detail, and permalink reads preserve protocol
+  1.0, documented envelopes, caching, canonical links, and published-only
+  privacy. A non-public permalink remained indistinguishable from unknown
+  without recording its identifier or private state.
+- Signed-out owner access retains the dispatcher-owned sign-in redirect. The
+  signed-in owner dashboard and Identity form loaded read-only. Retired Hub
+  paths return generic non-redirecting `404` responses.
+- Requested 320-, 390-, and 1440-pixel rows pass first-viewport hierarchy,
+  bounded 700-pixel wide layout, horizontal-overflow, off-screen-control, and
+  effective 44-pixel target checks. Reduced motion, forced-color focus, normal
+  focus, native public click navigation, current assets, and a clean fresh app
+  console pass. Exact-source TASK-156 evidence supplies native Enter and coarse
+  pointer coverage that the hosted in-app controller could not reproduce.
+
+### Validation and residual boundary
+
+- Exact-source validation passed 191/191 tests; migration generation produced
+  no change; the production dependency audit reported zero vulnerabilities;
+  and the packaged Worker, assets, `DB` binding, null R2, and reviewed migration
+  matched source. Complete identity-free evidence is in
+  `docs/acceptance/task-157-mobile-presence-deployment.md`.
+- Sites exposes no authoritative byte checksum for hosted D1 rows or the DNS
+  zone, and a separate hosted non-owner browser session was unavailable.
+  Preservation and denial are bounded respectively by unchanged provider and
+  public semantic evidence, absence of mutation calls, and the exact-source
+  authorization suite. The later evidence commit is not the deployed SHA.
+
+## Historical presence-first checkpoint — Site version 7 (2026-08-11)
 
 ### Source, deployment, and preserved state
 

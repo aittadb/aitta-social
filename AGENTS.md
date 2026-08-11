@@ -158,6 +158,19 @@ file. Keep this file strictly below 32,000 bytes and run
 - Keep public and owner surfaces clearly distinct, responsive, accessible,
   keyboard- and touch-friendly, with excellent typography and useful empty and
   error states.
+- Maintain one small, documented AittaSocial-specific visual vocabulary for
+  meanings shared across public and owner surfaces: semantic surfaces, text,
+  separators, focus, 44-pixel controls, fields, actions, status, notices, and
+  empty states. Reuse or deliberately extend that vocabulary instead of adding
+  a parallel hard-coded visual language; keep the public presence and private
+  owner workspace compositionally distinct.
+- Prefer narrowly named product elements when the same interaction and meaning
+  genuinely repeat. Do not turn visual consistency or source customization into
+  a generic UI framework, card or layout factory, runtime theme system,
+  arbitrary CSS/HTML input, empty extension point, or public/owner
+  authorization coupling. Central compile-time tokens and the accepted bounded
+  semantic owner controls are the customization boundary unless a new product
+  capability is separately accepted in `PLAN.md`.
 - Use constrained accent/density choices, few colors, no gradients, no
   unnecessary generated imagery, and no generic dashboard clutter.
 - Keep the template's default identity typographic and its sharing metadata
