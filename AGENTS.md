@@ -271,3 +271,31 @@ file. Keep this file strictly below 32,000 bytes and run
 - Preserve the exact owner-selected `FSL-1.1-MIT` text and notice in `LICENSE`.
   Any license change requires a new explicit owner decision plus synchronized
   README, changelog, and automated-check updates.
+
+## Multi-agent execution
+
+- GPT-5.6 Sol Ultra is the primary architect, orchestrator, integrator, and
+  final decision-maker.
+- The primary agent owns requirements analysis, architecture, task
+  decomposition, dependency ordering, conflict resolution, final review, and
+  validation.
+- Use GPT-5.6 Luna Max for small, fully specified implementation tasks with
+  clear scope, acceptance criteria, file ownership, tests, and no unresolved
+  architectural decisions.
+- Use GPT-5.6 Terra High for read-only codebase exploration, dependency mapping,
+  and investigation when implementation boundaries are not yet clear.
+- Use GPT-5.6 Sol High or Max for independent architecture, security,
+  correctness, and integration review.
+- Do not delegate ambiguous product, protocol, authorization, data-integrity,
+  concurrency, or cross-cutting architectural decisions to Luna.
+- Parallelize only independent work. Never allow concurrent write agents to
+  modify overlapping files, shared behavior, or tightly coupled components.
+- Every delegated implementation unit must include implementation, relevant
+  tests, and documentation as one complete task.
+- Subagents must report changed files, validation performed, assumptions, and
+  unresolved risks.
+- The primary agent must inspect and integrate all returned work, resolve review
+  findings, run the full relevant validation suite, and review the final
+  combined diff before declaring completion.
+- Prefer the specified models and reasoning levels whenever explicit subagent
+  selection is available; otherwise treat them as the intended routing policy.
