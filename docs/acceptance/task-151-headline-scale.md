@@ -16,8 +16,10 @@ navigation, stored preference, or route behavior.
 The owner section scale stays below its page h1 across all supported widths.
 The previous 640-pixel rules that could enlarge public Identity, setup, and
 permalink headings to 5rem are removed. Existing serif treatment, line height,
-balanced text, anywhere wrapping, semantic heading levels, section headings,
-update-card titles, native anchors, and focus behavior are unchanged.
+balanced text, anywhere wrapping, semantic heading levels, update-card titles,
+native anchors, and focus behavior are unchanged. The owner section h2 is the
+only subordinate heading whose scale changed, solely to keep it below its page
+h1 at every supported width.
 The repeated navigation wordmark is bounded and may ellipsize a maximum-length
 name; the complete Identity remains available in the wrapping primary heading.
 The owner header's text column may shrink below its intrinsic content width, so
@@ -34,10 +36,11 @@ and private-canary exclusion.
 
 ## Rendered evidence
 
-Initial implementation candidate `69c349ac31e32d1645b84b2a68ec57e9d9054716`
+The reachable pre-correction base
+`59822f794739cbed37d0d00c77f9fd6d1b56c636` supplied the before values below.
+Final source candidate `28d5b4b7a1a4dbafbde546e76ac34e0ca5c1d042`
 was built and opened against disposable loopback-only D1 fixtures in Chrome
-151.0.0.0 through the in-app browser. The earlier exact-base measurements and
-corrected sizes were:
+151.0.0.0 through the in-app browser for every corrected row:
 
 | Primary surface | Before wide / 320 | Corrected wide / 320 |
 | --- | ---: | ---: |
@@ -63,6 +66,13 @@ exception observation reported zero page exceptions. A native owner field
 received the unchanged 3-pixel visible focus outline; route controls and
 heading semantics are unchanged native HTML, and the 320-pixel layout continues
 to exercise the same reflow rules used at 400-percent desktop enlargement.
+
+The same final source candidate additionally rendered the dashboard with an
+unbroken 200-character Identity. At the wide viewport its 44.8-pixel h1 stayed
+above the 32-pixel Updates h2; at the narrow viewport its 36-pixel h1 stayed
+above the 28-pixel h2. The heading wrapped to 10 and 20 lines respectively,
+both heading rectangles remained within the viewport, document overflow was
+zero, and both rows reported zero warning or error console entries.
 
 This correction changes no schema, migration, protocol, runtime setting,
 hosting binding, Site, hosted data, access, DNS, or custom domain.
