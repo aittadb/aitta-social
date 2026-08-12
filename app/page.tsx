@@ -2,7 +2,10 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { getProfile, listPublishedEntries } from "@/db/repository";
 import { chatGPTSignInPath, getChatGPTUser } from "./chatgpt-auth";
-import { publicPresenceMetadata } from "@/lib/public-metadata";
+import {
+  publicPresenceMetadata,
+  unavailablePublicMetadata,
+} from "@/lib/public-metadata";
 import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { Entry, Profile } from "@/lib/types";
 import { DeploymentPrompt } from "./_components/DeploymentPrompt";
@@ -16,9 +19,13 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    return publicPresenceMetadata(await getProfile());
+    const [profile] = await Promise.all([
+      getProfile(),
+      listPublishedEntries(12),
+    ]);
+    return publicPresenceMetadata(profile);
   } catch {
-    return publicPresenceMetadata(null);
+    return unavailablePublicMetadata();
   }
 }
 
@@ -103,14 +110,14 @@ function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedI
       <PublicPresenceHeader
         displayName="AittaSocial"
         identityHref="#start"
-        label="Presence setup navigation"
-        actionsLabel="Presence setup actions"
+        label="Aitta setup navigation"
+        actionsLabel="Aitta setup actions"
         action={{
           href: ownerPath,
           label: "Set up",
           accessibleName: signedIn
-            ? "Set up this presence — open local sole-owner administration"
-            : "Set up this presence — sign in with ChatGPT for local sole-owner administration",
+            ? "Set up this Aitta — open local sole-owner administration"
+            : "Set up this Aitta — sign in with ChatGPT for local sole-owner administration",
         }}
       />
 
@@ -118,10 +125,16 @@ function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedI
         <section className="template-start" id="start" aria-labelledby="template-title">
           <div className="template-introduction">
             <p className="eyebrow">Start with one prompt</p>
-            <h1 id="template-title">Create your own presence</h1>
+            <h1 id="template-title">Set up your own Aitta</h1>
             <p className="identity-summary">
-              Give this prompt to ChatGPT. It will keep setup private, reuse the right Site,
-              and guide you through the first Identity.
+              An Aitta is your independently controlled AittaSocial application. It remains
+              authoritative for its identity, content, configuration, and locally stored data,
+              whether it is publicly reachable, private, or disconnected from the AittaSocial Hub.
+            </p>
+            <p className="identity-summary">
+              A profile is an Aitta&apos;s optional outward identity presentation. This Aitta has no
+              profile yet and no current Hub connection. Give the prompt to ChatGPT to keep setup
+              private, reuse the right Site, and guide you through the first Identity.
             </p>
           </div>
           <DeploymentPrompt />
@@ -142,13 +155,16 @@ function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedI
 function UnavailablePresence({ signedIn }: { signedIn: boolean }) {
   return (
     <main className="state-page" aria-labelledby="unavailable-title">
-      <p className="eyebrow">Presence unavailable</p>
-      <h1 id="unavailable-title">This presence cannot be loaded right now</h1>
-      <p>Try again shortly. No setup or public content has been changed.</p>
+      <p className="eyebrow">Aitta storage unavailable</p>
+      <h1 id="unavailable-title">This Aitta cannot be loaded right now</h1>
+      <p>
+        Its storage could not be read. Try again shortly. No setup, profile, or public content
+        has been changed.
+      </p>
       <div className="button-row">
         <a className="button" href="/">Try again</a>
         <a className="button button-quiet" href={signedIn ? "/owner" : chatGPTSignInPath("/owner")}>
-          Manage presence
+          Manage Aitta
         </a>
       </div>
     </main>
@@ -187,7 +203,7 @@ function EntriesSection({
           <p>
             {configured
               ? "The presence already stands on its own. Its first update will appear here when it is ready."
-              : "Published updates will appear here after the owner completes this presence."}
+              : "Published updates will appear here after the owner configures this Aitta's optional profile."}
           </p>
         </div>
       )}

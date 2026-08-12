@@ -5,7 +5,7 @@ export function DeploymentPrompt() {
     <div className="deployment-prompt">
       <label htmlFor="deployment-prompt">Prompt for ChatGPT</label>
       <p id="deployment-prompt-help">
-        Select and copy this prompt into ChatGPT to create your own presence.
+        Select and copy this prompt into ChatGPT to set up your own Aitta.
       </p>
       <textarea
         id="deployment-prompt"

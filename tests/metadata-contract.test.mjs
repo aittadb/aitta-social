@@ -77,10 +77,10 @@ test("unconfigured metadata is neutral, non-indexable, and independent of reques
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("cache-control"), "no-store, must-revalidate");
   const html = await response.text();
-  assert.match(html, /<title>Presence setup in progress<\/title>/i);
+  assert.match(html, /<title>Aitta setup in progress<\/title>/i);
   assert.match(
     html,
-    /<meta name="description" content="This independent presence is being prepared by its owner\."\s*\/?>/i,
+    /<meta name="description" content="This Aitta(?:&#x27;|&apos;|')s optional outward profile is not configured yet\."\s*\/?>/i,
   );
   assert.match(html, /<meta name="robots" content="noindex, nofollow"\s*\/?>/i);
   assert.doesNotMatch(html, /<link rel="canonical"/i);
@@ -88,6 +88,78 @@ test("unconfigured metadata is neutral, non-indexable, and independent of reques
   assertNoImageMetadata(html);
   assertNoPrivateMetadata(html);
   assert.doesNotMatch(html, /runtime-canonical-without-profile/i);
+});
+
+test("unavailable storage has distinct neutral metadata with no canonical or sharing URL", async () => {
+  const response = await fetchApp("/", {
+    origin: hostileOrigin,
+    headers: {
+      accept: "text/html",
+      "x-forwarded-host": hostileForwardedHost,
+      "x-forwarded-proto": "http",
+    },
+    env: makeEnv({
+      db: { prepare() { throw new Error("UNAVAILABLE_METADATA_PRIVATE_CANARY"); } },
+      ownerEmail: ownerCanary,
+      canonicalUrl: "https://runtime-canonical-during-storage-failure.example",
+    }),
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store, must-revalidate");
+  const html = await response.text();
+  assert.match(html, /<title>Aitta unavailable<\/title>/i);
+  assert.match(
+    html,
+    /<meta name="description" content="This Aitta(?:&#x27;|&apos;|')s public data could not be loaded from its storage\."\s*\/?>/i,
+  );
+  assert.match(html, /<meta name="robots" content="noindex, nofollow"\s*\/?>/i);
+  assert.doesNotMatch(html, /<link rel="canonical"|<meta property="og:url"/i);
+  assertNoImageMetadata(html);
+  assertNoPrivateMetadata(html);
+  assert.doesNotMatch(
+    html,
+    /runtime-canonical-during-storage-failure|UNAVAILABLE_METADATA_PRIVATE_CANARY/i,
+  );
+});
+
+test("an entries-only storage failure cannot retain configured indexable metadata", async () => {
+  const configuredDb = new FakeD1({
+    profile: profileRow({
+      display_name: "CONFIGURED_TITLE_PRIVATE_CANARY",
+      canonical_url: "https://stored-profile-private-canary.example",
+    }),
+  });
+  const selectiveFailureDb = {
+    prepare(query) {
+      if (/FROM entries/i.test(query)) {
+        throw new Error("SELECTIVE_ENTRY_FAILURE_PRIVATE_CANARY");
+      }
+      return configuredDb.prepare(query);
+    },
+  };
+  const response = await fetchApp("/", {
+    origin: hostileOrigin,
+    headers: { accept: "text/html", "x-forwarded-host": hostileForwardedHost },
+    env: makeEnv({
+      db: selectiveFailureDb,
+      ownerEmail: ownerCanary,
+      canonicalUrl: "https://runtime-canonical-private-canary.example",
+    }),
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store, must-revalidate");
+  const html = await response.text();
+  assert.match(html, /Aitta storage unavailable/i);
+  assert.match(html, /<title>Aitta unavailable<\/title>/i);
+  assert.match(html, /<meta name="robots" content="noindex, nofollow"\s*\/?>/i);
+  assert.doesNotMatch(html, /<link rel="canonical"|<meta property="og:url"/i);
+  assertNoImageMetadata(html);
+  assert.doesNotMatch(
+    html,
+    /CONFIGURED_TITLE_PRIVATE_CANARY|stored-profile-private-canary|runtime-canonical-private-canary|SELECTIVE_ENTRY_FAILURE_PRIVATE_CANARY/i,
+  );
 });
 
 test("published update metadata has a stable presence canonical and excludes drafts and private fields", async () => {

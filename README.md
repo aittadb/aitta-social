@@ -2,15 +2,15 @@
 
 ```text
 @Sites Deploy AittaSocial from https://github.com/aittadb/aitta-social. Reuse
-the existing Site for this project if exactly one matches; never create a
-duplicate, and stop to ask me if more than one Site could match. Keep it
-private first, give it its own storage, and guide me to set up one owner
+the existing Site if exactly one matches; never create a duplicate, and stop
+to ask me if more than one Site could match. Keep it private first, give this
+Aitta its own storage, and guide me to set up one owner
 through protected Site settings without putting their email in this prompt or
-source. Hub stays
-optional and public use works without it. After sign-in, help the owner
-customize Identity, links, updates, accent, density, and attribution through
-owner controls without a GitHub fork. Ask before any later source change or
-deployment, and ask separately before public access and before a custom domain.
+source. No current Hub connection exists; public use works without one. After
+sign-in, customize its optional outward Identity profile, links, updates,
+accent, density, and attribution through owner controls without a GitHub fork.
+Ask before any later source change or deployment, and ask separately before
+public access and before a custom domain.
 ```
 
 An Aitta is your independently controlled AittaSocial application. It remains
@@ -146,9 +146,10 @@ unknown updates have the same non-public metadata result.
 
 The request `Host` and forwarding headers never select public identity or a
 canonical URL. Without a valid public profile and canonical URL, the application
-uses neutral setup metadata, marks it `noindex, nofollow`, and emits no canonical
-or image URL. Owner-only pages use the same neutral robots boundary. All
-handler-produced HTML is rendered dynamically with `no-store` and
+uses neutral Aitta setup metadata; a storage-read failure uses separate neutral
+unavailable metadata. Both mark the response `noindex, nofollow` and emit no
+canonical, sharing, or image URL. Owner-only pages use the same neutral robots
+boundary. All handler-produced HTML is rendered dynamically with `no-store` and
 `must-revalidate`; the documented public JSON cache headers and static-asset
 handling are unchanged. External preview or search services may nevertheless
 retain public information they have already fetched.

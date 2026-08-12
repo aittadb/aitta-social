@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import type { Entry, Profile } from "./types";
 import { resolveCanonicalUrl, withoutTrailingSlash } from "./public-resources";
 
-const UNCONFIGURED_TITLE = "Presence setup in progress";
+const UNCONFIGURED_TITLE = "Aitta setup in progress";
 const UNCONFIGURED_DESCRIPTION =
-  "This independent presence is being prepared by its owner.";
+  "This Aitta's optional outward profile is not configured yet.";
+const UNAVAILABLE_TITLE = "Aitta unavailable";
+const UNAVAILABLE_DESCRIPTION =
+  "This Aitta's public data could not be loaded from its storage.";
 
 export function publicPresenceMetadata(profile: Profile | null): Metadata {
   const title = profile
@@ -35,6 +38,26 @@ export function publicPresenceMetadata(profile: Profile | null): Metadata {
       card: "summary",
       title,
       description,
+    },
+  };
+}
+
+export function unavailablePublicMetadata(): Metadata {
+  return {
+    title: UNAVAILABLE_TITLE,
+    description: UNAVAILABLE_DESCRIPTION,
+    referrer: "strict-origin-when-cross-origin",
+    robots: { index: false, follow: false },
+    openGraph: {
+      type: "website",
+      title: UNAVAILABLE_TITLE,
+      description: UNAVAILABLE_DESCRIPTION,
+      siteName: UNAVAILABLE_TITLE,
+    },
+    twitter: {
+      card: "summary",
+      title: UNAVAILABLE_TITLE,
+      description: UNAVAILABLE_DESCRIPTION,
     },
   };
 }

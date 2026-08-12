@@ -32,7 +32,12 @@ test("a fresh D1 moves from safe setup to configured empty and published-only wi
     headers: { accept: "text/html" },
   });
   assert.equal(initialPublic.status, 200);
-  assert.match(await initialPublic.text(), new RegExp(escapeRegex(deploymentPrompt)));
+  const initialPublicHtml = await initialPublic.text();
+  assert.match(initialPublicHtml, new RegExp(escapeRegex(deploymentPrompt)));
+  assert.match(initialPublicHtml, /Set up your own Aitta/i);
+  assert.match(initialPublicHtml, /An Aitta is your independently controlled AittaSocial application/i);
+  assert.match(initialPublicHtml, /optional outward identity presentation/i);
+  assert.match(initialPublicHtml, /no current Hub connection/i);
 
   const disabledOwner = await fetchApp("/owner", {
     env: missingOwnerEnv,
@@ -58,8 +63,9 @@ test("a fresh D1 moves from safe setup to configured empty and published-only wi
   });
   assert.equal(unavailable.status, 200);
   const unavailableHtml = await unavailable.text();
-  assert.match(unavailableHtml, /This presence cannot be loaded right now/i);
-  assert.doesNotMatch(unavailableHtml, /@Sites|CLEAN_SOURCE_D1_FAILURE_VALUE_CANARY/i);
+  assert.match(unavailableHtml, /Aitta storage unavailable/i);
+  assert.match(unavailableHtml, /This Aitta cannot be loaded right now/i);
+  assert.doesNotMatch(unavailableHtml, /@Sites|Set up your own Aitta|CLEAN_SOURCE_D1_FAILURE_VALUE_CANARY/i);
 
   const configuredEnv = makeEnv({ db, ownerEmail });
   const identitySave = await fetchApp("/api/private/profile", {

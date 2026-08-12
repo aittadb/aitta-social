@@ -126,7 +126,7 @@ test("every primary headline surface keeps semantic text and private values out"
   assert.match(owner, /<h1>Identity<\/h1>/);
   assert.match(denied, /<h1>This presence is not yours to administer<\/h1>/);
   assert.match(missing, /<h1>This update is not public<\/h1>/);
-  assert.match(setup, /<h1 id="template-title">Create your own presence<\/h1>/);
+  assert.match(setup, /<h1 id="template-title">Set up your own Aitta<\/h1>/);
 
   for (const html of [home, permalink, owner, denied, missing, setup]) {
     assert.doesNotMatch(html, new RegExp(PRIVATE_CANARY));

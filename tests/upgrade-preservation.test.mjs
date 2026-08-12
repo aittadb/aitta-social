@@ -668,7 +668,12 @@ async function proveUnconfiguredAndUnavailableStates(temporaryRoot, openWorker, 
   const setupHtml = await setupResponse.text();
   assert.match(setupHtml, /@Sites/);
   assert.match(setupHtml, /Deploy AittaSocial from/);
+  assert.match(setupHtml, /Set up your own Aitta/i);
+  assert.match(setupHtml, /An Aitta is your independently controlled AittaSocial application/i);
+  assert.match(setupHtml, /optional outward identity presentation/i);
+  assert.match(setupHtml, /no current Hub connection/i);
   assert.match(setupHtml, /<meta name="robots" content="noindex, nofollow"/i);
+  assert.doesNotMatch(setupHtml, /<link rel="canonical"|<meta property="og:url"/i);
   await closeWorker(migrated);
 
   const unavailable = await openWorker({
@@ -679,8 +684,12 @@ async function proveUnconfiguredAndUnavailableStates(temporaryRoot, openWorker, 
   });
   assert.equal(unavailableResponse.status, 200);
   const unavailableHtml = await unavailableResponse.text();
-  assert.match(unavailableHtml, /Presence unavailable|cannot be loaded right now/i);
+  assert.match(unavailableHtml, /Aitta storage unavailable/i);
+  assert.match(unavailableHtml, /This Aitta cannot be loaded right now/i);
+  assert.match(unavailableHtml, /<title>Aitta unavailable<\/title>/i);
+  assert.match(unavailableHtml, /<meta name="robots" content="noindex, nofollow"/i);
   assert.doesNotMatch(unavailableHtml, /Deploy AittaSocial from|@Sites/);
+  assert.doesNotMatch(unavailableHtml, /<link rel="canonical"|<meta property="og:url"/i);
   await closeWorker(unavailable);
 }
 

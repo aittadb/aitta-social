@@ -41,13 +41,23 @@ test("deployment prompt preserves every setup and approval boundary", () => {
   assert.match(normalizedPrompt, /keep it.*private first/i);
   assert.match(normalizedPrompt, /its own storage/i);
   assert.match(normalizedPrompt, /set up one owner through protected Site settings/i);
-  assert.match(normalizedPrompt, /Hub stays optional.*public use works without it/i);
+  assert.match(normalizedPrompt, /No current Hub connection exists.*public use works without one/i);
   assert.match(normalizedPrompt, /after sign-in.*owner controls.*without a GitHub fork/i);
+  assert.match(normalizedPrompt, /optional outward Identity profile/i);
   for (const control of ["Identity", "links", "updates", "accent", "density", "attribution"]) {
     assert.match(normalizedPrompt, new RegExp(`\\b${control}\\b`, "i"));
   }
   assert.match(normalizedPrompt, /ask before any later source change or.*deployment/i);
   assert.match(normalizedPrompt, /ask separately before public access and before a custom domain/i);
+});
+
+test("README gives the full approved first-use explanation and profile boundary", () => {
+  assert.match(
+    readme,
+    /An Aitta is your independently controlled AittaSocial application\. It remains\s+authoritative for its identity, content, configuration, and locally stored\s+data, whether it is publicly reachable, private, or disconnected from the\s+AittaSocial Hub\./,
+  );
+  assert.match(readme, /profile\*\* is an Aitta's optional outward identity presentation/i);
+  assert.match(readme, /current POC has no Hub connection/i);
 });
 
 test("deployment prompt contains no owner identity, secret name, or implementation jargon", () => {

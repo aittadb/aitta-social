@@ -390,7 +390,7 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
   assert.deepEqual(await contentSnapshot(worker.db), beforeOutage);
 });
 
-test("the setup prompt distinguishes an unconfigured presence from unavailable storage", {
+test("the setup prompt distinguishes an unconfigured Aitta from unavailable storage", {
   timeout: 120_000,
 }, async (t) => {
   const temporaryRoot = await mkdtemp(path.join(tmpdir(), "aitta-social-task060-prompt-"));
@@ -416,7 +416,8 @@ test("the setup prompt distinguishes an unconfigured presence from unavailable s
   });
   liveWorkers.add(unavailable);
   const unavailableHtml = await html(unavailable, "/");
-  assert.match(unavailableHtml, /Presence unavailable|cannot be loaded right now/i);
+  assert.match(unavailableHtml, /Aitta storage unavailable/i);
+  assert.match(unavailableHtml, /This Aitta cannot be loaded right now/i);
   assertNoLeadingPrompt(unavailableHtml);
 });
 
@@ -560,13 +561,16 @@ async function responseJson(response) {
 
 function assertLeadingPrompt(source) {
   assert.match(source, /Start with one prompt/i);
-  assert.match(source, /Create your own presence/i);
+  assert.match(source, /Set up your own Aitta/i);
+  assert.match(source, /An Aitta is your independently controlled AittaSocial application/i);
+  assert.match(source, /optional outward identity presentation/i);
+  assert.match(source, /no current Hub connection/i);
   assert.match(source, /Deploy AittaSocial from/i);
   assert.match(source, /@Sites/i);
 }
 
 function assertNoLeadingPrompt(source) {
-  assert.doesNotMatch(source, /Start with one prompt|Create your own presence|Deploy AittaSocial from|@Sites/i);
+  assert.doesNotMatch(source, /Start with one prompt|Set up your own Aitta|Deploy AittaSocial from|@Sites/i);
 }
 
 function assertConfiguredPresence(source) {

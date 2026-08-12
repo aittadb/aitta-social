@@ -5,12 +5,20 @@ when there is one, give the Aitta its own D1 database, configure its sole
 owner through protected runtime settings, and verify a private checkpoint
 before considering public access.
 
-When the D1 profile read succeeds and no Identity exists, the public template
-leads with the same short prompt shown at the top of the README. The prompt is
-selectable in a labeled read-only field, so it can be copied without running a
-browser write or granting authority. A configured Site never shows that prompt:
-it leads with the represented Identity. A D1 read failure shows a temporary
-unavailable state and must never be described as a new or unconfigured Site.
+An Aitta is your independently controlled AittaSocial application. It remains
+authoritative for its identity, content, configuration, and locally stored
+data, whether it is publicly reachable, private, or disconnected from the
+AittaSocial Hub. A profile is an Aitta's optional outward identity presentation.
+The current POC has no Hub connection, and public reads work without one.
+
+When the Aitta-owned D1 profile read succeeds and no profile exists, the public
+template clearly identifies the Aitta as unconfigured and leads with the same
+short prompt shown at the top of the README. The prompt is selectable in a
+labeled read-only field, so it can be copied without running a browser write or
+granting authority. A configured Aitta never shows that prompt: it leads with
+the represented Identity. A D1 read failure instead identifies Aitta storage as
+temporarily unavailable and must never be described as a new or unconfigured
+Aitta.
 
 Do not publish publicly or connect a custom domain without the Aitta owner's
 explicit approval.
@@ -105,11 +113,12 @@ If the selected hosting path cannot deploy privately, stop and ask the owner
 before using any shared or public access level. Do not choose a broader access
 level to complete a test.
 
-The first private checkpoint may show the public creation prompt because the
-profile does not yet exist. That is expected only after a successful empty D1
-read: it must not grant the first visitor write access, reveal whether a signed-
-in visitor matches the owner, or expose protected configuration. The owner path
-still performs its normal server-side authorization before displaying controls.
+The first private checkpoint may show the public Aitta setup prompt because the
+optional profile does not yet exist. That is expected only after a successful
+empty D1 read: it must not grant the first visitor write access, reveal whether
+a signed-in visitor matches the owner, or expose protected configuration. The
+owner path still performs its normal server-side authorization before displaying
+controls.
 
 ## 4. Configure protected runtime settings
 

@@ -499,13 +499,16 @@ function assertHomeHtml(html, matrixCase, profile) {
   assert.doesNotMatch(html, new RegExp(`${draftTitleCanary}|${draftBodyCanary}`, "u"));
 
   if (matrixCase.readiness === "profile-absent") {
-    assert.match(html, /<title>Presence setup in progress<\/title>/iu);
+    assert.match(html, /<title>Aitta setup in progress<\/title>/iu);
     assert.match(
       html,
-      /<meta name="description" content="This independent presence is being prepared by its owner\."\s*\/?>/iu,
+      /<meta name="description" content="This Aitta(?:&#x27;|&apos;|')s optional outward profile is not configured yet\."\s*\/?>/iu,
     );
     assert.match(html, /<meta name="robots" content="noindex, nofollow"\s*\/?>/iu);
-    assert.match(html, /Create your own presence/iu);
+    assert.match(html, /Set up your own Aitta/iu);
+    assert.match(html, /An Aitta is your independently controlled AittaSocial application/iu);
+    assert.match(html, /optional outward identity presentation/iu);
+    assert.match(html, /no current Hub connection/iu);
     assertNoCanonicalMetadata(html);
     return;
   }

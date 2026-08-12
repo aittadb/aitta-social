@@ -98,12 +98,14 @@ to the maintained checkout or an Aitta deployment.
 The compiled-Worker acceptance fixtures start with a new empty D1 interface and
 prove these release boundaries together:
 
-- signed-out public HTML leads with the exact short deployment prompt only
-  while Identity is absent;
+- signed-out public HTML gives the full approved Aitta explanation and leads
+  with the exact short deployment prompt only after storage succeeds while the
+  optional outward profile is absent;
 - a signed-in visitor still cannot write when the protected owner setting is
   missing, and the owner surface explains that administration is disabled;
-- a successful empty-D1 read is distinct from D1 failure, which shows a safe
-  temporary unavailable state rather than the creation prompt;
+- a successful empty-D1 read identifies an unconfigured Aitta and is distinct
+  from D1 failure, which identifies unavailable Aitta storage rather than
+  showing the setup prompt;
 - saving Identity and constrained presentation through the authorized owner
   endpoint persists in D1 and removes the setup prompt without changing Git;
 - an Aitta with a configured profile and no updates remains intentional and
@@ -112,7 +114,8 @@ prove these release boundaries together:
   update, while only an explicitly published update reaches public HTML and
   `/api/v1`; and
 - reload reads the saved D1 values without a fork, source edit, redeployment,
-  Hub connection, browser storage, or alternate authorization path.
+  Hub connection, browser storage, or alternate authorization path. The current
+  POC makes no Hub-connection claim and public reads remain independent of Hub.
 
 This is local source and application proof. It does not establish hosted
 upgrade/browser acceptance (TASK-059) or an exact Sites checkpoint and source
