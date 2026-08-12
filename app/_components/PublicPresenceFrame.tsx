@@ -83,10 +83,10 @@ export function PublicFooter({
           </span>
           <nav className="technical-links" aria-label="Technical resources">
             <a href="/privacy">Privacy</a>
-            <span>Technical</span>
+            <a href="/technical">Technical</a>
             <a href="/.well-known/aitta-social.json">Manifest</a>
-            <a href="/api/v1/site">Profile JSON</a>
-            <a href="/api/v1/entries">Updates JSON</a>
+            <a href="/api/v1/site">Profile</a>
+            <a href="/api/v1/entries">Updates</a>
           </nav>
         </div>
       </div>

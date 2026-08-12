@@ -12,14 +12,20 @@ public home and every published permalink share one compact product frame:
    and
 4. a restrained shared footer containing the owner-hideable AittaSocial
    attribution, a permanent GitHub source link, the public Privacy page, and
-   the existing discovery and JSON resources.
+   a real Technical destination followed by the concise Manifest, Profile, and
+   Updates resource links.
 
-The manifest and JSON resources remain directly usable, but they are secondary
-to the configured profile and never compete with Identity or updates. A
-permalink is the focused view of that same stream rather than a separate
-editorial page. These presentation changes do not alter a route, response,
-cache policy, metadata projection, query, schema, migration, or protocol 1.0
-field.
+`/technical` is a fixed, D1-independent human index of the protocol 1.0
+discovery manifest, public profile, and published-update collection. It uses
+the same restrained public information-page composition as Privacy, carries
+neutral `noindex, nofollow` metadata, and links to the exact machine routes
+without copying their JSON into the page. The machine resources remain
+directly usable and secondary to the configured profile; their paths, payloads,
+errors, cache policies, and protocol fields are unchanged.
+
+A permalink is the focused view of the same update stream rather than a
+separate editorial page. These presentation changes do not alter a machine
+resource response, metadata projection, query, schema, or migration.
 
 ## Identity composition
 

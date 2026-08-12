@@ -37,6 +37,21 @@ remains a required protocol 1.0 compatibility field in the discovery manifest
 and public site resource; it is not a required visible classification of the
 represented identity.
 
+## Human technical information
+
+`GET /technical` is a D1-independent HTML guide to the three public protocol
+entry points: the discovery manifest at
+`/.well-known/aitta-social.json`, the public profile at `/api/v1/site`, and the
+published-update collection at `/api/v1/entries`. It is a human navigation
+surface, not a protocol resource, alternate response representation, or JSON
+dump. Its fixed neutral metadata does not derive a canonical URL or other value
+from the request host, runtime settings, profile, or database.
+
+Adding the guide and using the concise footer labels Manifest, Profile, and
+Updates does not change the machine routes. They continue to return only the
+documented JSON success and error representations with their existing status,
+content-type, cache, allowlist, canonical-link, and privacy behavior.
+
 ## Conventions
 
 - Successful responses and application-generated validation, not-found, and

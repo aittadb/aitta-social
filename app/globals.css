@@ -569,7 +569,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   justify-content: center;
 }
 .technical-links { font-size: 0.78rem; }
-.technical-links > span { color: var(--ink); font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
 
 .public-information-page {
   width: 100%;
@@ -618,6 +617,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .public-information-section p {
   max-width: 66ch;
   margin: 0.55rem 0 0;
+  overflow-wrap: anywhere;
+}
+.public-information-link {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  max-width: 100%;
   overflow-wrap: anywhere;
 }
 
