@@ -127,13 +127,28 @@ Owner-only surfaces may display profile drafts, draft entries, and local editing
 state retrieved from D1. A signed-in
 visitor who is not the configured owner receives none of that data.
 
-The Identity form's live preview and required-field count are transient
-in-memory browser state. They are not written to D1, browser storage, Hub, a
+The Identity form's dirty marker, live preview, required-field count, and
+field-error presentation are transient in-memory browser state. They are not
+authoritative readiness and are not written to D1, browser storage, Hub, a
 runtime setting, or a new onboarding record. Reloading before a successful save
 discards them. Fresh, incomplete, and complete readiness is recalculated on the
 server after authorization from the current profile and effective canonical
 URL; it reveals no owner email, ChatGPT identity, credential, draft, Hub
 response, or request-host value.
+
+The saved/unsaved marker compares the current required, optional,
+presentation, and attribution controls with their exact initially rendered
+values. Returning every control to that baseline clears the marker; the first
+input event is not treated as permanent evidence of a change. When an invalid
+stored canonical fallback is replaced in the form by the normalized effective
+runtime URL, the authorized view identifies that substitution and the
+consequence of saving rather than calling it saved profile data. When no valid
+runtime substitution exists, the authorized view leaves the canonical field
+empty, identifies the invalid saved fallback as omitted, and treats the form as
+loaded with an omission rather than an exact saved-state match. It never sends
+the raw invalid stored or runtime value. Only an exactly empty saved fallback
+remains an exact empty form baseline; whitespace-only stored input is omitted
+and identified as invalid.
 
 The owner dashboard's first-update state is likewise a server-rendered view of
 the existing D1 profile and entries after authorization. Bounded prepared
@@ -156,12 +171,14 @@ confirmation is shown to the owner before public visibility changes, and the
 assistant must wait for explicit owner approval before accepting it.
 
 An interrupted response or 5xx response does not establish whether the D1 write
-committed. The interface retains current inputs and provides a saved-state
-reload link; the owner checks the server-rendered state before retrying. This
-recovery behavior stores no extra history. Identity saves replace the current
-profile, draft edits replace the current draft text, unpublishing retains the
-same entry privately, and deletion remains subject to hosting-provider backup
-limitations.
+committed. The Identity interface retains current inputs, disables another save
+from that uncertain page, and provides a saved-state reload link; the owner
+checks the server-rendered state before retrying. A definitive 4xx instead
+associates recognized safe validation details with the relevant fields and
+does not expose a recovery link. This recovery behavior stores no extra
+history. Identity saves replace the current profile, draft edits replace the
+current draft text, unpublishing retains the same entry privately, and deletion
+remains subject to hosting-provider backup limitations.
 
 Missing owner configuration disables all writes. It does not cause the
 application to reveal expected configuration values or treat the first visitor

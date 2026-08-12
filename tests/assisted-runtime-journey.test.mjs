@@ -49,18 +49,24 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   });
   assert.equal(identitySave.status, 204);
   assert.equal(db.profile.display_name, identity.displayName);
+  assert.equal(db.profile.short_description, identity.shortDescription);
+  assert.equal(db.profile.introduction, identity.introduction);
+  assert.equal(db.profile.location, identity.location);
+  assert.equal(db.profile.website, identity.website);
+  assert.deepEqual(JSON.parse(db.profile.external_links_json), identity.externalLinks);
   assert.equal(db.profile.canonical_url, "https://stored.example/fallback");
   assert.equal(db.profile.accent_color, identity.accentColor);
   assert.equal(db.profile.density, "compact");
   assert.equal(db.profile.hide_powered_by, 1);
+  assert.equal(db.profile.account_type, "other");
 
   const reloadedIdentity = await ownerHtml("/owner/profile", env, {
     "oai-authenticated-user-full-name": encodeURIComponent(ownerIdentityCanary),
   });
-  assert.match(reloadedIdentity, /Identity is complete/i);
-  assert.match(reloadedIdentity, /Effective public URL · (?:<!-- -->)?protected Site setting/i);
+  assert.match(reloadedIdentity, /Identity is ready/i);
+  assert.match(reloadedIdentity, /Effective public URL · (?:<!-- -->)?protected runtime URL/i);
   assert.match(reloadedIdentity, /https:\/\/runtime\.example\/presence/i);
-  assert.match(reloadedIdentity, /Fallback canonical presence URL/i);
+  assert.match(reloadedIdentity, /Canonical URL fallback/i);
   assert.match(reloadedIdentity, /value="https:\/\/stored\.example\/fallback"/i);
   assert.doesNotMatch(reloadedIdentity, new RegExp(ownerIdentityCanary, "i"));
   assert.match(reloadedIdentity, /<a class="owner-wordmark" href="\/owner">Manage<\/a>/i);
@@ -217,11 +223,83 @@ test("effective canonical defaults never serialize an invalid stored fallback", 
   });
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /Effective public URL · (?:<!-- -->)?protected Site setting/i);
-  assert.match(html, /Fallback canonical presence URL/i);
+  assert.match(html, /Effective public URL · (?:<!-- -->)?protected runtime URL/i);
+  assert.match(html, /Canonical URL fallback/i);
+  assert.match(html, /Saved profile loaded with a safe URL substitution/i);
+  assert.match(html, /class="identity-save-state identity-save-state-loaded"/i);
+  assert.match(html, /saved canonical fallback is invalid/i);
+  assert.match(html, /effective protected runtime URL is prefilled below/i);
+  assert.match(html, /Saving will replace the invalid D1 fallback/i);
+  assert.match(html, /Prefilled from the effective protected runtime URL because no valid saved fallback is available/i);
   assert.match(html, /name="canonicalUrl"[^>]+value="https:\/\/runtime\.example\/normalized"/i);
   assert.doesNotMatch(html, new RegExp(storedCanary, "i"));
   assert.doesNotMatch(html, /not-a-url/i);
+});
+
+test("an invalid stored fallback without a valid runtime URL is explicitly omitted", async () => {
+  const storedCanary = "INVALID_STORED_OMITTED_PRIVATE_CANARY";
+  const runtimeCanary = "INVALID_RUNTIME_OMITTED_PRIVATE_CANARY";
+  const response = await fetchApp("/owner/profile", {
+    env: makeEnv({
+      db: new FakeD1({ profile: profileRow({ canonical_url: `not-a-url-${storedCanary}` }) }),
+      ownerEmail,
+      canonicalUrl: `not-a-url-${runtimeCanary}`,
+    }),
+    headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Identity needs a valid public URL/i);
+  assert.match(html, /Saved profile loaded without its invalid URL/i);
+  assert.match(html, /class="identity-save-state identity-save-state-loaded"/i);
+  assert.match(html, /saved canonical fallback is invalid and was omitted from this form/i);
+  assert.match(html, /Other profile values were loaded from this Aitta/i);
+  assert.match(html, /No URL is prefilled because the saved fallback is invalid/i);
+  assert.match(html, /name="canonicalUrl"[^>]+value=""/i);
+  assert.doesNotMatch(html, /identity-save-state-saved|Saved values loaded|form matches the profile values loaded/i);
+  assert.doesNotMatch(html, new RegExp(`${storedCanary}|${runtimeCanary}|not-a-url`, "i"));
+});
+
+test("an empty stored fallback remains an exact empty saved baseline", async () => {
+  const response = await fetchApp("/owner/profile", {
+    env: makeEnv({
+      db: new FakeD1({ profile: profileRow({ canonical_url: "" }) }),
+      ownerEmail,
+      canonicalUrl: "also-not-valid",
+    }),
+    headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Identity needs a valid public URL/i);
+  assert.match(html, /class="identity-save-state identity-save-state-saved"/i);
+  assert.match(html, /Saved values loaded/i);
+  assert.match(html, /form matches the profile values loaded from this Aitta/i);
+  assert.match(html, /name="canonicalUrl"[^>]+value=""/i);
+  assert.doesNotMatch(html, /invalid URL|invalid saved fallback was omitted|invalid-stored-omitted/i);
+});
+
+test("a whitespace-only stored fallback is omitted rather than called an exact saved baseline", async () => {
+  const privateCanary = "WHITESPACE_STORED_PRIVATE_CANARY";
+  const response = await fetchApp("/owner/profile", {
+    env: makeEnv({
+      db: new FakeD1({
+        profile: profileRow({ canonical_url: " \t\n ", private_canary: privateCanary }),
+      }),
+      ownerEmail,
+      canonicalUrl: "also-not-valid",
+    }),
+    headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Identity needs a valid public URL/i);
+  assert.match(html, /class="identity-save-state identity-save-state-loaded"/i);
+  assert.match(html, /Saved profile loaded without its invalid URL/i);
+  assert.match(html, /saved canonical fallback is invalid and was omitted from this form/i);
+  assert.match(html, /name="canonicalUrl"[^>]+value=""/i);
+  assert.doesNotMatch(html, /identity-save-state-saved|Saved values loaded|form matches the profile values loaded/i);
+  assert.doesNotMatch(html, new RegExp(privateCanary, "i"));
 });
 
 test("owner mutation response policy treats 4xx as definitive and 5xx as unconfirmed", async () => {
@@ -301,15 +379,20 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(entryForm, /href=\{entry \? `\/owner\/entries\/\$\{entry\.id\}` : "\/owner"\}/);
   assert.match(entryForm, /const outcome = classifyOwnerMutationResponse\(response\);[\s\S]*if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setStatus\(await errorMessage\(response\)\);\s*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
   assert.match(entryForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The save result could not be confirmed\.[^\n]+\);\s*setShowRecovery\(true\);\s*setBusy\(false\);\s*\}/);
-  assert.match(profileForm, /<form[^>]+aria-label="Identity and presentation settings"[^>]+aria-busy=\{busy\}/);
-  assert.match(profileForm, /Fallback canonical presence URL/);
-  assert.match(profileForm, /Saving this field updates only the durable D1 fallback and cannot change that protected setting/);
-  assert.match(profileForm, /The Identity save result could not be confirmed\. Reload this page before retrying\./);
-  assert.match(profileForm, /href="\/owner\/profile">Reload saved Identity/);
-  assert.match(profileForm, /const outcome = classifyOwnerMutationResponse\(response\);[\s\S]*if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setStatus\(await errorMessage\(response\)\);\s*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
-  assert.match(profileForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The Identity save result could not be confirmed\.[^\n]+\);\s*setShowRecovery\(true\);\s*setBusy\(false\);\s*\}/);
-  assert.match(profilePage, /normalizedCanonicalOrNull\(profile\?\.canonicalUrl \?\? null\)/);
+  assert.match(profileForm, /<form[^>]+aria-label="Identity and profile settings"[^>]+aria-busy=\{busy\}/);
+  assert.match(profileForm, /Canonical URL fallback/);
+  assert.match(profileForm, /protected runtime URL remains effective and cannot be changed here/);
+  assert.match(profileForm, /The Identity save result could not be confirmed\. Reload the saved Identity before retrying\./);
+  assert.match(profileForm, /href="\/owner\/profile">Reload saved Identity before retrying/);
+  assert.match(profileForm, /const outcome = classifyOwnerMutationResponse\(response\);[\s\S]*if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}[\s\S]*const failure = await definitiveFailure\(response\);[\s\S]*setFieldErrors\(failure\.fieldErrors\);[\s\S]*setStatus\(failure\.message\);[\s\S]*focusFirstInvalidField\(formElement, failure\.fieldErrors\);\s*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
+  assert.match(profileForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The Identity save result could not be confirmed\.[^\n]+\);\s*setRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);
+  assert.match(profileForm, /if \(recoveryRequired\) return;/);
+  assert.match(profileForm, /disabled=\{busy \|\| recoveryRequired\}/);
+  assert.match(profileForm, /function definitiveFailure\([\s\S]*fieldErrors\[fieldName\] = value[\s\S]*Correct the highlighted fields and try again/);
+  assert.match(profilePage, /storedCanonicalValue = profile\?\.canonicalUrl \?\? ""/);
+  assert.match(profilePage, /normalizedCanonicalOrNull\(storedCanonicalValue\)/);
   assert.match(profilePage, /storedCanonical \?\? readiness\.canonicalUrl \?\? ""/);
+  assert.match(profilePage, /storedCanonical[\s\S]*\? "stored"[\s\S]*readiness\.canonicalSource === "runtime"[\s\S]*\? "runtime-substitution"[\s\S]*storedCanonicalValue\.length > 0[\s\S]*\? "invalid-stored-omitted"[\s\S]*: "empty"/);
   assert.match(profileForm, /canonicalUrl: canonicalDefault/);
   assert.match(outcomePolicy, /if \(response\.ok\) return "success";/);
   assert.match(outcomePolicy, /response\.status >= 500 \? "unconfirmed" : "definitive-error"/);

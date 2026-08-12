@@ -180,13 +180,26 @@ when present. It contains no competing action. Counts, update rows, update
 actions, and their text status remain available below in a compact sans-serif
 hierarchy; the empty state does not reserve a large blank panel.
 
-The Identity form still pairs saved readiness with a clearly labeled transient
-preview and native progress elements. Saving reloads the server-derived state,
-while a reload before saving discards the preview.
-The saved and live accent preview uses the same derived `--accent` as public
-rendering, including its border, label, and native progress accent. The color
-input continues to represent the owner's stored preference rather than the
-derived rendering color.
+The Identity route makes its four required values the first editing task:
+display name, short description, canonical URL fallback, and longer
+introduction. They sit in one bounded primary fieldset before the existing
+preview, optional public details, and presentation controls. Location, website,
+external links, accent, density, and attribution retain their complete existing
+payload and remain secondary; their more compact compositions belong to
+TASK-161 and TASK-162 rather than this save-journey change.
+
+The readiness panel is explicitly server-saved. A separate saved/unsaved strip
+compares every current form value with its exact loaded baseline: all required
+fields, location, website, the complete external-links text, canonical URL,
+accent, density, and attribution checkbox. Changing any value marks the form
+unsaved; restoring every value exactly restores its loaded state. Input events
+update only transient in-memory preview values and the local four-field count;
+neither is presented as readiness or durability. A successful save reloads
+`/owner/profile` so the server derives readiness again. Reloading before success
+discards the local edits. The saved and live accent preview continues
+to use the same derived `--accent` as public rendering, including its border,
+label, and native progress accent. The color input continues to represent the
+owner's stored preference rather than the derived rendering color.
 
 The normalized effective public URL is shown as compact secondary text with a
 safe protected-setting or saved-Identity explanation. Raw runtime
@@ -197,12 +210,33 @@ owner panels stack where necessary. Native links, buttons, and fields retain
 keyboard focus behavior and at least 44-pixel interactive height. The 60-pixel
 header also accounts for a device safe-area inset at its top edge.
 
-When a protected runtime canonical URL is effective, the editable field is
-named as the saved fallback and explains that saving it cannot change the
-protected setting. A malformed legacy stored value is never used as a form
-default or transient preview; a valid normalized runtime value becomes the safe
-fallback default instead. This lets an unrelated Identity or presentation save
-proceed without serializing the malformed value.
+The canonical field is always named `Canonical URL fallback`. When a protected
+runtime canonical URL is effective, plain text says that it is currently public
+and cannot be changed in this form; saving writes only the D1 fallback. Without
+a valid protected value, the normalized saved fallback is effective. A
+malformed legacy stored value is never used as a form default or transient
+preview; a valid normalized runtime value becomes the safe fallback default
+instead. This lets an unrelated Identity or presentation save proceed without
+serializing the malformed value. In that substitution case, the form explicitly
+says the stored fallback is invalid, the effective protected runtime URL has
+been prefilled, and saving will replace the invalid D1 fallback. It does not
+describe the substituted value as already saved or claim that every form value
+came from D1. If neither the stored nor runtime value is valid, the canonical
+field is empty and the loaded-state strip explicitly says that the invalid,
+nonblank saved fallback was omitted; it does not claim the sanitized form
+exactly matches D1. An exactly empty saved fallback remains an exact empty
+baseline. The raw invalid value is never rendered. Raw protected values are
+never sent to the browser.
+
+Native required and URL constraints are checked before a request. A definitive
+4xx response keeps all values in place, associates recognized server details
+with their controls through `aria-invalid` and `aria-describedby`, moves focus
+to the first affected control, and states that no save occurred. A rejected
+fetch or 5xx response remains ambiguous: the submit control is disabled and a
+native `Reload saved Identity before retrying` link is exposed. This prevents a
+second request from the uncertain page while preserving the open inputs for
+comparison. There is no automatic retry, automatic save, timeout, beacon, or
+browser-storage recovery state.
 
 Repeated update rows give each action a bounded owner-visible text label plus
 the complete collision-free stable entry identifier in its accessible name,

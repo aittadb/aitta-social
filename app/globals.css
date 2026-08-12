@@ -734,17 +734,40 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .owner-form { padding-top: 1rem; }
 .identity-form-readiness { align-items: center; }
 .identity-form-readiness > .text-link { justify-self: end; }
-.identity-draft-preview { margin: 2rem 0 3rem; padding: 2rem; border: 1px solid var(--line); border-left: 6px solid var(--accent); background: var(--paper-raised); }
+.identity-save-state {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.35fr) minmax(0, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper-raised);
+}
+.identity-save-state strong { overflow-wrap: anywhere; }
+.identity-save-state span { color: var(--muted); overflow-wrap: anywhere; }
+.identity-save-state-unsaved { border-left: 4px solid var(--accent); }
+.owner-form fieldset.identity-primary-fields {
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.25rem 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper-raised);
+}
+.fieldset-introduction { margin: -0.75rem 0 1.25rem; color: var(--muted); }
+.identity-draft-preview { margin: 0 0 3rem; padding: 2rem; border: 1px solid var(--line); border-left: 6px solid var(--accent); background: var(--paper-raised); }
+.identity-draft-preview > * { min-width: 0; }
+.identity-draft-preview p:not(.eyebrow) { overflow-wrap: anywhere; }
 .identity-draft-preview small { color: var(--muted); }
 .owner-form fieldset { margin: 0; padding: 0 0 3rem; border: 0; }
-.owner-form fieldset + fieldset { padding-top: 3rem; border-top: 1px solid var(--line); }
+.owner-form fieldset.identity-secondary-fields { padding-top: 3rem; border-top: 1px solid var(--line); }
 .owner-form legend { margin-bottom: 1.5rem; font-family: var(--sans); font-size: 1.4rem; font-weight: 700; }
 .field-grid { display: grid; gap: 1.25rem; }
 .field-grid-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .field { display: grid; gap: 0.5rem; margin-bottom: 1.25rem; font-weight: 700; }
 .field > span { font-size: 0.84rem; }
 .field small { color: var(--muted); font-weight: 400; }
-.field-note { margin: -0.5rem 0 1.5rem; color: var(--muted); font-size: 0.84rem; }
+.field-error { color: var(--danger); font-size: 0.84rem; font-weight: 650; }
 .field input, .field textarea, .field select {
   width: 100%;
   min-height: 48px;
@@ -755,6 +778,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   color: var(--ink);
   font-weight: 400;
 }
+.field input[aria-invalid="true"], .field textarea[aria-invalid="true"], .field select[aria-invalid="true"] { border-color: var(--danger); border-width: 2px; }
 .field textarea { resize: vertical; line-height: 1.5; }
 .color-field input { max-width: 100px; padding: 0.3rem; cursor: pointer; }
 .check-field { min-height: var(--control-min-height); display: flex; align-items: flex-start; gap: 0.75rem; font-weight: 600; }
@@ -816,7 +840,9 @@ code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; bac
   .owner-summary > div { padding-inline: 0.65rem; }
   .owner-summary strong { font-size: 0.95rem; }
   .field-grid-two { grid-template-columns: 1fr; }
-  .identity-readiness, .identity-form-readiness, .identity-draft-preview { grid-template-columns: 1fr; }
+  .identity-readiness, .identity-form-readiness, .identity-draft-preview { grid-template-columns: minmax(0, 1fr); }
+  .identity-save-state { grid-template-columns: 1fr; gap: 0.25rem; }
+  .owner-form fieldset.identity-primary-fields { padding: 1rem 1rem 0; }
   .identity-form-readiness > .text-link { justify-self: start; }
   .identity-readiness-incomplete, .identity-readiness-complete { padding-left: 1rem; }
   .owner-footer { align-items: flex-start; flex-direction: column; gap: 0; padding-top: 0.5rem; padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }

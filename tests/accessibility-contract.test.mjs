@@ -80,8 +80,8 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<footer class="owner-footer">[\s\S]*Private owner workspace[\s\S]*Sign out/i);
     assert.doesNotMatch(html, /Test Owner|owner-session|owner-user/i);
     assert.match(html, /<form[^>]+class="owner-form"/i);
-    assert.match(html, /<fieldset>/i);
-    assert.match(html, /<legend>Identity<\/legend>/i);
+    assert.match(html, /<fieldset class="identity-primary-fields">/i);
+    assert.match(html, /<legend>Required Identity<\/legend>/i);
     assert.match(html, /<label[^>]*>.*Display name.*<input[^>]+name="displayName"/is);
     assert.doesNotMatch(html, /name="accountType"|>Presence type</i);
     assert.doesNotMatch(html, /(?:&quot;|\\?")accountType(?:&quot;|\\?")/i);
@@ -90,6 +90,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
       html,
       /<input(?=[^>]*name="canonicalUrl")(?=[^>]*type="url")(?=[^>]*required)[^>]*>/i,
     );
+    assert.match(html, /class="identity-save-state identity-save-state-saved"[^>]+aria-live="polite"/i);
     assert.match(html, /role="status"[^>]+aria-live="polite"/i);
   });
 
@@ -193,6 +194,9 @@ test("CSS preserves responsive, reduced-motion, focus, touch-target, and no-grad
   assert.match(css, /@media\s*\(max-width:\s*640px\)/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /\.field-grid-two\s*\{\s*grid-template-columns:\s*1fr/s);
+  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-draft-preview\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s);
+  assert.match(css, /\.identity-draft-preview > \*\s*\{[^}]*min-width:\s*0/s);
+  assert.match(css, /\.identity-draft-preview p:not\(\.eyebrow\)\s*\{[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.owner-page-header\s*\{[^}]*flex-direction:\s*column/s);
   assert.match(css, /\.owner-topbar\s*\{[^}]*min-height:\s*calc\(60px \+ env\(safe-area-inset-top\)\)[^}]*padding-top:\s*env\(safe-area-inset-top\)/s);
   assert.match(css, /\.owner-nav\s*\{[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
@@ -221,9 +225,9 @@ test("client mutation controls announce status and use semantic form controls", 
   assert.match(entryForm, /<form[^>]+onSubmit=\{submit\}/);
   assert.match(entryForm, /<fieldset>/);
   assert.match(entryForm, /<legend>Update<\/legend>/);
-  assert.match(profileForm, /<fieldset>/);
-  assert.match(profileForm, /<legend>Identity<\/legend>/);
-  assert.match(profileForm, /<legend>Public details<\/legend>/);
+  assert.match(profileForm, /<fieldset className="identity-primary-fields">/);
+  assert.match(profileForm, /<legend>Required Identity<\/legend>/);
+  assert.match(profileForm, /<legend>Optional public details<\/legend>/);
   assert.match(profileForm, /<legend>Presentation<\/legend>/);
   assert.doesNotMatch(profileForm, /accountType|name="accountType"|>Presence type/);
 });
