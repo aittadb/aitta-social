@@ -245,6 +245,28 @@ second request from the uncertain page while preserving the open inputs for
 comparison. There is no automatic retry, automatic save, timeout, beacon, or
 browser-storage recovery state.
 
+The body-first owner update composer makes the text the first and largest
+control, followed by the existing kind, optional title, and optional
+destination fields. One short saved-state explanation distinguishes a new or
+existing private draft from an already public update. The form has one save
+action and a native return path to the Aitta; publishing and deletion remain
+separate existing update actions. All four kinds and the exact accepted title,
+body, and destination values continue through the unchanged create and edit
+payloads. The bounded editor surface is 760 pixels at most, becomes a single
+column on a phone, wraps long text and errors, and retains native 48-pixel
+fields plus the shared 44-pixel buttons and focus treatment.
+
+The composer performs native required, length, and URL checks before sending a
+request. A definitive 4xx response maps recognized `body`, `title`, `entryKind`,
+and `destinationUrl` details back to their controls, preserves every current
+value, focuses the first affected field, and permits a corrected retry. A
+rejected fetch or 5xx response is deliberately unconfirmed: the open values
+remain visible, another save is disabled, and the owner must reload the saved
+update or check the Aitta's saved updates before retrying. This is especially
+important for a new POST, whose first request may already have created a draft.
+No automatic or background retry, browser-storage recovery, or publication is
+added.
+
 Repeated update rows give each action a bounded owner-visible text label plus
 the complete collision-free stable entry identifier in its accessible name,
 while keeping concise visible labels. Publishing opens a native,

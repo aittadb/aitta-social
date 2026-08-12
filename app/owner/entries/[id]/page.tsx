@@ -16,7 +16,7 @@ export default async function EditEntryPage({ params }: { params: Promise<{ id: 
   return (
     <OwnerShell displayName={access.user.displayName} current="entries">
       <header className="owner-page-header compact-header">
-        <div><p className="eyebrow">{entry.state}</p><h1>Edit update</h1><p>Every save and publication change is checked against the configured owner on the server.</p></div>
+        <div><p className="eyebrow">{entry.state === "published" ? "Public update" : "Private draft"}</p><h1>Edit update</h1><p>Saving replaces the current content in this Aitta without changing whether it is draft or published.</p></div>
         <EntryActions id={entry.id} state={entry.state} label={entry.title ?? entry.body.slice(0, 90)} />
       </header>
       <EntryForm entry={entry} />

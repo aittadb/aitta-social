@@ -105,11 +105,13 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /<legend>Update<\/legend>/i);
-    assert.match(html, /<select[^>]+name="kind"/i);
+    assert.match(html, /<legend>Update content<\/legend>/i);
     assert.match(html, /<textarea[^>]+name="body"[^>]+required[^>]+maxlength="50000"/i);
+    assert.match(html, /<select[^>]+name="kind"/i);
+    assert.ok(html.indexOf('name="body"') < html.indexOf('name="kind"'), "update text is first");
     assert.match(html, /<form[^>]+aria-label="Create private draft"[^>]+aria-busy="false"/i);
-    assert.match(html, /<button[^>]+type="submit"[^>]*>Create private draft<\/button>/i);
+    assert.match(html, /<button[^>]+type="submit"[^>]*>Save private draft<\/button>/i);
+    assert.match(html, /Nothing becomes public from this form/i);
   });
 });
 
@@ -227,8 +229,10 @@ test("client mutation controls announce status and use semantic form controls", 
   assert.match(actions, /<button[^>]+type="button"/);
   assert.match(actions, /disabled=\{busy\}/);
   assert.match(entryForm, /<form[^>]+onSubmit=\{submit\}/);
-  assert.match(entryForm, /<fieldset>/);
-  assert.match(entryForm, /<legend>Update<\/legend>/);
+  assert.match(entryForm, /<fieldset className="entry-editor-fields">/);
+  assert.match(entryForm, /<legend>Update content<\/legend>/);
+  assert.match(entryForm, /disabled=\{busy \|\| recoveryRequired\}/);
+  assert.match(entryForm, /aria-invalid=\{Boolean\(fieldErrors\.body\) \|\| undefined\}/);
   assert.match(profileForm, /<fieldset className="identity-primary-fields">/);
   assert.match(profileForm, /<legend>Required Identity<\/legend>/);
   assert.match(profileForm, /<legend>Optional public details<\/legend>/);

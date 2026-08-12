@@ -374,11 +374,15 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(editPage, /<EntryActions id=\{entry\.id\} state=\{entry\.state\} label=\{entry\.title \?\? entry\.body\.slice\(0, 90\)\}/);
 
   assert.match(entryForm, /<form[^>]+aria-label=\{entry \? "Edit update" : "Create private draft"\}[^>]+aria-busy=\{busy\}/);
-  assert.match(entryForm, /Save public update[\s\S]*Save private draft[\s\S]*Create private draft/);
-  assert.match(entryForm, /The save result could not be confirmed\. Reload Your presence before retrying\./);
-  assert.match(entryForm, /href=\{entry \? `\/owner\/entries\/\$\{entry\.id\}` : "\/owner"\}/);
-  assert.match(entryForm, /const outcome = classifyOwnerMutationResponse\(response\);[\s\S]*if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setStatus\(await errorMessage\(response\)\);\s*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
-  assert.match(entryForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The save result could not be confirmed\.[^\n]+\);\s*setShowRecovery\(true\);\s*setBusy\(false\);\s*\}/);
+  assert.match(entryForm, /Save update[\s\S]*Save private draft/);
+  assert.match(entryForm, /The save result is unknown\. Do not submit again from this page; the first request may have succeeded/);
+  assert.match(entryForm, /href=\{entry \? `\/owner\/entries\/\$\{encodeURIComponent\(entry\.id\)\}` : "\/owner"\}/);
+  assert.match(entryForm, /const outcome = classifyOwnerMutationResponse\(response\);[\s\S]*if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}[\s\S]*const failure = await definitiveFailure\(response\);[\s\S]*setFieldErrors\(failure\.fieldErrors\);[\s\S]*focusFirstInvalidField\(formElement, failure\.fieldErrors\);[\s\S]*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
+  assert.match(entryForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The save result is unknown\.[^\n]+\);\s*setRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);
+  assert.match(entryForm, /if \(recoveryRequired\) return;/);
+  assert.match(entryForm, /disabled=\{busy \|\| recoveryRequired\}/);
+  assert.match(entryForm, /if \(!formElement\.checkValidity\(\)\)[\s\S]*formElement\.reportValidity\(\)/);
+  assert.match(entryForm, /if \(value === "entryKind"\) return "kind"/);
   assert.match(profileForm, /<form[^>]+aria-label="Identity and profile settings"[^>]+aria-busy=\{busy\}/);
   assert.match(profileForm, /Canonical URL fallback/);
   assert.match(profileForm, /protected runtime URL remains effective and cannot be changed here/);

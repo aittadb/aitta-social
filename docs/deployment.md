@@ -161,9 +161,11 @@ checking that its key is configured.
    Identity, and canonical/sharing URLs use the normalized configured canonical
    URL rather than the request host.
 7. With complete Identity and no updates, the owner workspace leads to **Create
-   first draft**. Save the draft, leave the editor, and return to the owner
-   workspace. It must offer to resume that same stable draft identifier and
-   state clearly that the draft remains private until publication.
+   first draft**. In the body-first composer, enter the update text before the
+   secondary kind, optional title, and destination controls, then choose **Save
+   private draft**. Leave the editor and return to the Aitta. It must offer to
+   resume that same stable draft identifier and state clearly that the draft
+   remains private until publication.
 8. Publish the test update. The owner workspace then marks the first-update
    journey complete and offers both the public preview and the stable
    `/entries/{id}` permalink while retaining the normal edit, unpublish, and
@@ -212,6 +214,14 @@ first request, so an immediate retry could create a second draft or reverse the
 wrong state. A 4xx validation or authorization response re-enables the control
 and shows its safe server message without adding the ambiguous-result recovery
 link.
+
+In the update composer specifically, an unknown result disables another save
+from the current page. For a new draft, use **Check saved updates before
+retrying**; for an existing update, use **Reload saved update before retrying**.
+Compare the freshly loaded D1-backed state before making another request. A
+definitive 4xx response instead keeps every entered value, highlights and
+focuses a recognized invalid field, and leaves **Save private draft** or **Save
+update** available after correction.
 
 Rollback stays within the existing product model. Reloading before a successful
 Identity save discards its transient preview. A saved Identity or presentation
