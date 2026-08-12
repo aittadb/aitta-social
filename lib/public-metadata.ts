@@ -11,7 +11,7 @@ const UNAVAILABLE_DESCRIPTION =
 
 export function publicPresenceMetadata(profile: Profile | null): Metadata {
   const title = profile
-    ? metadataText(profile.displayName, "Independent presence", 100)
+    ? metadataText(profile.displayName, "Independent Aitta", 100)
     : UNCONFIGURED_TITLE;
   const description = profile
     ? metadataText(profile.shortDescription, UNCONFIGURED_DESCRIPTION, 280)
@@ -67,8 +67,8 @@ export function publicEntryMetadata(
   profile: Profile | null,
 ): Metadata {
   const presenceTitle = profile
-    ? metadataText(profile.displayName, "Independent presence", 100)
-    : "Independent presence";
+    ? metadataText(profile.displayName, "Independent Aitta", 100)
+    : "Independent Aitta";
   const updateTitle = metadataText(
     entry.title ?? `${capitalize(entry.kind)} update`,
     "Published update",
@@ -77,7 +77,7 @@ export function publicEntryMetadata(
   const title = `${updateTitle} · ${presenceTitle}`;
   const description = metadataText(
     entry.body,
-    profile?.shortDescription ?? "A published update from this independent presence.",
+    profile?.shortDescription ?? "A published update from this independent Aitta.",
     280,
   );
   const canonicalBase = resolveCanonicalUrl(profile);
@@ -116,7 +116,7 @@ export function publicEntryMetadata(
 
 export function unavailableEntryMetadata(): Metadata {
   return {
-    title: { absolute: "Update not found · Independent presence" },
+    title: { absolute: "Update not found · Independent Aitta" },
     description: "This update is not public.",
     robots: { index: false, follow: false },
   };

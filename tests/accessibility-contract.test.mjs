@@ -25,14 +25,14 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /class="skip-link"[^>]+href="#main-content"/i);
     assert.match(html, /id="main-content"/i);
     assert.match(html, /<main[^>]+class="public-shell/i);
-    assert.match(html, /<header[^>]+aria-label="Presence navigation"/i);
+    assert.match(html, /<header[^>]+aria-label="Aitta navigation"/i);
     assert.match(html, /<section[^>]+aria-labelledby="account-name"/i);
-    assert.match(html, /<aside[^>]+aria-label="Presence details"/i);
+    assert.match(html, /<aside[^>]+aria-label="Profile details"/i);
     assert.match(html, /<section[^>]+aria-labelledby="entries-title"/i);
     assert.match(html, /<time[^>]+datetime=/i);
     assert.match(
       html,
-      /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]+aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i,
+      /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]+aria-label="Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i,
     );
     assert.doesNotMatch(html, />Sign in<\/a>|Owner access/i);
     assert.match(html, /<strong>\s*<a[^>]+href="https:\/\/aitta\.social"[^>]*>AittaSocial<\/a>\s*<\/strong>/i);
@@ -61,7 +61,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /href="\/owner"[^>]+aria-label="Manage presence as owner — open local sole-owner administration"[^>]*>Manage<\/a>/i);
+    assert.match(html, /href="\/owner"[^>]+aria-label="Manage Aitta as owner — open local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/i);
   });
 
@@ -123,7 +123,7 @@ test("presence and update language stays clear without obsolete Hub controls", a
     assert.match(publicHtml, />Updates<\/h2>/i);
     assert.match(publicHtml, /href="\/entries\/entry-1"[^>]+aria-label="Open update published [^"]+"/i);
     assert.match(publicHtml, /<a class="update-source-identity" href="#account">/i);
-    assert.match(publicHtml, /aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i);
+    assert.match(publicHtml, /aria-label="Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(publicHtml, />Entries<\/h2>|>Read (?:entry|update)<\/a>|>Sign in<\/a>/i);
 
     const ownerResponse = await fetchApp("/owner", {

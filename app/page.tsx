@@ -52,14 +52,14 @@ export default async function Home() {
       <PublicPresenceHeader
         displayName={profile.displayName}
         identityHref="#account"
-        label="Presence navigation"
-        actionsLabel="Presence actions"
+        label="Aitta navigation"
+        actionsLabel="Aitta actions"
         action={{
           href: user ? "/owner" : chatGPTSignInPath("/owner"),
           label: "Manage",
           accessibleName: user
-            ? "Manage presence as owner — open local sole-owner administration"
-            : "Manage presence as owner — sign in with ChatGPT for local sole-owner administration",
+            ? "Manage Aitta as owner — open local sole-owner administration"
+            : "Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration",
         }}
       />
 
@@ -143,7 +143,7 @@ function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedI
         <EntriesSection
           entries={entries}
           configured={false}
-          displayName="Independent presence"
+          displayName="Independent Aitta"
           identityHref="#start"
         />
       </div>
@@ -202,7 +202,7 @@ function EntriesSection({
           <h3>No published updates yet</h3>
           <p>
             {configured
-              ? "The presence already stands on its own. Its first update will appear here when it is ready."
+              ? "This Aitta already stands on its own. Its first update will appear here when it is ready."
               : "Published updates will appear here after the owner configures this Aitta's optional profile."}
           </p>
         </div>
@@ -279,7 +279,7 @@ function PresenceDetails({ profile }: { profile: Profile }) {
   }
 
   return (
-    <aside className="presence-details" aria-label="Presence details">
+    <aside className="presence-details" aria-label="Profile details">
       {profile.location && <PresenceDetail label="Location" value={profile.location} />}
       {profile.website && (
         <PresenceDetail

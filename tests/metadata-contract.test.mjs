@@ -233,7 +233,7 @@ test("an update without a configured profile is not given indexable or canonical
     env: makeEnv({
       db: new FakeD1({
         profile: null,
-        entries: [entryRow({ id: "orphan-update", title: "Orphan update" })],
+        entries: [entryRow({ id: "orphan-update", title: "Orphan update", body: "" })],
       }),
       canonicalUrl: "https://runtime-canonical-without-profile.example",
     }),
@@ -241,10 +241,38 @@ test("an update without a configured profile is not given indexable or canonical
 
   assert.equal(response.status, 200);
   const html = await response.text();
+  assert.match(html, /<title>Orphan update · Independent Aitta<\/title>/i);
+  assert.match(
+    html,
+    /<meta name="description" content="A published update from this independent Aitta\."\s*\/?>/i,
+  );
+  assert.match(html, /<meta property="og:site_name" content="Independent Aitta"\s*\/?>/i);
   assert.match(html, /<meta name="robots" content="noindex, nofollow"\s*\/?>/i);
   assert.doesNotMatch(html, /<link rel="canonical"/i);
   assert.doesNotMatch(html, /<meta property="og:url"/i);
   assert.doesNotMatch(html, /runtime-canonical-without-profile|hostile-request-host|forwarded-host/i);
+});
+
+test("blank historical profile metadata uses only the bounded Aitta fallback", async () => {
+  const response = await fetchApp("/", {
+    headers: { accept: "text/html" },
+    env: makeEnv({
+      db: new FakeD1({
+        profile: profileRow({ display_name: "   ", short_description: "\n\t" }),
+      }),
+      canonicalUrl: "https://canonical.example/aitta",
+    }),
+  });
+
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /<title>Independent Aitta<\/title>/i);
+  assert.match(
+    html,
+    /<meta name="description" content="This Aitta(?:&#x27;|&apos;|')s optional outward profile is not configured yet\."\s*\/?>/i,
+  );
+  assert.match(html, /<link rel="canonical" href="https:\/\/canonical\.example\/aitta"\s*\/?>/i);
+  assert.doesNotMatch(html, /Independent presence|An independently controlled presence/i);
 });
 
 test("non-article updates use website sharing semantics", async () => {
@@ -291,7 +319,7 @@ test("owner and unavailable HTML inherit only neutral non-indexable root metadat
   assert.equal(ownerResponse.status, 200);
   assert.equal(ownerResponse.headers.get("cache-control"), "no-store, must-revalidate");
   const ownerHtml = await ownerResponse.text();
-  assert.match(ownerHtml, /<title>Independent presence<\/title>/i);
+  assert.match(ownerHtml, /<title>Independent Aitta<\/title>/i);
   assert.match(ownerHtml, /<meta name="robots" content="noindex, nofollow"\s*\/?>/i);
   assert.doesNotMatch(ownerHtml, /<link rel="canonical"|property="og:|name="twitter:/i);
 

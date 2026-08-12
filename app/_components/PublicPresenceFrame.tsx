@@ -63,7 +63,7 @@ export function PublicFooter({
     <footer className="public-footer">
       <div className="public-frame public-footer-inner">
         <span className="public-footer-name">
-          {profile?.displayName ?? "Independent presence"}
+          {profile?.displayName ?? "Independent Aitta"}
         </span>
         <div className="public-footer-context">
           {!profile?.hidePoweredBy && (

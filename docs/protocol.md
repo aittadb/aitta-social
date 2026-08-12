@@ -24,6 +24,14 @@ updates for published content. Protocol 1.0 deliberately retains the stable
 `entries`, `/entries/*`, and `/api/v1/site` names. The terminology change does
 not alter a route, JSON field, schema, migration, or public contract.
 
+Configured public HTML, permalink return paths, not-found guidance, and generic
+document metadata name the application as an Aitta. `Independent Aitta` is a
+bounded presentation fallback only when no usable configured display name is
+available; it is not profile data and is never serialized into protocol 1.0.
+Configured profile text remains unchanged owner content. Canonical, robots,
+sharing-metadata allowlists, caching, CSP, and draft/unknown behavior are
+independent of this human-facing terminology.
+
 Ordinary Identity setup and public HTML are category-neutral. `accountType`
 remains a required protocol 1.0 compatibility field in the discovery manifest
 and public site resource; it is not a required visible classification of the

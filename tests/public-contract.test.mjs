@@ -40,7 +40,7 @@ test("signed-out visitors receive the public presence HTML and only published co
   assert.match(html, /Public Ada/);
   assert.match(html, /Visible entry/);
   assert.match(html, /PUBLIC_BODY_CANARY/);
-  assert.match(html, /aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/);
+  assert.match(html, /aria-label="Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/);
   assert.match(html, /\/signin-with-chatgpt\?return_to=%2Fowner/);
   assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/);
   assert.doesNotMatch(html, /DRAFT_TITLE_PRIVATE_CANARY|DRAFT_BODY_PRIVATE_CANARY/);
@@ -56,7 +56,7 @@ test("a presence with no updates still has an intentional public empty state", a
   const html = await response.text();
   assert.match(html, /Ada Account/);
   assert.match(html, /No published updates yet/i);
-  assert.match(html, /presence already stands on its own/i);
+  assert.match(html, /This Aitta already stands on its own/i);
 });
 
 test("public HTML is category-neutral while protocol 1.0 retains a legacy accountType", async () => {

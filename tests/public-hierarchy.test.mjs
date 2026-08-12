@@ -92,7 +92,7 @@ test("the public presence leads with its compact graphical identity and About co
   const identityField = html.indexOf('class="presence-identity-field"', identity);
   const identityTile = html.indexOf('class="presence-identity-tile presence-identity-tile-profile"', identityField);
   const identityHeading = html.indexOf('id="account-name"', identity);
-  const details = html.indexOf('aria-label="Presence details"', identityHeading);
+  const details = html.indexOf('aria-label="Profile details"', identityHeading);
   const about = html.indexOf('id="about-title"', details);
   const updates = html.indexOf('id="entries-title"', about);
   const firstUpdate = html.indexOf(longUnbrokenCopy, updates);
@@ -113,9 +113,9 @@ test("the public presence leads with its compact graphical identity and About co
   assert.ok(firstUpdate < firstNoteTitle, "a note body must lead its optional quiet title");
   assert.ok(firstUpdate < technical);
 
-  assert.match(html, /<header[^>]+class="public-nav"[^>]+aria-label="Presence navigation"/i);
-  assert.match(html, /<nav[^>]+class="public-nav-actions"[^>]+aria-label="Presence actions"/i);
-  assert.match(html, /<aside[^>]+aria-label="Presence details"/i);
+  assert.match(html, /<header[^>]+class="public-nav"[^>]+aria-label="Aitta navigation"/i);
+  assert.match(html, /<nav[^>]+class="public-nav-actions"[^>]+aria-label="Aitta actions"/i);
+  assert.match(html, /<aside[^>]+aria-label="Profile details"/i);
   const detailRegion = html.slice(html.indexOf('<aside class="presence-details"'), html.indexOf("</aside>") + 8);
   assert.equal(detailRegion.match(/<p class="presence-detail">/g)?.length, 10);
   assert.equal(detailRegion.match(/rel="me noopener noreferrer"/g)?.length, 9);
@@ -251,12 +251,12 @@ test("historical updates without a configured profile use a neutral source ident
   const permalinkHtml = await permalinkResponse.text();
   const update = homeHtml.match(/<article class="update-item update-kind-note">[\s\S]*?<\/article>/)?.[0];
   assert.ok(update);
-  assert.match(update, />Independent presence<\/span>/i);
+  assert.match(update, />Independent Aitta<\/span>/i);
   assert.doesNotMatch(update, />AittaSocial<\/span>|>Presence<\/span>/i);
-  assert.match(permalinkHtml, /<h1 class="visually-hidden">Update from Independent presence<\/h1>/i);
-  assert.match(permalinkHtml, /<span>Independent presence<\/span>/i);
+  assert.match(permalinkHtml, /<h1 class="visually-hidden">Update from Independent Aitta<\/h1>/i);
+  assert.match(permalinkHtml, /<span>Independent Aitta<\/span>/i);
   assert.doesNotMatch(permalinkHtml, /<h1[^>]*>Note<\/h1>|permalink-note-title/i);
-  assert.match(permalinkHtml, />Return to presence<\/a>/i);
+  assert.match(permalinkHtml, />Return to Aitta<\/a>/i);
   assert.match(permalinkHtml, />View as JSON<\/a>/i);
 });
 
@@ -276,7 +276,7 @@ test("an empty presence stays intentional without Hub", async () => {
   assert.match(html, />Updates<\/h2>/);
   assert.doesNotMatch(html, />Recent</);
   assert.match(html, /No published updates yet/);
-  assert.match(html, /presence already stands on its own/i);
+  assert.match(html, /This Aitta already stands on its own/i);
   assert.match(html, /aria-label="Technical resources"/);
   assert.doesNotMatch(html, /HIERARCHY_OWNER_PRIVATE_CANARY/i);
 });

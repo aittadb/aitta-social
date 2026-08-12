@@ -24,7 +24,7 @@ const historicalMigration = "drizzle/0000_closed_talos.sql";
 
 const sourceDigests = {
   "db/schema.ts": "8917fdac637f7a5ae4c96df0ecbed770ca881c218136e6067196fc3216bc1b67",
-  "docs/protocol.md": "4304e7e4551675d5c9e11d54814cbf4b83f7dc559970fa2a01b84964aa5889c0",
+  "docs/protocol.md": "c908df2eb4e7a339ff73f5ed62cf39dc208b133ceed6c1bbebaf497800c47ad4",
   [historicalMigration]: "95455a11b0795cfbfeb4ad0edfa07c2e75d076b14b142c9dfb1feb1c849e3c8a",
   "package-lock.json": "1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9",
   "tests/fixtures/poc-upgrade-v0.sql":
@@ -533,7 +533,7 @@ function assertHomeHtml(html, matrixCase, profile) {
 
 function assertPublishedPermalink(html, matrixCase, profile) {
   const presenceTitle = matrixCase.readiness === "profile-absent"
-    ? "Independent presence"
+    ? "Independent Aitta"
     : profile.displayName;
   assert.match(
     html,
@@ -562,13 +562,14 @@ function assertUnavailablePermalinks(draft, unknown) {
   assertHtmlHeaders(draft, 404);
   assertHtmlHeaders(unknown, 404);
   for (const observation of [draft, unknown]) {
-    assert.match(observation.body, /<title>Independent presence<\/title>/iu);
+    assert.match(observation.body, /<title>Independent Aitta<\/title>/iu);
     assert.match(
       observation.body,
-      /<meta name="description" content="An independently controlled presence\."\s*\/?>/iu,
+      /<meta name="description" content="An independently controlled AittaSocial app\."\s*\/?>/iu,
     );
     assert.match(observation.body, /<meta name="robots" content="noindex, nofollow"\s*\/?>/iu);
     assert.match(observation.body, /This update is not public/iu);
+    assert.match(observation.body, />Return to Aitta<\/a>/iu);
     assertNoCanonicalMetadata(observation.body);
   }
   assert.deepEqual(draft.headers, unknown.headers);

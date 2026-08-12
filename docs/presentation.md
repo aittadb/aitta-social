@@ -93,10 +93,13 @@ instead of an invented visible headline. Safe destination links remain beside
 the content, while View as JSON stays in the secondary permalink footer.
 
 Historical published rows can exist before a profile is configured. Their
-source currently uses the compatibility fallback `Independent presence`;
-TASK-169 owns changing that runtime string. Public presentation never
-invents profile data from the setup product name, request host, runtime
-configuration, or update content.
+source uses the bounded compatibility fallback `Independent Aitta` without
+pretending that a profile exists. The same fallback is used only where a
+generic public or entry title needs an application name and no usable
+configured display name exists. Configured display names, descriptions, and
+About content remain authoritative owner content and are never rewritten.
+Public presentation never invents profile data from the setup product name,
+request host, runtime configuration, or update content.
 
 ## Content states
 
@@ -109,8 +112,10 @@ renders the fixed temporary-unavailable state rather than setup guidance.
 
 An Aitta with a configured profile remains intentional with no published
 updates. Its Identity and About content stand on their own before the compact
-explicit empty state. One update uses the same continuous container as many
-updates, and all
+explicit empty state, which names the application as this Aitta. Configured
+public navigation and sole-owner management labels likewise use Aitta, while
+`profile` remains the term for outward presentation. One update uses the same
+continuous container as many updates, and all
 four supported kinds keep the same source-first structure. Drafts never affect
 public hierarchy, counts, links, or wording.
 Optional Hub availability never selects or modifies any public state.

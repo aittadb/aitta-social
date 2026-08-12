@@ -6,8 +6,8 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Independent presence",
-  description: "An independently controlled presence.",
+  title: "Independent Aitta",
+  description: "An independently controlled AittaSocial app.",
   referrer: "strict-origin-when-cross-origin",
   robots: { index: false, follow: false },
 };

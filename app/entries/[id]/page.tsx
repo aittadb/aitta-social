@@ -37,7 +37,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const [entry, profile] = await Promise.all([getEntry(id, true), getProfile()]);
   if (!entry) notFound();
-  const displayName = profile?.displayName ?? "Independent presence";
+  const displayName = profile?.displayName ?? "Independent Aitta";
   const publishedAt = entry.publishedAt ?? entry.createdAt;
   const isNote = entry.kind === "note";
 
@@ -54,7 +54,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
         action={{
           href: "/",
           label: "All updates",
-          accessibleName: "Return to the presence and all public updates",
+          accessibleName: "Return to this Aitta and all public updates",
         }}
       />
       <div className="permalink-content">
@@ -96,7 +96,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
           )}
         </article>
         <footer className="permalink-footer">
-          <a className="button" href="/">Return to presence</a>
+          <a className="button" href="/">Return to Aitta</a>
           <a className="text-link" href={`/api/v1/entries/${entry.id}`}>View as JSON</a>
         </footer>
       </div>
