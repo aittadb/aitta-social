@@ -173,6 +173,11 @@ file. Keep this file strictly below 32,000 bytes and run
   promoted to `PLAN.md`. Public reads remain independent of Hub.
 - Public contract changes update `docs/protocol.md` and receive a versioning
   decision when incompatible.
+- When one public GET resource has both human HTML and machine JSON
+  representations, select between them only from a bounded `Accept` contract,
+  never from `User-Agent`. Preserve the documented JSON default and payload,
+  identify negotiated responses with `Vary: Accept`, keep a direct raw-JSON
+  path, and apply the same public allowlist and privacy boundary to HTML.
 
 ## Product and accessibility
 
@@ -187,6 +192,13 @@ file. Keep this file strictly below 32,000 bytes and run
 - Keep public and owner surfaces clearly distinct, responsive, accessible,
   keyboard- and touch-friendly, with excellent typography and useful empty and
   error states.
+- Reuse maintained AittaSocial-specific header, navigation, footer, and page
+  frame primitives across every human route, including setup, unavailable,
+  not-found, Privacy, Technical, and owner-access states. Destinations and
+  private/public context may differ, but individual pages must not invent
+  parallel chrome. Keep Privacy, Technical information, and the official
+  GitHub source discoverable in the common footer; only the optional powered-by
+  attribution may be hidden by its existing owner control.
 - Maintain one small, documented AittaSocial-specific visual vocabulary for
   meanings shared across public and owner surfaces: semantic surfaces, text,
   separators, focus, 44-pixel controls, fields, actions, status, notices, and
