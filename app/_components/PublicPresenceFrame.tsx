@@ -66,19 +66,23 @@ export function PublicFooter({
           {profile?.displayName ?? "Independent Aitta"}
         </span>
         <div className="public-footer-context">
-          {!profile?.hidePoweredBy && (
-            <span className="public-attribution">
-              Powered by <strong><a href="https://aitta.social">AittaSocial</a></strong>
-              {" · "}
-              <a
-                href="https://github.com/aittadb/aitta-social"
-                aria-label="AittaSocial source on GitHub"
-              >
-                GitHub
-              </a>
-            </span>
-          )}
+          <span className="public-attribution">
+            {!profile?.hidePoweredBy && (
+              <>
+                Powered by <strong><a href="https://aitta.social" rel="noopener noreferrer">AittaSocial</a></strong>
+                <span aria-hidden="true"> · </span>
+              </>
+            )}
+            <a
+              href="https://github.com/aittadb/aitta-social"
+              rel="noopener noreferrer"
+              aria-label="AittaSocial source on GitHub"
+            >
+              GitHub
+            </a>
+          </span>
           <nav className="technical-links" aria-label="Technical resources">
+            <a href="/privacy">Privacy</a>
             <span>Technical</span>
             <a href="/.well-known/aitta-social.json">Manifest</a>
             <a href="/api/v1/site">Profile JSON</a>

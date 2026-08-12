@@ -475,7 +475,7 @@ test("the complete native checkbox label retains its owner touch-target source c
   ]);
   assert.match(
     html,
-    /<label class="check-field">\s*<input(?=[^>]*name="hidePoweredBy")(?=[^>]*type="checkbox")[^>]*>\s*<span>Hide the restrained “Powered by AittaSocial” and source links<\/span>\s*<\/label>/is,
+    /<label class="check-field">\s*<input(?=[^>]*name="hidePoweredBy")(?=[^>]*type="checkbox")[^>]*>\s*<span>Hide the restrained “Powered by AittaSocial” attribution<\/span>\s*<\/label>/is,
   );
 
   const labelRule = css.match(/\.check-field\s*\{([^}]*)\}/s);

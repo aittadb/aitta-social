@@ -10,8 +10,9 @@ public home and every published permalink share one compact product frame:
    display name, short description, optional public details, and About content;
 3. one continuous, identity-linked, deterministic newest-first update stream;
    and
-4. a restrained shared footer containing optional AittaSocial/source
-   attribution and the existing discovery and JSON resources.
+4. a restrained shared footer containing the owner-hideable AittaSocial
+   attribution, a permanent GitHub source link, the public Privacy page, and
+   the existing discovery and JSON resources.
 
 The manifest and JSON resources remain directly usable, but they are secondary
 to the configured profile and never compete with Identity or updates. A

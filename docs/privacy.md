@@ -9,6 +9,14 @@ remains responsible for the content they publish, their public privacy
 notice where one is required, and any hosting-level retention or access-policy
 choices.
 
+The application publishes a concise, D1-independent human summary at
+`/privacy`. It describes only these current application facts, uses neutral
+`noindex, nofollow` metadata without a canonical or image URL, and does not
+invent an operator identity, contact address, consent system, or legal promise.
+The shared public footer links to it. That footer's GitHub source link remains
+available when the owner hides only the restrained `Powered by AittaSocial`
+attribution.
+
 ## Data inventory
 
 ### Stored in the Aitta-owned D1 database

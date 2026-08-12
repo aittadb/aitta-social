@@ -51,7 +51,11 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     const html = await response.text();
     assert.doesNotMatch(html, /Powered by/i);
     assert.doesNotMatch(html, /https:\/\/aitta\.social/i);
-    assert.doesNotMatch(html, /https:\/\/github\.com\/aittadb\/aitta-social/i);
+    assert.match(
+      html,
+      /href="https:\/\/github\.com\/aittadb\/aitta-social"[^>]*rel="noopener noreferrer"[^>]*aria-label="AittaSocial source on GitHub"/i,
+    );
+    assert.match(html, /href="\/privacy"[^>]*>Privacy<\/a>/i);
   });
 
   await t.test("a signed-in visitor gets a management destination, not an authorization claim", async () => {

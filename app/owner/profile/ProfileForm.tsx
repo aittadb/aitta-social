@@ -314,7 +314,7 @@ export function ProfileForm({
             <FieldError name="density" error={fieldErrors.density} />
           </label>
         </div>
-        <label className="check-field"><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” and source links</span></label>
+        <label className="check-field"><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” attribution</span></label>
       </fieldset>
 
       <div className="form-footer">
