@@ -44,29 +44,52 @@ unknown parity before and after deletion.
 The shared owner action group retains its semantic labelled group, polite live
 status, native buttons and anchors, per-update accessible labels, 44-pixel
 controls, focus treatment, wrapping, reduced-motion, and forced-colors rules.
-The partial rendered review used compiled candidate
-`e1639858aea9fbf0ceed4a3a2278246f030da087`, two loopback-only Workers, a
-disposable migrated D1 containing synthetic draft and published updates, and a
-disposable loopback header/failure proxy. The authenticated owner dashboard
-rendered both action groups at 320, 390, and 1440 CSS pixels. Its document
-client/scroll widths were respectively 305/305, 375/375, and 1440/1440; 18
-visible controls had a 44-pixel minimum height; and no visible control was
-off-screen. Full-page renders at 320 and 390 pixels were also visually
-inspected.
+The completed rendered review used exact compiled candidate
+`b4abad41adc448512621804d1d481baa627d5c5a`, a loopback-only compiled Worker,
+a disposable migrated D1, and a disposable same-origin header/failure proxy.
+Those fixtures injected only synthetic local owner or non-owner identity and
+one-shot 400, 500, or dropped-connection deletion responses; no hosted Site,
+data, configuration, credential, or identity was used.
 
-That partial evidence is not the required completion matrix. During the first
-published-cancellation interaction, the Browser controller stopped responding;
-the call was interrupted and its outcome is unknown. The controller then
-reported the selected browser unavailable, a fresh local browser request found
-no browser, and the alternate connected-browser selector was also unavailable.
-Therefore no deletion cancellation, success, 4xx, 5xx, network-failure,
-denial/private-canary, keyboard/focus, touch, DPR-4 reflow, reduced-motion,
-forced-colors, or clean-console browser result is claimed. TASK-165 remains
-pending until all of those cells are observed against a fresh exact candidate.
-No hosted or external mutation was attempted.
+- At 320, 390, and 1440 CSS pixels, the authenticated owner dashboard rendered
+  draft and published action groups with document client/scroll widths
+  305/305, 375/375, and 1425/1425. The observed action controls had at least
+  44-pixel heights, no horizontal document overflow, and no off-screen action.
+  Draft and published native confirmation cancellation retained the same row
+  and enabled controls without a deletion request; accepted deletion returned
+  to `/owner` and removed the row.
+- A synthetic 400 kept Delete and the separate publication control enabled,
+  showed only the definite rejected-request message, and exposed no ambiguous
+  recovery. Synthetic 500 and dropped-connection results retained the row,
+  disabled only Delete, left publication available, and exposed the fixed
+  saved-state recovery link without a retry. The public detail routes for a
+  deleted draft, deleted published update, and arbitrary unknown identifier
+  rendered the same not-public state without a private canary.
+- The non-owner fixture at all three widths showed its safe denied heading,
+  no action groups or private canary, and retained bounded 44-pixel controls.
+  A focused normal-mode publication control had the shared solid 3-pixel
+  outline with 3-pixel offset. Under forced colors, a focused Manage link had
+  the same visible solid 3-pixel/3-pixel-offset focus treatment.
+- On the exact candidate, reduced-motion media matched `reduce`, sampled
+  action transition durations were `0s`, and document scroll behavior was
+  `auto`. Forced colors matched `active`. Coarse and any-coarse pointer media
+  both matched after loopback touch emulation, while sampled Delete, Publish,
+  and Unpublish controls remained 44 pixels high. A 320-CSS-pixel DPR-4 row
+  kept the document at 320/320 and action controls horizontally bounded.
+- Literal Chrome zoom was separately observed: the Chrome toolbar reported
+  **Zoom: 400%** for the fixture. At that zoom the page had a 300-CSS-pixel
+  viewport and 296/296 document widths; visible Publish and Delete controls
+  remained horizontally bounded and 44 pixels high. Zoom was reset through
+  Chrome's Reset control, whose toolbar state then reported **Zoom: 100%**.
+  This is distinct from the DPR-4 and 320-CSS-pixel rows.
+- Fresh browser warning/error logs were empty after the fixture navigation and
+  rendered checks. A complete sequential hardware-Tab traversal was not
+  enumerated and is not claimed.
 
 ## Validation and residual evidence
 
-The rendered local browser matrix remains the explicit completion blocker
-above. No Site, hosted D1, access, setting, domain, Hub, or other external state
-was changed.
+Focused deletion, assisted-runtime, accessibility, and publication-lifecycle
+coverage passed 35/35 against the rebased candidate before this evidence-only
+amendment. The final repository, migration-generation, production-audit, and
+diff gates are recorded with the final evidence commit. No Site, hosted D1,
+access, setting, domain, Hub, or other external state changed.
