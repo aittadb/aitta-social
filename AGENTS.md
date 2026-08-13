@@ -336,28 +336,95 @@ file. Keep this file strictly below 32,000 bytes and run
 
 ## Multi-agent execution
 
-- GPT-5.6 Sol Ultra is the primary architect, orchestrator, integrator, and
-  final decision-maker.
-- The primary agent owns requirements analysis, architecture, task
-  decomposition, dependency ordering, conflict resolution, final review, and
-  validation.
-- Use GPT-5.6 Luna Max for small, fully specified implementation tasks with
-  clear scope, acceptance criteria, file ownership, tests, and no unresolved
-  architectural decisions.
-- Use GPT-5.6 Terra High for read-only codebase exploration, dependency mapping,
-  and investigation when implementation boundaries are not yet clear.
-- Use GPT-5.6 Sol High or Max for independent architecture, security,
-  correctness, and integration review.
-- Do not delegate ambiguous product, protocol, authorization, data-integrity,
-  concurrency, or cross-cutting architectural decisions to Luna.
-- Parallelize only independent work. Never allow concurrent write agents to
-  modify overlapping files, shared behavior, or tightly coupled components.
-- Every delegated implementation unit must include implementation, relevant
-  tests, and documentation as one complete task.
-- Subagents must report changed files, validation performed, assumptions, and
-  unresolved risks.
-- The primary agent must inspect and integrate all returned work, resolve review
-  findings, run the full relevant validation suite, and review the final
-  combined diff before declaring completion.
-- Prefer the specified models and reasoning levels whenever explicit subagent
-  selection is available; otherwise treat them as the intended routing policy.
+### Main-agent role
+
+- The main agent is primarily the orchestrator, integrator, and final
+  decision-maker, not the default implementation worker. It owns requirements
+  analysis, architecture, task decomposition, dependency ordering, conflict
+  resolution, final review, and final validation.
+- For every nontrivial task, divide work into coherent workstreams; delegate as
+  much investigation, planning, implementation, testing, documentation,
+  debugging, and review as practical; give every worker a bounded scope,
+  relevant context, constraints, deliverables, and binary acceptance criteria;
+  wait for and inspect the necessary results; then integrate and verify the
+  complete outcome.
+- Subagents should perform the majority of substantive repository work. The
+  main agent may directly coordinate, make small integration changes, resolve
+  conflicts, perform final verification, handle work that cannot reasonably be
+  separated, or complete a genuinely trivial mechanically verifiable change.
+- Do not create agents merely to satisfy a numerical target. Give each one
+  coherent responsibility; use overlapping agents only for intentional
+  independent verification.
+
+### Cost-aware model routing
+
+- Always choose the least expensive model and lowest reasoning level likely to
+  complete the assigned work reliably. Route by actual difficulty and risk, not
+  by the main agent's model. Prefer explicit `gpt-5.6-luna`,
+  `gpt-5.6-terra`, and `gpt-5.6-sol` selection when supported.
+- Use `low`, `medium`, `high`, `xhigh` (extra high), and `max` reasoning names
+  when the active Codex configuration supports them. If an exact model or level
+  is unavailable, use the closest available equivalent while preserving this
+  inexpensive-worker → engineering → architecture/review hierarchy.
+- **Luna is the default inexpensive worker.** Use Luna Low for searches,
+  inventories, extraction/classification, log summaries, formatting, mechanical
+  cleanup, simple documentation corrections, predefined commands/tests, and
+  tiny verifiable edits. Use Luna Medium for routine implementation from a
+  precise plan, repetitive multi-file changes, conventional tests,
+  straightforward refactors, simple migrations, and known-cause fixes. Use
+  Luna High only for a narrow, fully specified task with non-obvious edge cases.
+- **Terra is the normal engineering and integration worker.** Use Terra Medium
+  for interpretive exploration, ordinary multi-file features, moderate
+  refactors, routine diagnosis, approved-architecture implementation, and
+  ordinary integration or Luna-output review. Use Terra High or XHigh for
+  reasonably scoped cross-module behavior, difficult integration, data flow,
+  lifecycle/concurrency, or multi-component debugging. Do not default to Terra
+  Max.
+- **Sol is for judgment-heavy work.** Use Sol High for nontrivial planning,
+  architecture, boundary/invariant definition, independent review, difficult
+  diagnosis, security/privacy/authentication/authorization/trust boundaries,
+  and public API/protocol/schema/persistence decisions. Use Sol XHigh for
+  high-risk architecture or migrations, subtle correctness/security review,
+  complex cross-system debugging, major tradeoffs, or release-critical
+  validation. Use Sol Max only for exceptional unresolved, critical, or
+  especially costly-to-get-wrong problems.
+- Do not spend Sol effort on mechanical work that Luna or Terra can reliably
+  perform. Do not delegate ambiguous product, protocol, authorization,
+  data-integrity, concurrency, or cross-cutting architectural decisions to
+  Luna; escalate Luna to Terra for interpretation and Terra to Sol when work is
+  ambiguous, high risk, architectural, security-sensitive, or resistant to
+  normal debugging. Change model when appropriate rather than repeatedly
+  retrying an unsuitable one at higher reasoning.
+
+### Delegation workflow and discipline
+
+- Unless a change is genuinely trivial, follow this lifecycle: a Sol planner
+  defines the implementation plan and acceptance boundary; Luna or Terra
+  workers complete independently divided implementation, tests, documentation,
+  and investigation; a different Sol agent independently reviews the diff and
+  evidence; the cheapest capable worker fixes clear findings; Sol re-reviews
+  substantial, risky, or architecture-affecting corrections; the main agent
+  integrates, resolves conflicts, runs final validation, and reviews the final
+  combined diff.
+- Every delegated implementation unit is a complete vertical outcome: its
+  implementation, relevant negative/security tests, documentation, and any
+  required migration or configuration decision travel together. Do not split
+  those into artificial handoff phases.
+- Parallelize only truly independent work. Never allow concurrent write agents
+  to alter overlapping files, shared behavior, tightly coupled components,
+  schema/migrations, contract fixtures, or external-state targets. Follow the
+  delivery/worktree rules above for declared ownership, rebasing, integration,
+  and tracker finalization; shared documentation is reconciled by integration
+  rather than used to serialize otherwise independent work.
+- Reuse existing findings instead of redoing the same exploration. A worker that
+  is uncertain must report the uncertainty rather than inventing a conclusion.
+
+### Required subagent handoff
+
+- Each subagent returns concise, distilled evidence: findings or decisions;
+  files inspected and changed; implementation completed; commands/tests run and
+  outcomes; assumptions; unresolved risks or uncertainties; and the recommended
+  next action.
+- The primary agent must inspect returned work, resolve review findings, run the
+  full relevant validation suite, and review the final combined diff before
+  declaring completion.
