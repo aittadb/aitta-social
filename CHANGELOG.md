@@ -1,5 +1,26 @@
 # Changelog
 
+- **TASK-181 — Reshape the prerelease v1 published-update detail resource.**
+  Replaced the unshipped `GET /api/v1/entries/{id}` grammar with the typed v1
+  entry document: explicit public attributes; ordered canonical JSON `self`,
+  collection, and schema-profile links; a human `text/html` alternate; and
+  empty anonymous actions. Root and manifest discovery now expose the same
+  RFC 6570 level-1 `{id}` template; concrete collection, self, and alternate
+  paths percent-encode every non-unreserved opaque-ID character. The JSON-only
+  route negotiates before D1, uses its single published-only query, preserves
+  draft/unpublished/deleted/malformed/unknown `404` parity, and retains safe
+  canonical authority, all four kinds, optional omissions, 60-second public
+  success caching, `Vary: Accept`, `HEAD`, JSON `405`, and canary exclusion.
+  Validation: integrated commit
+  `f61e0f645bceb1847a6a777daf2fe8e543b4e170`; full validation (240/240),
+  focused compiled-Worker/API/privacy/upgrade matrices, migration generation,
+  production audit (zero vulnerabilities), and diff checks pass. Two
+  independent Sol API/security reviews found no remaining P0/P1/P2 issue after
+  correcting URI-template encoding. No human route was added, so rendered
+  browser evidence is not applicable. No schema, Site, hosted data, setting,
+  access, DNS, domain, Hub, sibling, `main`, deployment, or external state
+  changed.
+
 - **TASK-180 — Reshape the prerelease v1 published-updates collection.**
   Replaced the unshipped `GET /api/v1/entries` grammar with the public v1
   collection document: explicit published-entry resources, bounded
