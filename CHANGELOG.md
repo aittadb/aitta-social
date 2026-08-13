@@ -1,5 +1,30 @@
 # Changelog
 
+- **TASK-188 — Added a safe custom-page import preview.** The sole owner can
+  now use `/owner/pages/import` to submit one bounded page-body HTML fragment,
+  inspect its closed normalized `PageDocumentV1` JSON, and review the same
+  escaped React-rendered result before anything is stored or published. The
+  owner-only JSON endpoint checks same origin and authorization before
+  negotiation, media, body, parsing, or any dependency; it has fixed
+  non-reflective request, validation, compiler, authorization, and 405 errors.
+  The `parse5@8.0.1` compiler rejects full documents, malformed or foreign
+  trees, unsafe elements/attributes/URLs, unresolved or reserved fragments,
+  heading skips, and all bounded document overflows. It neither accesses D1
+  nor fetches or persists. The private workspace now includes the bounded
+  Pages destination while retaining the existing scrollable owner navigation.
+  Validation: integrated commit
+  `687419df35e742226372e9fa0af814d7dcfb9bec`; full validation passed
+  472/472, focused checks passed 143/143, migration generation found no schema
+  change, production audit found zero vulnerabilities, and diff checks passed.
+  Independent Sol security and accessibility reviews found no P0/P1/P2 issue.
+  Disposable local production-build evidence covers accepted and hostile
+  fragments, 422/500/malformed-response recovery, owner/non-owner/missing-owner
+  states, 320/390/1440, actual Chrome 400% zoom followed by reset to 100%,
+  DPR-4, forced colors, reduced motion, touch, 44-pixel controls, bounded
+  internal scrolling, and a clean console. Residual uncertainty: a complete
+  sequential hardware-Tab traversal was not enumerated. No hosting, data,
+  configuration, schema, migration, deployment, or external state changed.
+
 - **TASK-195 — Made private update editing a truthful JSON-first browser API.**
   `PUT /api/private/entries/{id}` now retains same-origin-before-owner denial,
   then accepts bounded JSON and returns an allowlisted, no-store `owner-entry`
