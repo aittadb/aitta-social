@@ -11,50 +11,42 @@ type PublicPageFrameProps = {
   children: ReactNode;
   className?: string;
   displayName: string;
-  identityHref: string;
-  manageHref?: string;
-  manageAccessibleName?: string;
   profile: Pick<Profile, "displayName" | "hidePoweredBy"> | null;
-  showPoweredBy?: boolean;
   style?: CSSProperties;
 };
 
 /**
  * The fixed human-public chrome. Callers supply only already-projected display
- * values and destinations, so this component has no dependency on D1, runtime
- * configuration, authentication, or authorization state.
+ * values, so this component has no dependency on D1, runtime configuration,
+ * authentication, or authorization state.
  */
 export function PublicPageFrame({
   children,
   className = "",
   displayName,
-  identityHref,
-  manageHref = "/owner",
-  manageAccessibleName = "Manage Aitta as owner — open local sole-owner administration",
   profile,
-  showPoweredBy,
   style,
 }: PublicPageFrameProps) {
   return (
     <main className={`public-shell ${className}`.trim()} style={style}>
       <PublicPresenceHeader
         displayName={displayName}
-        identityHref={identityHref}
+        identityHref="/"
         label="Aitta navigation"
         actionsLabel="Aitta actions"
         action={{
-          href: manageHref,
+          href: "/owner",
           label: "Manage",
-          accessibleName: manageAccessibleName,
+          accessibleName: "Manage this Aitta’s local sole-owner administration",
         }}
       />
       {children}
-      <PublicFooter profile={profile} showPoweredBy={showPoweredBy} />
+      <PublicFooter profile={profile} />
     </main>
   );
 }
 
-export function PublicPresenceHeader({
+function PublicPresenceHeader({
   displayName,
   identityHref,
   label,
@@ -102,12 +94,10 @@ export function PresenceIdentityTile({
   );
 }
 
-export function PublicFooter({
+function PublicFooter({
   profile,
-  showPoweredBy = !profile?.hidePoweredBy,
 }: {
   profile: Pick<Profile, "displayName" | "hidePoweredBy"> | null;
-  showPoweredBy?: boolean;
 }) {
   return (
     <footer className="public-footer">
@@ -117,7 +107,7 @@ export function PublicFooter({
         </span>
         <div className="public-footer-context">
           <span className="public-attribution">
-            {showPoweredBy && (
+            {!profile?.hidePoweredBy && (
               <>
                 Powered by <strong><a href="https://aitta.social" rel="noopener noreferrer">AittaSocial</a></strong>
                 <span aria-hidden="true"> · </span>

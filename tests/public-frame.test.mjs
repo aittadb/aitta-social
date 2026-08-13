@@ -45,15 +45,21 @@ test("every human public state uses the fixed Manage header and common footer", 
       const html = await response.text();
 
       assert.equal((html.match(/<main\b/gi) ?? []).length, 1);
+      assert.equal((html.match(/<footer\b/gi) ?? []).length, 1);
       assert.match(html, /<main[^>]+class="public-shell(?:\s|")/i);
       assert.match(html, /<header[^>]+class="public-nav"[^>]+aria-label="Aitta navigation"/i);
+      assert.match(html, /class="wordmark" href="\/"/i);
       assert.match(html, /<nav[^>]+class="public-nav-actions"[^>]+aria-label="Aitta actions"/i);
-      assert.match(html, /class="public-nav-action"[^>]+aria-label="Manage Aitta as owner — [^"]+"[^>]*>Manage<\/a>/i);
+      assert.match(html, /class="public-nav-action"[^>]+href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
       assert.match(html, /<footer class="public-footer">/i);
       assert.match(html, /href="\/privacy"[^>]*>Privacy<\/a>/i);
       assert.match(html, /href="\/technical"[^>]*>Technical<\/a>/i);
       assert.match(html, /href="https:\/\/github\.com\/aittadb\/aitta-social"[^>]+aria-label="AittaSocial source on GitHub"/i);
       assert.doesNotMatch(html, /PUBLIC_FRAME_D1_CANARY|All updates|>Set up<\/a>|>Aitta<\/a>/i);
+
+      if (name === "published permalink") {
+        assert.match(html, /<nav class="permalink-footer" aria-label="Update actions">/i);
+      }
     });
   }
 });
@@ -63,11 +69,14 @@ test("the page frame is pure and preserves the owner-hideable attribution bounda
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 
   assert.match(source, /export function PublicPageFrame/);
-  assert.match(source, /manageHref = "\/owner"/);
+  assert.doesNotMatch(source, /export function (?:PublicPresenceHeader|PublicFooter)/);
+  assert.match(source, /href: "\/owner"/);
   assert.match(source, /label="Aitta navigation"/);
   assert.match(source, /label: "Manage"/);
-  assert.match(source, /showPoweredBy = !profile\?\.hidePoweredBy/);
-  assert.doesNotMatch(source, /getProfile|getChatGPTUser|next\/headers|process\.env|DB\b/);
+  assert.match(source, /accessibleName: "Manage this Aitta’s local sole-owner administration"/);
+  assert.match(source, /identityHref="\/"/);
+  assert.match(source, /!profile\?\.hidePoweredBy/);
+  assert.doesNotMatch(source, /getProfile|getChatGPTUser|chatGPTSignInPath|next\/headers|process\.env|DB\b/);
   assert.match(css, /\.public-state-shell\s*\{[^}]*display:\s*flex[^}]*flex-direction:\s*column/s);
   assert.match(css, /\.public-state-page\s*\{[^}]*min-height:\s*360px[^}]*flex:\s*1 0 auto/s);
   assert.match(css, /\.public-state-page h1\s*\{[^}]*overflow-wrap:\s*anywhere/s);
@@ -83,8 +92,12 @@ test("only a configured profile controls the public attribution", async () => {
     headers: { accept: "text/html" },
   });
 
-  assert.doesNotMatch(await hidden.text(), /Powered by|href="https:\/\/aitta\.social"/i);
+  assert.doesNotMatch(publicFooter(await hidden.text()), /Powered by|href="https:\/\/aitta\.social"/i);
   const staticHtml = await staticPage.text();
-  assert.match(staticHtml, /Powered by\s*<strong><a href="https:\/\/aitta\.social"/i);
+  assert.match(publicFooter(staticHtml), /Powered by\s*<strong><a href="https:\/\/aitta\.social"/i);
   assert.doesNotMatch(staticHtml, /FRAME_STATIC_D1_CANARY/);
 });
+
+function publicFooter(html) {
+  return /<footer class="public-footer">[\s\S]*?<\/footer>/i.exec(html)?.[0] ?? "";
+}

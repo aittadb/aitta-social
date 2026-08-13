@@ -3,19 +3,28 @@
 ## Outcome
 
 Every human-public route now composes the same fixed `PublicPageFrame`: the
-one-line public header, `Manage` owner destination, public footer, and existing
+one-line public header, context-neutral `Manage` link to `/owner`, public footer, and existing
 global skip target remain consistent for configured and unconfigured home,
 published updates, Privacy, Technical, storage-unavailable, and not-found
 states. The private owner workspace remains outside this component.
 
-The frame accepts only already-projected display name, identity destination,
-optional profile attribution fields, and a management destination supplied by
-the route. It performs no D1, runtime, authentication, authorization, request,
-or metadata access. Privacy and Technical therefore remain D1-independent, and
-not-found keeps draft/unknown parity without inferring profile attribution. A
-route that already loaded a public profile applies the existing owner-selected
-powered-by preference; GitHub, Privacy, and
-Technical stay present in every footer.
+The frame accepts only already-projected display name and optional profile
+attribution fields. It owns the fixed identity destination `/` and fixed
+management destination `/owner`, and performs no D1, runtime, authentication,
+authorization, request, or metadata access. Privacy and Technical therefore
+remain D1-independent, and not-found keeps draft/unknown parity without
+inferring profile attribution or hardcoding an attribution exception. A route
+that already loaded a public profile applies the existing owner-selected
+powered-by preference; all profile-null public states retain the normal visible
+attribution. GitHub, Privacy, and Technical stay present in every footer.
+
+The frame itself owns the fixed `/owner` destination and
+`Manage this Aitta’s local sole-owner administration` accessible name. This
+identifies the local single-owner boundary without implying AittaSocial network
+identity or membership. Public routes do not inspect ChatGPT identity or
+construct a sign-in URL: Sites owns any sign-in redirect from `/owner`.
+Permalink-local update actions use a labelled navigation region, leaving the
+shared `PublicFooter` as the page's only footer landmark.
 
 ## Automated evidence
 

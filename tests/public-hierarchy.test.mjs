@@ -223,7 +223,7 @@ test("the homepage and permalink use the same compact public frame and quiet res
     permalinkHtml,
     '<div class="permalink-body permalink-note-body">A useful public message.</div>',
     '<p class="permalink-note-title">First public note</p>',
-    '<footer class="permalink-footer">',
+    '<nav class="permalink-footer" aria-label="Update actions">',
   );
   assert.doesNotMatch(permalinkHtml, /<h1[^>]*>First public note<\/h1>/i);
 });

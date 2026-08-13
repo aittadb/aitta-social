@@ -71,18 +71,23 @@ test("public footer always exposes Privacy and GitHub while hiding only powered-
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /href="\/privacy"[^>]*>Privacy<\/a>/i);
+    const footer = publicFooter(html);
+    assert.match(footer, /href="\/privacy"[^>]*>Privacy<\/a>/i);
     assert.match(
-      html,
+      footer,
       /href="https:\/\/github\.com\/aittadb\/aitta-social"[^>]*rel="noopener noreferrer"[^>]*aria-label="AittaSocial source on GitHub"/i,
     );
     if (hidePoweredBy) {
-      assert.doesNotMatch(html, /Powered by|href="https:\/\/aitta\.social"/i);
+      assert.doesNotMatch(footer, /Powered by|href="https:\/\/aitta\.social"/i);
     } else {
-      assert.match(html, /Powered by\s*<strong><a href="https:\/\/aitta\.social" rel="noopener noreferrer">AittaSocial<\/a>/i);
+      assert.match(footer, /Powered by\s*<strong><a href="https:\/\/aitta\.social" rel="noopener noreferrer">AittaSocial<\/a>/i);
     }
   }
 });
+
+function publicFooter(html) {
+  return /<footer class="public-footer">[\s\S]*?<\/footer>/i.exec(html)?.[0] ?? "";
+}
 
 test("privacy presentation keeps narrow, enlarged-text, touch, focus, and motion contracts", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");

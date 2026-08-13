@@ -1,7 +1,6 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { getProfile, listPublishedEntries } from "@/db/repository";
-import { chatGPTSignInPath, getChatGPTUser } from "./chatgpt-auth";
 import {
   publicPresenceMetadata,
   unavailablePublicMetadata,
@@ -29,17 +28,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const [account, user] = await Promise.all([
-    loadAccount(),
-    getChatGPTUser(),
-  ]);
+  const account = await loadAccount();
   if (account.status === "unavailable") {
-    return <UnavailablePresence signedIn={Boolean(user)} />;
+    return <UnavailablePresence />;
   }
 
   const { profile, entries } = account;
   if (!profile) {
-    return <UnconfiguredPresence entries={entries} signedIn={Boolean(user)} />;
+    return <UnconfiguredPresence entries={entries} />;
   }
 
   const style = {
@@ -52,11 +48,6 @@ export default async function Home() {
       style={style}
       profile={profile}
       displayName={profile.displayName}
-      identityHref="#account"
-      manageHref={user ? "/owner" : chatGPTSignInPath("/owner")}
-      manageAccessibleName={user
-        ? "Manage Aitta as owner — open local sole-owner administration"
-        : "Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"}
     >
       <div className="public-presence-column">
         <section className="presence-identity" id="account" aria-labelledby="account-name">
@@ -97,18 +88,12 @@ async function loadAccount(): Promise<AccountLoad> {
   }
 }
 
-function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedIn: boolean }) {
-  const ownerPath = signedIn ? "/owner" : chatGPTSignInPath("/owner");
+function UnconfiguredPresence({ entries }: { entries: Entry[] }) {
   return (
     <PublicPageFrame
       className="density-comfortable template-shell"
       profile={null}
       displayName="Independent Aitta"
-      identityHref="#start"
-      manageHref={ownerPath}
-      manageAccessibleName={signedIn
-        ? "Manage Aitta as owner — open local sole-owner administration"
-        : "Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"}
     >
       <div className="public-wide-content">
         <section className="template-start" id="start" aria-labelledby="template-title">
@@ -140,17 +125,12 @@ function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedI
   );
 }
 
-function UnavailablePresence({ signedIn }: { signedIn: boolean }) {
+function UnavailablePresence() {
   return (
     <PublicPageFrame
       className="public-state-shell"
       profile={null}
       displayName="Independent Aitta"
-      identityHref="/"
-      manageHref={signedIn ? "/owner" : chatGPTSignInPath("/owner")}
-      manageAccessibleName={signedIn
-        ? "Manage Aitta as owner — open local sole-owner administration"
-        : "Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"}
     >
       <section className="public-state-page" aria-labelledby="unavailable-title">
         <p className="eyebrow">Aitta storage unavailable</p>

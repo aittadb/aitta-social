@@ -46,7 +46,6 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
       style={{ "--accent": resolvePresentationAccent(profile?.accentColor) } as CSSProperties}
       profile={profile}
       displayName={displayName}
-      identityHref="/"
     >
       <div className="permalink-content">
         <article className={`permalink-entry permalink-kind-${entry.kind}`}>
@@ -86,10 +85,10 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             </a>
           )}
         </article>
-        <footer className="permalink-footer">
+        <nav className="permalink-footer" aria-label="Update actions">
           <a className="button" href="/">Return to Aitta</a>
           <a className="text-link" href={`/api/v1/entries/${entry.id}`}>View as JSON</a>
-        </footer>
+        </nav>
       </div>
     </PublicPageFrame>
   );

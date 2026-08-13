@@ -18,12 +18,15 @@ product frame:
    Updates resource links.
 
 The frame itself is pure presentation: routes pass it already-projected display
-values, profile attribution choice, and destination. It does not read D1,
-runtime configuration, or authentication. Privacy and Technical therefore stay
+values and profile attribution choice. It owns fixed `/` identity and `/owner`
+Manage destinations and does not read D1, runtime configuration, or
+authentication. Privacy and Technical therefore stay
 D1-independent; the safe not-found fallback neither reads nor infers profile
-attribution. A route that already has a configured public profile alone applies
-the owner-selected powered-by preference. The fixed
-header action is never substituted with a page-specific return or setup action.
+attribution and keeps the normal attribution visible. A route that already has
+a configured public profile alone applies the owner-selected powered-by
+preference. The fixed header action is always the context-neutral `Manage`
+link to `/owner`; Sites owns any required sign-in redirect and the action is
+never substituted with a page-specific return or setup action.
 
 `/technical` is a fixed, D1-independent human index of the protocol 1.0
 discovery manifest, public profile, and published-update collection. It uses

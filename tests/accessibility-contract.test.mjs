@@ -32,7 +32,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<time[^>]+datetime=/i);
     assert.match(
       html,
-      /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]+aria-label="Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i,
+      /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i,
     );
     assert.doesNotMatch(html, />Sign in<\/a>|Owner access/i);
     assert.match(html, /<strong>\s*<a[^>]+href="https:\/\/aitta\.social"[^>]*>AittaSocial<\/a>\s*<\/strong>/i);
@@ -49,13 +49,14 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.doesNotMatch(html, /Powered by/i);
-    assert.doesNotMatch(html, /https:\/\/aitta\.social/i);
+    const footer = publicFooter(html);
+    assert.doesNotMatch(footer, /Powered by/i);
+    assert.doesNotMatch(footer, /https:\/\/aitta\.social/i);
     assert.match(
-      html,
+      footer,
       /href="https:\/\/github\.com\/aittadb\/aitta-social"[^>]*rel="noopener noreferrer"[^>]*aria-label="AittaSocial source on GitHub"/i,
     );
-    assert.match(html, /href="\/privacy"[^>]*>Privacy<\/a>/i);
+    assert.match(footer, /href="\/privacy"[^>]*>Privacy<\/a>/i);
   });
 
   await t.test("a signed-in visitor gets a management destination, not an authorization claim", async () => {
@@ -65,7 +66,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /href="\/owner"[^>]+aria-label="Manage Aitta as owner — open local sole-owner administration"[^>]*>Manage<\/a>/i);
+    assert.match(html, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/i);
   });
 
@@ -115,6 +116,10 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
   });
 });
 
+function publicFooter(html) {
+  return /<footer class="public-footer">[\s\S]*?<\/footer>/i.exec(html)?.[0] ?? "";
+}
+
 test("Aitta and update language stays clear without obsolete Hub controls", async (t) => {
   await t.test("public and owner surfaces use Aitta and update language", async () => {
     const env = makeEnv({
@@ -130,7 +135,7 @@ test("Aitta and update language stays clear without obsolete Hub controls", asyn
     assert.match(publicHtml, />Updates<\/h2>/i);
     assert.match(publicHtml, /href="\/entries\/entry-1"[^>]+aria-label="Open update published [^"]+"/i);
     assert.match(publicHtml, /<a class="update-source-identity" href="#account">/i);
-    assert.match(publicHtml, /aria-label="Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i);
+    assert.match(publicHtml, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(publicHtml, />Entries<\/h2>|>Read (?:entry|update)<\/a>|>Sign in<\/a>/i);
 
     const ownerResponse = await fetchApp("/owner", {

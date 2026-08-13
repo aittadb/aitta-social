@@ -76,7 +76,7 @@ test("the public footer makes Technical real and uses concise resource labels", 
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    const footer = html.slice(html.indexOf('<footer class="public-footer">'));
+    const footer = publicFooter(html);
 
     assert.match(
       footer,
@@ -91,6 +91,10 @@ test("the public footer makes Technical real and uses concise resource labels", 
     }
   }
 });
+
+function publicFooter(html) {
+  return /<footer class="public-footer">[\s\S]*?<\/footer>/i.exec(html)?.[0] ?? "";
+}
 
 test("technical information reuses responsive information-page and interaction contracts", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");

@@ -40,8 +40,8 @@ test("signed-out visitors receive the public presence HTML and only published co
   assert.match(html, /Public Ada/);
   assert.match(html, /Visible entry/);
   assert.match(html, /PUBLIC_BODY_CANARY/);
-  assert.match(html, /aria-label="Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/);
-  assert.match(html, /\/signin-with-chatgpt\?return_to=%2Fowner/);
+  assert.match(html, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/);
+  assert.doesNotMatch(html, /\/signin-with-chatgpt\?return_to=%2Fowner/);
   assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/);
   assert.doesNotMatch(html, /DRAFT_TITLE_PRIVATE_CANARY|DRAFT_BODY_PRIVATE_CANARY/);
   assert.doesNotMatch(html, new RegExp(ownerCanary, "i"));

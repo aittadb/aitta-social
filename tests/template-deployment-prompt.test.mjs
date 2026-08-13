@@ -59,8 +59,7 @@ test("a truly unconfigured deployment leads with the exact prompt and published-
   assert.match(html, /<label[^>]+for="deployment-prompt"[^>]*>Prompt for ChatGPT<\/label>/i);
   assert.match(html, /Select and copy this prompt into ChatGPT to set up your own Aitta/i);
   assert.match(html, /<textarea(?=[^>]+id="deployment-prompt")(?=[^>]+readonly)/i);
-  assert.match(html, /href="\/signin-with-chatgpt\?return_to=%2Fowner"/i);
-  assert.match(html, /aria-label="Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i);
+  assert.match(html, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
   assert.match(html, /Visible public update/i);
   assert.doesNotMatch(
     html,
@@ -79,7 +78,7 @@ test("the prompt reveals no owner authorization result", async (t) => {
     const html = await response.text();
     assert.equal(response.status, 200);
     assert.equal(readPrompt(html), deploymentPrompt);
-    assert.match(html, /href="\/owner"[^>]+aria-label="Manage Aitta as owner — open local sole-owner administration"[^>]*>Manage<\/a>/i);
+    assert.match(html, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(html, new RegExp(ownerEmail.replaceAll(".", "\\."), "i"));
   });
 
@@ -90,7 +89,7 @@ test("the prompt reveals no owner authorization result", async (t) => {
     });
     const publicHtml = await publicResponse.text();
     assert.equal(readPrompt(publicHtml), deploymentPrompt);
-    assert.match(publicHtml, /href="\/owner"[^>]+aria-label="Manage Aitta as owner — open local sole-owner administration"[^>]*>Manage<\/a>/i);
+    assert.match(publicHtml, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(publicHtml, /you are the owner|owner verified/i);
 
     const ownerResponse = await fetchApp("/owner", {
@@ -150,7 +149,7 @@ test("a D1 failure is unavailable Aitta storage, never fresh setup or an owner c
     },
   };
   const cases = [
-    ["signed out", {}, /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]*>Manage<\/a>/i],
+    ["signed out", {}, /href="\/owner"[^>]*>Manage<\/a>/i],
     ["signed-in owner", ownerHeaders(ownerEmail), /href="\/owner"[^>]*>Manage<\/a>/i],
     ["signed-in non-owner", ownerHeaders(otherEmail), /href="\/owner"[^>]*>Manage<\/a>/i],
   ];

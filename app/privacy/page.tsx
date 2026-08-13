@@ -16,7 +16,6 @@ export default function PrivacyPage() {
       className="privacy-shell"
       profile={null}
       displayName="Independent Aitta"
-      identityHref="/"
     >
       <article className="public-information-page" aria-labelledby="privacy-title">
         <header>

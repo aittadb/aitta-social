@@ -16,7 +16,6 @@ export default function TechnicalPage() {
       className="technical-shell"
       profile={null}
       displayName="Independent Aitta"
-      identityHref="/"
     >
       <article className="public-information-page" aria-labelledby="technical-title">
         <header>

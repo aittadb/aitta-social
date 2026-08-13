@@ -5,9 +5,7 @@ export default function NotFound() {
     <PublicPageFrame
       className="public-state-shell"
       profile={null}
-      showPoweredBy={false}
       displayName="Independent Aitta"
-      identityHref="/"
     >
       <section className="public-state-page" aria-label="Not found">
         <p className="eyebrow">404</p>
