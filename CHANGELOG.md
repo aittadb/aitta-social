@@ -1,5 +1,27 @@
 # Changelog
 
+- **TASK-182 — Reused common Aitta chrome in the private owner workspace.**
+  Authorized Home, Identity, new-update, and update-edit documents now share a
+  clear private owner header, exactly three native owner destinations with one
+  current-page state, one content frame, and a shared footer. Safe non-owner
+  and missing-owner states receive the same private context and fixed resource
+  links without an owner navigation, forms, private data, or D1 read;
+  signed-out requests retain their exact Sites redirect. The only extracted
+  primitive is the fixed, effect-free `AittaFooterResources` navigation for
+  Privacy, Technical, GitHub, Manifest, Profile, and Updates; fixed public
+  header/footer composition remains private to the public frame. Validation:
+  integrated commits `cff764a175acb3c0978699fc884dd429ba8d3152` and
+  evidence-only `e44721a25e6fb2d741ec31942a0328959f1fdcc2`; independent
+  integration review and 61 focused checks passed, while task validation passed
+  288/288, migration generation found no schema change, production audit found
+  zero vulnerabilities, and diff checks passed. Disposable compiled-Worker/D1
+  evidence covers owner/non-owner/missing-owner states across four owner paths
+  at 320/390/1440, DPR-4, forced colors, reduced motion, coarse touch, native
+  focus and navigation, signed-out redirect, 44-pixel controls, no overflow or
+  private canaries, and clean console logs. Residual uncertainty: a complete
+  sequential hardware-Tab traversal was not enumerated. No hosted, data,
+  configuration, schema, migration, deployment, or external state changed.
+
 - **TASK-177 — Unified the human-public Aitta frame.** Every configured and
   unconfigured home, published update, Privacy, Technical, storage-unavailable,
   and global/draft/unknown not-found document now uses one pure
