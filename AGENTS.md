@@ -78,7 +78,10 @@ file. Keep this file strictly below 32,000 bytes and run
 
 - Keep the architecture direct and product-specific. Prohibit generic storage
   adapters, generalized content frameworks, empty extension points, and
-  premature reusable runtime packages.
+  premature reusable runtime packages. Use a small, typed handler, strategy,
+  or adapter only when independently meaningful behavior genuinely needs it;
+  do not turn that boundary into a plugin system or dependency-injection
+  container.
 - Use strict TypeScript. Parse `unknown` at every external boundary, avoid
   `any`, and keep modules small and explicit.
 - Worker runtime code uses web/Cloudflare primitives only. Do not use Node
@@ -98,6 +101,54 @@ file. Keep this file strictly below 32,000 bytes and run
   a repository fork, source edit, redeployment, Hub availability, generic
   settings blob, arbitrary CSS/HTML/JavaScript, template, plugin, or remote
   asset URL.
+
+### Maintainable TypeScript and React design
+
+- Keep each file a small, precisely named, semantically cohesive unit with one
+  understandable responsibility. Split by domain behavior, not arbitrary line
+  count; do not fragment trivial logic merely to create files.
+- Organize code by feature or domain where practical. A feature should normally
+  own its component, types, tests, hooks, and service files, and use narrow,
+  stable composition points so independent work avoids shared hot spots. Do
+  not create catch-all `utils`, `helpers`, `types`, or `components` modules
+  when a domain-specific name is possible, or combine unrelated work for
+  convenience.
+- Prefer focused interfaces or named type aliases at meaningful repository,
+  adapter, handler, external-data, component, and test-substitute boundaries.
+  Keep dependencies explicit through parameters, props, constructors, or small
+  factories; avoid mutable global state, circular imports, initialization-order
+  behavior, broad interfaces, and exports that callers do not need. For fixed
+  domain states, prefer discriminated unions with exhaustive handling.
+- Do not grow a large central conditional for independently extensible
+  behaviors. Where a real extension boundary exists, use a lightweight typed
+  feature module, handler, strategy, or adapter with a narrow declarative
+  registration/composition point. Keep the core independent of feature
+  implementations; do not introduce a generic registry, framework, plugin
+  system, or extra indirection for one simple implementation.
+- Keep React components focused on one visible responsibility and driven by
+  explicit typed props. Prefer composition and local state over large
+  configurable components or unrelated nested branches; separate substantial
+  parsing, domain transitions, data access, and side effects from rendering.
+  Make loading, empty, error, unavailable, and success states explicit, retain
+  semantic accessible HTML, and add no UI framework or dependency without an
+  accepted product need.
+- Keep meaningful pure logic independently testable. Put storage, network,
+  browser, timer, and other effects behind narrow explicit boundaries that
+  tests can replace locally; test components through observable behavior, add
+  regressions for defects, and avoid enormous shared fixtures or application-
+  wide setup for a focused feature.
+- Use precise domain names and concise TSDoc or comments for exported contracts
+  and non-obvious intent, invariants, edge cases, or registration rules. Remove
+  stale comments and examples rather than restating obvious syntax.
+- Before implementation, identify the semantic boundary, the files that truly
+  need change, existing composition points, and a feature-owned path that
+  minimizes shared-file edits. During review, treat oversized mixed-purpose
+  modules, growing central conditionals, hidden concrete dependencies,
+  feature-specific core leakage, coupled test setup, and abstraction without
+  clearer ownership, testing, or extension as reasons for a proportional
+  refactor. Prefer direct readable platform/project code and a small bounded
+  change over a large rewrite; add no library when existing dependencies can
+  solve the problem clearly.
 
 ## Identity, authorization, and mutations
 
