@@ -43,6 +43,11 @@ const rootDocument = {
       mediaType: "application/json",
     },
     {
+      rel: "collection",
+      href: `${canonicalUrl}/api/v1/entries`,
+      mediaType: "application/json",
+    },
+    {
       rel: "social.aitta.manifest",
       href: `${canonicalUrl}/.well-known/aitta-social.json`,
       mediaType: "application/json",
@@ -62,6 +67,11 @@ const schemaDocument = {
         "self",
         "profile",
         "collection",
+        "item",
+        "first",
+        "previous",
+        "next",
+        "last",
         "social.aitta.profile",
         "social.aitta.manifest",
       ],
@@ -294,7 +304,7 @@ test("unexpected root and schema failures are safe bounded JSON", async () => {
   }
 });
 
-test("manifest and root discover the profile while entry resources remain unchanged", async () => {
+test("manifest and root discover the profile and published collection", async () => {
   const profile = profileRow();
   const entry = entryRow();
   const env = makeEnv({
@@ -316,7 +326,7 @@ test("manifest and root discover the profile while entry resources remain unchan
   });
   const collectionResponse = await fetchApp("/api/v1/entries", {
     env,
-    headers: { accept: "text/html" },
+    headers: { accept: "application/json" },
   });
   const detailResponse = await fetchApp(`/api/v1/entries/${entry.id}`, {
     env,
@@ -328,6 +338,7 @@ test("manifest and root discover the profile while entry resources remain unchan
     "links",
   ]);
   assert.deepEqual(Object.keys(await responseJson(collectionResponse)).sort(), [
+    "actions",
     "data",
     "links",
     "pagination",

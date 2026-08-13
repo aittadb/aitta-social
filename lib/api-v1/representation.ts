@@ -5,6 +5,11 @@ export type ApiV1Relation =
   | "self"
   | "profile"
   | "collection"
+  | "item"
+  | "first"
+  | "previous"
+  | "next"
+  | "last"
   | "social.aitta.profile"
   | "social.aitta.manifest";
 
@@ -21,7 +26,7 @@ export type ApiV1Action = {
   requestMediaType: typeof API_V1_MEDIA_TYPE;
 };
 
-type ApiV1Resource<TAttributes extends Record<string, unknown>> = {
+export type ApiV1Resource<TAttributes extends Record<string, unknown>> = {
   id: string;
   type: string;
   attributes: TAttributes;
@@ -53,10 +58,11 @@ export function apiV1RootDocument(canonicalUrl: string): ApiV1Document<{
       attributes: { name: "AittaSocial", version: 1 },
     },
     links: [
-      jsonLink("self", `${canonicalUrl}/api/v1`),
-      jsonLink("profile", `${canonicalUrl}/api/v1/schema`),
-      jsonLink("social.aitta.profile", `${canonicalUrl}/api/v1/site`),
-      jsonLink(
+      apiV1JsonLink("self", `${canonicalUrl}/api/v1`),
+      apiV1JsonLink("profile", `${canonicalUrl}/api/v1/schema`),
+      apiV1JsonLink("social.aitta.profile", `${canonicalUrl}/api/v1/site`),
+      apiV1JsonLink("collection", `${canonicalUrl}/api/v1/entries`),
+      apiV1JsonLink(
         "social.aitta.manifest",
         `${canonicalUrl}/.well-known/aitta-social.json`,
       ),
@@ -81,19 +87,24 @@ export function apiV1SchemaDocument(canonicalUrl: string): ApiV1Document<{
           "self",
           "profile",
           "collection",
+          "item",
+          "first",
+          "previous",
+          "next",
+          "last",
           "social.aitta.profile",
           "social.aitta.manifest",
         ],
       },
     },
     links: [
-      jsonLink("self", `${canonicalUrl}/api/v1/schema`),
-      jsonLink("collection", `${canonicalUrl}/api/v1`),
+      apiV1JsonLink("self", `${canonicalUrl}/api/v1/schema`),
+      apiV1JsonLink("collection", `${canonicalUrl}/api/v1`),
     ],
     actions: [],
   };
 }
 
-function jsonLink(rel: ApiV1Relation, href: string): ApiV1Link {
+export function apiV1JsonLink(rel: ApiV1Relation, href: string): ApiV1Link {
   return { rel, href, mediaType: API_V1_MEDIA_TYPE };
 }

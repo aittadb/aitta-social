@@ -24,7 +24,7 @@ const historicalMigration = "drizzle/0000_closed_talos.sql";
 
 const sourceDigests = {
   "db/schema.ts": "8917fdac637f7a5ae4c96df0ecbed770ca881c218136e6067196fc3216bc1b67",
-  "docs/protocol.md": "3d01809fa3fe9b870d56d97a990bcedaf647c63dc769a0af528f10aee9c0eeff",
+  "docs/protocol.md": "c065e6a01301deebe9101ccf6b6333f290b4cd1b894f899d1d4dd0802542ba6d",
   [historicalMigration]: "95455a11b0795cfbfeb4ad0edfa07c2e75d076b14b142c9dfb1feb1c849e3c8a",
   "package-lock.json": "1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9",
   "tests/fixtures/poc-upgrade-v0.sql":
@@ -436,7 +436,7 @@ async function assertCollectionPages(worker, matrixCase, setupError) {
 
   if (setupError) {
     for (const observation of [...observations, repeatedFirst]) {
-      assertJson(observation, setupError);
+      assertJson(observation, profileSetupError(setupError));
     }
   } else {
     for (const [index, observation] of observations.entries()) {
@@ -454,10 +454,12 @@ async function assertCollectionPages(worker, matrixCase, setupError) {
     status: 400,
     cacheControl: "no-store",
     body: {
+      data: null,
       error: {
         code: "invalid_pagination",
         message: "page must be at least 1 and pageSize must be between 1 and 50.",
       },
+      links: [],
     },
   });
 }
@@ -696,18 +698,47 @@ function expectedSite(canonicalUrl, profile) {
 function expectedCollectionPage(canonicalUrl, page, pageSize) {
   const offset = (page - 1) * pageSize;
   const pageIds = publishedOrder.slice(offset, offset + pageSize);
-  const hasMore = publishedOrder.length > offset + pageSize;
+  const lastPage = Math.max(1, Math.ceil(publishedOrder.length / pageSize));
   const collection = `${canonicalUrl}/api/v1/entries`;
   const pageUrl = (targetPage) =>
     `${collection}?page=${targetPage}&pageSize=${pageSize}`;
   return {
-    data: pageIds.map((id) => expectedPublicEntry(entryById(id), canonicalUrl)),
-    pagination: { page, pageSize, hasMore },
-    links: {
-      self: pageUrl(page),
-      ...(page > 1 ? { previous: pageUrl(page - 1) } : {}),
-      ...(hasMore ? { next: pageUrl(page + 1) } : {}),
-      site: `${canonicalUrl}/api/v1/site`,
+    data: pageIds.map((id) => expectedV1EntryResource(entryById(id))),
+    pagination: { page, pageSize },
+    links: [
+      { rel: "self", href: pageUrl(page), mediaType: "application/json" },
+      { rel: "first", href: pageUrl(1), mediaType: "application/json" },
+      ...(page > 1
+        ? [{ rel: "previous", href: pageUrl(page - 1), mediaType: "application/json" }]
+        : []),
+      ...(page < lastPage
+        ? [{ rel: "next", href: pageUrl(page + 1), mediaType: "application/json" }]
+        : []),
+      { rel: "last", href: pageUrl(lastPage), mediaType: "application/json" },
+      ...pageIds.map((id) => ({
+        rel: "item",
+        href: `${collection}/${encodeURIComponent(id)}`,
+        mediaType: "application/json",
+      })),
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "social.aitta.profile", href: `${canonicalUrl}/api/v1/site`, mediaType: "application/json" },
+    ],
+    actions: [],
+  };
+}
+
+function expectedV1EntryResource(entry) {
+  return {
+    id: entry.id,
+    type: "entry",
+    attributes: {
+      kind: entry.kind,
+      ...(entry.title ? { title: entry.title } : {}),
+      body: entry.body,
+      ...(entry.destinationUrl ? { destinationUrl: entry.destinationUrl } : {}),
+      ...(entry.publishedAt ? { publishedAt: entry.publishedAt } : {}),
+      createdAt: entry.createdAt,
+      updatedAt: entry.updatedAt,
     },
   };
 }

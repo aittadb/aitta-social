@@ -93,7 +93,18 @@ application-generated versioned API error uses `data: null`, a fixed safe
 and a `links` array. No error contains exception text, SQL, file paths,
 identity, credentials, request bodies, or protected settings.
 
-Links use standard relations where they fit (`self`, `collection`, `alternate`,
+The implemented published-update collection at `/api/v1/entries` uses typed
+`entry` resources, `{ page, pageSize }` metadata, ordered `self`, `first`,
+conditional `previous`/`next`, `last`, per-resource `item`, schema `profile`,
+and outward `social.aitta.profile` links, plus empty anonymous `actions`. One
+published-only count derives `last`; the count and page query use the same
+`state = 'published'` predicate, an empty collection has last page 1, and no
+total or draft fact is exposed. Its anonymous success cache is
+`public, max-age=30`; every result, including errors, varies on both `Accept`
+and `Authorization` so a future service-actor representation cannot cross the
+anonymous cache partition.
+
+Links use standard relations where they fit (`self`, `collection`, `item`, `alternate`,
 `first`, `previous`, `next`, `last`, `profile`, `create`, `edit`, `delete`,
 `publish`, `unpublish`, `login`, `logout`) and a documented `social.aitta.*`
 relation only when necessary. Links and actions use canonical URLs derived only
@@ -113,16 +124,17 @@ The current accepted path is deliberately incremental:
 1. TASK-178 established JSON-only `/api/v1` and `/api/v1/schema` integration
    discovery. The manifest advertises the root.
 2. TASK-179 established the pre-release v1 public profile representation. The
-   root and schema advertise it through `rel: social.aitta.profile`; TASK-180
-   next replaces the collection response shape.
-3. TASK-181 replaces v1 entry detail. TASK-193 then proves the first current
+   root and schema advertise it through `rel: social.aitta.profile`.
+3. TASK-180 established the published collection representation and advertised
+   it through the root's `rel: collection` and manifest `endpoints.entries`.
+4. TASK-181 replaces v1 entry detail. TASK-193 then proves the first current
    unversioned HTML/JSON document at `/entries/{id}`. A later public human document,
    including a published custom `/about` page, must use that proven pattern in
    its own publication task.
-4. TASK-191 may add one separate, deployment-bound machine create operation to
+5. TASK-191 may add one separate, deployment-bound machine create operation to
    the v1 collection only after that collection contract exists. It never
    represents ChatGPT, Codex, the owner, or a browser session.
-5. TASK-192 starts the separate browser-private JSON normalization lane with
+6. TASK-192 starts the separate browser-private JSON normalization lane with
    the Identity mutation. TASK-194, TASK-195, TASK-196, and TASK-197 then
    normalize exactly one private entry operation each—create, edit, publication
    state, and deletion—without turning any browser-private route into a

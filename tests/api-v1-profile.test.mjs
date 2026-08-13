@@ -283,7 +283,7 @@ test("v1 profile preserves setup categories and bounds storage/runtime failures"
   );
 });
 
-test("v1 discovery advertises the profile relation without changing manifest authority", async () => {
+test("v1 discovery advertises the profile and published collection", async () => {
   const env = makeEnv({
     canonicalUrl: "https://CANONICAL.example/aitta///",
     db: new FakeD1({ profile: profileRow({ account_type: "agent" }) }),
@@ -293,6 +293,7 @@ test("v1 discovery advertises the profile relation without changing manifest aut
     { rel: "self", href: `${canonicalUrl}/api/v1` },
     { rel: "profile", href: `${canonicalUrl}/api/v1/schema` },
     { rel: "social.aitta.profile", href: `${canonicalUrl}/api/v1/site` },
+    { rel: "collection", href: `${canonicalUrl}/api/v1/entries` },
     {
       rel: "social.aitta.manifest",
       href: `${canonicalUrl}/.well-known/aitta-social.json`,
@@ -303,6 +304,11 @@ test("v1 discovery advertises the profile relation without changing manifest aut
     "self",
     "profile",
     "collection",
+    "item",
+    "first",
+    "previous",
+    "next",
+    "last",
     "social.aitta.profile",
     "social.aitta.manifest",
   ]);

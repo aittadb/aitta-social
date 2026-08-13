@@ -474,13 +474,31 @@ function expectedPublicEntry(canonicalUrl) {
 }
 
 function expectedCollection(canonicalUrl) {
+  const entry = expectedPublicEntry(canonicalUrl);
   return {
-    data: [expectedPublicEntry(canonicalUrl)],
-    pagination: { page: 1, pageSize: 20, hasMore: false },
-    links: {
-      self: `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`,
-      site: `${canonicalUrl}/api/v1/site`,
-    },
+    data: [{
+      id: entry.id,
+      type: "entry",
+      attributes: {
+        kind: entry.kind,
+        title: entry.title,
+        body: entry.body,
+        destinationUrl: entry.destinationUrl,
+        publishedAt: entry.publishedAt,
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+      },
+    }],
+    pagination: { page: 1, pageSize: 20 },
+    links: [
+      { rel: "self", href: `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`, mediaType: "application/json" },
+      { rel: "first", href: `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`, mediaType: "application/json" },
+      { rel: "last", href: `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`, mediaType: "application/json" },
+      { rel: "item", href: `${canonicalUrl}/api/v1/entries/poc-v0-published-update`, mediaType: "application/json" },
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "social.aitta.profile", href: `${canonicalUrl}/api/v1/site`, mediaType: "application/json" },
+    ],
+    actions: [],
   };
 }
 

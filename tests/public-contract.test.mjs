@@ -322,43 +322,38 @@ test("entry collection is published-only, deterministically ordered, and determi
   assert.equal(firstResponse.headers.get("cache-control"), "public, max-age=30");
   const first = await responseJson(firstResponse);
   assert.deepEqual(first.data.map(({ id }) => id), ["newest", "charlie"]);
-  assert.deepEqual(first.pagination, { page: 1, pageSize: 2, hasMore: true });
-  assert.deepEqual(first.links, {
-    self: "https://canonical.example/account/api/v1/entries?page=1&pageSize=2",
-    next: "https://canonical.example/account/api/v1/entries?page=2&pageSize=2",
-    site: "https://canonical.example/account/api/v1/site",
-  });
+  assert.deepEqual(first.pagination, { page: 1, pageSize: 2 });
+  assert.equal(first.links.find(({ rel }) => rel === "self")?.href,
+    "https://canonical.example/account/api/v1/entries?page=1&pageSize=2");
+  assert.equal(first.links.find(({ rel }) => rel === "next")?.href,
+    "https://canonical.example/account/api/v1/entries?page=2&pageSize=2");
+  assert.equal(first.links.find(({ rel }) => rel === "last")?.href,
+    "https://canonical.example/account/api/v1/entries?page=3&pageSize=2");
+  assert.deepEqual(first.actions, []);
 
   const second = await responseJson(await fetchApp("/api/v1/entries?page=2&pageSize=2", { env }));
   assert.deepEqual(second.data.map(({ id }) => id), ["bravo", "alpha"]);
-  assert.deepEqual(second.pagination, { page: 2, pageSize: 2, hasMore: true });
-  assert.deepEqual(second.links, {
-    self: "https://canonical.example/account/api/v1/entries?page=2&pageSize=2",
-    previous: "https://canonical.example/account/api/v1/entries?page=1&pageSize=2",
-    next: "https://canonical.example/account/api/v1/entries?page=3&pageSize=2",
-    site: "https://canonical.example/account/api/v1/site",
-  });
+  assert.deepEqual(second.pagination, { page: 2, pageSize: 2 });
+  assert.equal(second.links.find(({ rel }) => rel === "previous")?.href,
+    "https://canonical.example/account/api/v1/entries?page=1&pageSize=2");
+  assert.equal(second.links.find(({ rel }) => rel === "next")?.href,
+    "https://canonical.example/account/api/v1/entries?page=3&pageSize=2");
 
   const third = await responseJson(await fetchApp("/api/v1/entries?page=3&pageSize=2", { env }));
   assert.deepEqual(third.data.map(({ id }) => id), ["oldest"]);
-  assert.deepEqual(third.pagination, { page: 3, pageSize: 2, hasMore: false });
-  assert.equal("next" in third.links, false);
+  assert.deepEqual(third.pagination, { page: 3, pageSize: 2 });
+  assert.equal(third.links.some(({ rel }) => rel === "next"), false);
 
   for (const resource of [...first.data, ...second.data, ...third.data]) {
     assert.deepEqual(Object.keys(resource).sort(), [
-      "body",
-      "createdAt",
+      "attributes",
       "id",
-      "kind",
-      "links",
-      "publishedAt",
-      "title",
-      "updatedAt",
+      "type",
     ]);
-    assert.equal("state" in resource, false);
+    assert.equal(resource.type, "entry");
+    assert.equal("state" in resource.attributes, false);
     assert.equal("private_canary" in resource, false);
-    assert.match(resource.links.self, /^https:\/\/canonical\.example\/account\/api\/v1\/entries\//);
-    assert.match(resource.links.html, /^https:\/\/canonical\.example\/account\/entries\//);
+    assert.equal("private_canary" in resource.attributes, false);
   }
   assert.doesNotMatch(JSON.stringify([first, second, third]), /DRAFT_COLLECTION_CANARY|ENTRY_PRIVATE_CANARY/);
 });
@@ -370,10 +365,12 @@ test("public APIs reject invalid pagination and report unavailable public resour
       const response = await fetchApp(`/api/v1/entries?${query}`, { env });
       assert.equal(response.status, 400);
       assert.deepEqual(await responseJson(response), {
+        data: null,
         error: {
           code: "invalid_pagination",
           message: "page must be at least 1 and pageSize must be between 1 and 50.",
         },
+        links: [],
       });
     });
   }

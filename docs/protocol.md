@@ -110,6 +110,11 @@ or the stored profile canonical URL. It returns:
       "mediaType": "application/json"
     },
     {
+      "rel": "collection",
+      "href": "https://account.example/api/v1/entries",
+      "mediaType": "application/json"
+    },
+    {
       "rel": "social.aitta.manifest",
       "href": "https://account.example/.well-known/aitta-social.json",
       "mediaType": "application/json"
@@ -134,6 +139,11 @@ implemented relation vocabulary:
         "self",
         "profile",
         "collection",
+        "item",
+        "first",
+        "previous",
+        "next",
+        "last",
         "social.aitta.profile",
         "social.aitta.manifest"
       ]
@@ -170,10 +180,11 @@ User-Agent and query format hints. `/api/v2` is not an application route.
 
 Missing or invalid protected canonical configuration returns a no-store
 structured `503` without a D1 read. Unexpected root/schema failures return a
-fixed safe `500`. The profile resource now uses this same media, method,
-`HEAD`, error, and safe-failure boundary. Until TASK-180–181 replace the
-unshipped entry grammars, those known entry routes retain their response shapes
-and existing media and method behavior.
+fixed safe `500`. The profile and published collection resources use this same
+media, method, `HEAD`, error, and safe-failure boundary. The collection also
+varies every response on `Authorization` to partition anonymous cache entries
+from the separately accepted machine-create task. Entry detail retains its
+unshipped response and method grammar until TASK-181 replaces it.
 
 ## Discovery manifest
 
@@ -322,9 +333,11 @@ returns the fixed safe `500 internal_error`. Errors are no-store. The route
 uses the same bounded JSON-only `Accept`, `HEAD`, and exact `405 Allow` behavior
 as the v1 root.
 
-## Public entry resource
+## Public entry resources
 
-A published entry has this public projection:
+A published entry detail currently has this public projection; TASK-181 owns
+its prerelease replacement. The collection below already uses a typed v1 entry
+resource with the same public fields nested under `attributes`.
 
 ```json
 {
@@ -370,35 +383,70 @@ order `publishedAt DESC, id DESC`.
   "data": [
     {
       "id": "7eaf8f66-bff9-4a54-a78f-c7fa394b046d",
-      "kind": "announcement",
-      "title": "Field session scheduled",
-      "body": "The next field session is scheduled for Thursday.",
-      "publishedAt": "2026-08-09T10:30:00.000Z",
-      "createdAt": "2026-08-09T09:10:00.000Z",
-      "updatedAt": "2026-08-09T10:30:00.000Z",
-      "links": {
-        "self": "https://account.example/api/v1/entries/7eaf8f66-bff9-4a54-a78f-c7fa394b046d",
-        "html": "https://account.example/entries/7eaf8f66-bff9-4a54-a78f-c7fa394b046d"
+      "type": "entry",
+      "attributes": {
+        "kind": "announcement",
+        "title": "Field session scheduled",
+        "body": "The next field session is scheduled for Thursday.",
+        "publishedAt": "2026-08-09T10:30:00.000Z",
+        "createdAt": "2026-08-09T09:10:00.000Z",
+        "updatedAt": "2026-08-09T10:30:00.000Z"
       }
     }
   ],
   "pagination": {
     "page": 1,
-    "pageSize": 20,
-    "hasMore": false
+    "pageSize": 20
   },
-  "links": {
-    "self": "https://account.example/api/v1/entries?page=1&pageSize=20",
-    "site": "https://account.example/api/v1/site"
-  }
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://account.example/api/v1/entries?page=1&pageSize=20",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "first",
+      "href": "https://account.example/api/v1/entries?page=1&pageSize=20",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "last",
+      "href": "https://account.example/api/v1/entries?page=1&pageSize=20",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "https://account.example/api/v1/entries/7eaf8f66-bff9-4a54-a78f-c7fa394b046d",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "profile",
+      "href": "https://account.example/api/v1/schema",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "social.aitta.profile",
+      "href": "https://account.example/api/v1/site",
+      "mediaType": "application/json"
+    }
+  ],
+  "actions": []
 }
 ```
 
-`links.site` always identifies the public site resource. When `page` is greater
-than 1, `links.previous` contains the canonical previous-page URL. When
-`hasMore` is `true`, `links.next` contains the canonical next-page URL. The
-collection must determine `hasMore` without exposing a total that could include
-drafts. Repeated requests against unchanged data produce the same ordering.
+`self`, `first`, and `last` are always present. An empty collection defines its
+last page as 1. `previous` appears when `page` is greater than 1, including a
+request beyond the last page; `next` appears only before the last published
+page. One `item` link identifies each returned resource, while `profile` names
+the API schema and `social.aitta.profile` names the outward Aitta profile. The
+server derives `last` from one `COUNT(*) WHERE state = 'published'` query using
+the exact page-query predicate. It exposes no total and never counts or returns
+a draft. Repeated requests against unchanged data produce the same ordering.
+
+Success is `public, max-age=30` with `Vary: Accept, Authorization` and empty
+anonymous `actions`. The route ignores presented browser identity, cookies,
+owner configuration, Hub state, and credentials; TASK-191 separately owns any
+future authenticated collection action.
 
 Invalid pagination uses `400` with `invalid_pagination`. Missing
 profile/canonical setup uses `profile_not_configured` or
@@ -420,7 +468,7 @@ Missing profile/canonical setup uses the same `profile_not_configured` and
 
 ## Errors and method handling
 
-The v1 root, schema, profile, and unknown-path boundary uses the common
+The v1 root, schema, profile, collection, and unknown-path boundary use the common
 pre-release error document:
 
 ```json
@@ -439,17 +487,17 @@ Its fixed codes are `not_acceptable`, `method_not_allowed`, `not_found`,
 These responses are `no-store`, contain no exception or runtime detail, and
 include no link when a canonical URL is unavailable.
 
-The entry resources retain their earlier error grammar until their accepted
-pre-release v1 replacement tasks land:
-
-Errors contain a stable machine-readable code and a safe message:
+Entry detail retains its earlier error grammar until TASK-181. The collection
+already uses the common error document, including for invalid pagination:
 
 ```json
 {
+  "data": null,
   "error": {
     "code": "invalid_pagination",
     "message": "page must be at least 1 and pageSize must be between 1 and 50."
-  }
+  },
+  "links": []
 }
 ```
 
@@ -458,16 +506,16 @@ the configured canonical URL is missing or invalid.
 
 - `400` with `invalid_pagination` is used for malformed pagination.
 - `404` with `profile_not_configured` is used when the profile is absent. The
-  profile route uses the common v1 error document.
+  profile and collection routes use the common v1 error document.
 - `404` with `entry_not_found` is used for a missing or non-public entry.
 - `503` with `canonical_url_unconfigured` is used when a successful canonical
   resource cannot be constructed safely.
 - `405` is used for an unsupported method and includes an appropriate `Allow`
-  header. The profile route returns the common v1 document with
-  `Allow: GET, HEAD`; entry routes remain framework-owned until TASK-180–181.
+  header. Profile and collection return the common v1 document with
+  `Allow: GET, HEAD`; detail remains framework-owned until TASK-181.
 - `500` may be used for an unexpected server failure, but its body must not
   reveal SQL, stack traces, environment values, credentials, or identifiers.
-  The profile route returns the fixed common `internal_error` document.
+  Profile and collection return the fixed common `internal_error` document.
 
 ## Private operations are not public protocol
 

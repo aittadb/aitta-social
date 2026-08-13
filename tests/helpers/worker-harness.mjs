@@ -109,6 +109,15 @@ class FakeStatement {
       return clone(entry ?? null);
     }
     if (
+      this.normalized.includes("select count(*) as count from entries") &&
+      this.normalized.includes("where state = ?")
+    ) {
+      const [state] = this.values;
+      return {
+        count: this.database.entries.filter((candidate) => candidate.state === state).length,
+      };
+    }
+    if (
       this.normalized.includes(" from entries") &&
       this.normalized.includes(" where state = ?") &&
       this.normalized.includes(" order by created_at asc, id asc") &&
