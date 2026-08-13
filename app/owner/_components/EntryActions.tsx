@@ -6,15 +6,15 @@ import { classifyOwnerMutationResponse } from "./owner-mutation-outcome";
 export function EntryActions({ id, state, label }: { id: string; state: "draft" | "published"; label: string }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
-  const [showRecovery, setShowRecovery] = useState(false);
   const [lifecycleRecoveryRequired, setLifecycleRecoveryRequired] = useState(false);
+  const [deletionRecoveryRequired, setDeletionRecoveryRequired] = useState(false);
   const updateLabel = boundedUpdateLabel(label);
   const actionReference = id;
   const lifecycleDescriptionId = `entry-lifecycle-${id}`;
 
   function showUnconfirmedResult(message: string) {
     setMessage(message);
-    setShowRecovery(true);
+    setDeletionRecoveryRequired(true);
     setBusy(false);
   }
 
@@ -23,14 +23,12 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
       ? "The publication result could not be confirmed. Check this Aitta’s saved state before changing this update’s publication state again."
       : "The unpublish result could not be confirmed. Check this Aitta’s saved state before changing this update’s publication state again.");
     setLifecycleRecoveryRequired(true);
-    setShowRecovery(true);
     setBusy(false);
   }
 
   async function changeState(nextState: "draft" | "published") {
     if (lifecycleRecoveryRequired) return;
     setBusy(true);
-    setShowRecovery(false);
     setMessage(nextState === "published" ? "Publishing this update…" : "Returning this update to Draft…");
     try {
       const response = await fetch(`/api/private/entries/${encodeURIComponent(id)}/state`, {
@@ -59,7 +57,6 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
       `Publish “${updateLabel}” (update ${actionReference}) now? It will become publicly readable on this Aitta at its permalink.`,
     );
     if (!confirmed) {
-      setShowRecovery(false);
       setMessage("Publication cancelled. The update is still private.");
       return;
     }
@@ -67,9 +64,12 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
   }
 
   async function remove() {
-    if (!window.confirm(`Delete “${updateLabel}” (update ${actionReference}) permanently? This cannot be undone.`)) return;
+    const confirmed = window.confirm(`Delete “${updateLabel}” (update ${actionReference}) permanently? This cannot be undone.`);
+    if (!confirmed) {
+      setMessage("Deletion cancelled. This update was not deleted.");
+      return;
+    }
     setBusy(true);
-    setShowRecovery(false);
     setMessage("Deleting update…");
     try {
       const response = await fetch(`/api/private/entries/${encodeURIComponent(id)}`, { method: "DELETE" });
@@ -79,13 +79,13 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
         return;
       }
       if (outcome === "unconfirmed") {
-        showUnconfirmedResult("The deletion result could not be confirmed. Reload Your presence before retrying.");
+        showUnconfirmedResult("The deletion result could not be confirmed. Check this Aitta’s saved state before deleting this update again.");
         return;
       }
-      setMessage(await safeError(response));
+      setMessage(await deletionFailureMessage(response));
       setBusy(false);
     } catch {
-      showUnconfirmedResult("The deletion result could not be confirmed. Reload Your presence before retrying.");
+      showUnconfirmedResult("The deletion result could not be confirmed. Check this Aitta’s saved state before deleting this update again.");
     }
   }
 
@@ -112,11 +112,16 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
           <button className="button button-small button-quiet" type="button" disabled={busy || lifecycleRecoveryRequired} onClick={() => void changeState("draft")} aria-label={`Unpublish ${updateLabel}, update ${actionReference}`}>Unpublish</button>
         </>
       )}
-      <button className="button button-small button-danger" type="button" disabled={busy} onClick={remove} aria-label={`Delete ${updateLabel}, update ${actionReference}`}>Delete</button>
+      <button className="button button-small button-danger" type="button" disabled={busy || deletionRecoveryRequired} onClick={remove} aria-label={`Delete ${updateLabel}, update ${actionReference}`}>Delete</button>
       <span className="form-status" role="status" aria-live="polite" aria-atomic="true">{message}</span>
-      {showRecovery ? (
+      {lifecycleRecoveryRequired ? (
         <a className="button button-small button-quiet" href="/owner" aria-label={`Check current state of ${updateLabel}, update ${actionReference}`}>
           Check this Aitta’s current saved state
+        </a>
+      ) : null}
+      {deletionRecoveryRequired ? (
+        <a className="button button-small button-quiet" href="/owner" aria-label={`Check saved state of ${updateLabel}, update ${actionReference}`}>
+          Check this Aitta’s saved state
         </a>
       ) : null}
     </div>
@@ -143,4 +148,8 @@ async function lifecycleFailureMessage(nextState: "draft" | "published", respons
   return nextState === "published"
     ? `The server rejected this publication request. ${failure}`
     : `The server rejected this unpublish request. ${failure}`;
+}
+
+async function deletionFailureMessage(response: Response): Promise<string> {
+  return `The server rejected this deletion request. ${await safeError(response)}`;
 }

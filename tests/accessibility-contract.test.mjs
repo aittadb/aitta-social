@@ -233,7 +233,7 @@ test("client mutation controls announce status and use semantic form controls", 
     assert.match(source, /aria-live="polite"/);
   }
   assert.match(actions, /<button[^>]+type="button"/);
-  assert.match(actions, /disabled=\{busy\}/);
+  assert.match(actions, /disabled=\{busy \|\| deletionRecoveryRequired\}/);
   assert.match(entryForm, /<form[^>]+onSubmit=\{submit\}/);
   assert.match(entryForm, /<fieldset className="entry-editor-fields">/);
   assert.match(entryForm, /<legend>Update content<\/legend>/);

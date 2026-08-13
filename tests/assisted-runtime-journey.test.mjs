@@ -147,6 +147,15 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   const resumed = await ownerHtml("/owner", env);
   assert.match(resumed, new RegExp(`href="/owner/entries/${created.id}"[^>]*>Resume first draft`, "i"));
   await assertPubliclyUnknown(env, created.id, [draftCanary, publicBody]);
+
+  const deletion = await fetchApp(`/api/private/entries/${created.id}`, {
+    env,
+    method: "DELETE",
+    headers: mutationHeaders(ownerEmail),
+  });
+  assert.equal(deletion.status, 204);
+  assert.equal(db.entries.some((entry) => entry.id === created.id), false);
+  await assertPubliclyUnknown(env, created.id, [draftCanary, publicBody]);
 });
 
 test("assisted write fixtures fail closed for non-owner, missing owner, CSRF, and invalid input", async (t) => {
@@ -361,18 +370,19 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   }
   assert.match(actions, /The publication result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
   assert.match(actions, /The unpublish result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
-  assert.match(actions, /The deletion result could not be confirmed\. Reload Your presence before retrying\./);
+  assert.match(actions, /The deletion result could not be confirmed\. Check this Aitta’s saved state before deleting this update again\./);
   assert.match(actions, /href="\/owner"[^>]+aria-label=\{`Check current state/);
+  assert.match(actions, /href="\/owner"[^>]+aria-label=\{`Check saved state/);
   assert.match(actions, /const actionReference = id;/);
   assert.doesNotMatch(actions, /boundedActionReference|slice\(-8\)/);
   assert.equal(countMatches(actions, /const outcome = classifyOwnerMutationResponse\(response\);/g), 2);
-  assert.equal(countMatches(actions, /setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 1);
+  assert.equal(countMatches(actions, /setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 0);
   assert.match(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*return;\s*\}\s*setMessage\(await lifecycleFailureMessage\(nextState, response\)\);\s*setBusy\(false\);/);
-  assert.match(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*return;\s*\}\s*setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/);
+  assert.match(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*return;\s*\}\s*setMessage\(await deletionFailureMessage\(response\)\);\s*setBusy\(false\);/);
   assert.match(actions, /catch \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*\}/);
   assert.match(actions, /catch \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*\}/);
-  assert.match(actions, /function showUnconfirmedResult\(message: string\) \{\s*setMessage\(message\);\s*setShowRecovery\(true\);\s*setBusy\(false\);\s*\}/);
-  assert.match(actions, /setBusy\(true\);\s*setShowRecovery\(false\);/);
+  assert.match(actions, /function showUnconfirmedResult\(message: string\) \{\s*setMessage\(message\);\s*setDeletionRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);
+  assert.match(actions, /setBusy\(true\);\s*setMessage\(nextState === "published" \? "Publishing this update…"/);
   assert.match(actions, /if \(lifecycleRecoveryRequired\) return;/);
   assert.equal(countMatches(actions, /disabled=\{busy \|\| lifecycleRecoveryRequired\}/g), 2);
   assert.match(dashboard, /<EntryActions id=\{entry\.id\} state=\{entry\.state\} label=\{entry\.title \?\? entry\.body\.slice\(0, 90\)\}/);

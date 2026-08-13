@@ -173,7 +173,13 @@ checking that its key is configured.
    public preview and the stable `/entries/{id}` permalink while retaining the
    normal edit, unpublish, and delete controls. Unpublish it and confirm the
    same D1 record becomes the resumable private draft again and disappears from
-   every public HTML, metadata, and JSON route.
+   every public HTML, metadata, and JSON route. Choose **Delete** only when the
+   owner is ready to permanently remove that particular update; its native
+   confirmation names the update and stable identifier. Cancelling makes no
+   request. The unchanged deletion API returns `204`; after that successful
+   response, the client navigates the owner to `/owner` and the
+   deleted update is indistinguishable from an unknown update on every public
+   route.
 
 The effective canonical URL follows one server-owned rule: a valid normalized
 `AITTA_SOCIAL_CANONICAL_URL` takes precedence, otherwise the normalized URL
@@ -219,6 +225,16 @@ authorization response instead states the definitive lifecycle outcome,
 re-enables the control, and shows its safe server message without adding the
 ambiguous-result recovery link; it describes the rejected request without
 claiming the update's current state.
+
+Deletion is a different irreversible boundary. A browser-controlling ChatGPT
+must stop at the update-specific **Delete** confirmation and obtain the human
+owner's explicit approval; approval to edit, publish, or unpublish does not
+approve deletion. A 4xx deletion result states the rejected deletion request,
+keeps **Delete** available for a deliberate retry, and does not assert the
+update's current state. A rejected fetch or 5xx result could have committed:
+it locks only **Delete**, preserves Edit and Publish or Unpublish, and provides
+**Check this Aitta’s saved state** at `/owner` before another deletion choice.
+The interface never automatically retries or deletes in the background.
 
 In the update composer specifically, an unknown result disables another save
 from the current page. For a new draft, use **Check saved updates before

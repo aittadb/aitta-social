@@ -460,6 +460,17 @@ does not retry automatically. Editing and deletion remain separately available
 actions. These additions use the existing button, focus, touch-target, wrapping,
 320-pixel, effective 400-percent-zoom, and reduced-motion rules.
 
+Deletion is a separate irreversible action, never a lifecycle-state control.
+Its native confirmation names the bounded update label and complete stable
+identifier, says that deletion is permanent, and requires the human owner's
+explicit approval. Cancelling sends no request. The unchanged `DELETE` API
+returns `204` on success; only then does the client navigate to `/owner`. A 4xx response describes only the rejected
+deletion request and leaves **Delete** available to retry without claiming the
+update's current state. A rejected fetch or 5xx response is unconfirmed: only
+**Delete** is locked and the native **Check this Aitta’s saved state** link
+returns to `/owner`; Edit, Publish, and Unpublish remain available from the
+rendered row. There is no automatic retry or background deletion.
+
 ## Review checklist
 
 The focused automated contract renders zero, one, and many updates plus
