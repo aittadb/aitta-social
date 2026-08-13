@@ -213,6 +213,17 @@ result is no-store and varies on `Accept`. Unsupported neighboring methods use
 JSON `405` with `Allow: PUT, DELETE` regardless of `Accept`, while the existing
 bodyless DELETE operation remains on its prior contract until TASK-197.
 
+`PUT /api/private/entries/{id}/state` uses that same private `owner-entry`
+representation for one exact Draft or Published transition. Its state action
+is derived from the returned state: a Draft exposes `publish`, and a Published
+update exposes `unpublish`; both retain `edit` and `delete`. The payload has
+only the `state` member. Success, safe failure, and authorization documents are
+JSON, no-store, and vary on Accept. Unsupported methods return JSON `405` with
+`Allow: PUT` independent of Accept. Same-state requests retain the accepted
+idempotent behavior; this contract defines no `409` conflict. The private links
+are relative same-origin paths and do not create machine authority or public
+discovery. DELETE retains its prior bodyless `204` contract until TASK-197.
+
 No statement in this document makes a browser-private endpoint a machine
 credential or public API resource.
 

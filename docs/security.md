@@ -348,6 +348,28 @@ messages. An invalid success document, redirect, non-JSON response, oversized
 response, failed fetch, or 5xx remains unconfirmed, disables another save, and
 requires the owner to reload the server-rendered saved update before retrying.
 
+`PUT /api/private/entries/{id}/state` applies the same browser-private policy
+to the exact `{ "state": "draft" | "published" }` document. Same-origin and
+sole-owner authorization precede Accept, media, body, route parameters, and D1.
+The UTF-8 JSON reader stops at 64 KiB; valid JSON with a missing, extra, or
+invalid state field is `422`. Unsupported methods are JSON `405` with exact
+`Allow: PUT` regardless of Accept, while only an authorized PUT can reach
+`406`. The existing prepared transition remains idempotent: publication sets a
+first publication time, unpublishing retains that history, and no version
+conflict or `409` is invented. Success is the allowlisted `owner-entry`
+document whose current action changes to `unpublish` or `publish`; unknown and
+unexpected results use safe structured `404` and `500`. Every response is
+no-store and varies on Accept. No raw D1 row, owner identity, request host,
+protected setting, machine authority, or private canary is serialized.
+
+The publication client sends JSON Accept and confirms success only from an
+exact bounded `200` document matching the stable identifier and requested
+state. Only an exact structured 4xx is definitive. A redirect, malformed or
+oversized response, invalid success document, failed fetch, or 5xx is
+unconfirmed: the state action remains locked behind a fresh saved-state check
+and is never retried automatically. The separate deletion transport and its
+TASK-165 confirmation and recovery behavior remain unchanged.
+
 Worker runtime code uses only supported web and Cloudflare APIs. It must not
 depend on Node built-ins, filesystem access, a durable process, or mutable
 module/process state for correctness or authorization.

@@ -198,7 +198,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     body: JSON.stringify({ state: "published" }),
   });
   assert.equal(publish.status, 200);
-  assert.equal((await responseJson(publish)).data.state, "published");
+  assert.equal((await responseJson(publish)).data.attributes.state, "published");
   const publicHome = await html(worker, "/");
   assert.match(publicHome, /A durable edited update/i);
   assert.match(publicHome, new RegExp(escapeRegExp(editedBody)));
@@ -226,7 +226,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     body: JSON.stringify({ state: "draft" }),
   });
   assert.equal(unpublish.status, 200);
-  assert.equal((await responseJson(unpublish)).data.state, "draft");
+  assert.equal((await responseJson(unpublish)).data.attributes.state, "draft");
   await assertPubliclyAbsent(worker, created.id, [freshDraftCanary, editedBody]);
 
   await closeWorker(worker);

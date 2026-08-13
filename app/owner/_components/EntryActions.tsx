@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { readPublicationStateResponse } from "../entries/publication-state-response";
 import { classifyOwnerMutationResponse } from "./owner-mutation-outcome";
 
 export function EntryActions({ id, state, label }: { id: string; state: "draft" | "published"; label: string }) {
@@ -33,19 +34,19 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
     try {
       const response = await fetch(`/api/private/entries/${encodeURIComponent(id)}/state`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ state: nextState }),
       });
-      const outcome = classifyOwnerMutationResponse(response);
-      if (outcome === "success") {
+      const result = await readPublicationStateResponse(response, { id, state: nextState });
+      if (result.outcome === "success") {
         window.location.reload();
         return;
       }
-      if (outcome === "unconfirmed") {
+      if (result.outcome === "unconfirmed") {
         showUnconfirmedLifecycleResult(nextState);
         return;
       }
-      setMessage(await lifecycleFailureMessage(nextState, response));
+      setMessage(lifecycleFailureMessage(nextState, result.message));
       setBusy(false);
     } catch {
       showUnconfirmedLifecycleResult(nextState);
@@ -143,8 +144,7 @@ async function safeError(response: Response): Promise<string> {
   }
 }
 
-async function lifecycleFailureMessage(nextState: "draft" | "published", response: Response): Promise<string> {
-  const failure = await safeError(response);
+function lifecycleFailureMessage(nextState: "draft" | "published", failure: string): string {
   return nextState === "published"
     ? `The server rejected this publication request. ${failure}`
     : `The server rejected this unpublish request. ${failure}`;

@@ -156,7 +156,7 @@ test("every private mutation route independently rejects a non-owner before touc
       assert.equal(response.status, 403);
       if (path === "/api/private/profile" || path === "/api/private/entries") {
         assert.equal((await responseJson(response)).error.code, "authorization_denied");
-      } else if (path === "/api/private/entries/entry-1" && method === "PUT") {
+      } else if (method === "PUT") {
         assert.equal((await responseJson(response)).error.code, "authorization_denied");
       } else {
         assert.deepEqual(await responseJson(response), {
@@ -239,8 +239,8 @@ test("authorized draft lifecycle stays private until publish and supports every 
   });
   assert.equal(publishedResponse.status, 200);
   const published = (await responseJson(publishedResponse)).data;
-  assert.equal(published.state, "published");
-  assert.ok(published.publishedAt);
+  assert.equal(published.attributes.state, "published");
+  assert.ok(published.attributes.publishedAt);
 
   const visibleDetail = await fetchApp(`/api/v1/entries/${created.id}`, { env });
   assert.equal(visibleDetail.status, 200);
@@ -255,7 +255,7 @@ test("authorized draft lifecycle stays private until publish and supports every 
     body: JSON.stringify({ state: "draft" }),
   });
   assert.equal(unpublishResponse.status, 200);
-  assert.equal((await responseJson(unpublishResponse)).data.state, "draft");
+  assert.equal((await responseJson(unpublishResponse)).data.attributes.state, "draft");
   assert.equal((await fetchApp(`/api/v1/entries/${created.id}`, { env })).status, 404);
 
   const deleteResponse = await fetchApp(`/api/private/entries/${created.id}`, {
@@ -280,7 +280,7 @@ test("authorized draft lifecycle stays private until publish and supports every 
     });
     assert.equal(missingResponse.status, 404);
     const missingDocument = await responseJson(missingResponse);
-    if (method === "PUT" && !path.endsWith("/state")) {
+    if (method === "PUT") {
       assert.deepEqual(missingDocument, {
         data: null,
         error: { code: "entry_not_found", message: "Update not found." },
@@ -325,7 +325,7 @@ test("write boundaries require JSON, bound request size, and valid entry state",
       headers: mutationHeaders(ownerEmail),
       body: JSON.stringify({ state: "scheduled" }),
     });
-    assert.equal(response.status, 400);
+    assert.equal(response.status, 422);
     assert.match(JSON.stringify(await responseJson(response)), /draft or published/);
   });
 });

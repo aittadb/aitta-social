@@ -451,7 +451,10 @@ states that unpublishing returns the same update to a private draft. Publishing
 opens a native, update-specific confirmation that says the update will become
 publicly readable at its permalink. A supervising ChatGPT must pause for the
 human owner's explicit approval before accepting it. State controls announce
-their pending result. A 4xx response gives a definitive rejected-request
+their pending result. The browser accepts success only after an exact bounded
+JSON owner-entry document confirms the stable identifier and requested state;
+it does not trust an arbitrary successful status or raw entry object. A 4xx
+response gives a definitive rejected-request
 outcome without claiming the update's current state, and permits a corrected
 later choice. A rejected fetch or 5xx response is
 unknown: it locks further publication-state requests from that rendered state,

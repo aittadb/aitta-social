@@ -76,7 +76,7 @@ test("complete Identity leads from a new draft through public preview and back t
     body: JSON.stringify({ state: "published" }),
   });
   assert.equal(publishedResponse.status, 200);
-  assert.equal((await responseJson(publishedResponse)).data.state, "published");
+  assert.equal((await responseJson(publishedResponse)).data.attributes.state, "published");
 
   const publishedDashboard = await ownerPage(env);
   assert.match(publishedDashboard, /Your first update is public/i);
@@ -107,7 +107,7 @@ test("complete Identity leads from a new draft through public preview and back t
     body: JSON.stringify({ state: "draft" }),
   });
   assert.equal(unpublishedResponse.status, 200);
-  assert.equal((await responseJson(unpublishedResponse)).data.state, "draft");
+  assert.equal((await responseJson(unpublishedResponse)).data.attributes.state, "draft");
 
   const resumedAfterUnpublish = await ownerPage(env);
   assert.match(resumedAfterUnpublish, /Continue your first draft/i);

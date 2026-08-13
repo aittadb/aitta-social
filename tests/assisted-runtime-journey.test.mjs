@@ -107,7 +107,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     body: JSON.stringify({ state: "published" }),
   });
   assert.equal(publish.status, 200);
-  assert.equal((await responseJson(publish)).data.state, "published");
+  assert.equal((await responseJson(publish)).data.attributes.state, "published");
 
   const [signedOutHome, signedOutPermalink, siteApi, entryApi] = await Promise.all([
     fetchApp("/", { env, headers: { accept: "text/html" } }),
@@ -143,7 +143,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     body: JSON.stringify({ state: "draft" }),
   });
   assert.equal(unpublish.status, 200);
-  assert.equal((await responseJson(unpublish)).data.state, "draft");
+  assert.equal((await responseJson(unpublish)).data.attributes.state, "draft");
   const resumed = await ownerHtml("/owner", env);
   assert.match(resumed, new RegExp(`href="/owner/entries/${created.id}"[^>]*>Resume first draft`, "i"));
   await assertPubliclyUnknown(env, created.id, [draftCanary, publicBody]);
@@ -375,9 +375,9 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(actions, /href="\/owner"[^>]+aria-label=\{`Check saved state/);
   assert.match(actions, /const actionReference = id;/);
   assert.doesNotMatch(actions, /boundedActionReference|slice\(-8\)/);
-  assert.equal(countMatches(actions, /const outcome = classifyOwnerMutationResponse\(response\);/g), 2);
+  assert.equal(countMatches(actions, /const outcome = classifyOwnerMutationResponse\(response\);/g), 1);
   assert.equal(countMatches(actions, /setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 0);
-  assert.match(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*return;\s*\}\s*setMessage\(await lifecycleFailureMessage\(nextState, response\)\);\s*setBusy\(false\);/);
+  assert.match(actions, /readPublicationStateResponse\(response, \{ id, state: nextState \}\)[\s\S]*if \(result\.outcome === "unconfirmed"\) \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*return;\s*\}\s*setMessage\(lifecycleFailureMessage\(nextState, result\.message\)\);\s*setBusy\(false\);/);
   assert.match(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*return;\s*\}\s*setMessage\(await deletionFailureMessage\(response\)\);\s*setBusy\(false\);/);
   assert.match(actions, /catch \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*\}/);
   assert.match(actions, /catch \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*\}/);
@@ -434,7 +434,7 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(securityDoc, /rejected fetch or 5xx response is ambiguous[\s\S]*reloads[\s\S]*before any retry[\s\S]*A 4xx validation or[\s\S]*authorization response/i);
   assert.match(privacyDoc, /application adds no agent identity, agent token, browser-storage record,[\s\S]*database field, log field, or outbound content request/i);
   assert.match(presentationDoc, /native,\s+update-specific confirmation[\s\S]*human owner's explicit approval/i);
-  assert.match(presentationDoc, /complete collision-free stable entry identifier[\s\S]*A 4xx response gives a definitive rejected-request\s+outcome without claiming the update's current state[\s\S]*rejected fetch or 5xx response is\s+unknown/i);
+  assert.match(presentationDoc, /complete collision-free stable entry identifier[\s\S]*exact bounded\s+JSON owner-entry document confirms the stable identifier and requested state[\s\S]*A 4xx\s+response gives a definitive rejected-request\s+outcome without claiming the update's current state[\s\S]*rejected fetch or 5xx response is\s+unknown/i);
 });
 
 test("repeated dashboard controls have distinct accessible names without leaking private configuration", async () => {

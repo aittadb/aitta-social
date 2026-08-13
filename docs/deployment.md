@@ -226,6 +226,13 @@ re-enables the control, and shows its safe server message without adding the
 ambiguous-result recovery link; it describes the rejected request without
 claiming the update's current state.
 
+The publication control requests and validates the normalized private JSON
+resource. A reload follows only an exact bounded response for the same stable
+update identifier and requested Draft or Published state. A redirect,
+non-JSON or malformed response, mismatched document, failed fetch, or 5xx never
+proves the transition and never triggers an automatic retry. This transport
+normalization does not change the separate Delete confirmation or response.
+
 Deletion is a different irreversible boundary. A browser-controlling ChatGPT
 must stop at the update-specific **Delete** confirmation and obtain the human
 owner's explicit approval; approval to edit, publish, or unpublish does not

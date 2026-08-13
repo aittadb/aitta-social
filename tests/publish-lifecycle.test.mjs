@@ -28,7 +28,7 @@ test("publish lifecycle keeps the existing owner state transition and public pro
     body: JSON.stringify({ state: "published" }),
   });
   assert.equal(publish.status, 200);
-  assert.equal((await responseJson(publish)).data.state, "published");
+  assert.equal((await responseJson(publish)).data.attributes.state, "published");
   assert.equal(db.entries[0].state, "published");
 
   const publicEntry = await fetchApp(`/api/v1/entries/${entryId}`, { env });
@@ -42,7 +42,7 @@ test("publish lifecycle keeps the existing owner state transition and public pro
     body: JSON.stringify({ state: "draft" }),
   });
   assert.equal(unpublish.status, 200);
-  assert.equal((await responseJson(unpublish)).data.state, "draft");
+  assert.equal((await responseJson(unpublish)).data.attributes.state, "draft");
   assert.equal(db.entries[0].state, "draft");
 
   const hiddenAgain = await fetchApp(`/api/v1/entries/${entryId}`, { env });
