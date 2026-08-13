@@ -35,7 +35,8 @@ A document's bounded `Accept` policy is independent of User-Agent:
   than HTML;
 - the parser bounds header size and media ranges, honors quality, specificity,
   order, and `q=0`, and rejects malformed or unsupported choices with a
-  no-store `406` and `Vary: Accept` without a resource body;
+  no-store structured JSON `406` and `Vary: Accept` for `GET`, while `HEAD`
+  carries the same status and headers without a body;
 - neither `?format=` nor a request host, forwarding header, or browser identity
   selects a representation;
 - negotiated HTML retains the Worker CSP and no-store policy; a task states the
@@ -114,6 +115,36 @@ one published-only query and one indistinguishable `404 entry_not_found`
 document. The v1 root and manifest advertise the detail URI template with
 `templated: true` and `endpoints.entryTemplate`; `{id}` is RFC 6570 level-1
 path expansion that percent-encodes an opaque identifier as one path segment.
+
+The implemented current published-update document at `/entries/{id}` retains
+that route's existing HTML as its default representation and returns current
+hypermedia JSON only when bounded `Accept` prefers JSON. The JSON resource
+reuses the same immutable allowlisted `entry` projection as v1, but its
+document, response, and error types are feature-local rather than a versioned
+API grammar. Its JSON `self` and HTML `alternate` both identify the canonical
+unversioned document URI; collection and profile links may lead to the current
+v1 integration resources. Success is `public, max-age=60`; every error is
+no-store; every negotiated result varies on `Accept`; and HTML retains the
+Worker's `no-store, must-revalidate` and CSP headers.
+
+The Worker applies this negotiation only to `GET` and `HEAD` whose raw path is
+exactly `/entries/` plus one segment. Missing `Accept`, wildcard-only input,
+and any positive HTML/JSON quality tie select HTML. For each representation,
+the most-specific matching range wins; if equally specific duplicate ranges
+conflict, the first occurrence wins. `application/*` can match JSON,
+`text/*` can match HTML, and `*/*` matches both. A query, User-Agent, request
+authority, identity header, cookie, or credential never selects a variant;
+the internal JSON dispatch clears the query and canonical links never include
+it. JSON `HEAD` matches JSON `GET` status and headers with an empty body.
+
+The compiled Worker strips the product-specific dispatch marker from every
+external request and reserves `/aitta-internal/*`: direct access receives a
+bodyless no-store `404` before Vinext or D1. Only a JSON-selected external
+entry read can add the marker and rewrite to the one internal route. A decoded
+slash is rejected as the same published-entry `404` before D1; a double-encoded
+slash remains a distinct literal `%2F` identifier. Other paths and methods stay
+Vinext-owned. This is a product-specific entry-document boundary, not a generic
+pathname dispatcher or framework.
 
 Links use standard relations where they fit (`self`, `collection`, `item`, `alternate`,
 `first`, `previous`, `next`, `last`, `profile`, `create`, `edit`, `delete`,

@@ -111,6 +111,12 @@ remains the visual lead; an optional stored title appears only once, quietly,
 after the body. An untitled non-note likewise receives a source-based hidden h1
 instead of an invented visible headline. Safe destination links remain beside
 the content, while View as JSON stays in the secondary permalink footer.
+That stable direct link continues to lead to the versioned integration detail
+resource. The same unversioned permalink also has a current hypermedia JSON
+representation for clients that send bounded JSON-preferred `Accept`; default,
+wildcard, and HTML/JSON ties preserve this exact HTML presentation. Negotiation
+changes no frame, native navigation, metadata, CSP, focus, touch, reflow, or
+published-only visibility behavior.
 
 Historical published rows can exist before a profile is configured. Their
 source uses the bounded compatibility fallback `Independent Aitta` without
