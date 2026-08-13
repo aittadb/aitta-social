@@ -444,6 +444,7 @@ function expectedManifest(canonicalUrl) {
     software: { name: "AittaSocial", version: "0.1.0" },
     canonicalUrl,
     endpoints: {
+      api: `${canonicalUrl}/api/v1`,
       profile: `${canonicalUrl}/api/v1/site`,
       entries: `${canonicalUrl}/api/v1/entries`,
     },

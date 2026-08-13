@@ -54,6 +54,9 @@ Adding the guide and using the concise footer labels Manifest, Profile, and
 Updates does not change the machine routes. They continue to return only the
 documented JSON success and error representations with their existing status,
 content-type, cache, allowlist, canonical-link, and privacy behavior.
+The manifest additionally advertises the D1-independent v1 integration root;
+clients discover its schema and implemented capabilities there rather than
+requiring another human-navigation link.
 
 ## Conventions
 
@@ -74,6 +77,97 @@ content-type, cache, allowlist, canonical-link, and privacy behavior.
   response; owner data is available only through separately authorized private
   surfaces.
 
+## Versioned API discovery
+
+`GET /api/v1` is the D1-independent integration root. It requires only a valid
+protected `AITTA_SOCIAL_CANONICAL_URL`; it never falls back to the request host
+or the stored profile canonical URL. It returns:
+
+```json
+{
+  "data": {
+    "id": "aitta-social-api",
+    "type": "api",
+    "attributes": {
+      "name": "AittaSocial",
+      "version": 1
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://account.example/api/v1",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "profile",
+      "href": "https://account.example/api/v1/schema",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "social.aitta.manifest",
+      "href": "https://account.example/.well-known/aitta-social.json",
+      "mediaType": "application/json"
+    }
+  ],
+  "actions": []
+}
+```
+
+`GET /api/v1/schema` identifies the current pre-release representation and its
+implemented relation vocabulary:
+
+```json
+{
+  "data": {
+    "id": "aitta-social-api-profile",
+    "type": "api-profile",
+    "attributes": {
+      "version": 1,
+      "representation": "aitta-social-json-api-v1",
+      "relations": [
+        "self",
+        "profile",
+        "collection",
+        "social.aitta.manifest"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://account.example/api/v1/schema",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "collection",
+      "href": "https://account.example/api/v1",
+      "mediaType": "application/json"
+    }
+  ],
+  "actions": []
+}
+```
+
+Both resources use `public, max-age=60`. Missing, wildcard, `application/json`,
+and matching application wildcards accept JSON. An explicit refusal of JSON,
+malformed syntax, more than 4 KiB, or more than 16 media ranges returns a
+no-store structured `406`. The parser uses the most specific matching range,
+so an exact `application/json;q=0` is not overridden by `*/*`.
+
+`HEAD` returns the matching `GET` status and headers with an empty body.
+`POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS` return structured `405` with
+`Allow: GET, HEAD`. Every method on an unknown `/api/v1/*` path returns the
+same structured `404`; unacceptable media still returns `406` first. All these
+responses include `Vary: Accept`, never redirect or select HTML, and ignore
+User-Agent and query format hints. `/api/v2` is not an application route.
+
+Missing or invalid protected canonical configuration returns a no-store
+structured `503` without a D1 read. Unexpected root/schema failures return a
+fixed safe `500`. Until TASK-179–181 replace the unshipped profile and entry
+grammars, those known routes retain their response shapes and existing media
+and method behavior.
+
 ## Discovery manifest
 
 `GET /.well-known/aitta-social.json` returns `200` and one JSON object:
@@ -88,6 +182,7 @@ content-type, cache, allowlist, canonical-link, and privacy behavior.
   },
   "canonicalUrl": "https://account.example",
   "endpoints": {
+    "api": "https://account.example/api/v1",
     "profile": "https://account.example/api/v1/site",
     "entries": "https://account.example/api/v1/entries"
   },
@@ -288,6 +383,28 @@ Missing profile/canonical setup uses the same `profile_not_configured` and
 
 ## Errors and method handling
 
+The v1 root, schema, and unknown-path boundary uses the common pre-release
+error document:
+
+```json
+{
+  "data": null,
+  "error": {
+    "code": "not_found",
+    "message": "The requested API resource was not found."
+  },
+  "links": []
+}
+```
+
+Its fixed codes are `not_acceptable`, `method_not_allowed`, `not_found`,
+`canonical_url_unconfigured`, and `internal_error`. These responses are
+`no-store`, contain no exception or runtime detail, and include no link when a
+protected canonical URL is unavailable.
+
+The site and entry resources retain their earlier error grammar until their
+accepted pre-release v1 replacement tasks land:
+
 Errors contain a stable machine-readable code and a safe message:
 
 ```json
@@ -308,8 +425,8 @@ the configured canonical URL is missing or invalid.
 - `503` with `canonical_url_unconfigured` is used when a successful canonical
   resource cannot be constructed safely.
 - `405` is used for an unsupported method and includes an appropriate `Allow`
-  header. This response is framework-owned; its body is not part of the
-  structured application-error contract.
+  header. On site and entry routes this response remains framework-owned until
+  TASK-179–181 replace those boundaries.
 - `500` may be used for an unexpected server failure, but its body must not
   reveal SQL, stack traces, environment values, credentials, or identifiers.
 
@@ -345,6 +462,7 @@ migration or data rewrite. Existing `/api/v1` cache headers are unchanged.
 Implementations of this document must test exact field allowlists, JSON content
 types, canonical absolute links, stable identifiers, manifest challenge
 conditionality, draft-indistinguishable 404 responses, deterministic pagination
-and tie-breaking, invalid pagination, unsupported methods, and safe unexpected
-errors. Test fixtures must include canary private values and assert that none
-appear anywhere in public response bodies or headers.
+and tie-breaking, invalid pagination, bounded Accept behavior, unknown paths,
+unsupported methods, matching HEAD responses, and safe unexpected errors. Test
+fixtures must include canary private values and assert that none appear anywhere
+in public response bodies or headers.

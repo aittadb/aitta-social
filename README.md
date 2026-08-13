@@ -110,6 +110,7 @@ update reads.
 | `/owner/profile` | Identity and constrained presentation settings |
 | `/owner/entries/new` and `/owner/entries/{id}` | Draft update creation and editing |
 | `/.well-known/aitta-social.json` | Public discovery manifest |
+| `/api/v1` and `/api/v1/schema` | Versioned JSON integration discovery and schema profile |
 | `/api/v1/site`, `/api/v1/entries`, and `/api/v1/entries/{id}` | Versioned public JSON resources |
 
 Owner pages and every private write enforce authorization on the server. Route

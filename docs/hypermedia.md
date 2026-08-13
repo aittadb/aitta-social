@@ -1,10 +1,9 @@
 # Planned AittaSocial hypermedia and integration API
 
-This is a design input for the accepted implementation tasks. It is not a
-claim that every described route exists yet. The existing application remains
-the first unpublished AittaSocial release, so it has one versioned integration
-API, `/api/v1`; it does not carry an unimplemented `/api/v2` compatibility
-lane.
+This records the implemented foundation and the accepted follow-up tasks. It
+does not claim that every described resource exists yet. The application
+remains the first unpublished AittaSocial release, with one versioned
+integration API, `/api/v1`; it carries no `/api/v2` compatibility lane.
 
 The earlier unimplemented v2 proposal is retained only as a dated supersession
 record in [api-v2.md](api-v2.md). TASK-189's acceptance record and CHANGELOG
@@ -56,7 +55,8 @@ discovery links together. That is not a second API version. After release, the
 documented v1 behavior is frozen and a successor requires an explicit
 compatibility decision.
 
-Versioned API routes default to JSON for missing or wildcard `Accept`, return
+The implemented root, schema, and unknown-path boundary defaults to JSON for
+missing or wildcard `Accept`, returns
 JSON only, and never redirect or negotiate HTML. An explicit refusal of JSON,
 malformed or excessive `Accept`, or an unsupported method uses the bounded
 JSON error/`405 Allow` behavior specified by the applicable task. API responses
@@ -110,8 +110,9 @@ prepared-storage checks.
 
 The current accepted path is deliberately incremental:
 
-1. TASK-178 adds JSON-only `/api/v1` and `/api/v1/schema` integration
-   discovery, then advertises only resources that have landed.
+1. TASK-178 established JSON-only `/api/v1` and `/api/v1/schema` integration
+   discovery. The manifest advertises the root; its ordered links advertise
+   only the root, schema, and discovery manifest until later resources land.
 2. TASK-179 and TASK-180 replace the pre-release v1 public profile and
    collection response shapes with the shared integration representation.
 3. TASK-181 replaces v1 entry detail. TASK-193 then proves the first current

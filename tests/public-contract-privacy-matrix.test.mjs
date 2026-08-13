@@ -24,7 +24,7 @@ const historicalMigration = "drizzle/0000_closed_talos.sql";
 
 const sourceDigests = {
   "db/schema.ts": "8917fdac637f7a5ae4c96df0ecbed770ca881c218136e6067196fc3216bc1b67",
-  "docs/protocol.md": "b59f56659e607cc44a7ec43d6f65131248fe941fa59ba88e9d781fd82b2d0949",
+  "docs/protocol.md": "0e0508e520222f4bcf4ecb6f0d696dd58d516ab8716b1dca9d25676129e7f4a6",
   [historicalMigration]: "95455a11b0795cfbfeb4ad0edfa07c2e75d076b14b142c9dfb1feb1c849e3c8a",
   "package-lock.json": "1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9",
   "tests/fixtures/poc-upgrade-v0.sql":
@@ -659,6 +659,7 @@ function expectedManifest(canonicalUrl, accountType) {
     software: { name: "AittaSocial", version: "0.1.0" },
     canonicalUrl,
     endpoints: {
+      api: `${canonicalUrl}/api/v1`,
       profile: `${canonicalUrl}/api/v1/site`,
       entries: `${canonicalUrl}/api/v1/entries`,
     },

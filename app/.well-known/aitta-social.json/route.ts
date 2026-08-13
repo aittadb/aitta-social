@@ -25,6 +25,7 @@ export async function GET() {
       software: { name: SOFTWARE_NAME, version: SOFTWARE_VERSION },
       canonicalUrl,
       endpoints: {
+        api: `${canonicalUrl}/api/v1`,
         profile: `${canonicalUrl}/api/v1/site`,
         entries: `${canonicalUrl}/api/v1/entries`,
       },

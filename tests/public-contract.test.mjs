@@ -262,6 +262,7 @@ test("discovery manifest has a stable allowlist and exposes only an explicitly c
     assert.equal(body.protocolVersion, "1.0");
     assert.deepEqual(body.software, { name: "AittaSocial", version: "0.1.0" });
     assert.deepEqual(body.endpoints, {
+      api: "https://canonical.example/account/api/v1",
       profile: "https://canonical.example/account/api/v1/site",
       entries: "https://canonical.example/account/api/v1/entries",
     });
