@@ -354,22 +354,27 @@ test("owner controls expose semantic, per-update actions, explicit publication c
     source("app/owner/_components/owner-mutation-outcome.ts"),
   ]);
 
-  assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*visible on the public presence and its permalink[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
+  assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*publicly readable on this Aitta at its permalink[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
   assert.match(actions, /role="group"[^>]+aria-label=\{`Actions for \$\{updateLabel\}, update \$\{actionReference\}`\}/);
   for (const action of ["Edit", "Publish", "Open public permalink for", "Unpublish", "Delete"]) {
     assert.match(actions, new RegExp(`aria-label=\\{\\\`${escapeRegex(action)}[^\\\`]+update \\$\\{actionReference\\}`));
   }
-  assert.match(actions, /The update visibility result could not be confirmed\. Reload Your presence before retrying\./);
+  assert.match(actions, /The publication result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
+  assert.match(actions, /The unpublish result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
   assert.match(actions, /The deletion result could not be confirmed\. Reload Your presence before retrying\./);
   assert.match(actions, /href="\/owner"[^>]+aria-label=\{`Check current state/);
   assert.match(actions, /const actionReference = id;/);
   assert.doesNotMatch(actions, /boundedActionReference|slice\(-8\)/);
   assert.equal(countMatches(actions, /const outcome = classifyOwnerMutationResponse\(response\);/g), 2);
-  assert.equal(countMatches(actions, /setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 2);
-  assert.equal(countMatches(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\("The (?:update visibility|deletion) result could not be confirmed\.[^\n]+\);\s*return;\s*\}\s*setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 2);
-  assert.equal(countMatches(actions, /catch \{\s*showUnconfirmedResult\("The (?:update visibility|deletion) result could not be confirmed\.[^\n]+\);\s*\}/g), 2);
+  assert.equal(countMatches(actions, /setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 1);
+  assert.match(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*return;\s*\}\s*setMessage\(await lifecycleFailureMessage\(nextState, response\)\);\s*setBusy\(false\);/);
+  assert.match(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*return;\s*\}\s*setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/);
+  assert.match(actions, /catch \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*\}/);
+  assert.match(actions, /catch \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*\}/);
   assert.match(actions, /function showUnconfirmedResult\(message: string\) \{\s*setMessage\(message\);\s*setShowRecovery\(true\);\s*setBusy\(false\);\s*\}/);
   assert.match(actions, /setBusy\(true\);\s*setShowRecovery\(false\);/);
+  assert.match(actions, /if \(lifecycleRecoveryRequired\) return;/);
+  assert.equal(countMatches(actions, /disabled=\{busy \|\| lifecycleRecoveryRequired\}/g), 2);
   assert.match(dashboard, /<EntryActions id=\{entry\.id\} state=\{entry\.state\} label=\{entry\.title \?\? entry\.body\.slice\(0, 90\)\}/);
   assert.match(editPage, /<EntryActions id=\{entry\.id\} state=\{entry\.state\} label=\{entry\.title \?\? entry\.body\.slice\(0, 90\)\}/);
 
@@ -412,14 +417,14 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 
   assert.match(deploymentDoc, /browser-controlling ChatGPT must stop there[\s\S]*owner explicitly approves/i);
-  assert.match(deploymentDoc, /Reload before\s+retrying:[\s\S]*may have committed the\s+first request/i);
-  assert.match(deploymentDoc, /server returns a 5xx response[\s\S]*A 4xx validation or authorization response/i);
+  assert.match(deploymentDoc, /For a publish or unpublish request, it locks another\s+publication-state change[\s\S]*Check this Aitta’s current saved state/i);
+  assert.match(deploymentDoc, /server returns a 5xx response[\s\S]*A 4xx validation or\s+authorization response/i);
   assert.match(deploymentDoc, /do not fork or[\s\S]*edit GitHub source, redeploy the Site, change protected settings, change access,[\s\S]*or connect a domain/i);
   assert.match(securityDoc, /there is no agent[\s\S]*credential, agent route, prompt-derived permission/i);
   assert.match(securityDoc, /rejected fetch or 5xx response is ambiguous[\s\S]*reloads[\s\S]*before any retry[\s\S]*A 4xx validation or[\s\S]*authorization response/i);
   assert.match(privacyDoc, /application adds no agent identity, agent token, browser-storage record,[\s\S]*database field, log field, or outbound content request/i);
   assert.match(presentationDoc, /native,\s+update-specific confirmation[\s\S]*human owner's explicit approval/i);
-  assert.match(presentationDoc, /complete collision-free stable entry identifier[\s\S]*rejected fetch or 5xx response[\s\S]*4xx response remains a\s+definitive safe error/i);
+  assert.match(presentationDoc, /complete collision-free stable entry identifier[\s\S]*A 4xx response gives a definitive rejected-request\s+outcome without claiming the update's current state[\s\S]*rejected fetch or 5xx response is\s+unknown/i);
 });
 
 test("repeated dashboard controls have distinct accessible names without leaking private configuration", async () => {

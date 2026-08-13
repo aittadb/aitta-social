@@ -7,8 +7,10 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [showRecovery, setShowRecovery] = useState(false);
+  const [lifecycleRecoveryRequired, setLifecycleRecoveryRequired] = useState(false);
   const updateLabel = boundedUpdateLabel(label);
   const actionReference = id;
+  const lifecycleDescriptionId = `entry-lifecycle-${id}`;
 
   function showUnconfirmedResult(message: string) {
     setMessage(message);
@@ -16,10 +18,20 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
     setBusy(false);
   }
 
+  function showUnconfirmedLifecycleResult(nextState: "draft" | "published") {
+    setMessage(nextState === "published"
+      ? "The publication result could not be confirmed. Check this Aitta’s saved state before changing this update’s publication state again."
+      : "The unpublish result could not be confirmed. Check this Aitta’s saved state before changing this update’s publication state again.");
+    setLifecycleRecoveryRequired(true);
+    setShowRecovery(true);
+    setBusy(false);
+  }
+
   async function changeState(nextState: "draft" | "published") {
+    if (lifecycleRecoveryRequired) return;
     setBusy(true);
     setShowRecovery(false);
-    setMessage(nextState === "published" ? "Publishing update…" : "Unpublishing update…");
+    setMessage(nextState === "published" ? "Publishing this update…" : "Returning this update to Draft…");
     try {
       const response = await fetch(`/api/private/entries/${encodeURIComponent(id)}/state`, {
         method: "PUT",
@@ -32,19 +44,19 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
         return;
       }
       if (outcome === "unconfirmed") {
-        showUnconfirmedResult("The update visibility result could not be confirmed. Reload Your presence before retrying.");
+        showUnconfirmedLifecycleResult(nextState);
         return;
       }
-      setMessage(await safeError(response));
+      setMessage(await lifecycleFailureMessage(nextState, response));
       setBusy(false);
     } catch {
-      showUnconfirmedResult("The update visibility result could not be confirmed. Reload Your presence before retrying.");
+      showUnconfirmedLifecycleResult(nextState);
     }
   }
 
   function requestPublish() {
     const confirmed = window.confirm(
-      `Publish “${updateLabel}” (update ${actionReference}) now? It will become visible on the public presence and its permalink.`,
+      `Publish “${updateLabel}” (update ${actionReference}) now? It will become publicly readable on this Aitta at its permalink.`,
     );
     if (!confirmed) {
       setShowRecovery(false);
@@ -78,21 +90,33 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
   }
 
   return (
-    <div className="entry-actions" role="group" aria-label={`Actions for ${updateLabel}, update ${actionReference}`} aria-busy={busy}>
+    <div
+      className="entry-actions"
+      role="group"
+      aria-label={`Actions for ${updateLabel}, update ${actionReference}`}
+      aria-describedby={lifecycleDescriptionId}
+      aria-busy={busy}
+    >
+      <p className="form-status" id={lifecycleDescriptionId}>
+        <strong>{state === "draft" ? "Draft" : "Published"}</strong>
+        {state === "draft"
+          ? " — only the owner can read this update. Publishing makes it publicly readable on this Aitta."
+          : " — this update is publicly readable on this Aitta. Unpublishing returns it to a private draft."}
+      </p>
       <a className="button button-small button-quiet" href={`/owner/entries/${id}`} aria-label={`Edit ${updateLabel}, update ${actionReference}`}>Edit</a>
       {state === "draft" ? (
-        <button className="button button-small" type="button" disabled={busy} onClick={requestPublish} aria-label={`Publish ${updateLabel}, update ${actionReference}`}>Publish</button>
+        <button className="button button-small" type="button" disabled={busy || lifecycleRecoveryRequired} onClick={requestPublish} aria-label={`Publish ${updateLabel}, update ${actionReference}`}>Publish</button>
       ) : (
         <>
           <a className="button button-small button-quiet" href={`/entries/${id}`} aria-label={`Open public permalink for ${updateLabel}, update ${actionReference}`}>Permalink</a>
-          <button className="button button-small button-quiet" type="button" disabled={busy} onClick={() => void changeState("draft")} aria-label={`Unpublish ${updateLabel}, update ${actionReference}`}>Unpublish</button>
+          <button className="button button-small button-quiet" type="button" disabled={busy || lifecycleRecoveryRequired} onClick={() => void changeState("draft")} aria-label={`Unpublish ${updateLabel}, update ${actionReference}`}>Unpublish</button>
         </>
       )}
       <button className="button button-small button-danger" type="button" disabled={busy} onClick={remove} aria-label={`Delete ${updateLabel}, update ${actionReference}`}>Delete</button>
       <span className="form-status" role="status" aria-live="polite" aria-atomic="true">{message}</span>
       {showRecovery ? (
         <a className="button button-small button-quiet" href="/owner" aria-label={`Check current state of ${updateLabel}, update ${actionReference}`}>
-          Check current state
+          Check this Aitta’s current saved state
         </a>
       ) : null}
     </div>
@@ -112,4 +136,11 @@ async function safeError(response: Response): Promise<string> {
   } catch {
     return "The operation could not be completed.";
   }
+}
+
+async function lifecycleFailureMessage(nextState: "draft" | "published", response: Response): Promise<string> {
+  const failure = await safeError(response);
+  return nextState === "published"
+    ? `The server rejected this publication request. ${failure}`
+    : `The server rejected this unpublish request. ${failure}`;
 }

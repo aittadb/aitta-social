@@ -166,12 +166,14 @@ checking that its key is configured.
    private draft**. Leave the editor and return to the Aitta. It must offer to
    resume that same stable draft identifier and state clearly that the draft
    remains private until publication.
-8. Publish the test update. The owner workspace then marks the first-update
-   journey complete and offers both the public preview and the stable
-   `/entries/{id}` permalink while retaining the normal edit, unpublish, and
-   delete controls. Unpublish it and confirm the same D1 record becomes the
-   resumable private draft again and disappears from every public HTML,
-   metadata, and JSON route.
+8. Confirm the test update is a **Draft**, meaning only the owner can read it.
+   Choose **Publish** and approve the update-specific native confirmation only
+   when the owner is ready to make it public. The owner workspace then shows
+   **Published**, marks the first-update journey complete, and offers both the
+   public preview and the stable `/entries/{id}` permalink while retaining the
+   normal edit, unpublish, and delete controls. Unpublish it and confirm the
+   same D1 record becomes the resumable private draft again and disappears from
+   every public HTML, metadata, and JSON route.
 
 The effective canonical URL follows one server-owned rule: a valid normalized
 `AITTA_SOCIAL_CANONICAL_URL` takes precedence, otherwise the normalized URL
@@ -200,7 +202,8 @@ fields, create or edit a private draft, and use preview or unpublish controls
 only while the owner supervises that signed-in browser.
 
 Publishing is the deliberate stop point. Choosing **Publish** opens a native
-confirmation that identifies the update and states that it will become public.
+confirmation that identifies the update and states that it will become publicly
+readable on this Aitta at its permalink.
 A browser-controlling ChatGPT must stop there, show the request to the human
 owner, and accept the confirmation only after the owner explicitly approves
 that publication. A deployment request, prior approval to make the Site public,
@@ -209,11 +212,13 @@ an earlier publication, or permission to edit a draft is not publish approval.
 If a browser request loses its response, or the server returns a 5xx response,
 the interface describes the result as unknown, keeps current form inputs in
 place, and offers a native link to reload the applicable saved Identity, update,
-or dashboard state. Reload before retrying: the server may have committed the
-first request, so an immediate retry could create a second draft or reverse the
-wrong state. A 4xx validation or authorization response re-enables the control
-and shows its safe server message without adding the ambiguous-result recovery
-link.
+or dashboard state. For a publish or unpublish request, it locks another
+publication-state change and offers **Check this Aitta’s current saved state** before
+any later choice: the first request may have committed. A 4xx validation or
+authorization response instead states the definitive lifecycle outcome,
+re-enables the control, and shows its safe server message without adding the
+ambiguous-result recovery link; it describes the rejected request without
+claiming the update's current state.
 
 In the update composer specifically, an unknown result disables another save
 from the current page. For a new draft, use **Check saved updates before

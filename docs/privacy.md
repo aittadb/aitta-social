@@ -107,9 +107,11 @@ identity, authorization, capability, or network membership. It remains in
 exact public allowlists; no other private profile or storage field becomes
 public with it.
 
-Publishing makes content retrievable without sign-in through HTML and JSON.
-Unpublishing removes it from this Aitta's public surfaces but cannot
-recall copies already cached, indexed, quoted, or saved elsewhere.
+An update is a **Draft** while only its owner can read it. Publishing makes it
+**Published** and retrievable without sign-in through HTML and JSON.
+Unpublishing returns the same update to a private draft and removes it from this
+Aitta's public surfaces, but cannot recall copies already cached, indexed,
+quoted, or saved elsewhere.
 
 The same limit applies to public document metadata. Handler-produced HTML is
 served with `no-store` and `must-revalidate`, but a search, sharing, or preview

@@ -341,16 +341,20 @@ added.
 
 Repeated update rows give each action a bounded owner-visible text label plus
 the complete collision-free stable entry identifier in its accessible name,
-while keeping concise visible labels. Publishing opens a native,
-update-specific confirmation. A
-supervising ChatGPT must pause for the human owner's explicit approval before
-accepting it. Save and state controls announce pending, safe response-error, and
-unknown result states. A rejected fetch or 5xx response exposes a native
-recovery link instead of retrying automatically; a 4xx response remains a
-definitive safe error without that link. Form inputs remain available until the
-owner chooses to reload the saved state. These additions use the existing button,
-focus, touch-target, wrapping, 320-pixel, effective 400-percent-zoom, and
-reduced-motion rules.
+while keeping concise visible labels. Their lifecycle statement makes **Draft**
+plainly owner-only and **Published** plainly readable on this Aitta; it also
+states that unpublishing returns the same update to a private draft. Publishing
+opens a native, update-specific confirmation that says the update will become
+publicly readable at its permalink. A supervising ChatGPT must pause for the
+human owner's explicit approval before accepting it. State controls announce
+their pending result. A 4xx response gives a definitive rejected-request
+outcome without claiming the update's current state, and permits a corrected
+later choice. A rejected fetch or 5xx response is
+unknown: it locks further publication-state requests from that rendered state,
+exposes the native `Check this Aitta’s current saved state` link, and
+does not retry automatically. Editing and deletion remain separately available
+actions. These additions use the existing button, focus, touch-target, wrapping,
+320-pixel, effective 400-percent-zoom, and reduced-motion rules.
 
 ## Review checklist
 
