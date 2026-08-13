@@ -1,5 +1,29 @@
 # Changelog
 
+- **TASK-194 — Made private draft creation a truthful JSON-first browser API.**
+  `POST /api/private/entries` now preserves same-origin-before-owner denial and
+  then accepts bounded JSON only, returning allowlisted, no-store JSON for
+  `201`, `400`, `406`, `415`, `422`, and every unsupported method's exact
+  `405 + Allow: POST`. Its private `owner-entry` resource uses safe relative
+  API/editor links and state-derived owner actions, forces the server-owned
+  draft/id/timestamp facts, needs neither profile nor canonical setup, and
+  exposes no request authority, owner, runtime, Hub, or public data. The new
+  draft client accepts only the exact bounded/domain-valid `201` document;
+  malformed success, redirect, malformed error, 5xx, or fetch failure locks
+  retry as unconfirmed, while an exact structured 4xx remains correctable.
+  Validation: integrated commit
+  `f8e9e32a35e0e4500c2312dc75f88ca04445c105`; full validation passed 341/341,
+  migration generation found no schema change, production audit found zero
+  vulnerabilities, and diff checks passed. Two independent Sol reviews found
+  no P0/P1/P2 issue after stream-bound, error-shape, and URL-parity corrections.
+  Disposable compiled-Worker evidence covers create/reload, 422 recovery, 500
+  and malformed-201 retry locks, 320/390/1440, DPR-4, forced colors, reduced
+  motion, coarse touch, 44-pixel targets, no overflow, and clean console.
+  Residual uncertainty: true 400% browser zoom, a complete native keyboard
+  sequence, and rendered private-canary cells remain unobserved; automated
+  canary/privacy coverage passes. No hosted, data, configuration, schema,
+  migration, deployment, or external state changed.
+
 - **TASK-193 — Negotiated current hypermedia JSON for published update documents.**
   `GET` and `HEAD /entries/{id}` now retain their HTML default while returning a
   current, allowlisted JSON document at the same unversioned canonical URI when
