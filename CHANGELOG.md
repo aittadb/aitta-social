@@ -1,5 +1,28 @@
 # Changelog
 
+- **TASK-177 — Unified the human-public Aitta frame.** Every configured and
+  unconfigured home, published update, Privacy, Technical, storage-unavailable,
+  and global/draft/unknown not-found document now uses one pure
+  `PublicPageFrame`: a fixed Aitta-home wordmark, `/owner` Manage destination
+  whose accessible name explicitly identifies local sole-owner administration,
+  and a shared footer with Privacy, Technical, GitHub, Manifest, Profile, and
+  Updates links. The owner-hideable Powered by attribution remains hidden only
+  when an already-loaded public profile selects it; profile-null static and
+  error states remain D1-independent and visibly attributed. Permalink-local
+  actions are a labelled navigation region, leaving one document footer. Public
+  routes no longer consult ChatGPT identity to construct header navigation.
+  Validation: integrated commits `91f4d9f`, `ae40b4d`, and evidence-only
+  `93b284d`; focused checks passed 85/85, full validation 282/282, migration
+  generation found no schema change, production audit found zero
+  vulnerabilities, and diff/instruction/plan checks passed. Independent Sol
+  review found no P0/P1/P2 issue. Disposable compiled-Worker/D1 evidence covers
+  12 public states at 320/390/1440, long unbroken content, attribution hiding,
+  DPR-4 reflow, forced colors, reduced motion, coarse touch, native header and
+  footer focus, 44-pixel targets, no overflow/canary leak, and clean console.
+  Residual uncertainty: a complete sequential hardware-Tab traversal was not
+  enumerated. No hosted, data, configuration, schema, migration, deployment,
+  or external state changed.
+
 - **TASK-192 — Made the private Identity mutation a truthful JSON-first browser API.** Normalized only `PUT /api/private/profile` and its authorized Identity client around an allowlisted `owner-profile` success resource, canonical navigation links, a verified-owner `edit` action, and structured no-store JSON errors. The route preserves same-origin-before-owner authorization, bounded JSON/media/Accept handling, `415`/`400`/`422`/`406`/`405` semantics, protected-setting secrecy, D1/public projection behavior, and browser dirty/recovery behavior; it is neither public discovery nor machine authority. Validation: independent Sol security/API re-review passed with no P0/P1/P2; focused compiled Worker tests passed 21/21; full validation passed 270/270; migration generation found no schema change; production dependency audit found zero vulnerabilities; exact compiled-browser evidence covered persisted save/two reloads, field-focused `422` retry, safe `500` recovery lock/reload, 320/390/1440 layout, and a clean console. Residual uncertainty: Sites ingress provenance remains separately blocked under TASK-190; the remaining private entry operations are intentionally deferred to TASK-194 through TASK-197.
 
 - **TASK-163 — Make each update kind self-explanatory while composing.**
