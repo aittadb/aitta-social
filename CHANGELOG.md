@@ -1,5 +1,26 @@
 # Changelog
 
+- **TASK-162 — Clarify restrained Identity appearance controls and preview.**
+  Reframed the existing constrained accent, update-spacing, and attribution
+  choices as compact secondary Appearance controls beside a transient owner
+  preview. The preview now makes saved, unsaved, and new state explicit while
+  showing both density choices and the optional attribution without creating a
+  theme system or new persisted field. Malformed historical accent preferences
+  never enter the native color control or an unrelated save: a safe fallback is
+  rendered, a deliberate replacement is required, and choosing that fallback
+  still remains visibly unsaved until it succeeds. Identity payloads, public
+  rendering, authorization, D1, API, and protocol contracts are unchanged.
+  Validation: integrated commit
+  `dc36059d6ef6420e58245c288120856c0491e8da`; full validation (249/249),
+  focused appearance coverage, migration generation, production audit (zero
+  vulnerabilities), and agent/plan/diff checks pass. Independent Sol review
+  found no remaining P0/P1/P2 issue. Disposable compiled-Worker browser
+  evidence covers saved, fresh, invalid-history, failure, denial, density,
+  attribution, 320/390/1440, DPR-4 reflow, forced colors, reduced motion,
+  coarse touch, focus, 44-pixel targets, no overflow/canary leakage, and clean
+  console logs. No schema, Site, hosted data, setting, access, DNS, domain,
+  Hub, sibling, `main`, deployment, or external state changed.
+
 - **TASK-181 — Reshape the prerelease v1 published-update detail resource.**
   Replaced the unshipped `GET /api/v1/entries/{id}` grammar with the typed v1
   entry document: explicit public attributes; ordered canonical JSON `self`,
