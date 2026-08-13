@@ -1,5 +1,7 @@
 # Changelog
 
+- **TASK-192 — Made the private Identity mutation a truthful JSON-first browser API.** Normalized only `PUT /api/private/profile` and its authorized Identity client around an allowlisted `owner-profile` success resource, canonical navigation links, a verified-owner `edit` action, and structured no-store JSON errors. The route preserves same-origin-before-owner authorization, bounded JSON/media/Accept handling, `415`/`400`/`422`/`406`/`405` semantics, protected-setting secrecy, D1/public projection behavior, and browser dirty/recovery behavior; it is neither public discovery nor machine authority. Validation: independent Sol security/API re-review passed with no P0/P1/P2; focused compiled Worker tests passed 21/21; full validation passed 270/270; migration generation found no schema change; production dependency audit found zero vulnerabilities; exact compiled-browser evidence covered persisted save/two reloads, field-focused `422` retry, safe `500` recovery lock/reload, 320/390/1440 layout, and a clean console. Residual uncertainty: Sites ingress provenance remains separately blocked under TASK-190; the remaining private entry operations are intentionally deferred to TASK-194 through TASK-197.
+
 - **TASK-163 — Make each update kind self-explanatory while composing.**
   Added concise kind-specific requirements to the existing body-first private
   composer without unmounting or discarding body, title, or destination values
