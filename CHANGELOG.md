@@ -1,5 +1,26 @@
 # Changelog
 
+- **TASK-161 — Make optional public Identity details compact and
+  discoverable.** Replaced the competing optional-detail fieldset with a native
+  `Optional public details` disclosure whose live 0–3 category count is closed
+  when empty and opens for saved details or validation errors. Location, website,
+  and up to eight labelled external links remain mounted while closed, preserving
+ their exact payload, API, authorization, D1, validation, and public projection
+ contracts. A closed invalid website now opens before native validity reporting
+ focuses it, and the native disclosure marker remains visible. Validation:
+ integrated commit `7c7dbcada18e7954432227a39cda7e41d1489e1d`; focused checks,
+ full validation (211/211), migration generation, production audit (zero
+ vulnerabilities), instruction/plan/diff gates, and independent final review
+ pass. The disposable compiled-Worker matrix covers absent, one-detail,
+ eight-link, long/unbroken, closed-invalid, non-owner, and missing-owner states
+ at 320/390/1440 pixels; actual save/reload at 390 preserves all three detail
+ categories; DPR-4 reflow, coarse touch, reduced motion, forced colors, focus,
+ no-overflow, 44-pixel targets, canary exclusion, and clean console are
+ recorded. Residual uncertainty: the in-app controller did not prove a
+ sequential hardware-Tab journey; native controls and focused keyboard/source
+ contracts cover that boundary. No Site, hosted data, setting, access, DNS,
+ domain, Hub, sibling, `main`, or deployment state changed.
+
 - **TASK-187 — Refine safe owner-managed website replacement.** Defined the
   Aitta-specific, no-fork customization contract for eventually replacing an
   owner's conventional website: closed versioned `PageDocument`, `SiteShell`,
