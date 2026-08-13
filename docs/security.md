@@ -13,7 +13,7 @@ that decision as trusted network authentication or network membership.
 | Anonymous or signed-in browser | Rendering public output; submitting validated owner forms | Identity headers, owner claims, destination URLs, write authorization, secrets |
 | ChatGPT Sites dispatcher | Injecting authenticated-user headers and operating sign-in routes | Establishing local owner status or AittaSocial network identity |
 | AittaSocial server code | Validating inputs, authorizing each operation, projecting public data, using protected settings | Assuming an earlier page check covers a later write |
-| Aitta-owned D1 | Persisting validated profile, entry, and minimal local configuration records | Producing a safe public response without an explicit projection |
+| Aitta-owned D1 | Persisting validated profile, entry, accepted page, and minimal local configuration records | Producing a safe public response without an explicit projection |
 | Protected runtime settings | Supplying local owner, canonical URL, and optional public verification challenge to server code | Browser-visible configuration beyond documented public effects or publishable content |
 | Future AittaSocial Hub contract | Optional registration, discovery, verification, credentials, and future network sessions | Current implementation authority; availability required for public reads; trusted claims from an Aitta deployment |
 | This Aitta deployment | Its own profile, updates, presentation, and local owner actions | Network-user authentication or authority over another Aitta deployment |
@@ -120,6 +120,13 @@ AittaSocial network sign-in or membership.
   current server-side owner authorization and strict method, media-type, and
   input validation.
 
+An implemented published custom page may later occupy a validated non-reserved
+human path. Authentication, owner, API, discovery, Privacy, Technical, entry,
+update, asset, framework, and static paths remain system owned. The accepted
+path and publication contract is recorded in
+`docs/acceptance/task-187-safe-owner-managed-website.md`; this refinement adds
+no route.
+
 The public HTML and API behavior must be identical for a draft identifier and
 an unknown identifier. Draft counts, identifiers, titles, timestamps, errors,
 and pagination effects are private.
@@ -135,9 +142,12 @@ and pagination effects are private.
   the only limit. Then parse unknown input through a strict schema that rejects
   unknown enum values, oversized strings, unsupported URL schemes, invalid
   timestamps, malformed identifiers, and extra security-sensitive fields.
-  Private JSON mutation bodies are limited to 64 KiB of UTF-8.
-- Treat profile introduction and entry body as text. Escape it during HTML
-  rendering; do not accept executable markup in the POC.
+  Existing private JSON mutation bodies are limited to 64 KiB of UTF-8. A
+  custom-page implementation may use only its accepted feature-local 192 KiB
+  import-body bound and must not broaden another private route.
+- Treat profile introduction and entry body as text. Escape them during HTML
+  rendering. A future custom-page importer may create only the accepted closed
+  non-executable page document; it does not change these text fields.
 - Permit only reviewed `http:` or `https:` destinations for public website,
   external-link, and entry-link fields. Apply safe link behavior in HTML.
 - Normalize the canonical Aitta deployment URL once at a server write boundary. A
@@ -171,6 +181,74 @@ and pagination effects are private.
 Worker runtime code uses only supported web and Cloudflare APIs. It must not
 depend on Node built-ins, filesystem access, a durable process, or mutable
 module/process state for correctness or authorization.
+
+## Accepted owner-managed website boundary
+
+TASK-187 refines a future owner-managed website replacement model without
+implementing it. Imported markup, stylesheets, and assets remain untrusted even
+when the sole owner submits them. This is necessary because public content and
+private owner administration share an origin: persistent script execution
+could make same-origin authorized mutations and would defeat the owner
+boundary.
+
+The only accepted content representation is a versioned closed
+`PageDocument`. An HTML fragment is an optional import format parsed as a tree
+into that document. The importer rejects document/head/chrome nodes, scripts,
+styles, forms, frames, embedded objects, SVG, MathML, event attributes, inline styles,
+DOM-clobbering identifiers, active URL schemes, remote resources, unknown
+semantics, and every size/depth/count overflow. Raw input is not retained in a
+public field or rendered through `dangerouslySetInnerHTML`, `srcdoc`, a
+template runtime, dynamic component lookup, or code evaluation. Full documents
+must be deliberately decomposed into page, shell, design, metadata, and asset
+inputs; the importer never guesses those boundaries. The renderer
+exhaustively creates reviewed React elements and escapes their values. Custom
+JavaScript is unsupported.
+
+A versioned `SiteShell` may add bounded brand, navigation, and footer content.
+It cannot remove, cover, rename into ambiguity, or restyle away the local
+Manage destination or Privacy, Technical, and GitHub. Page links use stable
+page identifiers and validated fragments; external contact links use an exact
+scheme allowlist. Shell publication rejects missing or unpublished targets.
+
+A versioned `SiteDesign` owns validated public tokens. Optional CSS is also
+only an import format: a standards-aware parser compiles accepted class-based
+page-body selectors and a closed property/value union into typed rules. Raw CSS
+never enters D1 or rendered HTML. Compiled rules cannot target common shell,
+system, owner, access, error, Privacy, or Technical markup and cannot express a
+resource URL, import, font face, generated content, hidden control, fixed
+overlay, z-index, pointer-event change, overflow trap, animation, or unbounded
+layout. Regex replacement is not an accepted HTML or CSS parser.
+
+Draft and published values are separate normalized snapshots. Public routes,
+metadata, shell links, assets, errors, and counts read only published values;
+draft, deleted, corrupt, unknown-version, and unknown paths fail closed without
+an existence signal or partial fallback. Publishing repeats owner, exact
+same-origin, media-type, body, schema, and prepared-query checks. A failed or
+5xx result is unconfirmed and never automatically retried.
+
+Custom routes use normalized lowercase path segments and reject every reserved
+system prefix—including Cloudflare `/cdn-cgi`, authentication dispatcher
+names, and conventional metadata/static filenames—before persistence and again
+before routing. Non-normalized or encoded-separator variants return the generic
+404 before D1/custom rendering. Canonical and
+sharing URLs use only the normalized configured Aitta URL plus the published
+path. Imported canonical, metadata, base, redirect, and request-host values are
+ignored or rejected.
+
+Same-origin assets are a later, separately accepted boundary. D1 owns metadata
+and references; deployment-owned R2 may own normalized raster bytes only after
+an explicit owner-approved hosting change. Upload must verify bytes and decoded
+bounds, remove metadata through a reviewed normalization pipeline, use immutable
+server-generated identifiers, and publish only referenced normalized bytes
+with an exact safe type and `nosniff`. Remote fetches, original upload
+passthrough, SVG/scriptable formats, public upload, custom fonts, and a generic
+media library are not accepted.
+
+The exact document shapes, limits, route reservations, lifecycle, asset rules,
+and first independently useful implementation row are recorded in the TASK-187
+acceptance record. Each later implementation must add its focused negative,
+privacy, migration, accessibility, and rendered evidence before it changes the
+current product.
 
 ## Public projection safety
 
@@ -220,11 +298,10 @@ documented public cache headers, and this rule does not change static-asset
 caching.
 
 The default template uses text-only sharing metadata and no logo, favicon, or
-social image. A later approved source edit may add only a direct checked-in
-asset with an accessible text alternative. Do not resolve an asset from a
-request value, profile URL, remote response, or protected setting, and do not
-add an upload endpoint, R2 bucket, runtime asset registry, or generic media
-abstraction for this boundary.
+social image. A direct checked-in asset remains an accepted source workflow.
+A separately accepted custom-page asset slice may use only the bounded
+same-origin normalized-raster boundary above; it must not resolve an asset from
+a request host, profile URL, remote response, or protected setting.
 
 ## Hub boundary
 
@@ -267,6 +344,13 @@ asset packaging, manifest canary exclusion, deterministic pagination, exact
 verification-challenge projection, retired Hub-route absence without redirect
 or outbound fetch, obsolete-setting canary exclusion from built output, and
 public reads without Hub.
+
+Once a custom-page slice is implemented, extend this set with raw-markup/script
+and stylesheet injection canaries, reserved and ambiguous paths, draft/unknown
+page parity, corrupt and unknown document versions, shell-reference failures,
+canonical-host attacks, body/node/depth/style bounds, asset type/sniffing and
+draft parity, and proof that customization cannot select owner or system
+chrome.
 
 Use explicit request fixtures or a development-only identity injection boundary
 in tests. Never add a production bypass, magic owner address, or client-only

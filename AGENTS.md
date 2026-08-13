@@ -55,7 +55,8 @@ file. Keep this file strictly below 32,000 bytes and run
   behavior into this project; follow this product's accepted requirements only.
 - This project does not use AittaDB, external databases, shared Hub content
   storage, shared Aitta runtime libraries, or external infrastructure.
-- Keep R2 null until an approved upload feature requires it.
+- Keep R2 null until an accepted same-origin asset task and owner-approved
+  hosting change require it.
 - The minimum future network direction is secure optional registration,
   verified Aitta discovery, explicit one-way Follow and Unfollow, and a
   private bounded followed-update reader. It is roadmap direction, not active
@@ -66,7 +67,8 @@ file. Keep this file strictly below 32,000 bytes and run
 - Do not implement multiple Aittas in one Aitta deployment, extra administrators,
   roles, teams, invitations, resharing, notifications, advertising, payments,
   ActivityPub, background federation, plugins, general themes, media uploads,
-  or general OAuth/OIDC support in this POC.
+  or general OAuth/OIDC. Only an accepted bounded normalized same-origin raster
+  slice may add media upload.
 - Comments, reactions, messages, revisions, retractions, and other future event
   semantics remain unimplemented unless an accepted versioned event-type
   vertical slice defines and implements them with its tests and documentation.
@@ -87,20 +89,21 @@ file. Keep this file strictly below 32,000 bytes and run
 - Worker runtime code uses web/Cloudflare primitives only. Do not use Node
   built-ins, filesystem access, a durable process, or mutable process/module
   state for correctness, persistence, or authorization.
-- Use this Aitta deployment's Sites D1 `DB` binding as the only authoritative
-  content store. Browser storage may hold disposable UI preferences only.
+- Use Sites D1 `DB` as the only authoritative structured content, state, and
+  asset-metadata store. An accepted deployment-owned R2 binding may own only
+  normalized asset bytes. Browser storage may hold disposable preferences.
 - Keep the relational schema compact. Use bound prepared queries and indexes
   justified by real query patterns.
 - Generate and review migrations with schema changes. Apply migrations before
   runtime access; request/runtime code must never create, alter, drop, repair,
   or otherwise mutate schema.
-- Persist only the one profile, entries, and minimal local configuration that
-  genuinely requires persistence.
-- Ordinary content and restrained presentation customization must use explicit
-  semantic owner controls persisted in Aitta-owned D1. It must not require
-  a repository fork, source edit, redeployment, Hub availability, generic
-  settings blob, arbitrary CSS/HTML/JavaScript, template, plugin, or remote
-  asset URL.
+- Persist only the one profile, entries, accepted custom pages, and minimal
+  local configuration that genuinely requires persistence.
+- Website customization uses versioned `PageDocument`, `SiteShell`, and
+  `SiteDesign` records in D1. Compile untrusted HTML/CSS into closed documents
+  or scoped typed rules; raw input may appear only as escaped owner form text,
+  never in an HTML/style context. Require no fork, source edit, redeployment,
+  Hub, generic settings blob, JavaScript, template/plugin, or remote asset URL.
 
 ### Maintainable TypeScript and React design
 
@@ -192,9 +195,9 @@ file. Keep this file strictly below 32,000 bytes and run
   accepted authenticity contract verifies it; identifiers, timestamps, and
   namespaces alone never prove authorship. Treat every remote event, type,
   parent, and payload as untrusted and bounded.
-- Signed-out and non-owner visitors may read only the public profile and
-  published entries. Drafts are indistinguishable from unknown entries in HTML,
-  JSON, pagination, counts, links, status, and error wording.
+- Signed-out and non-owner visitors read only explicit public projections: the
+  profile, published entries, and implemented published custom pages. Draft and
+  unknown resources are indistinguishable in every public surface.
 - Keep public APIs versioned under `/api/v1` and discovery at
   `/.well-known/aitta-social.json`.
 - Preserve the required protocol 1.0 `accountType` field and its documented
@@ -205,14 +208,15 @@ file. Keep this file strictly below 32,000 bytes and run
   a D1 row, environment object, authenticated user, or private domain object.
 - Treat document metadata as another explicit public projection. Root metadata
   may use only the bounded public display name and short description; permalink
-  metadata may additionally use only a published entry's bounded public text
-  and timestamps. Construct canonical and sharing URLs from the normalized
-  configured canonical URL, never `Host` or forwarding headers. Missing valid
-  public profile/canonical setup uses neutral `noindex, nofollow` metadata with
-  no canonical URL or image reference. Keep handler-produced HTML dynamic with
-  `no-store` and `must-revalidate` so a profile, publication-state change, or
-  private value is not frozen into a build or cross-request application cache;
-  do not alter documented JSON or static-asset caching incidentally.
+  metadata may additionally use a published entry's bounded public text and
+  timestamps, and an implemented published custom page may use only its bounded
+  normalized title, description, path, and reviewed asset. Construct canonical
+  and sharing URLs from the normalized configured canonical URL, never `Host`
+  or forwarding headers. Missing valid public profile/canonical setup uses
+  neutral `noindex, nofollow` metadata with no canonical URL or image reference.
+  Keep handler-produced HTML dynamic with `no-store` and `must-revalidate` so a
+  publication change or private value is not frozen into a build or cross-
+  request application cache; do not alter JSON/static-asset caching incidentally.
 - Preserve stable entry identifiers, canonical configured URLs, documented JSON
   envelopes, correct content types/statuses, deterministic pagination, and
   resource links. Do not derive canonical success links from an untrusted
@@ -247,9 +251,10 @@ file. Keep this file strictly below 32,000 bytes and run
   frame primitives across every human route, including setup, unavailable,
   not-found, Privacy, Technical, and owner-access states. Destinations and
   private/public context may differ, but individual pages must not invent
-  parallel chrome. Keep Privacy, Technical information, and the official
-  GitHub source discoverable in the common footer; only the optional powered-by
-  attribution may be hidden by its existing owner control.
+  parallel chrome. A bounded published `SiteShell` may add public brand,
+  navigation, and footer content but cannot hide Manage, Privacy, Technical, or
+  the official GitHub source; only the optional
+  powered-by attribution may be hidden by its existing owner control.
 - Maintain one small, documented AittaSocial-specific visual vocabulary for
   meanings shared across public and owner surfaces: semantic surfaces, text,
   separators, focus, 44-pixel controls, fields, actions, status, notices, and
@@ -258,19 +263,17 @@ file. Keep this file strictly below 32,000 bytes and run
   owner workspace compositionally distinct.
 - Prefer narrowly named product elements when the same interaction and meaning
   genuinely repeat. Do not turn visual consistency or source customization into
-  a generic UI framework, card or layout factory, runtime theme system,
-  arbitrary CSS/HTML input, empty extension point, or public/owner
-  authorization coupling. Central compile-time tokens and the accepted bounded
-  semantic owner controls are the customization boundary unless a new product
-  capability is separately accepted in `PLAN.md`.
+  a generic UI framework, layout factory, theme system, raw CSS/HTML renderer,
+  empty extension point, or public/owner auth coupling. Closed page documents,
+  design tokens, and compiled page-body style rules are the boundary.
 - Use constrained accent/density choices, few colors, no gradients, no
   unnecessary generated imagery, and no generic dashboard clutter.
 - Keep the template's default identity typographic and its sharing metadata
   text-only; a generic software logo, favicon, or preview image does not
   represent the configured profile. An owner-approved source customization may
-  add a directly checked-in asset and an accessible text alternative. Do not
-  add a runtime asset resolver, URL setting, upload UI, media manager, R2, or a
-  storage abstraction for identity assets.
+  add a checked-in asset and accessible text alternative. An accepted asset task
+  may add bounded same-origin raster assets with D1 metadata and R2 bytes, but
+  no remote URL, scriptable format, public upload, or generic media framework.
 - Keep the restrained “Powered by AittaSocial” reference owner-hideable.
 - Supported runtime customization must survive reload and upgrade without
   changing the Git checkout. A downstream repository fork may be an optional

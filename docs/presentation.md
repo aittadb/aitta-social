@@ -127,6 +127,68 @@ four supported kinds keep the same source-first structure. Drafts never affect
 public hierarchy, counts, links, or wording.
 Optional Hub availability never selects or modifies any public state.
 
+## Accepted owner-managed website composition
+
+TASK-187 defines a future bounded website replacement model without changing
+the current presentation. Until its follow-on implementation tasks land, the
+profile and update stream remain the homepage and there is no custom page,
+shell, design, CSS, or upload control.
+
+The accepted model separates three owner-published concerns:
+
+- `PageDocumentV1` is safe semantic content. It supplies one page title plus
+  bounded sections, headings, paragraphs, lists, link groups, inline emphasis,
+  code, and links. The first page slice deliberately excludes images, custom
+  shell content, homepage selection, and CSS.
+- `SiteShellV1` later adds bounded brand text, page-aware navigation, footer
+  groups, footer text, and a selected homepage around the common public frame.
+  It composes with fixed Manage, Privacy, Technical, GitHub, Manifest, Profile,
+  and Updates destinations rather than replacing them.
+- `SiteDesignV1` later adds validated palette, system typography, content
+  width, corner, and spacing. A still-later version may add compiled page-body
+  style rules. Neither becomes a runtime component registry, template engine,
+  global stylesheet, or owner-workspace theme.
+
+HTML and CSS are optional import formats only. The owner sees the normalized
+page or compiled style result before publication. Raw source is not rendered,
+retained as hidden executable content, or applied to the owner workspace.
+Custom JavaScript, forms, embeds, third-party resources, remote fonts, and
+remote assets are unsupported.
+
+Published custom pages use normalized direct paths such as `/about` or
+`/work/projects`. The system reserves authentication, owner, API, discovery,
+Privacy, Technical, entry, update, asset, framework, and static paths. Page
+navigation refers to stable page identity so a reviewed path publication can
+update destinations without accepting arbitrary internal URLs.
+
+The current profile/update root remains the default. A later explicit published
+homepage selection may render one published custom page at `/`; the established
+profile and update stream then remains at `/updates`. Clearing the selection
+restores the default. Draft editing never changes the published page, shell,
+design, homepage, metadata, or navigation. Unavailable or invalid customization
+falls back to fixed safe product presentation, never a partially rendered
+document.
+
+The representative replacement shape requires responsive section navigation,
+a hero, substantial grouped text, lists/cards, calls to action, contact links,
+custom shell/footer content, and eventually one same-origin raster asset. It is
+an abstract acceptance shape only; no reference-site identity, copy, stylesheet,
+or asset is copied. The PageDocument `flow`, `split`, and `cards` compositions
+must cover that shape while collapsing to one readable phone column.
+
+A later asset slice may add normalized JPEG, PNG, WebP, and AVIF content after
+an accepted R2 boundary and explicit hosted-binding approval. Images require a
+meaningful bounded alternative text. Remote URLs, SVG/scriptable assets,
+original upload passthrough, custom fonts, and a generic media manager remain
+outside the presentation model.
+
+The detailed types, bounds, threat controls, route behavior, metadata, asset
+ownership, migration approach, and the one exact first implementation row are
+recorded in
+`docs/acceptance/task-187-safe-owner-managed-website.md`. Later outcomes are
+promoted one independently useful slice at a time after current evidence is
+reviewed; they are not current capability.
+
 ## Accessibility and responsive behavior
 
 Source order matches reading and focus order: shared navigation, one Identity
