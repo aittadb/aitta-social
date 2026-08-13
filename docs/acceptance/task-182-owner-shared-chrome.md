@@ -36,13 +36,49 @@ remain regression coverage for the unchanged boundaries.
 
 ## Rendered evidence
 
-Rendered compiled-Worker evidence will be recorded against the exact validated
-task commit before integration. It must cover configured owner Home, Identity,
-new-update, and existing-update pages plus non-owner and missing-owner safe
-states at 320, 390, and 1440 CSS pixels; the signed-out redirect; 320 CSS pixels
-at device pixel ratio 4; native keyboard focus; 44-pixel targets; touch input;
-forced colors; reduced motion; overflow, obstruction, private-canary, and
-console checks. No hosted Site or external state is used.
+The exact compiled Worker from `cff764a175acb3c0978699fc884dd429ba8d3152`
+was exercised through a disposable loopback-only fixture. It contained one
+configured profile, one long unbroken private draft, non-owner and missing-owner
+states whose D1 binding throws a private canary if read, and a signed-out state.
+It used no hosted Site, active configuration, retained identity, or external
+state.
+
+At 320, 390, and 1440 CSS pixels, all 18 configured owner Home, Identity,
+new-update, existing-update, non-owner, and missing-owner cells had exactly one
+main landmark, one global skip target, one private header, one owner footer,
+and all six fixed resource links. Configured pages had exactly one three-link
+owner navigation and one current-page state; safe states had neither that
+navigation nor owner forms or entry lists. Every visible control was at least
+44 by 44 CSS pixels, no control was off-screen, no fixed or sticky owner chrome
+obstructed content, and `scrollWidth` equalled `clientWidth`. The expected
+vertical scrollbar reduced clients to 305, 375, and 1425 CSS pixels,
+respectively, without horizontal overflow. Neither auth-result nor D1-failure
+canaries appeared.
+
+At 320 CSS pixels and device pixel ratio 4, the existing-update page passed
+forced-colors, reduced-motion, coarse-pointer, and touch emulation with equal
+305-pixel client and scroll widths, zero undersized or off-screen controls,
+zero sticky/fixed obstruction, no nonzero transition or animation duration,
+and `scroll-behavior: auto`. Direct native keyboard focus checks covered the
+skip link, Manage, View Aitta, all three owner destinations, Privacy,
+Technical, GitHub, and sign-out; each was visible and received the forced-color
+3-pixel focus outline. The direct checks establish the shared chrome focus
+treatment; a complete sequential-Tab traversal was not separately enumerated.
+Under the same touch/coarse-pointer emulation, native `View Aitta` and Identity
+link activation reached the public document and owner Identity document, and
+the latter retained its current-page state. Browser warn/error logs were empty.
+
+The signed-out browser request reached the exact Sites navigation URL
+`/signin-with-chatgpt?return_to=%2Fowner` and rendered no owner frame or owner
+navigation. Automated compiled-Worker tests additionally pin that redirect and
+authorization-before-D1 behavior for all four owner routes without retaining a
+private body.
+
+The source gates for this exact runtime were `npm run validate` 288/288,
+`npm run db:generate` with no schema change, `npm audit --omit=dev` with zero
+vulnerabilities, and a clean diff check. This evidence-only record amendment
+does not alter runtime source or tests. Independent review and final rebase
+evidence are recorded by integration before task archival.
 
 ## Non-effects
 
