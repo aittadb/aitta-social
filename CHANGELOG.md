@@ -1,5 +1,27 @@
 # Changelog
 
+- **TASK-196 — Made private publication-state mutation a truthful JSON-first
+  browser API.** `PUT /api/private/entries/{id}/state` now preserves
+  same-origin-before-owner authorization, then accepts only bounded JSON and
+  returns an allowlisted, no-store `owner-entry` resource on exact `200`, or
+  structured JSON for `400`, `404`, `406`, `415`, `422`, and unexpected `500`
+  outcomes. Unsupported methods always return JSON `405 + Allow: PUT`
+  independently of `Accept`. The publication client sends `Accept`, confirms
+  only the requested stable ID/state/action document, reloads after confirmed
+  transitions, keeps structured 4xx results correctable, and locks only the
+  lifecycle action for malformed, network, or unconfirmed results. Existing
+  delete bytes and recovery remain unchanged. Validation: integrated commits
+  `dd00477` and `d196f19`; full validation passed 493/493, migration generation
+  found no schema change, production audit found zero vulnerabilities, and
+  diff checks passed. Independent Sol review found no P0/P1/P2 issue and
+  independently passed 45 focused checks. Disposable compiled-Worker evidence
+  covers draft/published transition and public projection, cancellation,
+  422/500/malformed recovery, non-owner privacy, 320/390/1440, DPR-4,
+  forced colors, reduced motion, coarse touch, 44-pixel controls, no document
+  overflow, and a clean console. Safari's maximum zoom had no numeric reading,
+  and a sequential-Tab traversal was not claimed. No hosted, data,
+  configuration, schema, migration, deployment, or external state changed.
+
 - **TASK-165 — Made update deletion an explicit, recoverable owner action.** A
   native confirmation now names the bounded update label and stable identifier;
   cancellation sends no request. The retained owner-only `DELETE` operation
