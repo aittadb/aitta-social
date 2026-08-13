@@ -1,5 +1,25 @@
 # Changelog
 
+- **TASK-163 — Make each update kind self-explanatory while composing.**
+  Added concise kind-specific requirements to the existing body-first private
+  composer without unmounting or discarding body, title, or destination values
+  when the kind changes. Link now expresses and uses its native destination
+  requirement; leaving Link clears only stale Link-specific server feedback.
+  The selector derives its choices and guidance exhaustiveness from the
+  canonical entry-kind list. Existing create/edit payloads, authorization, D1,
+  draft privacy, public contracts, and navigation remain unchanged. Validation:
+  integrated commit `d88eccb`; full validation (249/249), focused composer
+  coverage, migration generation, production audit (zero vulnerabilities), and
+  diff checks pass. An independent Sol review found no P0/P1/P2 issue.
+  Disposable compiled-Worker evidence covers all kinds/value retention, native
+  empty-Link validation, long content, synthetic-500 recovery with one request
+  and retry lock, denial/canary states, 320/390/1440, DPR-4 reflow, forced
+  colors, reduced motion, coarse touch, visible focus, 44-pixel targets, no
+  overflow, and clean console logs. Residual uncertainty: the controller did
+  not complete a sequential hardware-Tab traversal. No schema, Site, hosted
+  data, setting, access, DNS, domain, Hub, sibling, `main`, deployment, or
+  external state changed.
+
 - **TASK-162 — Clarify restrained Identity appearance controls and preview.**
   Reframed the existing constrained accent, update-spacing, and attribution
   choices as compact secondary Appearance controls beside a transient owner
