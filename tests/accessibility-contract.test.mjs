@@ -201,7 +201,7 @@ test("CSS preserves responsive, reduced-motion, focus, touch-target, and no-grad
   assert.match(css, /@media\s*\(max-width:\s*640px\)/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /\.field-grid-two\s*\{\s*grid-template-columns:\s*1fr/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-draft-preview\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s);
+  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-appearance-layout, \.identity-appearance-preview\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s);
   assert.match(css, /\.identity-draft-preview > \*\s*\{[^}]*min-width:\s*0/s);
   assert.match(css, /\.identity-draft-preview p:not\(\.eyebrow\)\s*\{[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.owner-page-header\s*\{[^}]*flex-direction:\s*column/s);
@@ -237,7 +237,7 @@ test("client mutation controls announce status and use semantic form controls", 
   assert.match(profileForm, /<fieldset className="identity-primary-fields">/);
   assert.match(profileForm, /<legend>Required Identity<\/legend>/);
   assert.match(profileForm, /<details[\s\S]*className="identity-optional-details"[\s\S]*<summary>[\s\S]*Optional public details/);
-  assert.match(profileForm, /<legend>Presentation<\/legend>/);
+  assert.match(profileForm, /<legend>Appearance<\/legend>/);
   assert.doesNotMatch(profileForm, /accountType|name="accountType"|>Presence type/);
 });
 

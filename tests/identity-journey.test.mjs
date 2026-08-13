@@ -230,7 +230,7 @@ test("Identity journey remains semantic, touch-friendly, responsive, and motion-
   assert.match(formSource, /Server-saved readiness/);
   assert.match(formSource, /Unsaved changes/);
   assert.match(formSource, /server-saved readiness above has not changed/i);
-  assert.match(formSource, /setDirty\(!sameFormValues\(formValues\(form\), loadedValues\)\)/);
+  assert.match(formSource, /setDirty\(!sameFormValues\(formValues\(form\), loadedValues\) \|\| replacementSelected\)/);
   assert.match(formSource, /function initialFormValues\([\s\S]*displayName:[\s\S]*shortDescription:[\s\S]*introduction:[\s\S]*location:[\s\S]*website:[\s\S]*externalLinks:[\s\S]*canonicalUrl:[\s\S]*accentColor:[\s\S]*density:[\s\S]*hidePoweredBy:/);
   assert.match(formSource, /function sameFormValues\([\s\S]*Object\.keys\(left\)\.every/);
   assert.match(formSource, /function saveStateClass\([\s\S]*defaultSource === "stored" \|\| defaultSource === "empty"[\s\S]*\? "identity-save-state-saved"[\s\S]*: "identity-save-state-loaded"/);

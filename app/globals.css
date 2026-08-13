@@ -812,12 +812,28 @@ button, a { -webkit-tap-highlight-color: transparent; }
   background: var(--paper-raised);
 }
 .fieldset-introduction { margin: -0.75rem 0 1.25rem; color: var(--muted); }
-.identity-draft-preview { margin: 0 0 3rem; padding: 2rem; border: 1px solid var(--line); border-left: 6px solid var(--accent); background: var(--paper-raised); }
+.identity-draft-preview { margin: 0; padding: 1.25rem; border: 1px solid var(--line); border-left: 6px solid var(--accent); background: var(--paper-raised); }
 .identity-draft-preview > * { min-width: 0; }
 .identity-draft-preview p:not(.eyebrow) { overflow-wrap: anywhere; }
 .identity-draft-preview small { color: var(--muted); }
 .owner-form fieldset { margin: 0; padding: 0 0 3rem; border: 0; }
 .owner-form fieldset.identity-secondary-fields { padding-top: 3rem; border-top: 1px solid var(--line); }
+.identity-appearance-layout { display: grid; grid-template-columns: minmax(220px, 0.6fr) minmax(0, 1.4fr); gap: 1.5rem; align-items: start; }
+.identity-appearance-controls { min-width: 0; }
+.identity-appearance-preview { grid-template-columns: minmax(0, 1fr) minmax(190px, 0.75fr); gap: 1rem 1.25rem; align-items: start; }
+.identity-appearance-preview-heading { min-width: 0; }
+.identity-appearance-preview-state { display: grid; gap: 0.2rem; margin: 0 0 1rem; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); }
+.identity-appearance-preview-state strong { color: var(--ink); font-size: 0.85rem; }
+.identity-appearance-preview-state span { color: var(--muted); font-size: 0.78rem; }
+.identity-appearance-preview-unsaved { border-left: 4px solid var(--accent); }
+.identity-appearance-sample { grid-column: 1 / -1; min-width: 0; display: grid; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.identity-appearance-sample-summary { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; color: var(--muted); font-size: 0.74rem; font-weight: 700; text-transform: uppercase; }
+.identity-appearance-sample-update { min-width: 0; display: grid; gap: 0.3rem; padding: 1rem; border: 1px solid var(--line); border-radius: 5px; }
+.identity-appearance-sample-update strong, .identity-appearance-sample-update span { overflow-wrap: anywhere; }
+.identity-appearance-sample-update span { color: var(--muted); font-size: 0.82rem; }
+.identity-appearance-preview.density-compact .identity-appearance-sample { gap: 0.5rem; }
+.identity-appearance-preview.density-compact .identity-appearance-sample-update { gap: 0.15rem; padding-block: 0.6rem; }
+.identity-appearance-sample-attribution { margin: 0; padding-top: 0.65rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.72rem; }
 .identity-optional-details { margin: 0 0 3rem; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .identity-optional-details summary { min-height: var(--control-min-height); padding: 0.7rem 0; color: var(--ink); cursor: pointer; font-family: var(--sans); font-size: 1.05rem; font-weight: 700; overflow-wrap: anywhere; }
 .identity-optional-details summary::marker { color: var(--accent); font-size: 0.9em; }
@@ -927,6 +943,8 @@ code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; bac
   .owner-summary > div { padding-inline: 0.65rem; }
   .owner-summary strong { font-size: 0.95rem; }
   .field-grid-two { grid-template-columns: 1fr; }
+  .identity-appearance-layout, .identity-appearance-preview { grid-template-columns: minmax(0, 1fr); }
+  .identity-appearance-sample { grid-column: auto; }
   .identity-optional-details-count { white-space: normal; }
   .identity-readiness, .identity-form-readiness, .identity-draft-preview { grid-template-columns: minmax(0, 1fr); }
   .identity-save-state { grid-template-columns: 1fr; gap: 0.25rem; }
@@ -947,6 +965,8 @@ code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; bac
 
 @media (forced-colors: active) {
   :focus-visible { outline-color: Highlight; box-shadow: none; }
+  .identity-draft-preview { border-left-color: CanvasText; }
+  .identity-appearance-preview-unsaved { border-left-color: Highlight; }
   .presence-identity-field { border-bottom: 1px solid CanvasText; }
   .presence-identity-field::before, .presence-identity-field::after { display: none; }
   .presence-identity-tile { border-color: CanvasText; }

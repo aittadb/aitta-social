@@ -253,12 +253,12 @@ hierarchy; the empty state does not reserve a large blank panel.
 
 The Identity route makes its four required values the first editing task:
 display name, short description, canonical URL fallback, and longer
-introduction. They sit in one bounded primary fieldset before the existing
-preview, optional public details, and presentation controls. Location, website,
+introduction. They sit in one bounded primary fieldset before optional public
+details and one compact secondary Appearance block. Location, website,
 external links, accent, density, and attribution retain their complete existing
 payload and remain secondary.
 
-Optional public details use one native `details` disclosure after the preview.
+Optional public details use one native `details` disclosure before Appearance.
 Its visible summary names the three public categories and shows the concise
 current count, such as “1 of 3 added.” The fields remain mounted while the
 section is closed, so values, native labels, browser validation, and save
@@ -269,18 +269,45 @@ summary target, wraps long text, becomes a one-column form at phone widths, and
 uses the shared focus, forced-colors, and reduced-motion behavior. Its native
 disclosure marker remains visible as the open/closed affordance.
 
+The Appearance block places the three restrained choices beside one transient
+appearance sample. For a valid stored accent, the color control continues to
+show its exact normalized six-digit preference while the sample uses the shared
+contrast-safe resolver. An invalid historical accent is never passed into the
+native color control: it shows the reviewed safe fallback and requires the owner
+to choose a replacement before any save. Loading, editing another field, or
+reloading therefore cannot rewrite that historical D1 value. Update spacing switches the two sample rows
+between the existing comfortable and compact choices. Hiding the optional
+attribution removes it from the sample while the explicit `Attribution · Hidden`
+summary keeps that choice understandable. No theme, free-form color/CSS input,
+or additional persisted presentation value is introduced.
+
+The sample says **Saved appearance** when it reflects an existing loaded
+profile, **Appearance not saved** before a profile exists, and **Unsaved
+preview** after any form value changes. The unsaved message says that the open
+choices remain temporary until Save Identity succeeds. Restoring every control
+to its exact loaded value returns the saved or not-saved label when no
+historical accent replacement has been selected. A deliberate replacement of
+a malformed historical accent remains unsaved even when it equals the displayed
+fallback. Both the sample and the form-wide save strip therefore identify
+persistence in text rather than through color alone.
+
 The readiness panel is explicitly server-saved. A separate saved/unsaved strip
 compares every current form value with its exact loaded baseline: all required
 fields, location, website, the complete external-links text, canonical URL,
 accent, density, and attribution checkbox. Changing any value marks the form
-unsaved; restoring every value exactly restores its loaded state. Input events
-update only transient in-memory preview values and the local four-field count;
-neither is presented as readiness or durability. A successful save reloads
-`/owner/profile` so the server derives readiness again. Reloading before success
-discards the local edits. The saved and live accent preview continues
-to use the same derived `--accent` as public rendering, including its border,
-label, and native progress accent. The color input continues to represent the
-owner's stored preference rather than the derived rendering color.
+unsaved; restoring every value exactly restores its loaded state unless the
+owner has selected a deliberate historical accent replacement. Input events
+update only transient in-memory preview values, the two appearance summaries,
+and the local four-field count; none is presented as readiness or durability. A
+successful save reloads `/owner/profile` so the server derives readiness again.
+Reloading before success discards the local edits. The saved and live accent
+preview continues to use the same derived `--accent` as public rendering,
+including its border, label, and native progress accent. For a valid stored
+accent, the color input represents the owner's stored preference rather than
+the derived rendering color. For a malformed historical value, it instead
+shows the safe fallback and remains replacement-required until the owner
+operates the control; that deliberate replacement remains unsaved even when it
+equals the fallback.
 
 The normalized effective public URL is shown as compact secondary text with a
 safe protected-setting or saved-Identity explanation. Raw runtime

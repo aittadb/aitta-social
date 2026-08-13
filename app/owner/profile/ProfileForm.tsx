@@ -12,7 +12,16 @@ import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { ProfileInput } from "@/lib/types";
 import { classifyOwnerMutationResponse } from "../_components/owner-mutation-outcome";
 
-type DraftPreview = Pick<ProfileInput, "displayName" | "shortDescription" | "introduction" | "canonicalUrl" | "accentColor">;
+type DraftPreview = Pick<
+  ProfileInput,
+  | "displayName"
+  | "shortDescription"
+  | "introduction"
+  | "canonicalUrl"
+  | "accentColor"
+  | "density"
+  | "hidePoweredBy"
+>;
 type ProfileFieldName = keyof ProfileInput;
 type FieldErrors = Partial<Record<ProfileFieldName, string>>;
 type CanonicalDefaultSource = "stored" | "runtime-substitution" | "invalid-stored-omitted" | "empty";
@@ -28,6 +37,9 @@ type FormValues = {
   density: string;
   hidePoweredBy: boolean;
 };
+
+const defaultAccentPreference = "#31554d";
+const validAccentPreference = /^#[0-9a-f]{6}$/i;
 
 const profileFieldNames = new Set<ProfileFieldName>([
   "displayName",
@@ -63,6 +75,9 @@ export function ProfileForm({
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [recoveryRequired, setRecoveryRequired] = useState(false);
+  const historicalAccentReplacementNeeded = Boolean(profile && !isValidAccentPreference(profile.accentColor));
+  const [historicalAccentReplacementChosen, setHistoricalAccentReplacementChosen] = useState(false);
+  const accentReplacementRequired = historicalAccentReplacementNeeded && !historicalAccentReplacementChosen;
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const optionalDetailsRef = useRef<HTMLDetailsElement>(null);
   const [optionalDetailsOpen, setOptionalDetailsOpen] = useState(() => hasOptionalPublicDetails(loadedValues));
@@ -72,7 +87,9 @@ export function ProfileForm({
     shortDescription: profile?.shortDescription ?? "",
     introduction: profile?.introduction ?? "",
     canonicalUrl: canonicalDefault,
-    accentColor: profile?.accentColor ?? "#31554d",
+    accentColor: editableAccentPreference(profile?.accentColor),
+    density: profile?.density ?? "comfortable",
+    hidePoweredBy: profile?.hidePoweredBy ?? false,
   });
 
   function showUnconfirmedSave() {
@@ -96,23 +113,32 @@ export function ProfileForm({
 
   function updatePreview(event: FormEvent<HTMLFormElement>) {
     const form = new FormData(event.currentTarget);
+    const control = event.target;
+    const fieldName = control instanceof HTMLInputElement ||
+      control instanceof HTMLTextAreaElement ||
+      control instanceof HTMLSelectElement
+      ? profileFieldName(control.name)
+      : null;
+    const replacementSelected = historicalAccentReplacementNeeded &&
+      (historicalAccentReplacementChosen || fieldName === "accentColor");
     setOptionalDetailsCount(optionalPublicDetailsCount(formValues(form)));
     setPreview({
       displayName: String(form.get("displayName") ?? ""),
       shortDescription: String(form.get("shortDescription") ?? ""),
       introduction: String(form.get("introduction") ?? ""),
       canonicalUrl: String(form.get("canonicalUrl") ?? ""),
-      accentColor: String(form.get("accentColor") ?? "#31554d"),
+      accentColor: String(form.get("accentColor") ?? defaultAccentPreference),
+      density: previewDensity(String(form.get("density") ?? "comfortable")),
+      hidePoweredBy: form.get("hidePoweredBy") === "on",
     });
-    setDirty(!sameFormValues(formValues(form), loadedValues));
+    setDirty(!sameFormValues(formValues(form), loadedValues) || replacementSelected);
 
-    const control = event.target;
     if (
       control instanceof HTMLInputElement ||
       control instanceof HTMLTextAreaElement ||
       control instanceof HTMLSelectElement
     ) {
-      const fieldName = profileFieldName(control.name);
+      if (fieldName === "accentColor") setHistoricalAccentReplacementChosen(true);
       if (fieldName && fieldErrors[fieldName]) {
         setFieldErrors((current) => ({ ...current, [fieldName]: undefined }));
       }
@@ -130,6 +156,15 @@ export function ProfileForm({
       if (hasInvalidOptionalPublicDetails(formElement)) openOptionalDetails();
       setStatus("Identity was not saved. Complete the required fields and correct invalid URLs.");
       formElement.reportValidity();
+      return;
+    }
+    if (accentReplacementRequired) {
+      const accentErrors = {
+        accentColor: "Choose an accent color before saving this historical profile.",
+      };
+      setFieldErrors(accentErrors);
+      setStatus("Identity was not saved. Choose a replacement for the historical accent and try again.");
+      focusFirstInvalidField(formElement, accentErrors);
       return;
     }
 
@@ -270,23 +305,6 @@ export function ProfileForm({
         </label>
       </fieldset>
 
-      <aside
-        className="identity-draft-preview"
-        aria-labelledby="identity-draft-preview-title"
-        style={{ "--accent": resolvePresentationAccent(preview.accentColor) } as CSSProperties}
-      >
-        <div>
-          <p className="eyebrow">{dirty ? "Unsaved local preview" : profile ? "Loaded Identity preview" : "New Identity preview"}</p>
-          <h2 id="identity-draft-preview-title">{preview.displayName.trim() || "Your display name"}</h2>
-          <p>{preview.shortDescription.trim() || "A short description will introduce this profile."}</p>
-        </div>
-        <div className="identity-draft-progress">
-          <label htmlFor="identity-draft-progress">Fields filled in this form: {requiredCount(preview)} of 4</label>
-          <progress id="identity-draft-progress" max="4" value={requiredCount(preview)}>{requiredCount(preview)} of 4</progress>
-          <small>This local count is not server readiness. {dirty ? "It remains temporary until Save Identity succeeds." : canonicalDefaultSource === "invalid-stored-omitted" ? "The preview excludes the invalid saved canonical fallback described above." : canonicalDefaultSource === "runtime-substitution" ? "The preview includes the safe runtime URL substitution described above." : profile ? "The preview uses the loaded saved values." : "Nothing has been saved yet."}</small>
-        </div>
-      </aside>
-
       <details
         ref={optionalDetailsRef}
         className="identity-optional-details"
@@ -321,36 +339,85 @@ export function ProfileForm({
       </details>
 
       <fieldset className="identity-secondary-fields">
-        <legend>Presentation</legend>
-        <div className="field-grid field-grid-two">
-          <label className="field color-field" htmlFor="profile-accentColor">
-            <span>Accent color</span>
-            <input
-              id="profile-accentColor"
-              name="accentColor"
-              type="color"
-              defaultValue={profile?.accentColor ?? "#31554d"}
-              aria-invalid={Boolean(fieldErrors.accentColor) || undefined}
-              aria-describedby={errorId("accentColor", fieldErrors.accentColor)}
-            />
-            <FieldError name="accentColor" error={fieldErrors.accentColor} />
-          </label>
-          <label className="field" htmlFor="profile-density">
-            <span>Update density</span>
-            <select
-              id="profile-density"
-              name="density"
-              defaultValue={profile?.density ?? "comfortable"}
-              aria-invalid={Boolean(fieldErrors.density) || undefined}
-              aria-describedby={errorId("density", fieldErrors.density)}
-            >
-              <option value="comfortable">Comfortable</option>
-              <option value="compact">Compact</option>
-            </select>
-            <FieldError name="density" error={fieldErrors.density} />
-          </label>
+        <legend>Appearance</legend>
+        <p className="fieldset-introduction">Optional restrained choices for this Aitta’s public profile and update list.</p>
+        <div className="identity-appearance-layout">
+          <div className="identity-appearance-controls">
+            <label className="field color-field" htmlFor="profile-accentColor">
+              <span>Accent color</span>
+              <input
+                id="profile-accentColor"
+                name="accentColor"
+                type="color"
+                defaultValue={editableAccentPreference(profile?.accentColor)}
+                aria-invalid={Boolean(fieldErrors.accentColor) || accentReplacementRequired || undefined}
+                aria-describedby={describedBy("accent-color-help", errorId("accentColor", fieldErrors.accentColor))}
+              />
+              <small id="accent-color-help">{accentReplacementRequired
+                ? "The historical saved accent cannot be shown safely. Choose a replacement before saving; reload leaves the stored value unchanged."
+                : "The saved choice stays exact. This preview derives a contrast-safe display color."}</small>
+              <FieldError name="accentColor" error={fieldErrors.accentColor} />
+            </label>
+            <label className="field" htmlFor="profile-density">
+              <span>Update spacing</span>
+              <select
+                id="profile-density"
+                name="density"
+                defaultValue={profile?.density ?? "comfortable"}
+                aria-invalid={Boolean(fieldErrors.density) || undefined}
+                aria-describedby={describedBy("density-help", errorId("density", fieldErrors.density))}
+              >
+                <option value="comfortable">Comfortable</option>
+                <option value="compact">Compact</option>
+              </select>
+              <small id="density-help">Choose comfortable or compact spacing for public updates.</small>
+              <FieldError name="density" error={fieldErrors.density} />
+            </label>
+            <label className="check-field"><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” attribution</span></label>
+          </div>
+
+          <aside
+            className={`identity-draft-preview identity-appearance-preview density-${previewDensity(preview.density)}`}
+            aria-labelledby="identity-draft-preview-title"
+            style={{ "--accent": resolvePresentationAccent(preview.accentColor) } as CSSProperties}
+          >
+            <div className="identity-appearance-preview-heading">
+              <p className="eyebrow">Appearance preview</p>
+              <p className={`identity-appearance-preview-state ${dirty ? "identity-appearance-preview-unsaved" : profile ? "identity-appearance-preview-saved" : "identity-appearance-preview-new"}`}>
+                <strong>{dirty ? "Unsaved preview" : profile ? "Saved appearance" : "Appearance not saved"}</strong>
+                <span>{dirty
+                  ? "These choices are temporary until Save Identity succeeds."
+                  : profile
+                    ? "This matches the appearance loaded from this Aitta."
+                    : "Choose an appearance, then save Identity to make it public."}</span>
+              </p>
+              <h2 id="identity-draft-preview-title">{preview.displayName.trim() || "Your display name"}</h2>
+              <p>{preview.shortDescription.trim() || "A short description will introduce this profile."}</p>
+            </div>
+
+            <div className="identity-draft-progress">
+              <label htmlFor="identity-draft-progress">Fields filled in this form: {requiredCount(preview)} of 4</label>
+              <progress id="identity-draft-progress" max="4" value={requiredCount(preview)}>{requiredCount(preview)} of 4</progress>
+              <small>This local count is not server readiness. {dirty ? "It remains temporary until Save Identity succeeds." : canonicalDefaultSource === "invalid-stored-omitted" ? "The preview excludes the invalid saved canonical fallback described above." : canonicalDefaultSource === "runtime-substitution" ? "The preview includes the safe runtime URL substitution described above." : profile ? "The preview uses the loaded saved values." : "Nothing has been saved yet."}</small>
+            </div>
+
+            <div className="identity-appearance-sample" aria-label="Public update appearance sample">
+              <div className="identity-appearance-sample-summary" aria-label="Current appearance choices">
+                <span>Spacing · {previewDensity(preview.density) === "compact" ? "Compact" : "Comfortable"}</span>
+                <span>Attribution · {preview.hidePoweredBy ? "Hidden" : "Visible"}</span>
+              </div>
+              <article className="identity-appearance-sample-update">
+                <strong>Example public update</strong>
+                <span>Spacing changes here without changing update content.</span>
+              </article>
+              <article className="identity-appearance-sample-update">
+                <strong>Another public update</strong>
+                <span>The preview remains local until the complete form is saved.</span>
+              </article>
+              {preview.hidePoweredBy ? null : <p className="identity-appearance-sample-attribution">Powered by AittaSocial</p>}
+            </div>
+          </aside>
         </div>
-        <label className="check-field"><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” attribution</span></label>
       </fieldset>
 
       <div className="form-footer">
@@ -419,6 +486,18 @@ function requiredCount(preview: DraftPreview): number {
     .length;
 }
 
+function previewDensity(value: string): ProfileInput["density"] {
+  return value === "compact" ? "compact" : "comfortable";
+}
+
+function isValidAccentPreference(value: unknown): value is string {
+  return typeof value === "string" && validAccentPreference.test(value);
+}
+
+function editableAccentPreference(value: unknown): string {
+  return isValidAccentPreference(value) ? value.toLowerCase() : defaultAccentPreference;
+}
+
 function optionalPublicDetailsCount(values: Pick<FormValues, "location" | "website" | "externalLinks">): number {
   return [values.location, values.website, values.externalLinks]
     .filter((value) => value.trim().length > 0)
@@ -438,7 +517,7 @@ function initialFormValues(profile: ProfileInput | null, canonicalDefault: strin
     website: profile?.website ?? "",
     externalLinks: profile?.externalLinks.map((link) => `${link.label} | ${link.url}`).join("\n") ?? "",
     canonicalUrl: canonicalDefault,
-    accentColor: profile?.accentColor ?? "#31554d",
+    accentColor: editableAccentPreference(profile?.accentColor),
     density: profile?.density ?? "comfortable",
     hidePoweredBy: profile?.hidePoweredBy ?? false,
   };
@@ -453,7 +532,7 @@ function formValues(form: FormData): FormValues {
     website: String(form.get("website") ?? ""),
     externalLinks: String(form.get("externalLinks") ?? ""),
     canonicalUrl: String(form.get("canonicalUrl") ?? ""),
-    accentColor: String(form.get("accentColor") ?? "#31554d"),
+    accentColor: String(form.get("accentColor") ?? defaultAccentPreference),
     density: String(form.get("density") ?? "comfortable"),
     hidePoweredBy: form.get("hidePoweredBy") === "on",
   };
