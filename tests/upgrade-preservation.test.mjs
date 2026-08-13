@@ -336,12 +336,12 @@ async function captureConfiguredBehavior(worker, canonicalUrl) {
   assertNoPrivatePublicCanary(publishedHtml);
 
   const draftApiResponse = await worker.fetch("/api/v1/entries/poc-v0-draft-private");
-  const missingApiResponse = await worker.fetch("/api/v1/entries/not-present");
   assert.equal(draftApiResponse.status, 404);
-  assert.equal(missingApiResponse.status, 404);
   assertPublicHeadersHaveNoPrivateCanary(draftApiResponse);
-  assertPublicHeadersHaveNoPrivateCanary(missingApiResponse);
   const draftApi = await responseJson(draftApiResponse);
+  const missingApiResponse = await worker.fetch("/api/v1/entries/not-present");
+  assert.equal(missingApiResponse.status, 404);
+  assertPublicHeadersHaveNoPrivateCanary(missingApiResponse);
   const missingApi = await responseJson(missingApiResponse);
   assert.deepEqual(draftApi, missingApi);
   assert.doesNotMatch(JSON.stringify(draftApi), new RegExp(`${draftTitleCanary}|${draftBodyCanary}`));
@@ -349,14 +349,14 @@ async function captureConfiguredBehavior(worker, canonicalUrl) {
   const draftHtmlResponse = await worker.fetch("/entries/poc-v0-draft-private", {
     headers: { accept: "text/html" },
   });
+  assert.equal(draftHtmlResponse.status, 404);
+  assertPublicHeadersHaveNoPrivateCanary(draftHtmlResponse);
+  const draftHtml = await draftHtmlResponse.text();
   const missingHtmlResponse = await worker.fetch("/entries/not-present", {
     headers: { accept: "text/html" },
   });
-  assert.equal(draftHtmlResponse.status, 404);
   assert.equal(missingHtmlResponse.status, 404);
-  assertPublicHeadersHaveNoPrivateCanary(draftHtmlResponse);
   assertPublicHeadersHaveNoPrivateCanary(missingHtmlResponse);
-  const draftHtml = await draftHtmlResponse.text();
   const missingHtml = await missingHtmlResponse.text();
   for (const html of [draftHtml, missingHtml]) {
     assert.match(html, /This update is not public/);
@@ -572,6 +572,7 @@ async function captureAuthorizationMatrix(
     body: JSON.stringify(profileInput({ shortDescription: "Must not be saved." })),
   });
   assert.equal(nonOwner.status, 403);
+  await consumeResponse(nonOwner);
   assert.deepEqual(await captureDatabase(worker.db), initial);
 
   const owner = await worker.fetch("/api/private/profile", {
@@ -580,6 +581,7 @@ async function captureAuthorizationMatrix(
     body: JSON.stringify(profileInput({ shortDescription: "Saved by the upgrade matrix." })),
   });
   assert.equal(owner.status, 204);
+  await consumeResponse(owner);
   const profile = await rows(
     worker.db,
     "SELECT account_type, short_description FROM profiles WHERE id = 1",
@@ -733,6 +735,10 @@ function profileInput(overrides = {}) {
 async function responseJson(response) {
   assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
   return JSON.parse(await response.text());
+}
+
+async function consumeResponse(response) {
+  await response.text();
 }
 
 function escapeRegExp(value) {

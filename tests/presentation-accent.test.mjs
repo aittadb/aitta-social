@@ -187,19 +187,17 @@ test("a malformed persisted legacy accent survives reopen without reaching publi
   worker = await createCompiledWorker({ persistPath });
 
   const homeResponse = await worker.fetch("/", { headers: { accept: "text/html" } });
+  const home = await homeResponse.text();
   const permalinkResponse = await worker.fetch("/entries/poc-v0-published-update", {
     headers: { accept: "text/html" },
   });
+  const permalink = await permalinkResponse.text();
   const ownerResponse = await worker.fetch("/owner/profile", {
     headers: { accept: "text/html", ...ownerHeaders(OWNER_EMAIL) },
   });
+  const owner = await ownerResponse.text();
   const siteResponse = await worker.fetch("/api/v1/site");
-  const [home, permalink, owner, site] = await Promise.all([
-    homeResponse.text(),
-    permalinkResponse.text(),
-    ownerResponse.text(),
-    responseJson(siteResponse),
-  ]);
+  const site = await responseJson(siteResponse);
 
   assertRenderedAccent(home, "public-shell", DEFAULT_ACCENT);
   assertRenderedAccent(permalink, "permalink-shell", DEFAULT_ACCENT);

@@ -109,6 +109,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     body: JSON.stringify(identity),
   });
   assert.equal(saveIdentity.status, 204);
+  await consumeResponse(saveIdentity);
   assert.deepEqual(await rows(
     worker.db,
     `SELECT display_name, account_type, short_description, introduction,
@@ -243,6 +244,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     headers: mutationHeaders(OWNER_EMAIL),
   });
   assert.equal(remove.status, 204);
+  await consumeResponse(remove);
   assert.deepEqual(await rows(worker.db, "SELECT id FROM entries WHERE id = ?", created.id), []);
 
   await closeWorker(worker);
@@ -316,6 +318,7 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
     body: JSON.stringify(replacementIdentity()),
   });
   assert.equal(nonOwnerWrite.status, 403);
+  await consumeResponse(nonOwnerWrite);
   assert.deepEqual(await contentSnapshot(worker.db), baseline);
   await close(worker);
 
@@ -333,6 +336,7 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
     body: JSON.stringify(replacementIdentity()),
   });
   assert.equal(missingOwnerWrite.status, 503);
+  await consumeResponse(missingOwnerWrite);
   assert.deepEqual(await contentSnapshot(worker.db), baseline);
   assert.match(await html(worker, "/"), /A preserved public update/i);
   await close(worker);
@@ -342,20 +346,20 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
     canonicalUrl: candidateCanonical,
   }));
   const beforeOutage = await contentSnapshot(worker.db);
-  const [publicDuringOutage, siteDuringOutage, manifestDuringOutage, ownerDuringOutage] = await Promise.all([
-    html(worker, "/"),
-    worker.fetch("/api/v1/site"),
-    worker.fetch("/.well-known/aitta-social.json"),
-    html(worker, "/owner", identityHeaders(OWNER_EMAIL)),
-  ]);
+  const publicDuringOutage = await html(worker, "/");
+  const siteDuringOutage = await worker.fetch("/api/v1/site");
+  const siteDuringOutageBody = await siteDuringOutage.text();
+  const manifestDuringOutage = await worker.fetch("/.well-known/aitta-social.json");
+  const manifestDuringOutageBody = await responseJson(manifestDuringOutage);
+  const ownerDuringOutage = await html(worker, "/owner", identityHeaders(OWNER_EMAIL));
   assert.match(publicDuringOutage, /Legacy Person Presence/i);
   assert.equal(siteDuringOutage.status, 200);
   assert.equal(manifestDuringOutage.status, 200);
   assert.match(ownerDuringOutage, /Legacy Person Presence/i);
   assertNoProtectedHubValues(`${publicDuringOutage}\n${ownerDuringOutage}`);
-  assert.doesNotMatch(await siteDuringOutage.text(), new RegExp(publicHubChallenge));
+  assert.doesNotMatch(siteDuringOutageBody, new RegExp(publicHubChallenge));
   assert.equal(
-    (await responseJson(manifestDuringOutage)).hubVerificationChallenge,
+    manifestDuringOutageBody.hubVerificationChallenge,
     publicHubChallenge,
   );
 
@@ -386,7 +390,9 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
   assert.deepEqual(retiredResponses[1], retiredResponses[2]);
   assert.equal(worker.outboundRequests.length, 0);
   assert.match(await html(worker, "/"), /A preserved public update/i);
-  assert.equal((await worker.fetch("/api/v1/entries")).status, 200);
+  const collectionResponse = await worker.fetch("/api/v1/entries");
+  assert.equal(collectionResponse.status, 200);
+  await consumeResponse(collectionResponse);
   assert.deepEqual(await contentSnapshot(worker.db), beforeOutage);
 });
 
@@ -525,20 +531,22 @@ async function assertEntryRow(db, id, expected) {
 }
 
 async function assertPubliclyAbsent(worker, id, canaries) {
-  const [home, permalink, detail, collection] = await Promise.all([
-    worker.fetch("/", { headers: { accept: "text/html" } }),
-    worker.fetch(`/entries/${id}`, { headers: { accept: "text/html" } }),
-    worker.fetch(`/api/v1/entries/${id}`),
-    worker.fetch("/api/v1/entries"),
-  ]);
+  const home = await worker.fetch("/", { headers: { accept: "text/html" } });
   assert.equal(home.status, 200);
+  const homeSource = await home.text();
+  const permalink = await worker.fetch(`/entries/${id}`, { headers: { accept: "text/html" } });
   assert.equal(permalink.status, 404);
+  const permalinkSource = await permalink.text();
+  const detail = await worker.fetch(`/api/v1/entries/${id}`);
   assert.equal(detail.status, 404);
+  const detailSource = JSON.stringify(await responseJson(detail));
+  const collection = await worker.fetch("/api/v1/entries");
+  const collectionSource = JSON.stringify(await responseJson(collection));
   const source = [
-    await home.text(),
-    await permalink.text(),
-    JSON.stringify(await responseJson(detail)),
-    JSON.stringify(await responseJson(collection)),
+    homeSource,
+    permalinkSource,
+    detailSource,
+    collectionSource,
   ].join("\n");
   for (const canary of canaries) {
     assert.doesNotMatch(source, new RegExp(escapeRegExp(canary), "iu"));
@@ -557,6 +565,10 @@ async function html(worker, pathname, headers = {}) {
 async function responseJson(response) {
   assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
   return JSON.parse(await response.text());
+}
+
+async function consumeResponse(response) {
+  await response.text();
 }
 
 function assertLeadingPrompt(source) {
