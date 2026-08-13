@@ -79,7 +79,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   });
   assert.equal(create.status, 201);
   const created = (await responseJson(create)).data;
-  assert.equal(created.state, "draft");
+  assert.equal(created.attributes.state, "draft");
 
   const edit = await fetchApp(`/api/private/entries/${created.id}`, {
     env,
@@ -206,7 +206,7 @@ test("assisted write fixtures fail closed for non-owner, missing owner, CSRF, an
       body: JSON.stringify(validEntryInput({ kind: "link", destinationUrl: null })),
     });
     assert.equal(invalidIdentity.status, 422);
-    assert.equal(invalidUpdate.status, 400);
+    assert.equal(invalidUpdate.status, 422);
     assert.equal(db.mutations.length, 0);
   });
 });

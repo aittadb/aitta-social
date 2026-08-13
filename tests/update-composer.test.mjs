@@ -128,11 +128,11 @@ test("draft create and edit preserve all four kinds and exact accepted values", 
     });
     assert.equal(response.status, 201);
     const created = (await responseJson(response)).data;
-    assert.equal(created.kind, fixture.kind);
-    assert.equal(created.title, fixture.title);
-    assert.equal(created.body, fixture.body);
-    assert.equal(created.destinationUrl, fixture.destinationUrl);
-    assert.equal(created.state, "draft");
+    assert.equal(created.attributes.kind, fixture.kind);
+    assert.equal(created.attributes.title, fixture.title);
+    assert.equal(created.attributes.body, fixture.body);
+    assert.equal(created.attributes.destinationUrl, fixture.destinationUrl);
+    assert.equal(created.attributes.state, "draft");
     createdIds.push(created.id);
   }
 
@@ -177,10 +177,12 @@ test("draft validation and authorization fail without mutation and private value
     headers: mutationHeaders(ownerEmail),
     body: JSON.stringify(validEntryInput({ body: "   " })),
   });
-  assert.equal(invalidBody.status, 400);
-  assert.deepEqual((await responseJson(invalidBody)).details, {
-    body: "Body must be between 1 and 50000 characters.",
-  });
+  assert.equal(invalidBody.status, 422);
+  assert.deepEqual((await responseJson(invalidBody)).error.fields, [{
+    name: "body",
+    code: "invalid",
+    message: "Body must be between 1 and 50000 characters.",
+  }]);
 
   const invalidLink = await fetchApp("/api/private/entries", {
     env,
@@ -188,10 +190,12 @@ test("draft validation and authorization fail without mutation and private value
     headers: mutationHeaders(ownerEmail),
     body: JSON.stringify(validEntryInput({ kind: "link", destinationUrl: null })),
   });
-  assert.equal(invalidLink.status, 400);
-  assert.deepEqual((await responseJson(invalidLink)).details, {
-    destinationUrl: "A link update needs a destination URL.",
-  });
+  assert.equal(invalidLink.status, 422);
+  assert.deepEqual((await responseJson(invalidLink)).error.fields, [{
+    name: "destinationUrl",
+    code: "invalid",
+    message: "A link update needs a destination URL.",
+  }]);
   assert.equal(db.mutations.length, 0);
 
   const deniedDb = new FakeD1({ entries: [] });

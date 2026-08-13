@@ -110,7 +110,9 @@ test("the same-origin gate runs before identity and database mutation", async (t
       });
       assert.equal(response.status, 403);
       assert.deepEqual(await responseJson(response), {
-        error: "Same-origin request required.",
+        data: null,
+        error: { code: "authorization_denied", message: "The request is not allowed." },
+        links: [],
       });
       assert.equal(db.mutations.length, 0);
     });
@@ -152,7 +154,7 @@ test("every private mutation route independently rejects a non-owner before touc
         ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
       });
       assert.equal(response.status, 403);
-      if (path === "/api/private/profile") {
+      if (path === "/api/private/profile" || path === "/api/private/entries") {
         assert.equal((await responseJson(response)).error.code, "authorization_denied");
       } else {
         assert.deepEqual(await responseJson(response), {
@@ -206,7 +208,7 @@ test("authorized draft lifecycle stays private until publish and supports every 
   });
   assert.equal(createdResponse.status, 201);
   const created = (await responseJson(createdResponse)).data;
-  assert.equal(created.state, "draft");
+  assert.equal(created.attributes.state, "draft");
   assert.match(created.id, /^[0-9a-f-]{36}$/i);
 
   const hiddenDetail = await fetchApp(`/api/v1/entries/${created.id}`, { env });
@@ -290,8 +292,8 @@ test("write boundaries require JSON, bound request size, and valid entry state",
       headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example", "content-type": "text/plain" },
       body: JSON.stringify(validEntryInput()),
     });
-    assert.equal(response.status, 400);
-    assert.match(JSON.stringify(await responseJson(response)), /Content-Type must be application\/json/);
+    assert.equal(response.status, 415);
+    assert.equal((await responseJson(response)).error.code, "unsupported_media_type");
   });
 
   await t.test("oversized request", async () => {

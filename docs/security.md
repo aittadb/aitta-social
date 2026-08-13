@@ -262,6 +262,13 @@ and pagination effects are private.
   navigation links, and the verified owner's current `edit` action. It never
   serializes `accountType`, owner identity/configuration, raw D1 rows, runtime
   settings, authentication headers, or another private resource.
+- The normalized private draft-create response projects one `owner-entry` with
+  only its accepted content, server-owned Draft state/identifier/timestamps,
+  same-origin private self and owner-editor links, and the verified owner's
+  current edit, publish, and delete actions. It never serializes a D1 row,
+  profile fields, owner identity/configuration, authentication headers, runtime
+  settings, Hub state, or machine authority. The actions aid discovery but do
+  not replace authorization on their separate routes.
 - Use prepared D1 statements with bound parameters. Pass one SQL statement to
   each preparation and batch separate statements when an operation must be
   atomic. Never concatenate user input into SQL.
@@ -296,6 +303,24 @@ is definitive and may expose only allowlisted field messages. A failed fetch,
 5xx, unexpected success status, non-JSON success, or malformed success document
 is unconfirmed: the client retains the open form, disables another save, and
 requires a server-state reload before retrying.
+
+`POST /api/private/entries` applies that policy independently: exact same
+origin and current sole-owner authorization precede Accept, media, body, and D1;
+missing or unsupported media is `415`, malformed or oversized JSON is `400`,
+valid domain-invalid JSON is `422`, explicit JSON refusal is `406`, and every
+unsupported method is `405` with `Allow: POST`. Its private browser-navigation
+links are safe relative paths, so creation requires no public profile or
+canonical setup and never uses request Host or forwarding headers. Every
+response is structured JSON, no-store, and varies on `Accept`. A safe
+`500` deliberately treats the creation result as unconfirmed because the
+prepared insert may have committed before a later failure; authorization and
+validation failures perform no mutation. Unsupported methods remain exact JSON
+`405` responses even when `Accept` is missing, excluded, or malformed; only an
+authorized `POST` negotiates `406`. The client treats only an exact bounded 4xx
+error document as definitive and bounds the response stream before parsing, so
+a redirect, malformed response, invalid success document, or storage failure
+cannot enable a duplicate retry. Draft state remains absent from every public
+HTML and v1 projection.
 
 Worker runtime code uses only supported web and Cloudflare APIs. It must not
 depend on Node built-ins, filesystem access, a durable process, or mutable

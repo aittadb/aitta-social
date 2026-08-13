@@ -4,6 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import { ENTRY_KINDS, type EntryKind } from "@/lib/constants";
 import type { Entry } from "@/lib/types";
 import { classifyOwnerMutationResponse } from "../_components/owner-mutation-outcome";
+import { readDraftCreateResponse } from "./draft-create-response";
 
 type EntryFieldName = "kind" | "title" | "body" | "destinationUrl";
 type FieldErrors = Partial<Record<EntryFieldName, string>>;
@@ -79,7 +80,9 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
     try {
       const response = await fetch(entry ? `/api/private/entries/${encodeURIComponent(entry.id)}` : "/api/private/entries", {
         method: entry ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: entry
+          ? { "Content-Type": "application/json" }
+          : { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({
           kind: form.get("kind"),
           title: form.get("title"),
@@ -87,13 +90,24 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
           destinationUrl: form.get("destinationUrl"),
         }),
       });
-      const outcome = classifyOwnerMutationResponse(response);
-      if (outcome === "success") {
-        const payload = await response.json() as { data: Entry };
-        if (!entry) {
-          window.location.assign(`/owner/entries/${encodeURIComponent(payload.data.id)}`);
+      if (!entry) {
+        const result = await readDraftCreateResponse(response);
+        if (result.outcome === "success") {
+          window.location.assign(`/owner/entries/${encodeURIComponent(result.id)}`);
           return;
         }
+        if (result.outcome === "unconfirmed") {
+          showUnconfirmedSave();
+          return;
+        }
+        setFieldErrors(result.fieldErrors);
+        setStatus(result.message);
+        focusFirstInvalidField(formElement, result.fieldErrors);
+        setBusy(false);
+        return;
+      }
+      const outcome = classifyOwnerMutationResponse(response);
+      if (outcome === "success") {
         setStatus(isPublished ? "Public update saved." : "Private draft saved.");
         setBusy(false);
         return;

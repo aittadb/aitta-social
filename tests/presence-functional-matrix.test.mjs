@@ -151,7 +151,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
   });
   assert.equal(createDraft.status, 201);
   const created = (await responseJson(createDraft)).data;
-  assert.equal(created.state, "draft");
+  assert.equal(created.attributes.state, "draft");
   assert.match(created.id, /^[0-9a-f-]{36}$/u);
   await assertEntryRow(worker.db, created.id, {
     kind: "note",

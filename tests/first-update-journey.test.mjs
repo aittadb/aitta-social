@@ -47,7 +47,7 @@ test("complete Identity leads from a new draft through public preview and back t
   });
   assert.equal(createdResponse.status, 201);
   const created = (await responseJson(createdResponse)).data;
-  assert.equal(created.state, "draft");
+  assert.equal(created.attributes.state, "draft");
 
   const leaveDashboard = await fetchApp("/owner/profile", {
     env,

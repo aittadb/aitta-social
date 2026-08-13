@@ -183,15 +183,25 @@ The current accepted path is deliberately incremental:
    state, and deletion—without turning any browser-private route into a
    machine or public API.
 
-`PUT /api/private/profile` now returns a feature-local allowlisted
+`PUT /api/private/profile` returns a feature-local allowlisted
 `owner-profile` resource, canonical JSON/owner/public navigation links, and one
 `edit` action only after same-origin sole-owner authorization. Its structured
 errors follow the JSON status policy recorded in the TASK-192 acceptance
 evidence. It remains private, no-store, undiscoverable, and unavailable to the
-deployment-bound machine actor. Other `/api/private/*` browser-owner mutations
-retain their current safety boundaries until their one-operation TASK-194–197
-slices land. No statement in this document makes a browser-private endpoint a
-machine credential or public API resource.
+deployment-bound machine actor.
+
+`POST /api/private/entries` uses the same browser-private policy for one draft
+creation. A verified owner receives `201` with one allowlisted `owner-entry`
+resource, safe same-origin private-API and owner-editor links, and only the draft's
+currently available `edit`, `publish`, and `delete` actions. The server forces
+Draft state, null publication time, identifier, and timestamps; none can be
+selected by the request. The route remains no-store and undiscoverable, and it
+does not grant the browser owner or Sites identity any `/api/v1` machine
+authority. Other private entry operations retain their current contracts until
+their one-operation TASK-195–197 slices land.
+
+No statement in this document makes a browser-private endpoint a machine
+credential or public API resource.
 
 ## Sites and machine identity
 

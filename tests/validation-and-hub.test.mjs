@@ -182,10 +182,11 @@ test("entry validation keeps the single flexible model bounded", async (t) => {
         headers: mutationHeaders(ownerEmail),
         body: JSON.stringify(input),
       });
-      assert.equal(response.status, 400);
+      assert.equal(response.status, 422);
       const body = await responseJson(response);
-      assert.equal(typeof body.details[issue], "string");
-      if (expectedMessage) assert.equal(body.details[issue], expectedMessage);
+      const field = body.error.fields.find(({ name }) => name === (issue === "entryKind" ? "kind" : issue));
+      assert.equal(typeof field?.message, "string");
+      if (expectedMessage) assert.equal(field.message, expectedMessage);
       assert.equal(db.mutations.length, 0);
     });
   }

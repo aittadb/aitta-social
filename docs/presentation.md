@@ -413,6 +413,18 @@ payloads. The bounded editor surface is 760 pixels at most, becomes a single
 column on a phone, wraps long text and errors, and retains native 48-pixel
 fields plus the shared 44-pixel buttons and focus treatment.
 
+For a new draft, the composer confirms success only after a `201` response
+contains the exact allowlisted private `owner-entry` document, its same-origin
+links, canonically bounded values, forced Draft state, and current actions. Only
+an exact bounded structured 4xx error document is definitive and can return
+allowlisted messages for the four visible fields. A redirect, a malformed or
+wrong-shaped error, an invalid 2xx document, any 5xx response, or a failed fetch is unconfirmed:
+the open form is retained, another submission is disabled, and the existing
+native saved-state recovery link is shown. The client never follows a response
+URL or accepts an arbitrary `{ data: Entry }` object as proof that creation
+succeeded. Existing-draft and published-update saves retain their current edit
+contract until their separate normalization task.
+
 The composer performs native required, length, and URL checks before sending a
 request. A definitive 4xx response maps recognized `body`, `title`, `entryKind`,
 and `destinationUrl` details back to their controls, preserves every current
