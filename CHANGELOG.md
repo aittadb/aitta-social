@@ -1,5 +1,21 @@
 # Changelog
 
+- **TASK-184 — Add maintainable TypeScript and React design guidance.** Added
+  a compact `Maintainable TypeScript and React design` section to the root
+  instructions, requiring small semantic units, feature-owned boundaries,
+  narrow explicit typed dependencies, proportionate handler/strategy use,
+  accessible focused React components, local effect isolation and tests, clear
+  naming, and small existing-platform-first changes. The guidance explicitly
+  preserves AittaSocial's direct Sites/D1 architecture and prohibition on
+  generic frameworks, plugin systems, DI containers, and premature extension
+  points. Validation: reviewed source commit `f064325`, independent Sol High
+  review reports no P0/P1/P2 findings, `npm run agents:check` passes at 31,039
+  bytes, plan and diff checks pass. Residual uncertainty: authenticated remote
+  publication of this and the earlier multi-agent-policy commit remains
+  TASK-183 after GitHub SSH authentication rejected the current key. No
+  application, schema, migration, Site, deployment, data, setting, access,
+  DNS, domain, Hub, sibling, or runtime state changed.
+
 - **TASK-175 — Publish a truthful public Privacy page.** Added a D1-independent `/privacy` page with neutral noindex metadata and factual coverage of public projections, private drafts, sole-owner authorization, protected settings, ChatGPT Sites processing boundaries, the absence of a current Hub connection or app-owned analytics, and bounded retention limits. The shared public footer now always exposes Privacy and the official GitHub source while the existing owner preference hides only the optional `Powered by AittaSocial` attribution; its owner-facing label now states that exact effect. Validation: focused commit `8db92b0582a7a4e741dce7314080df2a2a49f279`, integrated as `33ae47c`; focused suites pass 33/33, full validation passes 204/204, migration generation reports no schema change, production audit reports zero vulnerabilities, diff checks pass, and independent Sol High review reports no P0–P2 findings. Rendered local Worker evidence passes 320×568, 390×844, and 1440×900 with semantic hierarchy, no horizontal overflow, and at least 44-pixel footer targets. Residual uncertainty: a browser-controller 400-percent page-scale attempt was interrupted, so the record claims only the equivalent 320-pixel rendered reflow and source contracts, not literal browser zoom. No API, schema, authorization, Site, hosted data, setting, access, domain, Hub, sibling, `main`, or deployment state changed.
 
 Completed work moves here from [PLAN.md](PLAN.md). Each entry records decisive
