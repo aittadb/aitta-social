@@ -1,5 +1,22 @@
 # Changelog
 
+- **TASK-180 — Reshape the prerelease v1 published-updates collection.**
+  Replaced the unshipped `GET /api/v1/entries` grammar with the public v1
+  collection document: explicit published-entry resources, bounded
+  `page`/`pageSize`, ordered canonical self/first/last/previous/next and item
+  links, empty anonymous actions, and `Vary: Accept, Authorization`. A single
+  `state = 'published'` count now derives `last` without scanning or exposing
+  drafts; an empty collection reports page 1. The route retains JSON-only
+  negotiation before D1, `HEAD`, JSON method/error responses, public 30-second
+  anonymous caching, canonical authority, deterministic order, all four update
+  kinds, and private/draft exclusion. Validation: integrated commit
+  `fa647eae5682f293ac6f213834d3a3062de66942`; focused compiled-Worker/API
+  matrices, full validation (235/235), migration generation, production audit
+  (zero vulnerabilities), and diff checks pass. An independent Sol API/security
+  review found no P0/P1/P2 issue. No human route was added, so rendered-browser
+  evidence is not applicable. No schema, Site, hosted data, setting, access,
+  DNS, domain, Hub, sibling, `main`, deployment, or external state changed.
+
 - **TASK-179 — Reshape the prerelease v1 public Aitta profile resource.**
   Replaced the unshipped `GET /api/v1/site` grammar with the first public v1
   profile document: explicit `data.id/type/attributes`, stable JSON `self` and
