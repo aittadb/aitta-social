@@ -294,6 +294,7 @@ test("v1 discovery advertises the profile and published collection", async () =>
     { rel: "profile", href: `${canonicalUrl}/api/v1/schema` },
     { rel: "social.aitta.profile", href: `${canonicalUrl}/api/v1/site` },
     { rel: "collection", href: `${canonicalUrl}/api/v1/entries` },
+    { rel: "item", href: `${canonicalUrl}/api/v1/entries/{id}` },
     {
       rel: "social.aitta.manifest",
       href: `${canonicalUrl}/.well-known/aitta-social.json`,
@@ -305,6 +306,7 @@ test("v1 discovery advertises the profile and published collection", async () =>
     "profile",
     "collection",
     "item",
+    "alternate",
     "first",
     "previous",
     "next",
@@ -319,6 +321,7 @@ test("v1 discovery advertises the profile and published collection", async () =>
     api: `${canonicalUrl}/api/v1`,
     profile: `${canonicalUrl}/api/v1/site`,
     entries: `${canonicalUrl}/api/v1/entries`,
+    entryTemplate: `${canonicalUrl}/api/v1/entries/{id}`,
   });
   assert.equal(manifest.accountType, "agent");
 });

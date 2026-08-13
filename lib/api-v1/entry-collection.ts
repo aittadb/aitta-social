@@ -59,7 +59,7 @@ export function apiV1EntryCollectionDocument({
     ...data.map((resource) =>
       apiV1JsonLink(
         "item",
-        `${canonicalUrl}/api/v1/entries/${encodeURIComponent(resource.id)}`,
+        `${canonicalUrl}/api/v1/entries/${apiV1EntryIdPathSegment(resource.id)}`,
       )
     ),
     apiV1JsonLink("profile", `${canonicalUrl}/api/v1/schema`),
@@ -90,4 +90,11 @@ export function apiV1EntryResource(
       updatedAt: entry.updatedAt,
     },
   };
+}
+
+/** Encodes an opaque entry identifier as one RFC 6570 level-1 path segment. */
+export function apiV1EntryIdPathSegment(id: string): string {
+  return encodeURIComponent(id).replace(/[!'()*]/g, (character) =>
+    `%${character.charCodeAt(0).toString(16).toUpperCase()}`
+  );
 }

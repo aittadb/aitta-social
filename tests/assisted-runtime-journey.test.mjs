@@ -134,7 +134,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     showPoweredBy: false,
   });
   assert.deepEqual(publicSite.externalLinks, identity.externalLinks);
-  assert.equal((await responseJson(entryApi)).data.body, publicBody);
+  assert.equal((await responseJson(entryApi)).data.attributes.body, publicBody);
 
   const unpublish = await fetchApp(`/api/private/entries/${created.id}/state`, {
     env,

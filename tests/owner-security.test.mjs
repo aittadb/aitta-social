@@ -241,8 +241,8 @@ test("authorized draft lifecycle stays private until publish and supports every 
   const visibleDetail = await fetchApp(`/api/v1/entries/${created.id}`, { env });
   assert.equal(visibleDetail.status, 200);
   const visibleResource = (await responseJson(visibleDetail)).data;
-  assert.equal(visibleResource.title, "Ready to publish");
-  assert.equal("state" in visibleResource, false);
+  assert.equal(visibleResource.attributes.title, "Ready to publish");
+  assert.equal("state" in visibleResource.attributes, false);
 
   const unpublishResponse = await fetchApp(`/api/private/entries/${created.id}/state`, {
     env,

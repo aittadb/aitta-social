@@ -33,7 +33,7 @@ test("publish lifecycle keeps the existing owner state transition and public pro
 
   const publicEntry = await fetchApp(`/api/v1/entries/${entryId}`, { env });
   assert.equal(publicEntry.status, 200);
-  assert.equal((await responseJson(publicEntry)).data.body, privateCanary);
+  assert.equal((await responseJson(publicEntry)).data.attributes.body, privateCanary);
 
   const unpublish = await fetchApp(`/api/private/entries/${entryId}/state`, {
     env,

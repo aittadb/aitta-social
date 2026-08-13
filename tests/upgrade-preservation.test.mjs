@@ -313,7 +313,7 @@ async function captureConfiguredBehavior(worker, canonicalUrl) {
   assert.equal(publishedResponse.headers.get("cache-control"), "public, max-age=60");
   assertPublicHeadersHaveNoPrivateCanary(publishedResponse);
   const published = await responseJson(publishedResponse);
-  assert.deepEqual(published, { data: expectedPublicEntry(canonicalUrl) });
+  assert.deepEqual(published, expectedEntryDetail(canonicalUrl));
   assertNoPrivatePublicCanary(JSON.stringify(published));
 
   const publishedHtmlResponse = await worker.fetch(
@@ -451,6 +451,7 @@ function expectedManifest(canonicalUrl) {
       api: `${canonicalUrl}/api/v1`,
       profile: `${canonicalUrl}/api/v1/site`,
       entries: `${canonicalUrl}/api/v1/entries`,
+      entryTemplate: `${canonicalUrl}/api/v1/entries/{id}`,
     },
     accountType: "person",
   };
@@ -470,6 +471,32 @@ function expectedPublicEntry(canonicalUrl) {
       self: `${canonicalUrl}/api/v1/entries/poc-v0-published-update`,
       html: `${canonicalUrl}/entries/poc-v0-published-update`,
     },
+  };
+}
+
+function expectedEntryDetail(canonicalUrl) {
+  const entry = expectedPublicEntry(canonicalUrl);
+  return {
+    data: {
+      id: entry.id,
+      type: "entry",
+      attributes: {
+        kind: entry.kind,
+        title: entry.title,
+        body: entry.body,
+        destinationUrl: entry.destinationUrl,
+        publishedAt: entry.publishedAt,
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+      },
+    },
+    links: [
+      { rel: "self", href: entry.links.self, mediaType: "application/json" },
+      { rel: "collection", href: `${canonicalUrl}/api/v1/entries`, mediaType: "application/json" },
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "alternate", href: entry.links.html, mediaType: "text/html" },
+    ],
+    actions: [],
   };
 }
 

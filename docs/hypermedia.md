@@ -104,6 +104,17 @@ total or draft fact is exposed. Its anonymous success cache is
 and `Authorization` so a future service-actor representation cannot cross the
 anonymous cache partition.
 
+The implemented published-update detail at `/api/v1/entries/{id}` reuses the
+collection's typed `entry` resource and adds ordered canonical JSON `self`, JSON
+`collection`, JSON API `profile`, and human HTML `alternate` links with empty
+anonymous `actions`.
+Its success cache is `public, max-age=60` with `Vary: Accept`; every error is
+no-store. Draft, unpublished, deleted, malformed, and unknown identifiers share
+one published-only query and one indistinguishable `404 entry_not_found`
+document. The v1 root and manifest advertise the detail URI template with
+`templated: true` and `endpoints.entryTemplate`; `{id}` is RFC 6570 level-1
+path expansion that percent-encodes an opaque identifier as one path segment.
+
 Links use standard relations where they fit (`self`, `collection`, `item`, `alternate`,
 `first`, `previous`, `next`, `last`, `profile`, `create`, `edit`, `delete`,
 `publish`, `unpublish`, `login`, `logout`) and a documented `social.aitta.*`
@@ -127,7 +138,8 @@ The current accepted path is deliberately incremental:
    root and schema advertise it through `rel: social.aitta.profile`.
 3. TASK-180 established the published collection representation and advertised
    it through the root's `rel: collection` and manifest `endpoints.entries`.
-4. TASK-181 replaces v1 entry detail. TASK-193 then proves the first current
+4. TASK-181 established v1 entry detail and its root/manifest template
+   discovery. TASK-193 then proves the first current
    unversioned HTML/JSON document at `/entries/{id}`. A later public human document,
    including a published custom `/about` page, must use that proven pattern in
    its own publication task.

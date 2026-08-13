@@ -139,7 +139,7 @@ test("all four entry kinds use the same public presence and update permalink mod
     const apiResponse = await fetchApp(`/api/v1/entries/${entry.id}`, { env });
     assert.equal(apiResponse.status, 200);
     const api = await responseJson(apiResponse);
-    assert.equal(api.data.kind, entry.kind);
+    assert.equal(api.data.attributes.kind, entry.kind);
     assert.equal(api.data.id, entry.id);
   }
 
@@ -280,6 +280,7 @@ test("discovery manifest has a stable allowlist and exposes only an explicitly c
       api: "https://canonical.example/account/api/v1",
       profile: "https://canonical.example/account/api/v1/site",
       entries: "https://canonical.example/account/api/v1/entries",
+      entryTemplate: "https://canonical.example/account/api/v1/entries/{id}",
     });
     assert.equal("hubVerificationChallenge" in body, false);
     const serialized = JSON.stringify(body);

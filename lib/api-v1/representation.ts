@@ -6,6 +6,7 @@ export type ApiV1Relation =
   | "profile"
   | "collection"
   | "item"
+  | "alternate"
   | "first"
   | "previous"
   | "next"
@@ -17,6 +18,7 @@ export type ApiV1Link = {
   rel: ApiV1Relation;
   href: string;
   mediaType: typeof API_V1_MEDIA_TYPE | typeof HTML_MEDIA_TYPE;
+  templated?: true;
 };
 
 export type ApiV1Action = {
@@ -62,6 +64,10 @@ export function apiV1RootDocument(canonicalUrl: string): ApiV1Document<{
       apiV1JsonLink("profile", `${canonicalUrl}/api/v1/schema`),
       apiV1JsonLink("social.aitta.profile", `${canonicalUrl}/api/v1/site`),
       apiV1JsonLink("collection", `${canonicalUrl}/api/v1/entries`),
+      {
+        ...apiV1JsonLink("item", `${canonicalUrl}/api/v1/entries/{id}`),
+        templated: true,
+      },
       apiV1JsonLink(
         "social.aitta.manifest",
         `${canonicalUrl}/.well-known/aitta-social.json`,
@@ -88,6 +94,7 @@ export function apiV1SchemaDocument(canonicalUrl: string): ApiV1Document<{
           "profile",
           "collection",
           "item",
+          "alternate",
           "first",
           "previous",
           "next",

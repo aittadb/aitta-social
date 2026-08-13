@@ -24,7 +24,7 @@ const historicalMigration = "drizzle/0000_closed_talos.sql";
 
 const sourceDigests = {
   "db/schema.ts": "8917fdac637f7a5ae4c96df0ecbed770ca881c218136e6067196fc3216bc1b67",
-  "docs/protocol.md": "c065e6a01301deebe9101ccf6b6333f290b4cd1b894f899d1d4dd0802542ba6d",
+  "docs/protocol.md": "6a5fdd84dd23d8e265a773aa3176d84c5c514ee0d4966adae7ba36608df81071",
   [historicalMigration]: "95455a11b0795cfbfeb4ad0edfa07c2e75d076b14b142c9dfb1feb1c849e3c8a",
   "package-lock.json": "1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9",
   "tests/fixtures/poc-upgrade-v0.sql":
@@ -471,22 +471,24 @@ async function assertEntryDetails(worker, matrixCase, setupError) {
 
   if (setupError) {
     for (const observation of [published, draft, unknown]) {
-      assertJson(observation, setupError);
+      assertJson(observation, profileSetupError(setupError));
     }
   } else {
     assertJson(published, {
       status: 200,
       cacheControl: "public, max-age=60",
-      body: { data: expectedPublicEntry(entryById(publishedId), matrixCase.canonical) },
+      body: expectedEntryDetail(entryById(publishedId), matrixCase.canonical),
     });
     const notFound = {
       status: 404,
       cacheControl: "no-store",
       body: {
+        data: null,
         error: {
           code: "entry_not_found",
           message: "Published entry not found.",
         },
+        links: [],
       },
     };
     assertJson(draft, notFound);
@@ -664,6 +666,7 @@ function expectedManifest(canonicalUrl, accountType) {
       api: `${canonicalUrl}/api/v1`,
       profile: `${canonicalUrl}/api/v1/site`,
       entries: `${canonicalUrl}/api/v1/entries`,
+      entryTemplate: `${canonicalUrl}/api/v1/entries/{id}`,
     },
     accountType,
   };
@@ -743,20 +746,33 @@ function expectedV1EntryResource(entry) {
   };
 }
 
-function expectedPublicEntry(entry, canonicalUrl) {
+function expectedEntryDetail(entry, canonicalUrl) {
+  const encodedId = encodeURIComponent(entry.id);
   return {
-    id: entry.id,
-    kind: entry.kind,
-    ...(entry.title ? { title: entry.title } : {}),
-    body: entry.body,
-    ...(entry.destinationUrl ? { destinationUrl: entry.destinationUrl } : {}),
-    ...(entry.publishedAt ? { publishedAt: entry.publishedAt } : {}),
-    createdAt: entry.createdAt,
-    updatedAt: entry.updatedAt,
-    links: {
-      self: `${canonicalUrl}/api/v1/entries/${encodeURIComponent(entry.id)}`,
-      html: `${canonicalUrl}/entries/${encodeURIComponent(entry.id)}`,
-    },
+    data: expectedV1EntryResource(entry),
+    links: [
+      {
+        rel: "self",
+        href: `${canonicalUrl}/api/v1/entries/${encodedId}`,
+        mediaType: "application/json",
+      },
+      {
+        rel: "collection",
+        href: `${canonicalUrl}/api/v1/entries`,
+        mediaType: "application/json",
+      },
+      {
+        rel: "profile",
+        href: `${canonicalUrl}/api/v1/schema`,
+        mediaType: "application/json",
+      },
+      {
+        rel: "alternate",
+        href: `${canonicalUrl}/entries/${encodedId}`,
+        mediaType: "text/html",
+      },
+    ],
+    actions: [],
   };
 }
 

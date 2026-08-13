@@ -115,6 +115,12 @@ or the stored profile canonical URL. It returns:
       "mediaType": "application/json"
     },
     {
+      "rel": "item",
+      "href": "https://account.example/api/v1/entries/{id}",
+      "mediaType": "application/json",
+      "templated": true
+    },
+    {
       "rel": "social.aitta.manifest",
       "href": "https://account.example/.well-known/aitta-social.json",
       "mediaType": "application/json"
@@ -140,6 +146,7 @@ implemented relation vocabulary:
         "profile",
         "collection",
         "item",
+        "alternate",
         "first",
         "previous",
         "next",
@@ -183,8 +190,8 @@ structured `503` without a D1 read. Unexpected root/schema failures return a
 fixed safe `500`. The profile and published collection resources use this same
 media, method, `HEAD`, error, and safe-failure boundary. The collection also
 varies every response on `Authorization` to partition anonymous cache entries
-from the separately accepted machine-create task. Entry detail retains its
-unshipped response and method grammar until TASK-181 replaces it.
+from the separately accepted machine-create task. Entry detail uses the common
+v1 JSON-only media, error, and method grammar described below.
 
 ## Discovery manifest
 
@@ -202,7 +209,8 @@ unshipped response and method grammar until TASK-181 replaces it.
   "endpoints": {
     "api": "https://account.example/api/v1",
     "profile": "https://account.example/api/v1/site",
-    "entries": "https://account.example/api/v1/entries"
+    "entries": "https://account.example/api/v1/entries",
+    "entryTemplate": "https://account.example/api/v1/entries/{id}"
   },
   "accountType": "other"
 }
@@ -211,6 +219,12 @@ unshipped response and method grammar until TASK-181 replaces it.
 The top-level shape and field names above are stable for protocol 1.0.
 `software.version` is the deployed application version, not the protocol
 version.
+
+The root's templated `item` link and manifest `endpoints.entryTemplate` value
+identify the same detail-resource template. `{id}` is an RFC 6570 level-1 path
+expansion variable: expansion percent-encodes the complete opaque entry
+identifier as one path segment. Braces are template syntax rather than a
+literal route.
 
 When and only when `AITTA_SOCIAL_HUB_CHALLENGE` is explicitly configured, the
 manifest also includes:
@@ -335,23 +349,21 @@ as the v1 root.
 
 ## Public entry resources
 
-A published entry detail currently has this public projection; TASK-181 owns
-its prerelease replacement. The collection below already uses a typed v1 entry
-resource with the same public fields nested under `attributes`.
+A published entry uses this typed public resource in both collection and detail
+documents:
 
 ```json
 {
   "id": "7eaf8f66-bff9-4a54-a78f-c7fa394b046d",
-  "kind": "announcement",
-  "title": "Field session scheduled",
-  "body": "The next field session is scheduled for Thursday.",
-  "destinationUrl": "https://workshop.example/sessions/thursday",
-  "publishedAt": "2026-08-09T10:30:00.000Z",
-  "createdAt": "2026-08-09T09:10:00.000Z",
-  "updatedAt": "2026-08-09T10:30:00.000Z",
-  "links": {
-    "self": "https://account.example/api/v1/entries/7eaf8f66-bff9-4a54-a78f-c7fa394b046d",
-    "html": "https://account.example/entries/7eaf8f66-bff9-4a54-a78f-c7fa394b046d"
+  "type": "entry",
+  "attributes": {
+    "kind": "announcement",
+    "title": "Field session scheduled",
+    "body": "The next field session is scheduled for Thursday.",
+    "destinationUrl": "https://workshop.example/sessions/thursday",
+    "publishedAt": "2026-08-09T10:30:00.000Z",
+    "createdAt": "2026-08-09T09:10:00.000Z",
+    "updatedAt": "2026-08-09T10:30:00.000Z"
   }
 }
 ```
@@ -454,22 +466,67 @@ profile/canonical setup uses `profile_not_configured` or
 
 ## Single entry
 
-`GET /api/v1/entries/{id}` returns:
+`GET /api/v1/entries/{id}` returns one published entry in the same typed
+resource projection used by the collection:
 
-- `200` with `{ "data": <publicEntry> }` for a published entry; the public
-  entry contains its nested `links.self` and `links.html` values;
-- `404` with `entry_not_found` for an unknown identifier; and
-- the same `entry_not_found` shape for a draft or unpublished identifier.
+```json
+{
+  "data": {
+    "id": "7eaf8f66-bff9-4a54-a78f-c7fa394b046d",
+    "type": "entry",
+    "attributes": {
+      "kind": "announcement",
+      "title": "Field session scheduled",
+      "body": "The next field session is scheduled for Thursday.",
+      "publishedAt": "2026-08-09T10:30:00.000Z",
+      "createdAt": "2026-08-09T09:10:00.000Z",
+      "updatedAt": "2026-08-09T10:30:00.000Z"
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://account.example/api/v1/entries/7eaf8f66-bff9-4a54-a78f-c7fa394b046d",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "collection",
+      "href": "https://account.example/api/v1/entries",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "profile",
+      "href": "https://account.example/api/v1/schema",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "alternate",
+      "href": "https://account.example/entries/7eaf8f66-bff9-4a54-a78f-c7fa394b046d",
+      "mediaType": "text/html"
+    }
+  ],
+  "actions": []
+}
+```
+
+The JSON `self`, JSON collection, JSON API `profile`, and human HTML `alternate`
+links use canonical authority and a percent-encoded identifier. Anonymous
+actions are empty.
+Success is `public, max-age=60` with `Vary: Accept`.
 
 The endpoint must not reveal whether a non-public identifier exists through
 status, timing-dependent branches, error wording, links, or extra fields.
-Missing profile/canonical setup uses the same `profile_not_configured` and
-`canonical_url_unconfigured` errors as the other resources.
+Draft, unpublished, deleted, malformed, and unknown identifiers all use the
+same published-only prepared query and common no-store `404 entry_not_found`
+document. Missing profile/canonical setup uses the same
+`profile_not_configured` and `canonical_url_unconfigured` errors as the other
+resources. Negotiation occurs before D1, `HEAD` matches `GET` without a body,
+and unsupported methods return the common `405` with `Allow: GET, HEAD`.
 
 ## Errors and method handling
 
-The v1 root, schema, profile, collection, and unknown-path boundary use the common
-pre-release error document:
+The v1 root, schema, profile, collection, entry detail, and unknown-path
+boundary use the common pre-release error document:
 
 ```json
 {
@@ -483,12 +540,13 @@ pre-release error document:
 ```
 
 Its fixed codes are `not_acceptable`, `method_not_allowed`, `not_found`,
-`profile_not_configured`, `canonical_url_unconfigured`, and `internal_error`.
+`profile_not_configured`, `canonical_url_unconfigured`, `entry_not_found`, and
+`internal_error`.
 These responses are `no-store`, contain no exception or runtime detail, and
 include no link when a canonical URL is unavailable.
 
-Entry detail retains its earlier error grammar until TASK-181. The collection
-already uses the common error document, including for invalid pagination:
+The collection additionally uses the common error document for invalid
+pagination:
 
 ```json
 {
@@ -505,17 +563,17 @@ Errors omit canonical links rather than derive one from the request host when
 the configured canonical URL is missing or invalid.
 
 - `400` with `invalid_pagination` is used for malformed pagination.
-- `404` with `profile_not_configured` is used when the profile is absent. The
-  profile and collection routes use the common v1 error document.
+- `404` with `profile_not_configured` is used when the profile is absent.
 - `404` with `entry_not_found` is used for a missing or non-public entry.
 - `503` with `canonical_url_unconfigured` is used when a successful canonical
   resource cannot be constructed safely.
 - `405` is used for an unsupported method and includes an appropriate `Allow`
-  header. Profile and collection return the common v1 document with
-  `Allow: GET, HEAD`; detail remains framework-owned until TASK-181.
+  header. Profile, collection, and detail return the common v1 document with
+  `Allow: GET, HEAD`.
 - `500` may be used for an unexpected server failure, but its body must not
   reveal SQL, stack traces, environment values, credentials, or identifiers.
-  Profile and collection return the fixed common `internal_error` document.
+  Profile, collection, and detail return the fixed common `internal_error`
+  document.
 
 ## Private operations are not public protocol
 

@@ -69,7 +69,7 @@ test("v1 collection allowlists all four published entry kinds and optional omiss
       published_at: "2026-08-03T00:00:00.000Z",
     }),
     entryRow({
-      id: "link/id ?",
+      id: "link/id ?opaque!()*'id",
       kind: "link",
       title: "Link title",
       destination_url: "https://public.example/resource",
@@ -97,8 +97,13 @@ test("v1 collection allowlists all four published entry kinds and optional omiss
   assert.deepEqual(
     body.links.filter(({ rel }) => rel === "item"),
     entries.map(({ id }) =>
-      jsonLink("item", `${canonicalUrl}/api/v1/entries/${encodeURIComponent(id)}`)
+      jsonLink("item", `${canonicalUrl}/api/v1/entries/${rfc6570PathSegment(id)}`)
     ),
+  );
+  assert.equal(
+    body.links.find(({ rel, href }) =>
+      rel === "item" && href.endsWith("link%2Fid%20%3Fopaque%21%28%29%2A%27id"))?.href,
+    `${canonicalUrl}/api/v1/entries/link%2Fid%20%3Fopaque%21%28%29%2A%27id`,
   );
   assert.deepEqual(body.actions, []);
 });
@@ -328,6 +333,12 @@ function entryResource(entry) {
 
 function jsonLink(rel, href) {
   return { rel, href, mediaType: "application/json" };
+}
+
+function rfc6570PathSegment(id) {
+  return encodeURIComponent(id).replace(/[!'()*]/g, (character) =>
+    `%${character.charCodeAt(0).toString(16).toUpperCase()}`
+  );
 }
 
 function pageUrl(page, pageSize) {

@@ -48,6 +48,12 @@ const rootDocument = {
       mediaType: "application/json",
     },
     {
+      rel: "item",
+      href: `${canonicalUrl}/api/v1/entries/{id}`,
+      mediaType: "application/json",
+      templated: true,
+    },
+    {
       rel: "social.aitta.manifest",
       href: `${canonicalUrl}/.well-known/aitta-social.json`,
       mediaType: "application/json",
@@ -68,6 +74,7 @@ const schemaDocument = {
         "profile",
         "collection",
         "item",
+        "alternate",
         "first",
         "previous",
         "next",
@@ -318,6 +325,7 @@ test("manifest and root discover the profile and published collection", async ()
     api: `${canonicalUrl}/api/v1`,
     profile: `${canonicalUrl}/api/v1/site`,
     entries: `${canonicalUrl}/api/v1/entries`,
+    entryTemplate: `${canonicalUrl}/api/v1/entries/{id}`,
   });
 
   const siteResponse = await fetchApp("/api/v1/site", {
@@ -330,7 +338,7 @@ test("manifest and root discover the profile and published collection", async ()
   });
   const detailResponse = await fetchApp(`/api/v1/entries/${entry.id}`, {
     env,
-    headers: { accept: "text/html" },
+    headers: { accept: "application/json" },
   });
   assert.deepEqual(Object.keys(await responseJson(siteResponse)).sort(), [
     "actions",
@@ -343,7 +351,11 @@ test("manifest and root discover the profile and published collection", async ()
     "links",
     "pagination",
   ]);
-  assert.deepEqual(Object.keys(await responseJson(detailResponse)), ["data"]);
+  assert.deepEqual(Object.keys(await responseJson(detailResponse)).sort(), [
+    "actions",
+    "data",
+    "links",
+  ]);
 
   const v2 = await fetchApp("/api/v2", { env, headers: { accept: "application/json" } });
   assert.equal(v2.status, 404);
