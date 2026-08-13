@@ -1,5 +1,37 @@
 # Changelog
 
+- **TASK-185 — Make compiled-Worker response-lifetime tests deterministic.**
+  Repaired the existing Miniflare acceptance harnesses so every dispatched
+  response is consumed, parsed, or explicitly cancelled before another request
+  can invalidate its stream. Existing upgrade-preservation, presentation-accent,
+  and public functional-matrix assertions and all product behavior remain
+  unchanged. Validation: integrated commit `f4c2e9a69cfb296b9c9f1b5be2ce70da8d46c670`;
+  the guarded affected suite passes 10/10, repeated guarded upgrade coverage
+  passes, and `MINIFLARE_ASSERT_BODIES_CONSUMED=true npm run validate` passes
+  211/211. Migration generation reports no schema change, `npm audit --omit=dev`
+  reports zero vulnerabilities, and diff checks pass. No application, API,
+  protocol, schema, migration, Worker/runtime, Site, deployment, data, setting,
+  access, DNS, domain, Hub, sibling, or hosted state changed.
+
+- **TASK-160 — Simplify basic private-draft composition and editing.** Made the
+  sole-owner new/edit update journey compact and body-first, with clear private
+  draft versus published context, one save action, native field-associated
+  validation, and a reload-before-retry lock for 5xx or interrupted saves.
+  Create/edit routes, all four stored kinds and values, API payloads, owner and
+  same-origin enforcement, D1 behavior, draft privacy, and public contracts are
+  unchanged. Validation: integrated commit `6c3a703`; focused composer,
+  accessibility, assisted-runtime, owner-security, and public-regression
+  coverage passes; the final guarded full repository validation passes 211/211,
+  migration generation reports no schema change, `npm audit --omit=dev` reports
+  zero vulnerabilities, and diff checks pass. Local preview evidence covers
+  new, draft, published, long/unbroken, validation, definitive and unconfirmed
+  failure/recovery, denial, private-canary, touch/focus, forced-colors,
+  reduced-motion, and reflow cases. Residual uncertainty: the browser
+  controller did not reproduce a sequential hardware-Tab journey, and rendered
+  evidence used a local development preview rather than a hosted checkpoint.
+  No Site, hosted data, setting, access, DNS, domain, Hub, sibling, `main`, or
+  deployment state changed.
+
 - **TASK-184 — Add maintainable TypeScript and React design guidance.** Added
   a compact `Maintainable TypeScript and React design` section to the root
   instructions, requiring small semantic units, feature-owned boundaries,
