@@ -11,7 +11,7 @@ that decision as trusted network authentication or network membership.
 | Boundary | Trusted for | Never trusted for |
 | --- | --- | --- |
 | Anonymous or signed-in browser | Rendering public output; submitting validated owner forms | Identity headers, owner claims, destination URLs, write authorization, secrets |
-| ChatGPT Sites dispatcher | Injecting authenticated-user headers and operating sign-in routes | Establishing local owner status or AittaSocial network identity |
+| Verified ChatGPT Sites ingress | Forwarding the documented signed-in visitor context and operating sign-in routes, but only after that origin's ingress behavior is established | Application-level cryptographic proof, local owner status, machine authentication, or AittaSocial network identity |
 | AittaSocial server code | Validating inputs, authorizing each operation, projecting public data, using protected settings | Assuming an earlier page check covers a later write |
 | Aitta-owned D1 | Persisting validated profile, entry, accepted page, and minimal local configuration records | Producing a safe public response without an explicit projection |
 | Protected runtime settings | Supplying local owner, canonical URL, and optional public verification challenge to server code | Browser-visible configuration beyond documented public effects or publishable content |
@@ -20,8 +20,44 @@ that decision as trusted network authentication or network membership.
 
 ChatGPT Sites access policy is a hosting boundary. Keeping a Site private during
 setup is important, but private hosting does not replace application-level
-authorization. Every write still performs the same owner check that will be
-used after a public release.
+authorization. Every browser-owner write still performs the same owner and
+same-origin checks that will be used after a public release.
+
+## Sites identity provenance
+
+The current bundled OpenAI Sites authentication reference documents that a
+signed-in visitor receives `oai-authenticated-user-id` and
+`oai-authenticated-user-email`. It describes the user ID as stable for the same
+user and Site but different across Sites, and describes email and name as
+display or contact data. An optional non-empty full name may be forwarded as
+percent-encoded UTF-8 only with the matching encoding header. Sites dispatch
+owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and `/callback`; the
+application does not implement them.
+
+That reference does not document a signed assertion, issuer, audience,
+signature, public key, expiry, nonce, or request binding visible to this
+application. It also does not state that caller-supplied identity headers are
+stripped or overwritten on every Sites-provided or custom origin. The source
+code can parse a header value but cannot establish who inserted it. Header
+provenance is therefore an ingress property, not an application-level
+cryptographic fact.
+
+The current Aitta deployment relies on Sites-managed ingress for browser sign
+in, but that reliance remains externally unverified for the current origins.
+TASK-190 owns a separately approved, read-only absent/forged/normal-session
+matrix. Until that evidence exists, do not describe the raw headers as secure,
+cryptographically authentic, or independently verified by AittaSocial. Tests
+that inject headers prove only application policy after an identity context is
+supplied; they do not prove the production ingress. A non-Sites production
+mode must not treat raw `oai-*` headers as identity. The explicit development
+fixture remains development-only and production ignores it.
+
+This is a current limitation, not a check already enforced by the raw-header
+parser. `getChatGPTUser()` cannot determine request provenance and current
+authorization code proceeds from the values it receives. Verified per-origin
+Sites ingress is therefore an unresolved deployment assumption for current
+browser administration and a prerequisite for any future
+`SitesAuthenticationContext`; adding an adapter alone cannot create that proof.
 
 ## Local owner authorization
 
@@ -33,8 +69,9 @@ For each owner page, server action, or private API request, server code must:
 2. Normalize it using the same trim-and-case normalization applied to the
    authenticated email. An empty or syntactically invalid configured value is
    treated as missing.
-3. Obtain the authenticated ChatGPT identity only through the Sites-provided
-   server authentication helper or trusted forwarded headers.
+3. Establish the Sites ingress prerequisite for the deployed origin, then
+   obtain the authenticated ChatGPT identity through the Sites-provided server
+   helper; never infer provenance from a raw forwarded-header value.
 4. Require a non-empty normalized authenticated email that exactly matches the
    normalized configured owner email.
 5. Reject the operation before reading or mutating owner-only data when any
@@ -43,8 +80,9 @@ For each owner page, server action, or private API request, server code must:
 An anonymous browser can be redirected through dispatch-owned Sign in with
 ChatGPT for an owner page; private APIs reject rather than redirect. A signed-in
 non-owner receives no administrative data or write capability. If the owner
-setting is missing, all writes are disabled and the interface explains how to
-use protected Site settings without printing an email or configuration value.
+setting is missing, all browser-owner writes are disabled and the interface
+explains how to use protected Site settings without printing an email or
+configuration value.
 
 Do not infer `AITTA_SOCIAL_OWNER_EMAIL` from a Sites project owner, editor,
 access-policy record, or workspace account. Those hosting identities can differ
@@ -55,8 +93,8 @@ the match by reaching the owner surface; neither value is displayed.
 Do not send the configured email to a client for comparison. Hidden controls,
 client route guards, form fields, cookies created by application code, and
 browser-supplied headers are not authorization. A dashboard check does not
-authorize a subsequent profile or entry mutation: every mutation repeats the
-server-side check.
+authorize a subsequent profile or entry mutation: every browser-owner mutation
+repeats the server-side owner and same-origin checks.
 
 Identity readiness is also a server decision, not an authentication shortcut.
 Each authorized owner page derives it from the current D1 profile and the
@@ -110,6 +148,51 @@ Sign-in return locations are same-origin relative paths. Human-facing entry to
 this flow must identify sole-owner Aitta administration and must not imply
 AittaSocial network sign-in or membership.
 
+## Machine clients
+
+No machine credential or machine write endpoint currently exists. A machine
+client can read the anonymous protocol 1.0 resources but cannot gain owner
+authority by sending `oai-authenticated-user-*` headers, copying a browser
+cookie, supplying an email in JSON or a query, or naming itself ChatGPT or
+Codex. Supervised browser assistance remains the only current ChatGPT-assisted
+write path.
+
+The planned JSON API v2 keeps machine authentication in a separate typed
+adapter from Sites browser authentication. TASK-191 is the accepted first
+write slice: one deployment-local service actor may use protected current/next
+opaque bearer-secret slots and only the `entries:write` scope to create one
+server-forced private draft through `POST /api/v2/entries`. The credential
+identifies neither ChatGPT nor the human owner, grants no `/owner` or existing
+private-API access, and is useful only to the specific normalized canonical
+Aitta deployment and audience that issued it. Missing, malformed, expired,
+revoked, wrong-audience, wrong-scope, local-production, and unverified machine-
+deployment modes fail closed.
+
+Action discovery is cache-separated from authentication. The normal anonymous
+`GET /api/v2/entries` response retains its reviewed public cache and empty
+actions. A valid service credential receives a `no-store` response with the
+create action; any presented invalid credential receives an explicit `no-store`
+401, while an authenticated wrong-scope credential receives `no-store` 403.
+Every collection variant uses
+`Vary: Accept, Authorization`, and the machine POST is always `no-store`, so a
+shared cache cannot replay an authenticated action to an anonymous caller or
+hide one behind a cached anonymous response.
+
+Rotation uses bounded current and next credential slots with explicit expiry;
+revocation removes the accepted slot without changing content. Each attempted
+operation repeats scope, state, media, size, validation, and prepared-storage
+checks and records a bounded D1 audit event with credential ID, machine actor,
+operation, target identifier, outcome category, correlation ID, and timestamp.
+Never store or log the raw secret, Authorization header, request body, owner
+email, ChatGPT identity, or response content. A discoverable hypermedia action
+does not authorize its invocation. The exact credential lifecycle, audit
+migration and hosting-secret authority must land in that same vertical task.
+TASK-191 remains blocked from hosted completion until the owner explicitly
+approves the exact target Site and protected current/next secret-slot setup;
+this planning text creates no credential and authorizes no setting or hosting
+change. No edit, publish, unpublish, delete, credential-minting, or other
+machine operation is accepted.
+
 ## Route exposure
 
 - `/`, `/entries/{id}`, `/.well-known/aitta-social.json`, and `/api/v1/*` are
@@ -119,6 +202,9 @@ AittaSocial network sign-in or membership.
 - `/api/private/*` is not a public API. Every request independently requires
   current server-side owner authorization and strict method, media-type, and
   input validation.
+- The implemented public contract remains `/api/v1`. Accepted `/api/v2` work
+  is an explicit incompatible successor and never changes a v1 route or turns
+  a browser-private route into a machine route.
 
 An implemented published custom page may later occupy a validated non-reserved
 human path. Authentication, owner, API, discovery, Privacy, Technical, entry,
@@ -133,11 +219,18 @@ and pagination effects are private.
 
 ## Write validation and data access
 
-- Enforce an exact same-origin/CSRF check on every mutation before processing
-  it. When `Origin` is present, require it to match the server request origin
-  exactly. When it is absent, require the browser-controlled
+- Enforce an exact same-origin/CSRF check on every browser-owner mutation before
+  processing it. When `Origin` is present, require it to match the server
+  request origin exactly. When it is absent, require the browser-controlled
   `Sec-Fetch-Site: same-origin` signal. Opaque, malformed, cross-site, and
   otherwise unverified requests fail closed.
+- The accepted TASK-191 machine POST does not borrow browser same-origin or
+  Sites-owner authorization. It independently requires its deployment-bound
+  bearer adapter, exact scope and audience, JSON media/body/validation checks,
+  and prepared transaction. Browser mode fails closed on missing/invalid owner
+  configuration; machine mode fails closed on missing/invalid machine slots,
+  deployment mode, canonical audience, scope, or expiry. Neither mode's
+  configuration authorizes the other.
 - Bound every request body before parsing it; do not trust `Content-Length` as
   the only limit. Then parse unknown input through a strict schema that rejects
   unknown enum values, oversized strings, unsupported URL schemes, invalid
@@ -175,8 +268,10 @@ and pagination effects are private.
 - Use stable server-generated identifiers. A browser may not select or replace
   the identifier of an existing entry.
 - Mutating requests accept only their intended method and media type.
-  Authorization, same-origin enforcement, body bounds, and validation happen
-  even when the trusted interface made the request.
+  Browser-owner requests repeat owner authorization and same-origin checks;
+  the accepted v2 machine request repeats service authentication, audience,
+  and scope checks. Both repeat body bounds and validation even when a trusted
+  interface made the request.
 
 Worker runtime code uses only supported web and Cloudflare APIs. It must not
 depend on Node built-ins, filesystem access, a durable process, or mutable

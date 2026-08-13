@@ -157,20 +157,27 @@ file. Keep this file strictly below 32,000 bytes and run
 
 - Version one has exactly one owner. Compare the normalized authenticated
   ChatGPT email with protected `AITTA_SOCIAL_OWNER_EMAIL` in server code.
-- If the owner setting is missing or invalid, reject every write and show safe
-  setup guidance. Never expose the expected or authenticated email.
+- If the owner setting is missing or invalid, reject every browser-owner write
+  and show safe setup guidance. Never expose either email.
 - Sites owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, and
   identity headers. Do not implement app-owned auth routes or a production auth
   bypass.
 - Test identity only through explicit fixtures or a development-only injection
   boundary that production ignores.
-- Every mutation independently requires current server-side owner
-  authorization, an exact same-origin/CSRF check, an intended method/media type,
-  a bounded request body, strict validation, and a prepared query.
+- Every browser-owner mutation independently requires current server-side owner
+  authorization, exact same-origin/CSRF, intended method/media type, a bounded
+  request body, strict validation, and a prepared query.
 - ChatGPT may help the owner operate the normal signed-in interface, but it is
   not an authentication principal and receives no separate token or authority.
-  Never add prompt-derived authorization, a magic owner, an agent credential,
-  an authentication bypass, or a public customization endpoint.
+  Never add prompt-derived authorization, a magic owner, a ChatGPT-, Codex-,
+  or owner-impersonating credential, an authentication bypass, or a public
+  customization endpoint.
+- Only an accepted task may add a deployment-bound machine credential for one
+  named v2 operation and scope. Keep it separate from Sites identity and browser
+  CSRF, in protected rotating/revocable runtime slots, D1-audited, and fail
+  closed when that mode's configuration is missing or invalid. It is only its
+  named service actor, grants no owner dashboard or existing private-API access,
+  and never represents ChatGPT, Codex, a prompt, or a human.
 - Never trust a hidden control, client route guard, browser field, browser
   destination, or previous page authorization.
 - Protected owner configuration, any future Hub credentials, runtime secrets, and
@@ -198,7 +205,8 @@ file. Keep this file strictly below 32,000 bytes and run
 - Signed-out and non-owner visitors read only explicit public projections: the
   profile, published entries, and implemented published custom pages. Draft and
   unknown resources are indistinguishable in every public surface.
-- Keep public APIs versioned under `/api/v1` and discovery at
+- Preserve every `/api/v1` contract. An explicitly accepted incompatible
+  successor may use `/api/v2`; never silently revise v1. Keep discovery at
   `/.well-known/aitta-social.json`.
 - Preserve the required protocol 1.0 `accountType` field and its documented
   legacy values until a deliberate versioned contract change. Hiding the
