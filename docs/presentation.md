@@ -232,7 +232,7 @@ and the application never disables system color adjustment.
 ## Owner Identity journey
 
 The visually distinct owner workspace uses a neutral 60-pixel application
-header with `Manage` and a quiet public-view link. A separate, horizontally
+header with `Manage` and a quiet `View Aitta` public-view link. A separate, horizontally
 scrollable, non-wrapping route bar contains exactly three destinations: Home,
 Identity, and New update. `Sign out` stays in the compact private-workspace
 footer rather than becoming a route destination or menu item. The accepted
@@ -243,10 +243,12 @@ Owner Home presents fresh, incomplete, and complete Identity readiness derived
 from saved server state. It renders exactly one state-derived primary action:
 Identity setup while fresh, Identity repair while incomplete, first-draft
 creation or resume while unpublished, and public preview after the first
-publication. One compact `owner-next-step` panel combines status, guidance,
+publication. Its `Your Aitta` heading and `Aitta summary` label describe the
+local application, while `Identity` and `profile` continue to name its outward
+presentation. One compact `owner-next-step` panel combines status, guidance,
 the existing two-step native progress semantics, and the effective public URL
 when present. It contains no competing action. Counts, update rows, update
-actions, and their text status remain available below in a compact sans-serif
+actions, and their unchanged update-state text remain available below in a compact sans-serif
 hierarchy; the empty state does not reserve a large blank panel.
 
 The Identity route makes its four required values the first editing task:

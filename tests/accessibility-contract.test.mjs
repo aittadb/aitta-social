@@ -79,7 +79,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<main[^>]+class="owner-shell/i);
     assert.match(html, /<nav[^>]+aria-label="Owner navigation"/i);
     assert.match(html, /aria-current="page"[^>]*>Identity</i);
-    assert.match(html, /<header class="owner-topbar"><a[^>]+href="\/owner"[^>]*>Manage<\/a><a[^>]+href="\/"[^>]*>View presence<\/a><\/header>/i);
+    assert.match(html, /<header class="owner-topbar"><a[^>]+href="\/owner"[^>]*>Manage<\/a><a[^>]+href="\/"[^>]*>View Aitta<\/a><\/header>/i);
     assert.match(html, /<nav class="owner-nav"[^>]*><a href="\/owner"[^>]*>Home<\/a><a href="\/owner\/profile"[^>]*>Identity<\/a><a href="\/owner\/entries\/new"[^>]*>New update<\/a><\/nav>/i);
     assert.match(html, /<footer class="owner-footer">[\s\S]*Private owner workspace[\s\S]*Sign out/i);
     assert.doesNotMatch(html, /Test Owner|owner-session|owner-user/i);
@@ -115,8 +115,8 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
   });
 });
 
-test("presence and update language stays clear without obsolete Hub controls", async (t) => {
-  await t.test("public and owner surfaces use presence and update language", async () => {
+test("Aitta and update language stays clear without obsolete Hub controls", async (t) => {
+  await t.test("public and owner surfaces use Aitta and update language", async () => {
     const env = makeEnv({
       db: new FakeD1({ entries: [entryRow()] }),
       ownerEmail,
@@ -139,10 +139,11 @@ test("presence and update language stays clear without obsolete Hub controls", a
     });
     assert.equal(ownerResponse.status, 200);
     const ownerHtml = await ownerResponse.text();
-    assert.match(ownerHtml, />Your presence<\/p>/i);
+    assert.match(ownerHtml, />Your Aitta<\/p>/i);
     assert.match(ownerHtml, />Updates<\/h2>/i);
     assert.match(ownerHtml, />Create update<\/a>/i);
-    assert.match(ownerHtml, /aria-label="Presence summary"/i);
+    assert.match(ownerHtml, /aria-label="Aitta summary"/i);
+    assert.doesNotMatch(ownerHtml, /presence/i);
     assert.doesNotMatch(ownerHtml, /Deployment overview|Account summary|>Entries<\/h2>|>Create entry<\/a>/i);
     assert.doesNotMatch(ownerHtml, /owner\/hub|Advanced|Provisional Hub setup|Hub probe/i);
   });

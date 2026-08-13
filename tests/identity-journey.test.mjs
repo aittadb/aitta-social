@@ -257,7 +257,7 @@ test("Identity journey remains semantic, touch-friendly, responsive, and motion-
   assert.doesNotMatch(formSource, /setTimeout|setInterval|navigator\.sendBeacon/);
   assert.doesNotMatch(formSource, /localStorage|sessionStorage|accountType|next\/link/i);
   assert.match(shellSource, /<a className="owner-wordmark" href="\/owner">Manage<\/a>/);
-  assert.match(shellSource, /<a className="owner-public-link" href="\/">View presence<\/a>/);
+  assert.match(shellSource, /<a className="owner-public-link" href="\/">View Aitta<\/a>/);
   assert.match(shellSource, /<OwnerNavLink href="\/owner"[^>]*>Home<\/OwnerNavLink>[\s\S]*<OwnerNavLink href="\/owner\/profile"[^>]*>Identity<\/OwnerNavLink>[\s\S]*<OwnerNavLink href="\/owner\/entries\/new"[^>]*>New update<\/OwnerNavLink>/);
   assert.match(shellSource, /<footer className="owner-footer">[\s\S]*Private owner workspace[\s\S]*Sign out/);
   assert.doesNotMatch(shellSource, /\{displayName\}|owner-user|owner-session|Owner workspace/);

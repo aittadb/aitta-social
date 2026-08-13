@@ -30,7 +30,7 @@ export default async function OwnerDashboard() {
     <OwnerShell displayName={access.user.displayName} current="overview">
       <header className="owner-page-header">
         <div>
-          <p className="eyebrow">Your presence</p>
+          <p className="eyebrow">Your Aitta</p>
           <h1>{heading}</h1>
           <p>{dashboardIntroduction(readiness.state, firstUpdate)}</p>
         </div>
@@ -41,7 +41,7 @@ export default async function OwnerDashboard() {
 
       <OwnerNextStep readiness={readiness} journey={firstUpdate} />
 
-      <section className="owner-summary" aria-label="Presence summary">
+      <section className="owner-summary" aria-label="Aitta summary">
         <Summary label="Identity" value={readiness.state === "complete" ? "Ready" : readiness.state === "incomplete" ? "Incomplete" : "Not started"} />
         <Summary label="Published" value={String(published)} />
         <Summary label="Drafts" value={String(entries.length - published)} />
@@ -148,13 +148,13 @@ function nextStepContent(readiness: IdentityReadiness, journey: FirstUpdateJourn
     return {
       status: "Draft saved privately",
       title: "Continue your first draft",
-      message: "Your work is stored in this presence and remains private until you publish it.",
+      message: "Your work is stored in this Aitta and remains private until you publish it.",
     };
   }
   return {
     status: "Published",
     title: "Your first update is public",
-    message: "It is visible on your public presence. You can keep managing every update below.",
+    message: "It is visible on your public Aitta. You can keep managing every update below.",
   };
 }
 
@@ -164,7 +164,7 @@ function dashboardIntroduction(
 ): string {
   if (firstUpdate.state === "empty") return "Identity is ready. Begin with one private draft.";
   if (firstUpdate.state === "draft") return "Continue your private draft or manage the updates below.";
-  if (firstUpdate.state === "published") return "Review your public presence or manage the updates below.";
+  if (firstUpdate.state === "published") return "Review your public Aitta or manage the updates below.";
   if (state === "incomplete") return "Finish Identity before creating your first public update.";
   return "Set up Identity before creating your first public update.";
 }
@@ -177,7 +177,7 @@ function dashboardPrimaryAction(
   if (firstUpdate.state === "draft") {
     return { href: `/owner/entries/${firstUpdate.entry.id}`, label: "Resume first draft" };
   }
-  if (firstUpdate.state === "published") return { href: "/", label: "Preview public presence" };
+  if (firstUpdate.state === "published") return { href: "/", label: "Preview public Aitta" };
   return readiness.state === "incomplete"
     ? { href: "/owner/profile", label: "Finish identity" }
     : { href: "/owner/profile", label: "Set up identity" };

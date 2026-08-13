@@ -57,6 +57,7 @@ test("complete Identity leads from a new draft through public preview and back t
 
   const resumedDashboard = await ownerPage(env);
   assert.match(resumedDashboard, /Continue your first draft/i);
+  assert.match(resumedDashboard, /stored in this Aitta and remains private until you publish it/i);
   assert.match(resumedDashboard, /remains private until you publish it/i);
   assert.match(
     resumedDashboard,
@@ -79,9 +80,9 @@ test("complete Identity leads from a new draft through public preview and back t
 
   const publishedDashboard = await ownerPage(env);
   assert.match(publishedDashboard, /Your first update is public/i);
-  assert.match(publishedDashboard, /href="\/"[^>]*>Preview public presence/i);
+  assert.match(publishedDashboard, /href="\/"[^>]*>Preview public Aitta/i);
   assert.equal(countMatches(ownerPageHeader(publishedDashboard), /<a class="button"/gi), 1);
-  assert.equal(countMatches(publishedDashboard, />Preview public presence<\/a>/gi), 1);
+  assert.equal(countMatches(publishedDashboard, />Preview public Aitta<\/a>/gi), 1);
   const publishedPanel = nextStepPanel(publishedDashboard);
   assert.equal(countMatches(publishedPanel, /<a /gi), 0);
   assert.doesNotMatch(publishedPanel, /class="button"/i);

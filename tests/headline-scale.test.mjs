@@ -124,7 +124,7 @@ test("every primary headline surface keeps semantic text and private values out"
   assert.match(home, new RegExp(`<h1 id="account-name">${LONG_NAME}</h1>`));
   assert.match(permalink, new RegExp(`<h1>${LONG_TITLE}</h1>`));
   assert.match(owner, /<h1>Identity<\/h1>/);
-  assert.match(denied, /<h1>This presence is not yours to administer<\/h1>/);
+  assert.match(denied, /<h1>This Aitta is not yours to administer<\/h1>/);
   assert.match(missing, /<h1>This update is not public<\/h1>/);
   assert.match(setup, /<h1 id="template-title">Set up your own Aitta<\/h1>/);
 
