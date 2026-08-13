@@ -81,7 +81,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<nav[^>]+aria-label="Owner navigation"/i);
     assert.match(html, /aria-current="page"[^>]*>Identity</i);
     assert.match(html, /<header class="owner-topbar"[^>]+aria-label="Private owner workspace"[\s\S]*href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>[\s\S]*href="\/"[^>]*>View Aitta<\/a><\/div><\/header>/i);
-    assert.match(html, /<nav class="owner-nav"[^>]*><a href="\/owner"[^>]*>Home<\/a><a href="\/owner\/profile"[^>]*>Identity<\/a><a href="\/owner\/entries\/new"[^>]*>New update<\/a><\/nav>/i);
+    assert.match(html, /<nav class="owner-nav"[^>]*><a href="\/owner"[^>]*>Home<\/a><a href="\/owner\/profile"[^>]*>Identity<\/a><a href="\/owner\/entries\/new"[^>]*>New update<\/a><a href="\/owner\/pages\/import"[^>]*>Pages<\/a><\/nav>/i);
     assert.match(html, /<footer class="owner-footer">[\s\S]*Private owner workspace[\s\S]*aria-label="Technical resources"[\s\S]*>Privacy<\/a>[\s\S]*>Technical<\/a>[\s\S]*>GitHub<\/a>[\s\S]*Sign out/i);
     assert.doesNotMatch(html, /Test Owner|owner-session|owner-user/i);
     assert.match(html, /<form[^>]+class="owner-form"/i);

@@ -82,6 +82,10 @@ evidence are recorded by integration before task archival.
 
 ## Non-effects
 
+TASK-188 subsequently adds Pages as a fourth bounded owner destination. That
+later change does not alter the exact three-route runtime or rendered evidence
+recorded above for TASK-182.
+
 This presentation-only task adds no schema or migration, D1 operation, runtime
 setting, auth decision, API or public route, mutation, client router, metadata,
 CSP, cache policy, Hub behavior, hosting change, or external mutation.

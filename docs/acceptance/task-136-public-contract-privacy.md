@@ -25,7 +25,7 @@ The test pins these reviewed inputs and fails closed if one changes:
 | `db/schema.ts` | `8917fdac637f7a5ae4c96df0ecbed770ca881c218136e6067196fc3216bc1b67` |
 | `docs/protocol.md` | `72240d08f2d03a9c22aa07e6f12dc5a0daea097b029e3960854066eb4c2e3e43` |
 | `drizzle/0000_closed_talos.sql` | `95455a11b0795cfbfeb4ad0edfa07c2e75d076b14b142c9dfb1feb1c849e3c8a` |
-| `package-lock.json` | `1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9` |
+| `package-lock.json` | `822d92df7b5b294a7095c396ca2b1214ee0fb62161f3388720ab495dcf5bd5b5` |
 | `tests/fixtures/poc-upgrade-v0.sql` | `bde6241fd75d84b729a0b84401ffe671df2e505fc7f42c6e23e7d4fbd5755ac9` |
 | `tests/helpers/local-d1-upgrade.mjs` | `89e2fc30bfe9609ba4e77d0af7ccfafc320ccb782683cb32fab6e74a323e1bc5` |
 | `tests/public-contract-privacy-matrix.test.mjs` | `5ca113cfbbe7fef67db0f16078d3711d37740d6c068c8558af6b037ccebb0cf6` |
@@ -34,6 +34,9 @@ The migration inventory at acceptance is exactly
 `drizzle/0000_closed_talos.sql`. A changed input or added migration requires a
 deliberate review and updated acceptance evidence rather than silently reusing
 this result.
+TASK-188 performed that deliberate review for the package lock only when it
+added and audited the exact-pinned Worker-compatible HTML parser. The public
+projection, protocol, schema, migration, and fixture boundaries are unchanged.
 
 ## Exact case matrix
 

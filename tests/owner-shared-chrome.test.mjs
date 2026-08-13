@@ -23,6 +23,7 @@ const ownerRoutes = [
   { path: "/owner/profile", current: "Identity" },
   { path: "/owner/entries/new", current: "New update" },
   { path: "/owner/entries/owner-chrome-entry", current: "New update" },
+  { path: "/owner/pages/import", current: "Pages" },
 ];
 
 test("every authorized owner document uses one truthful shared private frame", async () => {
@@ -159,14 +160,14 @@ function assertOwnerFrame(html, { authorized, current }) {
   const ownerNav = html.match(/<nav class="owner-nav"[\s\S]*?<\/nav>/iu)?.[0] ?? "";
   if (authorized) {
     assert.match(html, /class="owner-wordmark" href="\/owner"[^>]*>Manage<\/a>/iu);
-    assert.match(ownerNav, /href="\/owner"[^>]*>Home<\/a>[\s\S]*href="\/owner\/profile"[^>]*>Identity<\/a>[\s\S]*href="\/owner\/entries\/new"[^>]*>New update<\/a>/iu);
-    assert.equal((ownerNav.match(/<a\b/giu) ?? []).length, 3);
+    assert.match(ownerNav, /href="\/owner"[^>]*>Home<\/a>[\s\S]*href="\/owner\/profile"[^>]*>Identity<\/a>[\s\S]*href="\/owner\/entries\/new"[^>]*>New update<\/a>[\s\S]*href="\/owner\/pages\/import"[^>]*>Pages<\/a>/iu);
+    assert.equal((ownerNav.match(/<a\b/giu) ?? []).length, 4);
     assert.equal((ownerNav.match(/aria-current="page"/giu) ?? []).length, 1);
     assert.match(ownerNav, new RegExp(`aria-current="page"[^>]*>${current}<\\/a>`, "iu"));
   } else {
     assert.match(html, /<span class="owner-wordmark">Manage<\/span>/iu);
     assert.equal(ownerNav, "");
-    assert.doesNotMatch(html, /href="\/owner\/profile"|href="\/owner\/entries\/new"|class="owner-form"|class="owner-entry/iu);
+    assert.doesNotMatch(html, /href="\/owner\/profile"|href="\/owner\/entries\/new"|href="\/owner\/pages\/import"|class="owner-form"|class="owner-entry/iu);
   }
 }
 

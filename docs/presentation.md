@@ -255,7 +255,7 @@ footer, link, focus, touch, and responsive vocabulary without reusing or
 exporting the fixed public-frame composition. Its 60-pixel application header
 names `Manage` and `Private owner workspace`, then offers a quiet `View Aitta`
 public-view link. A separate, horizontally scrollable, non-wrapping route bar
-contains exactly three destinations: Home, Identity, and New update. The
+contains exactly four destinations: Home, Identity, New update, and Pages. The
 current destination uses native `aria-current="page"` semantics. `Sign out`
 stays in the private-workspace footer rather than becoming a route destination
 or menu item. Authenticated ChatGPT display data is not accepted or rendered by
@@ -270,7 +270,7 @@ bypass. Owner pages keep one main landmark, one global skip target, one owner
 navigation landmark, and one footer landmark.
 
 Non-owner and missing-owner pages use the same clearly private header and
-resource footer but never render the authorized three-link owner navigation.
+resource footer but never render the authorized owner navigation.
 Their `Manage` label is plain text, while `View Aitta`, the fixed resource
 links, and the exact Sites sign-out destination remain available. Those safe
 states are selected before any D1 read and receive no profile, update, owner

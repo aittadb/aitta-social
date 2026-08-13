@@ -40,7 +40,7 @@ const reviewedDigests = {
   [historicalFixture]:
     "bde6241fd75d84b729a0b84401ffe671df2e505fc7f42c6e23e7d4fbd5755ac9",
   "package-lock.json":
-    "1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9",
+    "822d92df7b5b294a7095c396ca2b1214ee0fb62161f3388720ab495dcf5bd5b5",
 };
 
 test("TASK-060 provenance remains bound to the reviewed functional candidate", async () => {

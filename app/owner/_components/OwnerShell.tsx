@@ -2,7 +2,7 @@ import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
 import { AittaFooterResources } from "@/app/_components/AittaFooterResources";
 
 export function OwnerShell(props: {
-  current: "overview" | "profile" | "entries";
+  current: "overview" | "profile" | "entries" | "pages";
   children: React.ReactNode;
 }) {
   const { current, children } = props;
@@ -13,6 +13,7 @@ export function OwnerShell(props: {
         <OwnerNavLink href="/owner" active={current === "overview"}>Home</OwnerNavLink>
         <OwnerNavLink href="/owner/profile" active={current === "profile"}>Identity</OwnerNavLink>
         <OwnerNavLink href="/owner/entries/new" active={current === "entries"}>New update</OwnerNavLink>
+        <OwnerNavLink href="/owner/pages/import" active={current === "pages"}>Pages</OwnerNavLink>
       </nav>
       <div className="owner-frame">
         <div className="owner-content">{children}</div>

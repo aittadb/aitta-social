@@ -31,10 +31,13 @@ external registry check.
 | `db/schema.ts` | `8917fdac637f7a5ae4c96df0ecbed770ca881c218136e6067196fc3216bc1b67` |
 | `drizzle/0000_closed_talos.sql` | `95455a11b0795cfbfeb4ad0edfa07c2e75d076b14b142c9dfb1feb1c849e3c8a` |
 | `tests/fixtures/poc-upgrade-v0.sql` | `bde6241fd75d84b729a0b84401ffe671df2e505fc7f42c6e23e7d4fbd5755ac9` |
-| `package-lock.json` | `1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9` |
+| `package-lock.json` | `822d92df7b5b294a7095c396ca2b1214ee0fb62161f3388720ab495dcf5bd5b5` |
 
 The functional test pins those digests and enumerates every numbered migration
 in filename order. A digest change or missing compiled Worker fails the proof.
+TASK-188 deliberately superseded only the package-lock digest after adding and
+auditing the exact-pinned Worker-compatible HTML parser; schema, migration, and
+upgrade-fixture inputs remain the TASK-060 reviewed values.
 
 ## Route, viewer, and state matrix
 
