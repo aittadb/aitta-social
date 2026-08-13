@@ -122,15 +122,15 @@ The current accepted path is deliberately incremental:
    the v1 collection only after that collection contract exists. It never
    represents ChatGPT, Codex, the owner, or a browser session.
 5. TASK-192 starts the separate browser-private JSON normalization lane with
-   the Identity mutation; remaining private mutations are not pre-authorized
-   by that focused task.
+   the Identity mutation. TASK-194, TASK-195, TASK-196, and TASK-197 then
+   normalize exactly one private entry operation each—create, edit, publication
+   state, and deletion—without turning any browser-private route into a
+   machine or public API.
 
-Existing `/api/private/*` browser-owner mutations are not yet normalized to the
-new integration representation. They remain JSON browser endpoints with their
-current safety boundaries until a separate accepted owner-mutation slice
-changes one bounded operation and its browser client together. No statement in
-this document claims that unfinished private endpoints are machine credentials
-or a public API.
+Existing `/api/private/*` browser-owner mutations remain private and use their
+current safety boundaries until their one-operation TASK-192/TASK-194–197
+slices land. No statement in this document claims that browser-private
+endpoints are machine credentials or public API resources.
 
 ## Sites and machine identity
 
