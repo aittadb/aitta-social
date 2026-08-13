@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-179 — Reshape the prerelease v1 public Aitta profile resource.**
+  Replaced the unshipped `GET /api/v1/site` grammar with the first public v1
+  profile document: explicit `data.id/type/attributes`, stable JSON `self` and
+  API-schema `profile` links, a truthful `text/html`
+  `social.aitta.profile` link to the canonical human Aitta document, and empty
+  anonymous actions. The v1 root and schema now advertise the profile resource;
+  the existing manifest profile endpoint remains unchanged. The route retains
+  public-without-Hub access, runtime-first then already-public stored canonical
+  fallback, optional-field omissions, account-type compatibility, bounded
+  JSON-only media negotiation before D1, `HEAD`, JSON `405`, no-store safe
+  failures, and exclusion of owner, identity, Hub, draft, and private canary
+  values. Validation: integrated commit `781228f33bea98d65e52d5245f5208e84babf173`;
+  focused compiled-Worker/API/public matrices, full validation (229/229),
+  migration generation, production audit (zero vulnerabilities), and diff
+  checks pass. An independent Sol API/security review found no P0/P1/P2 issue.
+  No schema, Site, hosted data, setting, access, DNS, domain, Hub, sibling,
+  `main`, deployment, or external state changed.
+
 - **TASK-161 — Make optional public Identity details compact and
   discoverable.** Replaced the competing optional-detail fieldset with a native
   `Optional public details` disclosure whose live 0–3 category count is closed
