@@ -33,10 +33,12 @@ vertical changes. `/api/v2` remains absent.
   owner/identity/Hub/profile/entry/runtime canaries, query format hints, and a
   browser User-Agent. No response projects any canary and neither discovery
   resource issues a D1 query.
-- The configured manifest adds only canonical `endpoints.api`; its existing
-  `profile` and `entries` names and values remain exact. Existing v1 site,
-  collection, and detail response shapes remain unchanged pending their
-  accepted replacement tasks.
+- At TASK-178 completion, the configured manifest added only canonical
+  `endpoints.api`; its existing `profile` and `entries` names and values stayed
+  exact. The then-existing v1 site, collection, and detail response shapes were
+  unchanged pending their accepted replacement tasks. TASK-179 subsequently
+  replaced only the profile shape and advertised that now-implemented resource
+  from the root/schema; this record remains the TASK-178 foundation evidence.
 
 ## Validation
 

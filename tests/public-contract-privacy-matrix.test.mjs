@@ -24,7 +24,7 @@ const historicalMigration = "drizzle/0000_closed_talos.sql";
 
 const sourceDigests = {
   "db/schema.ts": "8917fdac637f7a5ae4c96df0ecbed770ca881c218136e6067196fc3216bc1b67",
-  "docs/protocol.md": "0e0508e520222f4bcf4ecb6f0d696dd58d516ab8716b1dca9d25676129e7f4a6",
+  "docs/protocol.md": "3d01809fa3fe9b870d56d97a990bcedaf647c63dc769a0af528f10aee9c0eeff",
   [historicalMigration]: "95455a11b0795cfbfeb4ad0edfa07c2e75d076b14b142c9dfb1feb1c849e3c8a",
   "package-lock.json": "1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9",
   "tests/fixtures/poc-upgrade-v0.sql":
@@ -403,7 +403,7 @@ async function assertPublicMatrix(worker, matrixCase) {
 
   if (setupError) {
     assertJson(manifest, setupError);
-    assertJson(site, setupError);
+    assertJson(site, profileSetupError(setupError));
   } else {
     assertJson(manifest, {
       status: 200,
@@ -670,22 +670,26 @@ function expectedManifest(canonicalUrl, accountType) {
 function expectedSite(canonicalUrl, profile) {
   return {
     data: {
-      displayName: profile.displayName,
-      accountType: profile.accountType,
-      shortDescription: profile.shortDescription,
-      introduction: profile.introduction,
-      location: profile.location,
-      website: profile.website,
-      externalLinks: profile.externalLinks,
-      canonicalUrl,
-      presentation: profile.presentation,
+      id: "profile",
+      type: "profile",
+      attributes: {
+        displayName: profile.displayName,
+        accountType: profile.accountType,
+        shortDescription: profile.shortDescription,
+        introduction: profile.introduction,
+        location: profile.location,
+        website: profile.website,
+        externalLinks: profile.externalLinks,
+        canonicalUrl,
+        presentation: profile.presentation,
+      },
     },
-    links: {
-      self: `${canonicalUrl}/api/v1/site`,
-      html: canonicalUrl,
-      entries: `${canonicalUrl}/api/v1/entries`,
-      manifest: `${canonicalUrl}/.well-known/aitta-social.json`,
-    },
+    links: [
+      { rel: "self", href: `${canonicalUrl}/api/v1/site`, mediaType: "application/json" },
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "social.aitta.profile", href: canonicalUrl, mediaType: "text/html" },
+    ],
+    actions: [],
   };
 }
 
@@ -757,6 +761,23 @@ function setupErrorFor(readiness) {
     };
   }
   return null;
+}
+
+function profileSetupError(setupError) {
+  const { code, message } = setupError.body.error;
+  return {
+    ...setupError,
+    body: {
+      data: null,
+      error: {
+        code,
+        message: code === "profile_not_configured"
+          ? "The Aitta profile has not been configured."
+          : message,
+      },
+      links: [],
+    },
+  };
 }
 
 async function observeHtml(worker, pathname) {

@@ -410,30 +410,34 @@ async function captureConfiguredBehavior(worker, canonicalUrl) {
 function expectedSiteResource(canonicalUrl) {
   return {
     data: {
-      displayName: "Legacy Person Presence",
-      accountType: "person",
-      shortDescription: "A preserved deployment-owned profile.",
-      introduction:
-        "This introduction, presentation, and content must survive an in-place upgrade.",
-      location: "Helsinki",
-      website: "https://legacy-person.example/about",
-      externalLinks: [
-        { label: "Work", url: "https://legacy-person.example/work" },
-        { label: "Contact", url: "https://legacy-person.example/contact" },
-      ],
-      canonicalUrl,
-      presentation: {
-        accentColor: "#6a4b35",
-        density: "compact",
-        showPoweredBy: false,
+      id: "profile",
+      type: "profile",
+      attributes: {
+        displayName: "Legacy Person Presence",
+        accountType: "person",
+        shortDescription: "A preserved deployment-owned profile.",
+        introduction:
+          "This introduction, presentation, and content must survive an in-place upgrade.",
+        location: "Helsinki",
+        website: "https://legacy-person.example/about",
+        externalLinks: [
+          { label: "Work", url: "https://legacy-person.example/work" },
+          { label: "Contact", url: "https://legacy-person.example/contact" },
+        ],
+        canonicalUrl,
+        presentation: {
+          accentColor: "#6a4b35",
+          density: "compact",
+          showPoweredBy: false,
+        },
       },
     },
-    links: {
-      self: `${canonicalUrl}/api/v1/site`,
-      html: canonicalUrl,
-      entries: `${canonicalUrl}/api/v1/entries`,
-      manifest: `${canonicalUrl}/.well-known/aitta-social.json`,
-    },
+    links: [
+      { rel: "self", href: `${canonicalUrl}/api/v1/site`, mediaType: "application/json" },
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "social.aitta.profile", href: canonicalUrl, mediaType: "text/html" },
+    ],
+    actions: [],
   };
 }
 
@@ -646,8 +650,11 @@ async function proveStoredCanonicalFallback(persistPath, openWorker, closeWorker
   const siteResponse = await worker.fetch("https://hostile-fallback.example/api/v1/site");
   assert.equal(siteResponse.status, 200);
   const site = await responseJson(siteResponse);
-  assert.equal(site.data.canonicalUrl, storedCanonical);
-  assert.equal(site.links.html, storedCanonical);
+  assert.equal(site.data.attributes.canonicalUrl, storedCanonical);
+  assert.equal(
+    site.links.find(({ rel }) => rel === "social.aitta.profile")?.href,
+    storedCanonical,
+  );
   assert.doesNotMatch(JSON.stringify(site), /hostile-fallback/);
 
   const home = await worker.fetch("https://hostile-fallback.example/", {

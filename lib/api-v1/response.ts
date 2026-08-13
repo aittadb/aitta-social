@@ -32,7 +32,7 @@ export function apiV1ReadResponse<TAttributes extends Record<string, unknown>>(
         503,
       );
     }
-    return Response.json(createDocument(canonicalUrl), { headers: JSON_HEADERS });
+    return apiV1JsonResponse(createDocument(canonicalUrl));
   } catch {
     return apiV1Error(
       "internal_error",
@@ -71,7 +71,7 @@ export function apiV1Head(response: Response): Response {
   });
 }
 
-function apiV1NegotiationError(request: Request): Response | null {
+export function apiV1NegotiationError(request: Request): Response | null {
   return acceptsApiV1Json(request.headers.get("accept")).accepted
     ? null
     : apiV1Error(
@@ -81,7 +81,13 @@ function apiV1NegotiationError(request: Request): Response | null {
       );
 }
 
-function apiV1Error(
+export function apiV1JsonResponse<
+  TAttributes extends Record<string, unknown>,
+>(document: ApiV1Document<TAttributes>): Response {
+  return Response.json(document, { headers: JSON_HEADERS });
+}
+
+export function apiV1Error(
   code: string,
   message: string,
   status: number,

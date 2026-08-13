@@ -50,7 +50,7 @@ test("profile writes normalize canonical/public URLs and persist only validated 
 
   const publicProfile = (await responseJson(await fetchApp("/api/v1/site", {
     env: makeEnv({ db, ownerEmail }),
-  }))).data;
+  }))).data.attributes;
   assert.equal(publicProfile.canonicalUrl, "https://canonical.example/account");
   assert.equal(publicProfile.presentation.showPoweredBy, false);
 });

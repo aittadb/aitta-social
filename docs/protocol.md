@@ -105,6 +105,11 @@ or the stored profile canonical URL. It returns:
       "mediaType": "application/json"
     },
     {
+      "rel": "social.aitta.profile",
+      "href": "https://account.example/api/v1/site",
+      "mediaType": "application/json"
+    },
+    {
       "rel": "social.aitta.manifest",
       "href": "https://account.example/.well-known/aitta-social.json",
       "mediaType": "application/json"
@@ -129,6 +134,7 @@ implemented relation vocabulary:
         "self",
         "profile",
         "collection",
+        "social.aitta.profile",
         "social.aitta.manifest"
       ]
     }
@@ -164,9 +170,10 @@ User-Agent and query format hints. `/api/v2` is not an application route.
 
 Missing or invalid protected canonical configuration returns a no-store
 structured `503` without a D1 read. Unexpected root/schema failures return a
-fixed safe `500`. Until TASK-179–181 replace the unshipped profile and entry
-grammars, those known routes retain their response shapes and existing media
-and method behavior.
+fixed safe `500`. The profile resource now uses this same media, method,
+`HEAD`, error, and safe-failure boundary. Until TASK-180–181 replace the
+unshipped entry grammars, those known entry routes retain their response shapes
+and existing media and method behavior.
 
 ## Discovery manifest
 
@@ -224,31 +231,47 @@ contains links derived from the request host.
 ```json
 {
   "data": {
-    "displayName": "Northern Workshop",
-    "accountType": "other",
-    "shortDescription": "Tools and field notes for careful collaboration.",
-    "introduction": "We publish working notes, longer explanations, and project announcements.",
-    "location": "Helsinki",
-    "website": "https://workshop.example/",
-    "externalLinks": [
-      {
-        "label": "Documentation",
-        "url": "https://workshop.example/docs"
+    "id": "profile",
+    "type": "profile",
+    "attributes": {
+      "displayName": "Northern Workshop",
+      "accountType": "other",
+      "shortDescription": "Tools and field notes for careful collaboration.",
+      "introduction": "We publish working notes, longer explanations, and project announcements.",
+      "location": "Helsinki",
+      "website": "https://workshop.example/",
+      "externalLinks": [
+        {
+          "label": "Documentation",
+          "url": "https://workshop.example/docs"
+        }
+      ],
+      "canonicalUrl": "https://account.example",
+      "presentation": {
+        "accentColor": "#315b4c",
+        "density": "comfortable",
+        "showPoweredBy": true
       }
-    ],
-    "canonicalUrl": "https://account.example",
-    "presentation": {
-      "accentColor": "#315b4c",
-      "density": "comfortable",
-      "showPoweredBy": true
     }
   },
-  "links": {
-    "self": "https://account.example/api/v1/site",
-    "html": "https://account.example",
-    "entries": "https://account.example/api/v1/entries",
-    "manifest": "https://account.example/.well-known/aitta-social.json"
-  }
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://account.example/api/v1/site",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "profile",
+      "href": "https://account.example/api/v1/schema",
+      "mediaType": "application/json"
+    },
+    {
+      "rel": "social.aitta.profile",
+      "href": "https://account.example",
+      "mediaType": "text/html"
+    }
+  ],
+  "actions": []
 }
 ```
 
@@ -270,20 +293,34 @@ stored value through their exact public allowlists. The owner form receives
 only editable fields, and a successful private profile write returns no profile
 representation.
 
-This is an additive-compatible presentation and write-boundary change: no
-field, allowed legacy value, endpoint, or response envelope is removed or
-renamed, so protocol and API version 1.0 remain current. The existing non-null
-D1 column already stores `other`; no schema migration or data rewrite is
-needed. Consumers must treat `accountType` as compatibility metadata, not as
-proof of identity, authorization, capability, Hub verification, or network
-membership.
+The v1 singleton envelope deliberately replaces the earlier unshipped profile
+grammar during this pre-release. It preserves every public profile field and
+allowed legacy `accountType` value inside `data.attributes`; no compatibility
+route or v2 lane exists. The existing non-null D1 column already stores
+`other`; no schema migration or data rewrite is needed. Consumers must treat
+`accountType` as compatibility metadata, not as proof of identity,
+authorization, capability, Hub verification, or network membership.
+
+The root advertises this resource with `rel: social.aitta.profile`. Within the
+resource, `rel: self` identifies this v1 JSON resource, `rel: profile`
+identifies the JSON API schema, and `rel: social.aitta.profile` identifies the
+canonical human profile document with `mediaType: text/html`. Link order is
+stable and successful links
+derive from normalized protected or stored profile canonical configuration,
+never the request host.
 
 The response never contains owner identity, authentication state, protected
 runtime settings, Hub connection details, drafts, database metadata, or
-owner-only URLs.
+owner-only URLs. It is public without Hub or sign-in, uses
+`public, max-age=60` and `Vary: Accept`, and returns an empty anonymous
+`actions` array.
 
-An unconfigured profile returns `404` with `profile_not_configured`; a missing
-valid canonical URL returns `503` with `canonical_url_unconfigured`.
+An unconfigured profile returns the common v1 error envelope with `404` and
+`profile_not_configured`; a missing valid canonical URL returns that envelope
+with `503` and `canonical_url_unconfigured`. Unexpected D1 or runtime failure
+returns the fixed safe `500 internal_error`. Errors are no-store. The route
+uses the same bounded JSON-only `Accept`, `HEAD`, and exact `405 Allow` behavior
+as the v1 root.
 
 ## Public entry resource
 
@@ -383,8 +420,8 @@ Missing profile/canonical setup uses the same `profile_not_configured` and
 
 ## Errors and method handling
 
-The v1 root, schema, and unknown-path boundary uses the common pre-release
-error document:
+The v1 root, schema, profile, and unknown-path boundary uses the common
+pre-release error document:
 
 ```json
 {
@@ -398,12 +435,12 @@ error document:
 ```
 
 Its fixed codes are `not_acceptable`, `method_not_allowed`, `not_found`,
-`canonical_url_unconfigured`, and `internal_error`. These responses are
-`no-store`, contain no exception or runtime detail, and include no link when a
-protected canonical URL is unavailable.
+`profile_not_configured`, `canonical_url_unconfigured`, and `internal_error`.
+These responses are `no-store`, contain no exception or runtime detail, and
+include no link when a canonical URL is unavailable.
 
-The site and entry resources retain their earlier error grammar until their
-accepted pre-release v1 replacement tasks land:
+The entry resources retain their earlier error grammar until their accepted
+pre-release v1 replacement tasks land:
 
 Errors contain a stable machine-readable code and a safe message:
 
@@ -420,15 +457,17 @@ Errors omit canonical links rather than derive one from the request host when
 the configured canonical URL is missing or invalid.
 
 - `400` with `invalid_pagination` is used for malformed pagination.
-- `404` with `profile_not_configured` is used when the profile is absent.
+- `404` with `profile_not_configured` is used when the profile is absent. The
+  profile route uses the common v1 error document.
 - `404` with `entry_not_found` is used for a missing or non-public entry.
 - `503` with `canonical_url_unconfigured` is used when a successful canonical
   resource cannot be constructed safely.
 - `405` is used for an unsupported method and includes an appropriate `Allow`
-  header. On site and entry routes this response remains framework-owned until
-  TASK-179–181 replace those boundaries.
+  header. The profile route returns the common v1 document with
+  `Allow: GET, HEAD`; entry routes remain framework-owned until TASK-180–181.
 - `500` may be used for an unexpected server failure, but its body must not
   reveal SQL, stack traces, environment values, credentials, or identifiers.
+  The profile route returns the fixed common `internal_error` document.
 
 ## Private operations are not public protocol
 

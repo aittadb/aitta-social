@@ -162,8 +162,9 @@ test("JSON and other non-HTML responses keep their own contracts without CSP", a
   assert.equal(json.headers.get("content-security-policy"), null);
   assert.equal(json.headers.get("cache-control"), "public, max-age=60");
   const jsonBody = JSON.parse(await json.text());
-  assert.deepEqual(Object.keys(jsonBody).sort(), ["data", "links"]);
-  assert.deepEqual(Object.keys(jsonBody.data).sort(), [
+  assert.deepEqual(Object.keys(jsonBody).sort(), ["actions", "data", "links"]);
+  assert.deepEqual(Object.keys(jsonBody.data).sort(), ["attributes", "id", "type"]);
+  assert.deepEqual(Object.keys(jsonBody.data.attributes).sort(), [
     "accountType",
     "canonicalUrl",
     "displayName",

@@ -84,7 +84,7 @@ test("public HTML is category-neutral while protocol 1.0 retains a legacy accoun
   const siteResponse = await fetchApp("/api/v1/site", { env });
   assert.equal(siteResponse.status, 200);
   const site = await responseJson(siteResponse);
-  assert.equal(site.data.accountType, "company");
+  assert.equal(site.data.attributes.accountType, "company");
 
   const manifestResponse = await fetchApp("/.well-known/aitta-social.json", { env });
   assert.equal(manifestResponse.status, 200);
@@ -210,8 +210,9 @@ test("site API uses an explicit public allowlist and canonical configured links"
   assert.equal(response.headers.get("cache-control"), "public, max-age=60");
   const body = await responseJson(response);
 
-  assert.deepEqual(Object.keys(body).sort(), ["data", "links"]);
-  assert.deepEqual(Object.keys(body.data).sort(), [
+  assert.deepEqual(Object.keys(body).sort(), ["actions", "data", "links"]);
+  assert.deepEqual(Object.keys(body.data).sort(), ["attributes", "id", "type"]);
+  assert.deepEqual(Object.keys(body.data.attributes).sort(), [
     "accountType",
     "canonicalUrl",
     "displayName",
@@ -222,13 +223,27 @@ test("site API uses an explicit public allowlist and canonical configured links"
     "shortDescription",
     "website",
   ]);
-  assert.equal(body.data.canonicalUrl, "https://canonical.example/account");
-  assert.deepEqual(body.links, {
-    self: "https://canonical.example/account/api/v1/site",
-    html: "https://canonical.example/account",
-    entries: "https://canonical.example/account/api/v1/entries",
-    manifest: "https://canonical.example/account/.well-known/aitta-social.json",
-  });
+  assert.equal(body.data.id, "profile");
+  assert.equal(body.data.type, "profile");
+  assert.equal(body.data.attributes.canonicalUrl, "https://canonical.example/account");
+  assert.deepEqual(body.links, [
+    {
+      rel: "self",
+      href: "https://canonical.example/account/api/v1/site",
+      mediaType: "application/json",
+    },
+    {
+      rel: "profile",
+      href: "https://canonical.example/account/api/v1/schema",
+      mediaType: "application/json",
+    },
+    {
+      rel: "social.aitta.profile",
+      href: "https://canonical.example/account",
+      mediaType: "text/html",
+    },
+  ]);
+  assert.deepEqual(body.actions, []);
 
   const serialized = JSON.stringify(body);
   assert.doesNotMatch(serialized, /PROFILE_ROW_SECRET|PRIVATE_CREATED_CANARY|PRIVATE_UPDATED_CANARY/);
@@ -369,10 +384,12 @@ test("public APIs reject invalid pagination and report unavailable public resour
     });
     assert.equal(response.status, 404);
     assert.deepEqual(await responseJson(response), {
+      data: null,
       error: {
         code: "profile_not_configured",
-        message: "The account profile has not been configured.",
+        message: "The Aitta profile has not been configured.",
       },
+      links: [],
     });
   });
 
@@ -382,10 +399,12 @@ test("public APIs reject invalid pagination and report unavailable public resour
     });
     assert.equal(response.status, 503);
     assert.deepEqual(await responseJson(response), {
+      data: null,
       error: {
         code: "canonical_url_unconfigured",
         message: "Canonical URL is not configured.",
       },
+      links: [],
     });
   });
 });

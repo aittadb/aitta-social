@@ -38,6 +38,11 @@ const rootDocument = {
       mediaType: "application/json",
     },
     {
+      rel: "social.aitta.profile",
+      href: `${canonicalUrl}/api/v1/site`,
+      mediaType: "application/json",
+    },
+    {
       rel: "social.aitta.manifest",
       href: `${canonicalUrl}/.well-known/aitta-social.json`,
       mediaType: "application/json",
@@ -53,7 +58,13 @@ const schemaDocument = {
     attributes: {
       version: 1,
       representation: "aitta-social-json-api-v1",
-      relations: ["self", "profile", "collection", "social.aitta.manifest"],
+      relations: [
+        "self",
+        "profile",
+        "collection",
+        "social.aitta.profile",
+        "social.aitta.manifest",
+      ],
     },
   },
   links: [
@@ -283,7 +294,7 @@ test("unexpected root and schema failures are safe bounded JSON", async () => {
   }
 });
 
-test("manifest adds only the canonical v1 API root while known v1 resources remain unchanged", async () => {
+test("manifest and root discover the profile while entry resources remain unchanged", async () => {
   const profile = profileRow();
   const entry = entryRow();
   const env = makeEnv({
@@ -301,7 +312,7 @@ test("manifest adds only the canonical v1 API root while known v1 resources rema
 
   const siteResponse = await fetchApp("/api/v1/site", {
     env,
-    headers: { accept: "text/html" },
+    headers: { accept: "application/json" },
   });
   const collectionResponse = await fetchApp("/api/v1/entries", {
     env,
@@ -311,7 +322,11 @@ test("manifest adds only the canonical v1 API root while known v1 resources rema
     env,
     headers: { accept: "text/html" },
   });
-  assert.deepEqual(Object.keys(await responseJson(siteResponse)).sort(), ["data", "links"]);
+  assert.deepEqual(Object.keys(await responseJson(siteResponse)).sort(), [
+    "actions",
+    "data",
+    "links",
+  ]);
   assert.deepEqual(Object.keys(await responseJson(collectionResponse)).sort(), [
     "data",
     "links",

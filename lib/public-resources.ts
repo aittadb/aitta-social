@@ -15,33 +15,6 @@ export function resolveCanonicalUrl(profile: Profile | null): string | null {
   return null;
 }
 
-export function publicSiteResource(profile: Profile, canonicalUrl: string) {
-  const base = withoutTrailingSlash(canonicalUrl);
-  return {
-    data: {
-      displayName: profile.displayName,
-      accountType: profile.accountType,
-      shortDescription: profile.shortDescription,
-      introduction: profile.introduction,
-      ...(profile.location ? { location: profile.location } : {}),
-      ...(profile.website ? { website: profile.website } : {}),
-      externalLinks: profile.externalLinks.map(({ label, url }) => ({ label, url })),
-      canonicalUrl: base,
-      presentation: {
-        accentColor: profile.accentColor,
-        density: profile.density,
-        showPoweredBy: !profile.hidePoweredBy,
-      },
-    },
-    links: {
-      self: `${base}/api/v1/site`,
-      html: base,
-      entries: `${base}/api/v1/entries`,
-      manifest: `${base}/.well-known/aitta-social.json`,
-    },
-  };
-}
-
 export function publicEntryResource(entry: Entry, canonicalUrl: string) {
   const base = withoutTrailingSlash(canonicalUrl);
   return {

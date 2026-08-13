@@ -7,17 +7,20 @@ type ApiV1Runtime = {
 };
 
 /**
- * Reads the one runtime value required for D1-independent integration discovery.
- * It deliberately does not construct the broad runtime-settings object, because
- * owner and Hub settings are irrelevant to this public boundary.
+ * Reads only canonical configuration for v1 resources. A D1-independent
+ * discovery caller supplies no fallback; a profile-backed resource may supply
+ * its already-public stored canonical value without reading owner or Hub settings.
  */
-export function apiV1CanonicalUrl(): string | null {
+export function apiV1CanonicalUrl(storedFallback?: unknown): string | null {
   const value = (env as unknown as ApiV1Runtime).AITTA_SOCIAL_CANONICAL_URL;
   const configured = typeof value === "string" ? value.trim() : "";
-  if (!configured) return null;
-  try {
-    return normalizeCanonicalUrl(configured);
-  } catch {
-    return null;
+  for (const candidate of [configured, storedFallback]) {
+    if (!candidate) continue;
+    try {
+      return normalizeCanonicalUrl(candidate);
+    } catch {
+      // A malformed protected value does not override a valid stored fallback.
+    }
   }
+  return null;
 }

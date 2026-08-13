@@ -136,7 +136,7 @@ test("an accepted accent stays exact in D1 and protocol while every rendered sur
   assertRenderedAccent(permalink, "permalink-shell", expectedRendered);
   assertRenderedAccent(owner, "identity-draft-preview", expectedRendered);
   assert.match(owner, /name="accentColor"[^>]*value="#ffffff"/i);
-  assert.equal(site.data.presentation.accentColor, "#ffffff");
+  assert.equal(site.data.attributes.presentation.accentColor, "#ffffff");
   assert.deepEqual(db.profile, beforeReads);
   assert.equal(db.mutations.length, 1, "read, preview, and reload paths must not clobber D1");
 
@@ -209,7 +209,7 @@ test("a malformed persisted legacy accent survives reopen without reaching publi
   }
   assert.doesNotMatch(home, /POC_V0_DRAFT_(?:TITLE|BODY)_PRIVATE_CANARY/);
   assert.doesNotMatch(permalink, /POC_V0_DRAFT_(?:TITLE|BODY)_PRIVATE_CANARY/);
-  assert.equal(site.data.presentation.accentColor, legacyAccent);
+  assert.equal(site.data.attributes.presentation.accentColor, legacyAccent);
   assert.deepEqual(await storedAccent(worker.db), [{ accent_color: legacyAccent }]);
 });
 

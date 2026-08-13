@@ -1,15 +1,17 @@
 export const API_V1_MEDIA_TYPE = "application/json" as const;
+export const HTML_MEDIA_TYPE = "text/html" as const;
 
 export type ApiV1Relation =
   | "self"
   | "profile"
   | "collection"
+  | "social.aitta.profile"
   | "social.aitta.manifest";
 
 export type ApiV1Link = {
   rel: ApiV1Relation;
   href: string;
-  mediaType: typeof API_V1_MEDIA_TYPE;
+  mediaType: typeof API_V1_MEDIA_TYPE | typeof HTML_MEDIA_TYPE;
 };
 
 export type ApiV1Action = {
@@ -53,6 +55,7 @@ export function apiV1RootDocument(canonicalUrl: string): ApiV1Document<{
     links: [
       jsonLink("self", `${canonicalUrl}/api/v1`),
       jsonLink("profile", `${canonicalUrl}/api/v1/schema`),
+      jsonLink("social.aitta.profile", `${canonicalUrl}/api/v1/site`),
       jsonLink(
         "social.aitta.manifest",
         `${canonicalUrl}/.well-known/aitta-social.json`,
@@ -78,6 +81,7 @@ export function apiV1SchemaDocument(canonicalUrl: string): ApiV1Document<{
           "self",
           "profile",
           "collection",
+          "social.aitta.profile",
           "social.aitta.manifest",
         ],
       },

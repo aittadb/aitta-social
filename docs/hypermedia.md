@@ -55,8 +55,8 @@ discovery links together. That is not a second API version. After release, the
 documented v1 behavior is frozen and a successor requires an explicit
 compatibility decision.
 
-The implemented root, schema, and unknown-path boundary defaults to JSON for
-missing or wildcard `Accept`, returns
+The implemented root, schema, public profile, and unknown-path boundary defaults
+to JSON for missing or wildcard `Accept`, returns
 JSON only, and never redirect or negotiate HTML. An explicit refusal of JSON,
 malformed or excessive `Accept`, or an unsupported method uses the bounded
 JSON error/`405 Allow` behavior specified by the applicable task. API responses
@@ -111,10 +111,10 @@ prepared-storage checks.
 The current accepted path is deliberately incremental:
 
 1. TASK-178 established JSON-only `/api/v1` and `/api/v1/schema` integration
-   discovery. The manifest advertises the root; its ordered links advertise
-   only the root, schema, and discovery manifest until later resources land.
-2. TASK-179 and TASK-180 replace the pre-release v1 public profile and
-   collection response shapes with the shared integration representation.
+   discovery. The manifest advertises the root.
+2. TASK-179 established the pre-release v1 public profile representation. The
+   root and schema advertise it through `rel: social.aitta.profile`; TASK-180
+   next replaces the collection response shape.
 3. TASK-181 replaces v1 entry detail. TASK-193 then proves the first current
    unversioned HTML/JSON document at `/entries/{id}`. A later public human document,
    including a published custom `/about` page, must use that proven pattern in

@@ -126,7 +126,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   assert.doesNotMatch(publicHtml, /Powered by AittaSocial/i);
   assert.doesNotMatch(publicHtml, new RegExp(`${draftCanary}|${ownerIdentityCanary}|owner@example\\.com`, "i"));
 
-  const publicSite = (await responseJson(siteApi)).data;
+  const publicSite = (await responseJson(siteApi)).data.attributes;
   assert.equal(publicSite.canonicalUrl, "https://runtime.example/presence");
   assert.deepEqual(publicSite.presentation, {
     accentColor: "#6a4b35",

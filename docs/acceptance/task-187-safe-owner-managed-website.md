@@ -451,12 +451,13 @@ remain outside this model.
   both HTML and its current hypermedia JSON representation through the proven
   bounded `Accept` policy; it does not create a `/api/v1/pages/*` route unless
   a separate accepted versioned-integration task later requires one.
-- The implemented protocol 1.0 manifest, site resource, and entry resources
-  remain unchanged until their accepted pre-release v1 tasks land. A later
-  published custom homepage does not change their public allowlists or create
-  a second versioned API. `/api/v1/site.links.html` continues to identify the
-  Aitta root, whether the root presents the default profile or an explicitly
-  published custom homepage.
+- The implemented protocol 1.0 manifest and TASK-179 profile resource remain
+  discovery boundaries while the entry resources await their accepted
+  pre-release v1 tasks. A later published custom homepage does not change their
+  public allowlists or create a second versioned API. The profile resource's
+  `rel: social.aitta.profile` link continues to identify the Aitta root,
+  whether that root presents the default profile or an explicitly published
+  custom homepage.
 - Public pages remain independent of Hub. Import never fetches the reference
   website or another Aitta at request time.
 
