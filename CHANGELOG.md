@@ -1,5 +1,15 @@
 # Changelog
 
+- **TASK-183 — Restored reviewed engineering-policy publication.** An ordinary
+  authenticated fast-forward advanced `origin/develop` from `17d2878` to
+  `5612b6d8a1228230a2182bc8103a5c4b49e51716`. Read-back confirmed local
+  `develop` and `origin/develop` match at that SHA, both the reviewed
+  multi-agent-policy commit `ec96d4d8ce511f83913ecc7b7da219f2e40ac643` and
+  the completed TASK-184 guidance are ancestors, and the policy bytes match
+  (`AGENTS.md` SHA-256 `14f9ce…798dbf4`). No application, schema, migration,
+  Site, deployment, data, setting, access, DNS, domain, Hub, sibling, or
+  runtime state changed.
+
 - **TASK-196 — Made private publication-state mutation a truthful JSON-first
   browser API.** `PUT /api/private/entries/{id}/state` now preserves
   same-origin-before-owner authorization, then accepts only bounded JSON and
