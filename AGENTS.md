@@ -172,12 +172,10 @@ file. Keep this file strictly below 32,000 bytes and run
   Never add prompt-derived authorization, a magic owner, a ChatGPT-, Codex-,
   or owner-impersonating credential, an authentication bypass, or a public
   customization endpoint.
-- Only an accepted task may add a deployment-bound machine credential for one
-  named v2 operation and scope. Keep it separate from Sites identity and browser
-  CSRF, in protected rotating/revocable runtime slots, D1-audited, and fail
-  closed when that mode's configuration is missing or invalid. It is only its
-  named service actor, grants no owner dashboard or existing private-API access,
-  and never represents ChatGPT, Codex, a prompt, or a human.
+- Only an accepted task may add one deployment-bound v1 machine credential and
+  scope. Keep it separate from Sites/browser CSRF, rotating/revocable,
+  D1-audited, and fail-closed; it grants no owner/private-API access and never
+  represents ChatGPT, Codex, a prompt, or a human.
 - Never trust a hidden control, client route guard, browser field, browser
   destination, or previous page authorization.
 - Protected owner configuration, any future Hub credentials, runtime secrets, and
@@ -205,9 +203,10 @@ file. Keep this file strictly below 32,000 bytes and run
 - Signed-out and non-owner visitors read only explicit public projections: the
   profile, published entries, and implemented published custom pages. Draft and
   unknown resources are indistinguishable in every public surface.
-- Preserve every `/api/v1` contract. An explicitly accepted incompatible
-  successor may use `/api/v2`; never silently revise v1. Keep discovery at
-  `/.well-known/aitta-social.json`.
+- `/api/v1` is the sole versioned integration namespace during this pre-release.
+  An accepted task may reshape an unshipped v1 contract with its tests and
+  protocol documentation; do not add `/api/v2`. After release, require an
+  explicit compatibility decision. Keep discovery at `/.well-known/aitta-social.json`.
 - Preserve the required protocol 1.0 `accountType` field and its documented
   legacy values until a deliberate versioned contract change. Hiding the
   category from ordinary HTML does not authorize dropping, renaming, or
@@ -225,22 +224,20 @@ file. Keep this file strictly below 32,000 bytes and run
   Keep handler-produced HTML dynamic with `no-store` and `must-revalidate` so a
   publication change or private value is not frozen into a build or cross-
   request application cache; do not alter JSON/static-asset caching incidentally.
-- Preserve stable entry identifiers, canonical configured URLs, documented JSON
-  envelopes, correct content types/statuses, deterministic pagination, and
-  resource links. Do not derive canonical success links from an untrusted
-  request host.
+- Preserve stable entry identifiers, canonical configured URLs, correct
+  content/statuses, deterministic pagination, and resource links. A pre-release
+  v1 task may replace an unshipped envelope only through a documented, tested
+  decision; never derive canonical success links from an untrusted host.
 - Treat the public Hub verification challenge only as a configured
   control-of-deployment check, never authentication.
 - Do not add an outbound Hub credential flow, private Hub probe, registration,
   or connection behavior until its exact versioned contract is accepted and
   promoted to `PLAN.md`. Public reads remain independent of Hub.
-- Public contract changes update `docs/protocol.md` and receive a versioning
-  decision when incompatible.
-- When one public GET resource has both human HTML and machine JSON
-  representations, select between them only from a bounded `Accept` contract,
-  never from `User-Agent`. Preserve the documented JSON default and payload,
-  identify negotiated responses with `Vary: Accept`, keep a direct raw-JSON
-  path, and apply the same public allowlist and privacy boundary to HTML.
+- Update `docs/protocol.md` for a released-integration contract change. An
+  unversioned public document may instead offer current HTML and hypermedia JSON
+  at one path, never a parallel `/vN`: bounded `Accept` only (no User-Agent or
+  query), HTML on default/tie, JSON only when preferred, `Vary: Accept`, and
+  the same allowlist/privacy boundary. `/api/v1` stays JSON-only/default.
 
 ## Product and accessibility
 

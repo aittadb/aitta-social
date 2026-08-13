@@ -1,5 +1,14 @@
 # TASK-189 — JSON-first API and authentication refinement
 
+> **Superseded pre-release planning decision (2026-08-13).** Before any
+> `/api/v2` implementation, deployment, migration, or client was created, the
+> owner selected one versioned integration API at `/api/v1` plus current
+> hypermedia JSON variants of selected unversioned human documents. The current
+> decision and dependency graph are in `PLAN.md` and
+> [hypermedia.md](../hypermedia.md). This record preserves what TASK-189
+> concluded at the time; it is historical evidence, not a claim that `/api/v2`
+> exists or remains planned.
+
 TASK-189 is a read-only architecture and compatibility decision. It changes no
 application handler, response, schema, migration, dependency, Site, deployment,
 data, runtime setting, access policy, DNS, domain, Hub, or sibling repository.

@@ -157,11 +157,11 @@ cookie, supplying an email in JSON or a query, or naming itself ChatGPT or
 Codex. Supervised browser assistance remains the only current ChatGPT-assisted
 write path.
 
-The planned JSON API v2 keeps machine authentication in a separate typed
+The planned versioned JSON API v1 keeps machine authentication in a separate typed
 adapter from Sites browser authentication. TASK-191 is the accepted first
 write slice: one deployment-local service actor may use protected current/next
 opaque bearer-secret slots and only the `entries:write` scope to create one
-server-forced private draft through `POST /api/v2/entries`. The credential
+server-forced private draft through `POST /api/v1/entries`. The credential
 identifies neither ChatGPT nor the human owner, grants no `/owner` or existing
 private-API access, and is useful only to the specific normalized canonical
 Aitta deployment and audience that issued it. Missing, malformed, expired,
@@ -169,7 +169,7 @@ revoked, wrong-audience, wrong-scope, local-production, and unverified machine-
 deployment modes fail closed.
 
 Action discovery is cache-separated from authentication. The normal anonymous
-`GET /api/v2/entries` response retains its reviewed public cache and empty
+`GET /api/v1/entries` response retains its reviewed public cache and empty
 actions. A valid service credential receives a `no-store` response with the
 create action; any presented invalid credential receives an explicit `no-store`
 401, while an authenticated wrong-scope credential receives `no-store` 403.
@@ -202,9 +202,10 @@ machine operation is accepted.
 - `/api/private/*` is not a public API. Every request independently requires
   current server-side owner authorization and strict method, media-type, and
   input validation.
-- The implemented public contract remains `/api/v1`. Accepted `/api/v2` work
-  is an explicit incompatible successor and never changes a v1 route or turns
-  a browser-private route into a machine route.
+- `/api/v1` is the only versioned integration surface for this unpublished
+  first release. Its accepted tasks may reshape pre-release response contracts
+  with exact tests and protocol documentation; `/api/v2` is not planned. This
+  does not turn a browser-private route into a machine route.
 
 An implemented published custom page may later occupy a validated non-reserved
 human path. Authentication, owner, API, discovery, Privacy, Technical, entry,
@@ -224,7 +225,7 @@ and pagination effects are private.
   request origin exactly. When it is absent, require the browser-controlled
   `Sec-Fetch-Site: same-origin` signal. Opaque, malformed, cross-site, and
   otherwise unverified requests fail closed.
-- The accepted TASK-191 machine POST does not borrow browser same-origin or
+- The accepted TASK-191 versioned machine POST does not borrow browser same-origin or
   Sites-owner authorization. It independently requires its deployment-bound
   bearer adapter, exact scope and audience, JSON media/body/validation checks,
   and prepared transaction. Browser mode fails closed on missing/invalid owner
@@ -269,7 +270,7 @@ and pagination effects are private.
   the identifier of an existing entry.
 - Mutating requests accept only their intended method and media type.
   Browser-owner requests repeat owner authorization and same-origin checks;
-  the accepted v2 machine request repeats service authentication, audience,
+  the accepted versioned machine request repeats service authentication, audience,
   and scope checks. Both repeat body bounds and validation even when a trusted
   interface made the request.
 

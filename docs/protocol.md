@@ -13,9 +13,12 @@ not depend on AittaSocial Hub.
 - Protocol version: `1.0`
 - Public API base: `/api/v1`
 
-An incompatible public change requires a new API or protocol version. Optional
-additive fields may be introduced within version 1 only when old clients can
-safely ignore them.
+Until this first versioned integration is declared released, an accepted task
+may deliberately revise the pre-release protocol 1.0 grammar together with its
+routes, tests, manifest, and this document; it does not need to create an
+unshipped v2 compatibility lane. After release, an incompatible public change
+requires a new API or protocol version. Optional additive fields may be
+introduced within version 1 only when old clients can safely ignore them.
 
 Canonical human-facing guidance uses Aitta for the owner-controlled
 application, profile for its optional outward identity presentation, and

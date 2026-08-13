@@ -446,13 +446,17 @@ remain outside this model.
   unknown, corrupt, and unavailable pages use identical neutral noindex
   metadata and no canonical or image URL.
 - Custom page, shell, design, and asset owner APIs remain under
-  `/api/private/*`; they are not public AittaSocial protocol resources. No new
-  custom-page JSON route is added under `/api/v1`.
-- The protocol 1.0 manifest, site resource, entry resources, envelopes,
-  allowlists, errors, links, pagination, cache behavior, and version remain
-  unchanged. `/api/v1/site.links.html` continues to identify the Aitta root,
-  whether the root presents the default profile or an explicitly published
-  custom homepage.
+  `/api/private/*`; they are not public AittaSocial protocol resources. A
+  published custom human document uses its own unversioned canonical URI for
+  both HTML and its current hypermedia JSON representation through the proven
+  bounded `Accept` policy; it does not create a `/api/v1/pages/*` route unless
+  a separate accepted versioned-integration task later requires one.
+- The implemented protocol 1.0 manifest, site resource, and entry resources
+  remain unchanged until their accepted pre-release v1 tasks land. A later
+  published custom homepage does not change their public allowlists or create
+  a second versioned API. `/api/v1/site.links.html` continues to identify the
+  Aitta root, whether the root presents the default profile or an explicitly
+  published custom homepage.
 - Public pages remain independent of Hub. Import never fetches the reference
   website or another Aitta at request time.
 
