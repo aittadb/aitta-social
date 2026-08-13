@@ -1,5 +1,28 @@
 # Changelog
 
+- **TASK-195 — Made private update editing a truthful JSON-first browser API.**
+  `PUT /api/private/entries/{id}` now retains same-origin-before-owner denial,
+  then accepts bounded JSON and returns an allowlisted, no-store `owner-entry`
+  document on exact `200`, or structured JSON for `400`, `404`, `406`, `415`,
+  `422`, and unexpected `500` outcomes. Every unsupported method now returns
+  JSON `405 + Allow: PUT, DELETE` independently of `Accept`; the existing
+  DELETE handler remains byte-compatible. The edit client confirms a success
+  only when the bounded response matches the submitted normalized kind, title,
+  body, destination, identifier, and publication state. Malformed success,
+  redirects, transport failure, and 5xx results lock retry as unconfirmed;
+  exact structured 4xx errors remain correctable and field-focused. Validation:
+  integrated commit `0dc14217db9ddcb970ecb7f108fa45ba2cddd27c`; full validation
+  passed 364/364, migration generation found no schema change, production audit
+  found zero vulnerabilities, and diff checks passed. An independent Sol
+  security/correctness review found no P0/P1/P2 issue and independently passed
+  111 focused checks. Disposable compiled-Worker evidence covers draft and
+  published edits, `422` retry, `500` and malformed-200 recovery locks,
+  non-owner/missing-owner safe states, 320/390/1440, forced colors, reduced
+  motion, coarse touch, 44-pixel targets, no overflow/private canaries, and a
+  clean console. Residual uncertainty: the Sites identity-header ingress
+  boundary remains separately blocked under TASK-190; no hosted, data,
+  configuration, schema, migration, deployment, or external state changed.
+
 - **TASK-194 — Made private draft creation a truthful JSON-first browser API.**
   `POST /api/private/entries` now preserves same-origin-before-owner denial and
   then accepts bounded JSON only, returning allowlisted, no-store JSON for

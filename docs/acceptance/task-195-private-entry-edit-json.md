@@ -74,7 +74,9 @@ hosting, deployment, Site setting, external data, or network mutation.
 ## Validation and residuals
 
 Migration drift is unchanged because TASK-195 adds no schema or migration.
-The final candidate must pass the repository's full validation, production
-audit, diff checks, current-develop rebase, and independent Sol review. The
-production Sites identity-header ingress boundary remains the separately
-tracked TASK-190 uncertainty; this task neither strengthens nor claims it.
+Final candidate `0dc14217db9ddcb970ecb7f108fa45ba2cddd27c` rebased directly on
+`fed6ee34269281fbe33680ba685c35cb9c76aac9` and passed the repository's full
+validation (364/364), production audit (zero vulnerabilities), diff checks,
+and independent Sol review with no P0/P1/P2 findings. The production Sites
+identity-header ingress boundary remains the separately tracked TASK-190
+uncertainty; this task neither strengthens nor claims it.
