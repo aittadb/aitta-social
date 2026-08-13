@@ -1,5 +1,24 @@
 # Changelog
 
+- **TASK-187 — Refine safe owner-managed website replacement.** Defined the
+  Aitta-specific, no-fork customization contract for eventually replacing an
+  owner's conventional website: closed versioned `PageDocument`, `SiteShell`,
+  and `SiteDesign` records; safe HTML/CSS import rather than raw rendering;
+  mandatory system destinations; bounded routes, metadata, accessibility,
+  publication, canonical, and privacy rules; and a separately approved
+  same-origin normalized-raster asset boundary. Arbitrary JavaScript, remote
+  fetch, generic plugins/templates, global unsafe styles, public uploads, and
+  a generic media framework remain excluded. The one immediately useful next
+  increment is TASK-188's owner-only HTML-fragment compilation and escaped
+  preview; persistence, publication/routing, shell/home, design/CSS, and asset
+  work remain deliberately unqueued until that evidence exists. Validation:
+  rebased and integrated commit `ac8d612`; production build and 86 focused
+  security, metadata, public, owner, and workflow tests pass; instruction
+  check passes at 31,400 bytes; plan and diff checks pass; and independent Sol
+  High architecture/security review found no P0/P1/P2 issue. No product code,
+  schema, migration, Site, deployment, data, setting, access, DNS, domain,
+  Hub, sibling, or hosted state changed.
+
 - **TASK-186 — Refine the next parallel-safe server-source boundary
   improvement.** Mapped the current `app/api`, `lib`, and `db` module, import,
   and test seams outside active feature ownership. The reviewed conclusion is
