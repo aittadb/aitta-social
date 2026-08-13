@@ -630,7 +630,7 @@ async function captureAuthorizationMatrix(
     headers: mutationHeaders(OWNER_EMAIL),
     body: JSON.stringify(profileInput({ shortDescription: "Saved by the upgrade matrix." })),
   });
-  assert.equal(owner.status, 204);
+  assert.equal(owner.status, 200);
   await consumeResponse(owner);
   const profile = await rows(
     worker.db,

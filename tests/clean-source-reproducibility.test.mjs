@@ -81,7 +81,7 @@ test("a fresh D1 moves from safe setup to configured empty and published-only wi
       hidePoweredBy: true,
     })),
   });
-  assert.equal(identitySave.status, 204);
+  assert.equal(identitySave.status, 200);
   assert.equal(db.profile.display_name, "Clean Source Presence");
   assert.equal(db.profile.canonical_url, "https://clean-source.example/presence");
 

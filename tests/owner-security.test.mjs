@@ -28,7 +28,7 @@ test("owner matching is normalized and remains a sole-owner server decision", as
       },
       body: JSON.stringify(validProfileInput()),
     });
-    assert.equal(response.status, 204);
+    assert.equal(response.status, 200);
     assert.equal(db.mutations.length, 1);
   });
 
@@ -44,9 +44,7 @@ test("owner matching is normalized and remains a sole-owner server decision", as
       body: JSON.stringify(validProfileInput()),
     });
     assert.equal(response.status, 403);
-    assert.deepEqual(await responseJson(response), {
-      error: "Administrative access denied.",
-    });
+    assert.equal((await responseJson(response)).error.code, "authorization_denied");
   });
 
   await t.test("a signed-out visitor is challenged without leaking the owner", async () => {
@@ -130,7 +128,7 @@ test("the same-origin gate runs before identity and database mutation", async (t
       },
       body: JSON.stringify(validProfileInput()),
     });
-    assert.equal(response.status, 204);
+    assert.equal(response.status, 200);
     assert.equal(db.mutations.length, 1);
   });
 });
@@ -154,9 +152,13 @@ test("every private mutation route independently rejects a non-owner before touc
         ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
       });
       assert.equal(response.status, 403);
-      assert.deepEqual(await responseJson(response), {
-        error: "Administrative access denied.",
-      });
+      if (path === "/api/private/profile") {
+        assert.equal((await responseJson(response)).error.code, "authorization_denied");
+      } else {
+        assert.deepEqual(await responseJson(response), {
+          error: "Administrative access denied.",
+        });
+      }
       assert.equal(db.mutations.length, 0);
     });
   }
@@ -174,9 +176,7 @@ test("category-neutral profile writes still require configured sole-owner author
       body: JSON.stringify(input),
     });
     assert.equal(response.status, 403);
-    assert.deepEqual(await responseJson(response), {
-      error: "Administrative access denied.",
-    });
+    assert.equal((await responseJson(response)).error.code, "authorization_denied");
     assert.equal(db.mutations.length, 0);
   });
 

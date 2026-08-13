@@ -146,16 +146,21 @@ The current accepted path is deliberately incremental:
 5. TASK-191 may add one separate, deployment-bound machine create operation to
    the v1 collection only after that collection contract exists. It never
    represents ChatGPT, Codex, the owner, or a browser session.
-6. TASK-192 starts the separate browser-private JSON normalization lane with
-   the Identity mutation. TASK-194, TASK-195, TASK-196, and TASK-197 then
+6. TASK-192 establishes the separate browser-private JSON normalization lane
+   with the Identity mutation. TASK-194, TASK-195, TASK-196, and TASK-197 then
    normalize exactly one private entry operation each—create, edit, publication
    state, and deletion—without turning any browser-private route into a
    machine or public API.
 
-Existing `/api/private/*` browser-owner mutations remain private and use their
-current safety boundaries until their one-operation TASK-192/TASK-194–197
-slices land. No statement in this document claims that browser-private
-endpoints are machine credentials or public API resources.
+`PUT /api/private/profile` now returns a feature-local allowlisted
+`owner-profile` resource, canonical JSON/owner/public navigation links, and one
+`edit` action only after same-origin sole-owner authorization. Its structured
+errors follow the JSON status policy recorded in the TASK-192 acceptance
+evidence. It remains private, no-store, undiscoverable, and unavailable to the
+deployment-bound machine actor. Other `/api/private/*` browser-owner mutations
+retain their current safety boundaries until their one-operation TASK-194–197
+slices land. No statement in this document makes a browser-private endpoint a
+machine credential or public API resource.
 
 ## Sites and machine identity
 

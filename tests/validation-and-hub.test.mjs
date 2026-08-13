@@ -35,8 +35,8 @@ test("profile writes normalize canonical/public URLs and persist only validated 
     })),
   });
 
-  assert.equal(response.status, 204);
-  assert.equal(await response.text(), "");
+  assert.equal(response.status, 200);
+  assert.equal((await responseJson(response)).data.type, "owner-profile");
   assert.equal(db.profile.display_name, "Normalized account");
   assert.equal(db.profile.location, "Helsinki");
   assert.equal(db.profile.website, "http://example.com/about?q=public#section");
@@ -68,8 +68,8 @@ test("category-neutral profile writes keep the smallest protocol 1.0 compatibili
       })),
     });
 
-    assert.equal(response.status, 204);
-    assert.equal(await response.text(), "");
+    assert.equal(response.status, 200);
+    assert.equal((await responseJson(response)).data.type, "owner-profile");
     assert.equal(db.profile.display_name, "Category-neutral presence");
     assert.equal(db.profile.account_type, "other");
   });
@@ -100,8 +100,8 @@ test("category-neutral profile writes keep the smallest protocol 1.0 compatibili
       })),
     });
 
-    assert.equal(response.status, 204);
-    assert.equal(await response.text(), "");
+    assert.equal(response.status, 200);
+    assert.equal((await responseJson(response)).data.type, "owner-profile");
     assert.equal(db.profile.display_name, "Updated legacy project");
     assert.equal(db.profile.account_type, "project");
   });
@@ -151,11 +151,14 @@ test("profile validation rejects malformed identity, canonical URL, links, and p
         headers: mutationHeaders(ownerEmail),
         body: JSON.stringify(validProfileInput(overrides)),
       });
-      assert.equal(response.status, 400);
+      assert.equal(response.status, 422);
       const body = await responseJson(response);
-      assert.equal(body.error, "The submitted values are invalid.");
-      for (const issue of expectedIssues) assert.equal(typeof body.details[issue], "string");
-      assert.equal("accountType" in body.details, false);
+      assert.equal(body.error.code, "validation_failed");
+      const fields = Object.fromEntries(
+        body.error.fields.map(({ name, message }) => [name, message]),
+      );
+      for (const issue of expectedIssues) assert.equal(typeof fields[issue], "string");
+      assert.equal("accountType" in fields, false);
       assert.equal(db.mutations.length, 0);
     });
   }

@@ -314,9 +314,11 @@ profile and omits `account_type` from later profile updates. An `accountType`
 property sent by an older or handcrafted private client is ignored like any
 other unknown input and cannot select or replace the stored value. Reads do not
 rewrite legacy values. The manifest and `/api/v1/site` continue to emit the
-stored value through their exact public allowlists. The owner form receives
-only editable fields, and a successful private profile write returns no profile
-representation.
+stored value through their exact public allowlists. The owner form receives only
+editable fields. A successful private profile write returns a no-store,
+owner-authorized, feature-local `owner-profile` representation containing only
+those editable fields and its current owner action; it is neither public nor
+discoverable.
 
 The v1 singleton envelope deliberately replaces the earlier unshipped profile
 grammar during this pre-release. It preserves every public profile field and

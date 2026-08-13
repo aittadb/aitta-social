@@ -256,8 +256,12 @@ and pagination effects are private.
   private profile-write model. The server inserts the protocol 1.0
   compatibility value `other` for a new profile and leaves the column unchanged
   on updates. Ignore a browser-supplied `accountType`; it cannot select or
-  replace the stored value. Project only editable fields into the client form;
-  a successful private write returns no profile serialization.
+  replace the stored value. Project only editable fields into the client form.
+  The normalized private Identity write returns a feature-local allowlisted
+  `owner-profile` resource containing only those editable fields, canonical
+  navigation links, and the verified owner's current `edit` action. It never
+  serializes `accountType`, owner identity/configuration, raw D1 rows, runtime
+  settings, authentication headers, or another private resource.
 - Use prepared D1 statements with bound parameters. Pass one SQL statement to
   each preparation and batch separate statements when an operation must be
   atomic. Never concatenate user input into SQL.
@@ -273,6 +277,25 @@ and pagination effects are private.
   the accepted versioned machine request repeats service authentication, audience,
   and scope checks. Both repeat body bounds and validation even when a trusted
   interface made the request.
+
+`PUT /api/private/profile` is the first normalized browser-private JSON
+mutation. It runs exact same-origin and current sole-owner authorization before
+Accept negotiation, media inspection, body streaming, validation, or D1. Only
+bounded `application/json` with an optional UTF-8 charset is accepted. The body
+reader stops after 64 KiB before parsing unknown input. Missing or unsupported
+media is `415`, malformed/oversized JSON is `400`, valid domain-invalid JSON is
+`422`, explicit JSON refusal is `406`, and unsupported methods are `405` with
+`Allow: PUT`. Success, authorization, validation, storage, and unexpected
+responses are structured JSON with `Cache-Control: no-store` and `Vary:
+Accept`. This browser-private contract is not discovery, machine authority, or
+a public profile resource.
+
+The Identity client requests and validates that exact JSON success resource
+before navigating to the server-rendered saved state. A rejected 4xx response
+is definitive and may expose only allowlisted field messages. A failed fetch,
+5xx, unexpected success status, non-JSON success, or malformed success document
+is unconfirmed: the client retains the open form, disables another save, and
+requires a server-state reload before retrying.
 
 Worker runtime code uses only supported web and Cloudflare APIs. It must not
 depend on Node built-ins, filesystem access, a durable process, or mutable

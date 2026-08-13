@@ -47,7 +47,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     headers: mutationHeaders(ownerEmail),
     body: JSON.stringify(identity),
   });
-  assert.equal(identitySave.status, 204);
+  assert.equal(identitySave.status, 200);
   assert.equal(db.profile.display_name, identity.displayName);
   assert.equal(db.profile.short_description, identity.shortDescription);
   assert.equal(db.profile.introduction, identity.introduction);
@@ -205,7 +205,7 @@ test("assisted write fixtures fail closed for non-owner, missing owner, CSRF, an
       headers: mutationHeaders(ownerEmail),
       body: JSON.stringify(validEntryInput({ kind: "link", destinationUrl: null })),
     });
-    assert.equal(invalidIdentity.status, 400);
+    assert.equal(invalidIdentity.status, 422);
     assert.equal(invalidUpdate.status, 400);
     assert.equal(db.mutations.length, 0);
   });
@@ -393,11 +393,11 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(profileForm, /protected runtime URL remains effective and cannot be changed here/);
   assert.match(profileForm, /The Identity save result could not be confirmed\. Reload the saved Identity before retrying\./);
   assert.match(profileForm, /href="\/owner\/profile">Reload saved Identity before retrying/);
-  assert.match(profileForm, /const outcome = classifyOwnerMutationResponse\(response\);[\s\S]*if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}[\s\S]*const failure = await definitiveFailure\(response\);[\s\S]*setFieldErrors\(failure\.fieldErrors\);[\s\S]*setStatus\(failure\.message\);[\s\S]*focusFirstInvalidField\(formElement, failure\.fieldErrors\);\s*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
+  assert.match(profileForm, /const result = await readProfileSaveResponse\(response\);[\s\S]*if \(result\.outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}[\s\S]*setFieldErrors\(result\.fieldErrors\);[\s\S]*setStatus\(result\.message\);[\s\S]*focusFirstInvalidField\(formElement, result\.fieldErrors\);[\s\S]*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
   assert.match(profileForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The Identity save result could not be confirmed\.[^\n]+\);\s*setRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);
   assert.match(profileForm, /if \(recoveryRequired\) return;/);
   assert.match(profileForm, /disabled=\{busy \|\| recoveryRequired\}/);
-  assert.match(profileForm, /function definitiveFailure\([\s\S]*fieldErrors\[fieldName\] = value[\s\S]*Correct the highlighted fields and try again/);
+  assert.match(profileForm, /readProfileSaveResponse\(response\)/);
   assert.match(profilePage, /storedCanonicalValue = profile\?\.canonicalUrl \?\? ""/);
   assert.match(profilePage, /normalizedCanonicalOrNull\(storedCanonicalValue\)/);
   assert.match(profilePage, /storedCanonical \?\? readiness\.canonicalUrl \?\? ""/);

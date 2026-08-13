@@ -109,7 +109,7 @@ test("an accepted accent stays exact in D1 and protocol while every rendered sur
     headers: mutationHeaders("owner@example.test"),
     body: JSON.stringify(validProfileInput({ accentColor: "#FFFFFF" })),
   });
-  assert.equal(save.status, 204);
+  assert.equal(save.status, 200);
   assert.equal(db.profile.accent_color, "#ffffff");
   assert.equal(db.profile.account_type, "person");
   assert.equal(db.mutations.length, 1);

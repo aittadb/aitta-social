@@ -24,7 +24,7 @@ const historicalMigration = "drizzle/0000_closed_talos.sql";
 
 const sourceDigests = {
   "db/schema.ts": "8917fdac637f7a5ae4c96df0ecbed770ca881c218136e6067196fc3216bc1b67",
-  "docs/protocol.md": "6a5fdd84dd23d8e265a773aa3176d84c5c514ee0d4966adae7ba36608df81071",
+  "docs/protocol.md": "17c8d2c7e69e41d8cb2756fdadce934a33ac73c0a3802db85d9e9fc3425c535f",
   [historicalMigration]: "95455a11b0795cfbfeb4ad0edfa07c2e75d076b14b142c9dfb1feb1c849e3c8a",
   "package-lock.json": "1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9",
   "tests/fixtures/poc-upgrade-v0.sql":

@@ -8,9 +8,10 @@ import {
   type InputHTMLAttributes,
 } from "react";
 import type { IdentityReadiness } from "@/lib/identity-readiness";
+import type { PrivateProfileFieldName } from "@/lib/private-profile/representation";
 import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { ProfileInput } from "@/lib/types";
-import { classifyOwnerMutationResponse } from "../_components/owner-mutation-outcome";
+import { readProfileSaveResponse } from "./profile-save-response";
 
 type DraftPreview = Pick<
   ProfileInput,
@@ -22,7 +23,7 @@ type DraftPreview = Pick<
   | "density"
   | "hidePoweredBy"
 >;
-type ProfileFieldName = keyof ProfileInput;
+type ProfileFieldName = PrivateProfileFieldName;
 type FieldErrors = Partial<Record<ProfileFieldName, string>>;
 type CanonicalDefaultSource = "stored" | "runtime-substitution" | "invalid-stored-omitted" | "empty";
 type FormValues = {
@@ -184,7 +185,7 @@ export function ProfileForm({
     try {
       const response = await fetch("/api/private/profile", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({
           displayName: form.get("displayName"),
           shortDescription: form.get("shortDescription"),
@@ -198,21 +199,20 @@ export function ProfileForm({
           hidePoweredBy: form.get("hidePoweredBy") === "on",
         }),
       });
-      const outcome = classifyOwnerMutationResponse(response);
-      if (outcome === "success") {
+      const result = await readProfileSaveResponse(response);
+      if (result.outcome === "success") {
         setStatus("Identity saved. Reloading server-saved readiness…");
         window.location.assign("/owner/profile");
         return;
       }
-      if (outcome === "unconfirmed") {
+      if (result.outcome === "unconfirmed") {
         showUnconfirmedSave();
         return;
       }
-      const failure = await definitiveFailure(response);
-      setFieldErrors(failure.fieldErrors);
-      if (hasOptionalPublicDetailErrors(failure.fieldErrors)) openOptionalDetails();
-      setStatus(failure.message);
-      focusFirstInvalidField(formElement, failure.fieldErrors);
+      setFieldErrors(result.fieldErrors);
+      if (hasOptionalPublicDetailErrors(result.fieldErrors)) openOptionalDetails();
+      setStatus(result.message);
+      focusFirstInvalidField(formElement, result.fieldErrors);
     } catch {
       showUnconfirmedSave();
       return;
@@ -604,34 +604,6 @@ function hasInvalidOptionalPublicDetails(form: HTMLFormElement): boolean {
     const control = form.elements.namedItem(fieldName);
     return (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) && !control.validity.valid;
   });
-}
-
-async function definitiveFailure(response: Response): Promise<{ message: string; fieldErrors: FieldErrors }> {
-  const fieldErrors: FieldErrors = {};
-  let safeMessage = "The server rejected this request.";
-  try {
-    const body = await response.json() as unknown;
-    if (body && typeof body === "object" && !Array.isArray(body)) {
-      const record = body as Record<string, unknown>;
-      if (typeof record.error === "string" && record.error.length <= 240) safeMessage = record.error;
-      if (record.details && typeof record.details === "object" && !Array.isArray(record.details)) {
-        for (const [key, value] of Object.entries(record.details as Record<string, unknown>)) {
-          const fieldName = profileFieldName(key);
-          if (fieldName && typeof value === "string" && !fieldErrors[fieldName]) {
-            fieldErrors[fieldName] = value;
-          }
-        }
-      }
-    }
-  } catch {
-    // Keep the fixed safe fallback for malformed error responses.
-  }
-  return {
-    message: Object.keys(fieldErrors).length
-      ? "Identity was not saved. Correct the highlighted fields and try again."
-      : `Identity was not saved. ${safeMessage}`,
-    fieldErrors,
-  };
 }
 
 function focusFirstInvalidField(form: HTMLFormElement, errors: FieldErrors) {

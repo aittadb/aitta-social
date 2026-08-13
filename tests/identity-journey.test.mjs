@@ -161,8 +161,11 @@ test("Identity authorization and validation fail closed without mutation or priv
       headers: mutationHeaders(ownerEmail),
       body: JSON.stringify(validProfileInput({ canonicalUrl: "https://user:secret@example.com/?private=yes" })),
     });
-    assert.equal(response.status, 400);
-    assert.deepEqual(Object.keys((await responseJson(response)).details), ["canonicalUrl"]);
+    assert.equal(response.status, 422);
+    assert.deepEqual(
+      (await responseJson(response)).error.fields.map(({ name }) => name),
+      ["canonicalUrl"],
+    );
     assert.equal(db.profile, null);
     assert.equal(db.mutations.length, 0);
   });
@@ -188,7 +191,7 @@ test("successful save resumes from D1 and never derives public Identity from Cha
     headers: mutationHeaders(ownerEmail),
     body: JSON.stringify(input),
   });
-  assert.equal(save.status, 204);
+  assert.equal(save.status, 200);
 
   const profileResponse = await fetchApp("/owner/profile", {
     env,
@@ -247,7 +250,7 @@ test("Identity journey remains semantic, touch-friendly, responsive, and motion-
   assert.match(formSource, /onInvalidCapture=\{revealInvalidOptionalDetails\}/);
   assert.match(formSource, /function revealInvalidOptionalDetails\([\s\S]*optionalPublicDetailFieldNames\.has\(fieldName\)[\s\S]*openOptionalDetails\(\)/);
   assert.match(formSource, /hasInvalidOptionalPublicDetails\(formElement\)[\s\S]*openOptionalDetails\(\)[\s\S]*formElement\.reportValidity\(\)/);
-  assert.match(formSource, /hasOptionalPublicDetailErrors\(failure\.fieldErrors\)[\s\S]*openOptionalDetails\(\)/);
+  assert.match(formSource, /hasOptionalPublicDetailErrors\(result\.fieldErrors\)[\s\S]*openOptionalDetails\(\)/);
   assert.match(formSource, /<details[\s\S]*<Field label="Location \(optional\)"[\s\S]*<Field label="Website \(optional\)"[\s\S]*name="externalLinks"/);
   assert.match(formSource, /formElement\.checkValidity\(\)[\s\S]*formElement\.reportValidity\(\)/);
   assert.match(formSource, /aria-invalid=\{Boolean\(error\) \|\| undefined\}/);

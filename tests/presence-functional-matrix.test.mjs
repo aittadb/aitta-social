@@ -108,7 +108,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     headers: mutationHeaders(OWNER_EMAIL),
     body: JSON.stringify(identity),
   });
-  assert.equal(saveIdentity.status, 204);
+  assert.equal(saveIdentity.status, 200);
   await consumeResponse(saveIdentity);
   assert.deepEqual(await rows(
     worker.db,
