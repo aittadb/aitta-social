@@ -1,5 +1,27 @@
 # Changelog
 
+- **TASK-165 — Made update deletion an explicit, recoverable owner action.** A
+  native confirmation now names the bounded update label and stable identifier;
+  cancellation sends no request. The retained owner-only `DELETE` operation
+  still returns its existing `204` and navigates to `/owner` on success. A safe
+  4xx leaves Delete available without asserting current state, while a 5xx or
+  network result disables only Delete and offers the fixed saved-state recovery
+  link. Edit and publication controls remain independently usable; there is no
+  retry, timer, background deletion, schema, protocol, or machine change.
+  Focused compiled-worker coverage proves draft/published deletion, denial,
+  public unknown parity, and private-canary exclusion. Validation: integrated
+  commit `26c204f0ac4a8c78f42c672af90ca12dde38ca4a`; full validation passed
+  475/475, migration generation found no schema change, production audit found
+  zero vulnerabilities, and diff checks passed. An independent Sol review
+  found no P0/P1/P2 issue and reran 35 focused checks. Disposable loopback
+  browser evidence covers draft/published cancellation and success, 400/500/
+  network recovery, non-owner privacy, 320/390/1440, literal Chrome 400% zoom
+  followed by reset to 100%, DPR-4, forced colors, reduced motion, coarse
+  touch, 44-pixel controls, visible focus, and a clean console. Residual
+  uncertainty: a complete sequential hardware-Tab traversal was not
+  enumerated. No hosted, data, configuration, schema, migration, deployment,
+  or external state changed.
+
 - **TASK-188 — Added a safe custom-page import preview.** The sole owner can
   now use `/owner/pages/import` to submit one bounded page-body HTML fragment,
   inspect its closed normalized `PageDocumentV1` JSON, and review the same
