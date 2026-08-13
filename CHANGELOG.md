@@ -1,5 +1,19 @@
 # Changelog
 
+- **TASK-186 — Refine the next parallel-safe server-source boundary
+  improvement.** Mapped the current `app/api`, `lib`, and `db` module, import,
+  and test seams outside active feature ownership. The reviewed conclusion is
+  that no parallel-safe refactor is presently justified: generic private-write
+  handlers, public-resource helpers, repository abstractions, and parser splits
+  would either overlap active vertical slices or add framework without an
+  independently useful behavior. Validation: rebased and integrated commit
+  `86c98a8`, instruction and plan checks pass (15 active/79 completed at the
+  task gate), diff checks pass, and independent Sol High review found no
+  P0/P1/P2 issue. Residual uncertainty: reconsider only when a future accepted
+  slice demonstrates repeated behavior with exclusive ownership. No production
+  code, tests, contract, schema, migration, Worker/runtime, Site, deployment,
+  data, setting, access, DNS, domain, Hub, or sibling state changed.
+
 - **TASK-185 — Make compiled-Worker response-lifetime tests deterministic.**
   Repaired the existing Miniflare acceptance harnesses so every dispatched
   response is consumed, parsed, or explicitly cancelled before another request
