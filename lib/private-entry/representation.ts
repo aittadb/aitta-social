@@ -58,6 +58,19 @@ export type PrivateEntryErrorDocument = {
   links: [];
 };
 
+export type PrivateEntryDeletionDocument = {
+  data: {
+    id: string;
+    type: "owner-entry-deletion";
+    attributes: { deleted: true };
+  };
+  links: [
+    { rel: "collection"; href: "/owner"; mediaType: "text/html" },
+    { rel: "recovery"; href: "/owner"; mediaType: "text/html" },
+  ];
+  actions: [];
+};
+
 /** Projects only the private update facts required by the verified owner client. */
 export function privateEntryDocument(
   entry: Entry,
@@ -103,6 +116,22 @@ export function privateEntryDocument(
       },
       { rel: "delete", method: "DELETE", href: self },
     ],
+  };
+}
+
+/** A deleted update has no private self resource; only safe owner destinations remain. */
+export function privateEntryDeletionDocument(id: string): PrivateEntryDeletionDocument {
+  return {
+    data: {
+      id,
+      type: "owner-entry-deletion",
+      attributes: { deleted: true },
+    },
+    links: [
+      { rel: "collection", href: "/owner", mediaType: "text/html" },
+      { rel: "recovery", href: "/owner", mediaType: "text/html" },
+    ],
+    actions: [],
   };
 }
 

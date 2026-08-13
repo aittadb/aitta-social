@@ -210,8 +210,7 @@ state action is `publish` for a draft and `unpublish` for a published update,
 alongside `edit` and `delete`. An unknown identifier is a structured
 `404 entry_not_found`; an uncertain storage result is a safe `500`. Every edit
 result is no-store and varies on `Accept`. Unsupported neighboring methods use
-JSON `405` with `Allow: PUT, DELETE` regardless of `Accept`, while the existing
-bodyless DELETE operation remains on its prior contract until TASK-197.
+JSON `405` with `Allow: PUT, DELETE` regardless of `Accept`.
 
 `PUT /api/private/entries/{id}/state` uses that same private `owner-entry`
 representation for one exact Draft or Published transition. Its state action
@@ -222,7 +221,20 @@ JSON, no-store, and vary on Accept. Unsupported methods return JSON `405` with
 `Allow: PUT` independent of Accept. Same-state requests retain the accepted
 idempotent behavior; this contract defines no `409` conflict. The private links
 are relative same-origin paths and do not create machine authority or public
-discovery. DELETE retains its prior bodyless `204` contract until TASK-197.
+discovery.
+
+`DELETE /api/private/entries/{id}` now selects JSON for missing, wildcard, and
+JSON-compatible Accept after same-origin sole-owner authorization. It is
+bodyless: no content type or request body is interpreted. Its success document
+is deliberately not an `owner-entry`: it has only the requested identifier,
+`owner-entry-deletion`, `{ deleted: true }`, empty actions, and ordered
+`collection` then `recovery` HTML links. Both links are the existing `/owner`
+saved-update dashboard; the duplicate href intentionally preserves distinct
+semantic destinations without inventing a private collection or deleted self
+resource. Every result is no-store and varies on Accept. Explicit refusal or
+malformed Accept is `406`; unknown is safe `404`; unexpected results are safe
+`500`; unsupported methods are `405 Allow: PUT, DELETE` independent of Accept.
+No part of this private acknowledgement is v1 or machine discovery.
 
 No statement in this document makes a browser-private endpoint a machine
 credential or public API resource.

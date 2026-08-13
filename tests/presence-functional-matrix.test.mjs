@@ -243,7 +243,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     method: "DELETE",
     headers: mutationHeaders(OWNER_EMAIL),
   });
-  assert.equal(remove.status, 204);
+  assert.equal(remove.status, 200);
   await consumeResponse(remove);
   assert.deepEqual(await rows(worker.db, "SELECT id FROM entries WHERE id = ?", created.id), []);
 

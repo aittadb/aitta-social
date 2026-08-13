@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { readDeletionResponse } from "../entries/deletion-response";
 import { readPublicationStateResponse } from "../entries/publication-state-response";
-import { classifyOwnerMutationResponse } from "./owner-mutation-outcome";
 
 export function EntryActions({ id, state, label }: { id: string; state: "draft" | "published"; label: string }) {
   const [busy, setBusy] = useState(false);
@@ -73,17 +73,21 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
     setBusy(true);
     setMessage("Deleting update…");
     try {
-      const response = await fetch(`/api/private/entries/${encodeURIComponent(id)}`, { method: "DELETE" });
-      const outcome = classifyOwnerMutationResponse(response);
-      if (outcome === "success") {
+      const response = await fetch(`/api/private/entries/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: { Accept: "application/json" },
+        redirect: "error",
+      });
+      const outcome = await readDeletionResponse(response, id);
+      if (outcome.outcome === "success") {
         window.location.assign("/owner");
         return;
       }
-      if (outcome === "unconfirmed") {
+      if (outcome.outcome === "unconfirmed") {
         showUnconfirmedResult("The deletion result could not be confirmed. Check this Aitta’s saved state before deleting this update again.");
         return;
       }
-      setMessage(await deletionFailureMessage(response));
+      setMessage(`The server rejected this deletion request. ${outcome.message}`);
       setBusy(false);
     } catch {
       showUnconfirmedResult("The deletion result could not be confirmed. Check this Aitta’s saved state before deleting this update again.");
@@ -135,21 +139,8 @@ function boundedUpdateLabel(value: string): string {
   return normalized.length > 80 ? `${normalized.slice(0, 77).trimEnd()}…` : normalized;
 }
 
-async function safeError(response: Response): Promise<string> {
-  try {
-    const body = await response.json() as { error?: string };
-    return body.error ?? "The operation could not be completed.";
-  } catch {
-    return "The operation could not be completed.";
-  }
-}
-
 function lifecycleFailureMessage(nextState: "draft" | "published", failure: string): string {
   return nextState === "published"
     ? `The server rejected this publication request. ${failure}`
     : `The server rejected this unpublish request. ${failure}`;
-}
-
-async function deletionFailureMessage(response: Response): Promise<string> {
-  return `The server rejected this deletion request. ${await safeError(response)}`;
 }

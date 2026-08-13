@@ -236,10 +236,14 @@ normalization does not change the separate Delete confirmation or response.
 Deletion is a different irreversible boundary. A browser-controlling ChatGPT
 must stop at the update-specific **Delete** confirmation and obtain the human
 owner's explicit approval; approval to edit, publish, or unpublish does not
-approve deletion. A 4xx deletion result states the rejected deletion request,
+approve deletion. The bodyless request accepts only the private JSON
+acknowledgement matching the visible update identifier; its collection and
+recovery link values are not navigation authority, and success always goes to
+fixed `/owner`. A structured 4xx deletion result states the rejected deletion request,
 keeps **Delete** available for a deliberate retry, and does not assert the
 update's current state. A rejected fetch or 5xx result could have committed:
-it locks only **Delete**, preserves Edit and Publish or Unpublish, and provides
+so can a redirect, non-JSON, malformed, oversized, or wrong-shape `200`; each
+locks only **Delete**, preserves Edit and Publish or Unpublish, and provides
 **Check this Aitta’s saved state** at `/owner` before another deletion choice.
 The interface never automatically retries or deletes in the background.
 

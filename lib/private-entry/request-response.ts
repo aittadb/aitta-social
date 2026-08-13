@@ -2,6 +2,7 @@ import { acceptsApiV1Json } from "../api-v1/accept";
 import { ValidationError } from "../validation";
 import type {
   PrivateEntryDocument,
+  PrivateEntryDeletionDocument,
   PrivateEntryErrorDocument,
   PrivateEntryErrorField,
 } from "./representation";
@@ -71,7 +72,7 @@ export async function readPrivateEntryJson(request: Request): Promise<unknown> {
 }
 
 export function privateEntrySuccess(
-  document: PrivateEntryDocument,
+  document: PrivateEntryDocument | PrivateEntryDeletionDocument,
   status = 200,
 ): Response {
   return Response.json(document, { status, headers: PRIVATE_ENTRY_HEADERS });

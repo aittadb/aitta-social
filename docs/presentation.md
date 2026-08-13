@@ -466,10 +466,16 @@ actions. These additions use the existing button, focus, touch-target, wrapping,
 Deletion is a separate irreversible action, never a lifecycle-state control.
 Its native confirmation names the bounded update label and complete stable
 identifier, says that deletion is permanent, and requires the human owner's
-explicit approval. Cancelling sends no request. The unchanged `DELETE` API
-returns `204` on success; only then does the client navigate to `/owner`. A 4xx response describes only the rejected
+explicit approval. Cancelling sends no request. The bodyless JSON `DELETE` API
+returns `200` only with the exact allowlisted deletion acknowledgement for the
+current stable identifier, `{ deleted: true }`, ordered `/owner` collection and
+recovery links, and no actions; only then does the client navigate to fixed
+`/owner`, never a response-provided URL; redirects are fetch errors rather than
+browser-followed DELETE requests. A 4xx response describes only the rejected
 deletion request and leaves **Delete** available to retry without claiming the
-update's current state. A rejected fetch or 5xx response is unconfirmed: only
+update's current state. A rejected fetch, redirect, 5xx, malformed/non-JSON or
+oversized acknowledgement, or wrong acknowledgement identifier/link/actions is
+unconfirmed: only
 **Delete** is locked and the native **Check this Aitta’s saved state** link
 returns to `/owner`; Edit, Publish, and Unpublish remain available from the
 rendered row. There is no automatic retry or background deletion.

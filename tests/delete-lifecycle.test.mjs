@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import ts from "typescript";
 
 import {
   FakeD1,
@@ -15,7 +16,7 @@ const ownerEmail = "owner@example.com";
 const draftId = "16500000-0000-4000-8000-000000000001";
 const publishedId = "16500000-0000-4000-8000-000000000002";
 
-test("deleting either a draft or published update uses the unchanged owner route and makes it publicly unknown", async () => {
+test("deleting either a draft or published update acknowledges only the deleted identifier and makes it publicly unknown", async () => {
   const privateCanary = "TASK165_DELETE_PRIVATE_CANARY";
   const db = new FakeD1({
     entries: [
@@ -30,7 +31,8 @@ test("deleting either a draft or published update uses the unchanged owner route
     method: "DELETE",
     headers: mutationHeaders(ownerEmail),
   });
-  assert.equal(draftDelete.status, 204);
+  assertPrivateJson(draftDelete, 200);
+  assertDeletionAcknowledgement(await responseJson(draftDelete), draftId);
   assert.equal(db.entries.some((entry) => entry.id === draftId), false);
 
   const publishedBeforeDelete = await fetchApp(`/api/v1/entries/${publishedId}`, { env });
@@ -41,7 +43,8 @@ test("deleting either a draft or published update uses the unchanged owner route
     method: "DELETE",
     headers: mutationHeaders(ownerEmail),
   });
-  assert.equal(publishedDelete.status, 204);
+  assertPrivateJson(publishedDelete, 200);
+  assertDeletionAcknowledgement(await responseJson(publishedDelete), publishedId);
   assert.equal(db.entries.some((entry) => entry.id === publishedId), false);
 
   const [deletedDraft, deletedPublished, unknown] = await Promise.all([
@@ -89,9 +92,11 @@ test("delete controls have an irreversible update-specific confirmation and isol
 
   assert.match(actions, /window\.confirm\(`Delete “\$\{updateLabel\}” \(update \$\{actionReference\}\) permanently\? This cannot be undone\.`\)/);
   assert.match(actions, /if \(!confirmed\) \{\s*setMessage\("Deletion cancelled\. This update was not deleted\."\);\s*return;/);
-  assert.match(actions, /fetch\(`\/api\/private\/entries\/\$\{encodeURIComponent\(id\)\}`, \{ method: "DELETE" \}\)/);
-  assert.match(actions, /if \(outcome === "success"\) \{\s*window\.location\.assign\("\/owner"\);/);
-  assert.match(actions, /The server rejected this deletion request\. \$\{await safeError\(response\)\}/);
+  assert.match(actions, /import \{ readDeletionResponse \} from "\.\.\/entries\/deletion-response"/u);
+  assert.match(actions, /fetch\(`\/api\/private\/entries\/\$\{encodeURIComponent\(id\)\}`, \{\s*method: "DELETE",\s*headers: \{ Accept: "application\/json" \},\s*redirect: "error"/u);
+  assert.match(actions, /readDeletionResponse\(response, id\)/u);
+  assert.match(actions, /if \(outcome\.outcome === "success"\) \{\s*window\.location\.assign\("\/owner"\);/u);
+  assert.match(actions, /The server rejected this deletion request\. \$\{outcome\.message\}/u);
   assert.match(actions, /The deletion result could not be confirmed\. Check this Aitta’s saved state before deleting this update again\./);
   assert.match(actions, /setDeletionRecoveryRequired\(true\);[\s\S]*setBusy\(false\);/);
   assert.match(actions, /disabled=\{busy \|\| deletionRecoveryRequired\}[\s\S]*Delete/);
@@ -105,3 +110,86 @@ test("delete controls have an irreversible update-specific confirmation and isol
     assert.match(document, /Aitta/i);
   }
 });
+
+test("deletion client accepts only the exact acknowledgement and exact structured 4xx errors", async () => {
+  const readDeletionResponse = await compiledDeletionResponseReader();
+  const acknowledgement = deletionAcknowledgement(draftId);
+  assert.deepEqual(
+    await readDeletionResponse(Response.json(acknowledgement), draftId),
+    { outcome: "success" },
+  );
+
+  for (const response of [
+    new Response(null, { status: 204 }),
+    new Response("not JSON", { status: 200 }),
+    new Response(JSON.stringify(acknowledgement), { status: 200, headers: { "content-type": "application/json-seq" } }),
+    Response.json({ ...acknowledgement, data: { ...acknowledgement.data, id: publishedId } }),
+    Response.json({ ...acknowledgement, data: { ...acknowledgement.data, type: "owner-entry" } }),
+    Response.json({ ...acknowledgement, data: { ...acknowledgement.data, attributes: { deleted: false } } }),
+    Response.json({ ...acknowledgement, links: [] }),
+    Response.json({ ...acknowledgement, links: [acknowledgement.links[0], { ...acknowledgement.links[1], href: "/attacker" }] }),
+    Response.json({ ...acknowledgement, actions: [{ rel: "create" }] }),
+    Response.json({ error: "DELETE_RESPONSE_PRIVATE_CANARY" }, { status: 500 }),
+    Response.json({ data: null, error: { code: "bad", message: "No." }, links: [] }, { status: 302 }),
+    new Response("not JSON", { status: 404, headers: { "content-type": "text/plain" } }),
+    Response.json({ error: "legacy" }, { status: 422 }),
+  ]) {
+    assert.deepEqual(await readDeletionResponse(response, draftId), { outcome: "unconfirmed" });
+  }
+
+  assert.deepEqual(await readDeletionResponse(Response.json({
+    data: null,
+    error: { code: "entry_not_found", message: "Update not found." },
+    links: [],
+  }, { status: 404 }), draftId), {
+    outcome: "definitive-error",
+    message: "Update not found.",
+  });
+
+  let pulls = 0;
+  const oversized = new Response(new ReadableStream({
+    pull(controller) {
+      pulls += 1;
+      if (pulls > 100) return controller.close();
+      controller.enqueue(new Uint8Array(16 * 1024));
+    },
+  }, { highWaterMark: 0 }), { status: 200, headers: { "content-type": "application/json" } });
+  assert.deepEqual(await readDeletionResponse(oversized, draftId), { outcome: "unconfirmed" });
+  assert.ok(pulls <= 6);
+});
+
+function assertPrivateJson(response, status) {
+  assert.equal(response.status, status);
+  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.ok((response.headers.get("vary") ?? "").split(",").map((value) => value.trim()).includes("Accept"));
+}
+
+function assertDeletionAcknowledgement(value, id) {
+  assert.deepEqual(value, deletionAcknowledgement(id));
+}
+
+function deletionAcknowledgement(id) {
+  return {
+    data: { id, type: "owner-entry-deletion", attributes: { deleted: true } },
+    links: [
+      { rel: "collection", href: "/owner", mediaType: "text/html" },
+      { rel: "recovery", href: "/owner", mediaType: "text/html" },
+    ],
+    actions: [],
+  };
+}
+
+async function compiledDeletionResponseReader() {
+  const draftSource = await readFile(new URL("../app/owner/entries/draft-create-response.ts", import.meta.url), "utf8");
+  const draftCompiled = ts.transpileModule(draftSource, {
+    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const draftUrl = `data:text/javascript,${encodeURIComponent(draftCompiled)}`;
+  const source = (await readFile(new URL("../app/owner/entries/deletion-response.ts", import.meta.url), "utf8"))
+    .replace('from "./draft-create-response"', `from "${draftUrl}"`);
+  const compiled = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  return (await import(`data:text/javascript,${encodeURIComponent(compiled)}`)).readDeletionResponse;
+}

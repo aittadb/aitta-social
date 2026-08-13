@@ -154,14 +154,10 @@ test("every private mutation route independently rejects a non-owner before touc
         ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
       });
       assert.equal(response.status, 403);
-      if (path === "/api/private/profile" || path === "/api/private/entries") {
+      if (path === "/api/private/profile" || path === "/api/private/entries" || method === "DELETE") {
         assert.equal((await responseJson(response)).error.code, "authorization_denied");
       } else if (method === "PUT") {
         assert.equal((await responseJson(response)).error.code, "authorization_denied");
-      } else {
-        assert.deepEqual(await responseJson(response), {
-          error: "Administrative access denied.",
-        });
       }
       assert.equal(db.mutations.length, 0);
     });
@@ -263,8 +259,8 @@ test("authorized draft lifecycle stays private until publish and supports every 
     method: "DELETE",
     headers: mutationHeaders(ownerEmail),
   });
-  assert.equal(deleteResponse.status, 204);
-  assert.equal(await deleteResponse.text(), "");
+  assert.equal(deleteResponse.status, 200);
+  assert.deepEqual(await responseJson(deleteResponse), deletionAcknowledgement(created.id));
   assert.equal(db.entries.length, 0);
 
   for (const [method, path, body] of [
@@ -280,17 +276,26 @@ test("authorized draft lifecycle stays private until publish and supports every 
     });
     assert.equal(missingResponse.status, 404);
     const missingDocument = await responseJson(missingResponse);
-    if (method === "PUT") {
+    if (method === "PUT" || method === "DELETE") {
       assert.deepEqual(missingDocument, {
         data: null,
         error: { code: "entry_not_found", message: "Update not found." },
         links: [],
       });
-    } else {
-      assert.deepEqual(missingDocument, { error: "Update not found." });
     }
   }
 });
+
+function deletionAcknowledgement(id) {
+  return {
+    data: { id, type: "owner-entry-deletion", attributes: { deleted: true } },
+    links: [
+      { rel: "collection", href: "/owner", mediaType: "text/html" },
+      { rel: "recovery", href: "/owner", mediaType: "text/html" },
+    ],
+    actions: [],
+  };
+}
 
 test("write boundaries require JSON, bound request size, and valid entry state", async (t) => {
   const db = new FakeD1({ entries: [entryRow({ state: "draft", published_at: null })] });

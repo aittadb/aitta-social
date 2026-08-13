@@ -369,7 +369,7 @@ test("unknown entries, storage failures, and authorization-setting failures rema
   }
 });
 
-test("neighbor methods are negotiated JSON 405 while DELETE stays byte-compatible", async (t) => {
+test("neighbor methods are JSON 405 while DELETE negotiates its own JSON acknowledgement", async (t) => {
   for (const method of ["GET", "POST", "PATCH", "OPTIONS"]) {
     await t.test(method, async () => {
       const response = await fetchApp("/api/private/entries/entry-1", {
@@ -402,28 +402,23 @@ test("neighbor methods are negotiated JSON 405 while DELETE stays byte-compatibl
     assert.equal((await responseJson(unacceptable)).error.code, "method_not_allowed");
   }
 
-  const existing = editDatabase();
-  const deleted = await fetchApp("/api/private/entries/entry-1", {
-    env: makeEnv({ db: existing, ownerEmail }),
-    method: "DELETE",
-    headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example", accept: "text/html" },
-  });
-  assert.equal(deleted.status, 204);
-  assert.equal(deleted.headers.get("cache-control"), "no-store");
-  assert.equal(deleted.headers.get("content-type"), null);
-  assert.doesNotMatch(deleted.headers.get("vary") ?? "", /(?:^|,)\s*Accept\s*(?:,|$)/iu);
-  assert.equal(await deleted.text(), "");
-  assert.equal(existing.entries.length, 0);
+  for (const accept of [undefined, "*/*", "application/*", "application/json"]) {
+    const existing = editDatabase();
+    const deleted = await fetchApp("/api/private/entries/entry-1", {
+      env: makeEnv({ db: existing, ownerEmail }), method: "DELETE",
+      headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example", ...(accept === undefined ? {} : { accept }) },
+    });
+    assertPrivateJson(deleted, 200);
+    assert.equal((await responseJson(deleted)).data.type, "owner-entry-deletion");
+    assert.equal(existing.entries.length, 0);
+  }
 
-  const missing = await fetchApp("/api/private/entries/entry-1", {
-    env: makeEnv({ db: existing, ownerEmail }),
-    method: "DELETE",
+  const excluded = await fetchApp("/api/private/entries/entry-1", {
+    env: makeEnv({ db: throwingD1(), ownerEmail }), method: "DELETE",
     headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example", accept: "text/html" },
   });
-  assert.equal(missing.status, 404);
-  assert.equal(missing.headers.get("cache-control"), "no-store");
-  assert.doesNotMatch(missing.headers.get("vary") ?? "", /(?:^|,)\s*Accept\s*(?:,|$)/iu);
-  assert.deepEqual(await responseJson(missing), { error: "Update not found." });
+  assertPrivateJson(excluded, 406);
+  assert.equal((await responseJson(excluded)).error.code, "not_acceptable");
 });
 
 test("edit client confirms only exact 200 owner-entry documents", async () => {

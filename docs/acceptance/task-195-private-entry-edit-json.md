@@ -13,10 +13,9 @@ Success is a no-store `200` `owner-entry` document with relative self and owner
 editor links. Drafts expose `edit`, `publish`, and `delete`; published updates
 expose `edit`, `unpublish`, and `delete`. Every normalized PUT response is JSON
 and varies on Accept. Unsupported methods are JSON `405` with exact
-`Allow: PUT, DELETE` independent of Accept. The existing DELETE handler remains
-byte-compatible: successful deletion is bodyless no-store `204`; its missing
-target retains the legacy `{ "error": "Update not found." }` JSON 404 and no
-new Accept negotiation.
+`Allow: PUT, DELETE` independent of Accept. The existing DELETE handler was
+unchanged by TASK-195. TASK-197 later normalized deletion separately to a
+bodyless JSON acknowledgement with negotiated structured JSON failures.
 
 The client sends `Accept: application/json` and confirms success only from an
 exact bounded `200` document whose stable ID, state, and normalized submitted

@@ -296,7 +296,7 @@ test("publication client accepts only the exact bounded state document", async (
   assert.ok(pulls <= 6);
 });
 
-test("EntryActions uses strict state recovery and leaves deletion transport unchanged", async () => {
+test("EntryActions uses strict state recovery while deletion has its own strict JSON reader", async () => {
   const source = await readFile(new URL("../app/owner/_components/EntryActions.tsx", import.meta.url), "utf8");
   assert.match(source, /readPublicationStateResponse\(response, \{ id, state: nextState \}\)/u);
   assert.match(source, /headers: \{ Accept: "application\/json", "Content-Type": "application\/json" \}/u);
@@ -305,8 +305,9 @@ test("EntryActions uses strict state recovery and leaves deletion transport unch
   assert.match(source, /disabled=\{busy \|\| lifecycleRecoveryRequired\}/u);
   assert.doesNotMatch(source, /classifyOwnerMutationResponse\(response\)[\s\S]{0,350}location\.reload/u);
   assert.doesNotMatch(source, /setTimeout|setInterval|localStorage|sessionStorage|sendBeacon/u);
-  assert.match(source, /fetch\(`\/api\/private\/entries\/\$\{encodeURIComponent\(id\)\}`, \{ method: "DELETE" \}\)/u);
-  assert.match(source, /classifyOwnerMutationResponse\(response\)[\s\S]*window\.location\.assign\("\/owner"\)/u);
+  assert.match(source, /readDeletionResponse\(response, id\)/u);
+  assert.match(source, /headers: \{ Accept: "application\/json" \}/u);
+  assert.match(source, /outcome\.outcome === "success"[\s\S]*window\.location\.assign\("\/owner"\)/u);
 });
 
 async function stateWith(id, state, { db = stateDatabase(id), headers = {}, body } = {}) {

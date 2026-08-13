@@ -153,10 +153,22 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     method: "DELETE",
     headers: mutationHeaders(ownerEmail),
   });
-  assert.equal(deletion.status, 204);
+  assert.equal(deletion.status, 200);
+  assert.deepEqual(await responseJson(deletion), deletionAcknowledgement(created.id));
   assert.equal(db.entries.some((entry) => entry.id === created.id), false);
   await assertPubliclyUnknown(env, created.id, [draftCanary, publicBody]);
 });
+
+function deletionAcknowledgement(id) {
+  return {
+    data: { id, type: "owner-entry-deletion", attributes: { deleted: true } },
+    links: [
+      { rel: "collection", href: "/owner", mediaType: "text/html" },
+      { rel: "recovery", href: "/owner", mediaType: "text/html" },
+    ],
+    actions: [],
+  };
+}
 
 test("assisted write fixtures fail closed for non-owner, missing owner, CSRF, and invalid input", async (t) => {
   await t.test("a different signed-in user cannot save Identity", async () => {
@@ -375,10 +387,10 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(actions, /href="\/owner"[^>]+aria-label=\{`Check saved state/);
   assert.match(actions, /const actionReference = id;/);
   assert.doesNotMatch(actions, /boundedActionReference|slice\(-8\)/);
-  assert.equal(countMatches(actions, /const outcome = classifyOwnerMutationResponse\(response\);/g), 1);
+  assert.equal(countMatches(actions, /const outcome = classifyOwnerMutationResponse\(response\);/g), 0);
   assert.equal(countMatches(actions, /setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 0);
   assert.match(actions, /readPublicationStateResponse\(response, \{ id, state: nextState \}\)[\s\S]*if \(result\.outcome === "unconfirmed"\) \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*return;\s*\}\s*setMessage\(lifecycleFailureMessage\(nextState, result\.message\)\);\s*setBusy\(false\);/);
-  assert.match(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*return;\s*\}\s*setMessage\(await deletionFailureMessage\(response\)\);\s*setBusy\(false\);/);
+  assert.match(actions, /const outcome = await readDeletionResponse\(response, id\);[\s\S]*if \(outcome\.outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*return;\s*\}\s*setMessage\(`The server rejected this deletion request\. \$\{outcome\.message\}`\);\s*setBusy\(false\);/);
   assert.match(actions, /catch \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*\}/);
   assert.match(actions, /catch \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*\}/);
   assert.match(actions, /function showUnconfirmedResult\(message: string\) \{\s*setMessage\(message\);\s*setDeletionRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);

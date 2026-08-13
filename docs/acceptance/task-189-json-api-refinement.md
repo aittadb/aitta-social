@@ -66,7 +66,7 @@ browser-owner routes, not public AittaSocial protocol or machine APIs.
 | `PUT /api/private/profile` | JSON profile input | `204`, empty, `no-store` | Authentication `{ error: string }` at 401/403/503; wrong/missing media, malformed JSON, size, and domain validation all use `400 { error, details? }` |
 | `POST /api/private/entries` | JSON entry input | `201 { data: <private entry> }`, `no-store` | Same auth/400 shapes |
 | `PUT /api/private/entries/{id}` | JSON entry input | `200 { data: <private entry> }`, `no-store` | Same auth/400 shapes; `404 { error: string }` |
-| `DELETE /api/private/entries/{id}` | No request body | `204`, empty, `no-store` | Same auth shape; `404 { error: string }` |
+| `DELETE /api/private/entries/{id}` | No request body | TASK-197 later normalized this to a no-store JSON `200` deletion acknowledgement | Same auth shape; structured JSON failures |
 | `PUT /api/private/entries/{id}/state` | JSON `{ state: "draft" | "published" }` | `200 { data: <private entry> }`, `no-store` | Same auth/400 shapes; `404 { error: string }` |
 
 Unsupported media is currently a `400`, valid JSON that fails domain rules is

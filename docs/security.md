@@ -335,8 +335,7 @@ configuration, or machine authority. An unknown target is a safe structured
 404; unexpected authorization-setting, storage, or post-write failure is a
 non-reflective 500 whose result is deliberately unconfirmed. Every normalized
 edit response is no-store and varies on Accept. Neighboring unsupported methods
-advertise the actual `PUT, DELETE` methods, but DELETE retains its existing
-authorization, response bytes, and negotiation behavior until its own task.
+advertise the actual `PUT, DELETE` methods.
 Unsupported neighboring methods always return structured JSON `405` with exact
 `Allow: PUT, DELETE`; only an authorized PUT can reach `406` negotiation.
 
@@ -369,6 +368,26 @@ oversized response, invalid success document, failed fetch, or 5xx is
 unconfirmed: the state action remains locked behind a fresh saved-state check
 and is never retried automatically. The separate deletion transport and its
 TASK-165 confirmation and recovery behavior remain unchanged.
+
+`DELETE /api/private/entries/{id}` is bodyless but now shares the bounded
+browser-private JSON policy. Same-origin then sole-owner authorization precede
+Accept, route parameters, and D1; the request body and content type are never
+read. Missing, wildcard, and JSON-compatible Accept select JSON; explicit
+exclusion, malformed, or oversized Accept returns structured no-store `406`.
+Success is only a no-store `200` acknowledgement containing the requested
+identifier, `owner-entry-deletion`, `{ deleted: true }`, two deliberately
+duplicate safe `/owner` collection/recovery links, and no actions. The deleted
+resource has no self link and no private collection endpoint is added. Unknown,
+authorization, storage, and unexpected failures are allowlisted no-store JSON;
+unauthorized callers cannot distinguish a target. Unsupported methods are JSON
+`405` with exact `Allow: PUT, DELETE` before authorization or negotiation.
+The client sends only `Accept: application/json`, requires `redirect: "error"`
+so a browser cannot follow a redirected DELETE, follows no response link, and
+navigates to fixed `/owner` only after that exact bounded acknowledgement. Only
+an exact structured 4xx error is definitive. Redirects, 5xx, malformed or
+oversized JSON, wrong ID/link/action shape, non-JSON, and every other status
+are unconfirmed, lock only Delete, retain edit/lifecycle controls, expose fixed
+saved-state recovery, and never retry automatically.
 
 Worker runtime code uses only supported web and Cloudflare APIs. It must not
 depend on Node built-ins, filesystem access, a durable process, or mutable

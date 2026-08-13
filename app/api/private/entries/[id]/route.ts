@@ -1,6 +1,5 @@
 import { deleteEntry, updateEntry } from "@/db/repository";
 import { requireOwnerApi } from "@/lib/auth";
-import { jsonError } from "@/lib/http";
 import {
   privateEntryAuthorizationError,
   privateEntryError,
@@ -9,7 +8,10 @@ import {
   privateEntrySuccess,
   readPrivateEntryJson,
 } from "@/lib/private-entry/request-response";
-import { privateEntryDocument } from "@/lib/private-entry/representation";
+import {
+  privateEntryDeletionDocument,
+  privateEntryDocument,
+} from "@/lib/private-entry/representation";
 import { parseEntryInput } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
@@ -54,14 +56,33 @@ async function putPrivateEntry(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> },
 ) {
+  try {
+    return await deletePrivateEntry(request, context);
+  } catch {
+    return privateEntryError(
+      "delete_failed",
+      "The deletion result could not be confirmed.",
+      500,
+    );
+  }
+}
+
+async function deletePrivateEntry(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<Response> {
   const auth = await requireOwnerApi(request);
-  if (!auth.ok) return auth.response;
+  if (!auth.ok) return privateEntryAuthorizationError(auth.response.status);
+
+  const negotiationError = privateEntryNegotiationError(request);
+  if (negotiationError) return negotiationError;
+
   const { id } = await params;
   return (await deleteEntry(id))
-    ? new Response(null, { status: 204, headers: { "Cache-Control": "no-store" } })
-    : jsonError("Update not found.", 404);
+    ? privateEntrySuccess(privateEntryDeletionDocument(id))
+    : privateEntryError("entry_not_found", "Update not found.", 404);
 }
 
 function privateEntryEditMethodNotAllowed(): Response {
