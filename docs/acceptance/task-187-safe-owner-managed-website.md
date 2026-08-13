@@ -535,9 +535,12 @@ preview. Exact default/annotated layout, fragment, link-group, same-page
 fragment, updates, and external-link mappings work while relative page links
 remain unavailable without a trusted resolver. Unsupported full documents,
 shell/header/nav/footer source, active/unknown elements or attributes, hostile
-and malformed URLs, malformed trees, duplicate fragments, and every byte/node/
-depth/text/link bound fail as one safe non-reflective error; raw input appears
-only escaped in its owner textarea and never as interpreted HTML/style,
+and malformed URLs, malformed trees, duplicate fragments, and every compiler/
+normalized-document byte/node/depth/text/link bound fail as one safe
+non-reflective compiler error. The feature-local request-envelope cap may use
+its own fixed non-reflective transport error, and title/description validation
+may use fixed structured field errors; none may reflect source input. Raw input
+appears only escaped in its owner textarea and never as interpreted HTML/style,
 hydration markup, logs, or a persisted value; the preview endpoint enforces
 owner authorization, exact same origin, JSON media type, its feature-local body
 bound, strict output allowlist, and no outbound fetch; non-owner/missing-owner,
