@@ -1,10 +1,58 @@
 import type { Profile } from "@/lib/types";
+import type { CSSProperties, ReactNode } from "react";
 
 type HeaderAction = {
   href: string;
   label: string;
   accessibleName: string;
 };
+
+type PublicPageFrameProps = {
+  children: ReactNode;
+  className?: string;
+  displayName: string;
+  identityHref: string;
+  manageHref?: string;
+  manageAccessibleName?: string;
+  profile: Pick<Profile, "displayName" | "hidePoweredBy"> | null;
+  showPoweredBy?: boolean;
+  style?: CSSProperties;
+};
+
+/**
+ * The fixed human-public chrome. Callers supply only already-projected display
+ * values and destinations, so this component has no dependency on D1, runtime
+ * configuration, authentication, or authorization state.
+ */
+export function PublicPageFrame({
+  children,
+  className = "",
+  displayName,
+  identityHref,
+  manageHref = "/owner",
+  manageAccessibleName = "Manage Aitta as owner — open local sole-owner administration",
+  profile,
+  showPoweredBy,
+  style,
+}: PublicPageFrameProps) {
+  return (
+    <main className={`public-shell ${className}`.trim()} style={style}>
+      <PublicPresenceHeader
+        displayName={displayName}
+        identityHref={identityHref}
+        label="Aitta navigation"
+        actionsLabel="Aitta actions"
+        action={{
+          href: manageHref,
+          label: "Manage",
+          accessibleName: manageAccessibleName,
+        }}
+      />
+      {children}
+      <PublicFooter profile={profile} showPoweredBy={showPoweredBy} />
+    </main>
+  );
+}
 
 export function PublicPresenceHeader({
   displayName,
@@ -56,8 +104,10 @@ export function PresenceIdentityTile({
 
 export function PublicFooter({
   profile,
+  showPoweredBy = !profile?.hidePoweredBy,
 }: {
   profile: Pick<Profile, "displayName" | "hidePoweredBy"> | null;
+  showPoweredBy?: boolean;
 }) {
   return (
     <footer className="public-footer">
@@ -67,7 +117,7 @@ export function PublicFooter({
         </span>
         <div className="public-footer-context">
           <span className="public-attribution">
-            {!profile?.hidePoweredBy && (
+            {showPoweredBy && (
               <>
                 Powered by <strong><a href="https://aitta.social" rel="noopener noreferrer">AittaSocial</a></strong>
                 <span aria-hidden="true"> · </span>

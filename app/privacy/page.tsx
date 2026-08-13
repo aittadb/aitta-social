@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import {
-  PublicFooter,
-  PublicPresenceHeader,
+  PublicPageFrame,
 } from "@/app/_components/PublicPresenceFrame";
 
 export const metadata: Metadata = {
@@ -13,19 +12,12 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="public-shell privacy-shell">
-      <PublicPresenceHeader
-        displayName="Independent Aitta"
-        identityHref="/"
-        label="Privacy navigation"
-        actionsLabel="Privacy actions"
-        action={{
-          href: "/",
-          label: "Aitta",
-          accessibleName: "Return to this Aitta",
-        }}
-      />
-
+    <PublicPageFrame
+      className="privacy-shell"
+      profile={null}
+      displayName="Independent Aitta"
+      identityHref="/"
+    >
       <article className="public-information-page" aria-labelledby="privacy-title">
         <header>
           <p className="eyebrow">Privacy</p>
@@ -119,7 +111,6 @@ export default function PrivacyPage() {
         </section>
       </article>
 
-      <PublicFooter profile={null} />
-    </main>
+    </PublicPageFrame>
   );
 }

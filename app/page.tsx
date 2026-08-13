@@ -11,8 +11,7 @@ import type { Entry, Profile } from "@/lib/types";
 import { DeploymentPrompt } from "./_components/DeploymentPrompt";
 import {
   PresenceIdentityTile,
-  PublicFooter,
-  PublicPresenceHeader,
+  PublicPageFrame,
 } from "./_components/PublicPresenceFrame";
 
 export const dynamic = "force-dynamic";
@@ -48,21 +47,17 @@ export default async function Home() {
   } as CSSProperties;
 
   return (
-    <main className={`public-shell density-${profile.density}`} style={style}>
-      <PublicPresenceHeader
-        displayName={profile.displayName}
-        identityHref="#account"
-        label="Aitta navigation"
-        actionsLabel="Aitta actions"
-        action={{
-          href: user ? "/owner" : chatGPTSignInPath("/owner"),
-          label: "Manage",
-          accessibleName: user
-            ? "Manage Aitta as owner — open local sole-owner administration"
-            : "Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration",
-        }}
-      />
-
+    <PublicPageFrame
+      className={`density-${profile.density}`}
+      style={style}
+      profile={profile}
+      displayName={profile.displayName}
+      identityHref="#account"
+      manageHref={user ? "/owner" : chatGPTSignInPath("/owner")}
+      manageAccessibleName={user
+        ? "Manage Aitta as owner — open local sole-owner administration"
+        : "Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"}
+    >
       <div className="public-presence-column">
         <section className="presence-identity" id="account" aria-labelledby="account-name">
           <div className="presence-identity-field" aria-hidden="true" />
@@ -84,8 +79,7 @@ export default async function Home() {
           identityHref="#account"
         />
       </div>
-      <PublicFooter profile={profile} />
-    </main>
+    </PublicPageFrame>
   );
 }
 
@@ -106,21 +100,16 @@ async function loadAccount(): Promise<AccountLoad> {
 function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedIn: boolean }) {
   const ownerPath = signedIn ? "/owner" : chatGPTSignInPath("/owner");
   return (
-    <main className="public-shell density-comfortable template-shell">
-      <PublicPresenceHeader
-        displayName="AittaSocial"
-        identityHref="#start"
-        label="Aitta setup navigation"
-        actionsLabel="Aitta setup actions"
-        action={{
-          href: ownerPath,
-          label: "Set up",
-          accessibleName: signedIn
-            ? "Set up this Aitta — open local sole-owner administration"
-            : "Set up this Aitta — sign in with ChatGPT for local sole-owner administration",
-        }}
-      />
-
+    <PublicPageFrame
+      className="density-comfortable template-shell"
+      profile={null}
+      displayName="Independent Aitta"
+      identityHref="#start"
+      manageHref={ownerPath}
+      manageAccessibleName={signedIn
+        ? "Manage Aitta as owner — open local sole-owner administration"
+        : "Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"}
+    >
       <div className="public-wide-content">
         <section className="template-start" id="start" aria-labelledby="template-title">
           <div className="template-introduction">
@@ -147,27 +136,34 @@ function UnconfiguredPresence({ entries, signedIn }: { entries: Entry[]; signedI
           identityHref="#start"
         />
       </div>
-      <PublicFooter profile={null} />
-    </main>
+    </PublicPageFrame>
   );
 }
 
 function UnavailablePresence({ signedIn }: { signedIn: boolean }) {
   return (
-    <main className="state-page" aria-labelledby="unavailable-title">
-      <p className="eyebrow">Aitta storage unavailable</p>
-      <h1 id="unavailable-title">This Aitta cannot be loaded right now</h1>
-      <p>
-        Its storage could not be read. Try again shortly. No setup, profile, or public content
-        has been changed.
-      </p>
-      <div className="button-row">
-        <a className="button" href="/">Try again</a>
-        <a className="button button-quiet" href={signedIn ? "/owner" : chatGPTSignInPath("/owner")}>
-          Manage Aitta
-        </a>
-      </div>
-    </main>
+    <PublicPageFrame
+      className="public-state-shell"
+      profile={null}
+      displayName="Independent Aitta"
+      identityHref="/"
+      manageHref={signedIn ? "/owner" : chatGPTSignInPath("/owner")}
+      manageAccessibleName={signedIn
+        ? "Manage Aitta as owner — open local sole-owner administration"
+        : "Manage Aitta as owner — sign in with ChatGPT for local sole-owner administration"}
+    >
+      <section className="public-state-page" aria-labelledby="unavailable-title">
+        <p className="eyebrow">Aitta storage unavailable</p>
+        <h1 id="unavailable-title">This Aitta cannot be loaded right now</h1>
+        <p>
+          Its storage could not be read. Try again shortly. No setup, profile, or public content
+          has been changed.
+        </p>
+        <div className="button-row">
+          <a className="button" href="/">Try again</a>
+        </div>
+      </section>
+    </PublicPageFrame>
   );
 }
 

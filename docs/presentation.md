@@ -1,11 +1,13 @@
 # Public profile presentation
 
-The default is an Aitta's profile rather than an editorial page. The configured
-public home and every published permalink share one compact product frame:
+The default is an Aitta's profile rather than an editorial page. Every human
+public route—configured and unconfigured home, published permalink, Privacy,
+Technical, temporary storage-unavailable, and not-found—uses one compact
+product frame:
 
 1. a 60-pixel single-line header containing the bounded profile display name
    and one
-   quiet real action;
+   quiet `Manage` action for local sole-owner administration;
 2. the configured Identity, with a shallow accent field, initials tile,
    display name, short description, optional public details, and About content;
 3. one continuous, identity-linked, deterministic newest-first update stream;
@@ -14,6 +16,14 @@ public home and every published permalink share one compact product frame:
    attribution, a permanent GitHub source link, the public Privacy page, and
    a real Technical destination followed by the concise Manifest, Profile, and
    Updates resource links.
+
+The frame itself is pure presentation: routes pass it already-projected display
+values, profile attribution choice, and destination. It does not read D1,
+runtime configuration, or authentication. Privacy and Technical therefore stay
+D1-independent; the safe not-found fallback neither reads nor infers profile
+attribution. A route that already has a configured public profile alone applies
+the owner-selected powered-by preference. The fixed
+header action is never substituted with a page-specific return or setup action.
 
 `/technical` is a fixed, D1-independent human index of the protocol 1.0
 discovery manifest, public profile, and published-update collection. It uses

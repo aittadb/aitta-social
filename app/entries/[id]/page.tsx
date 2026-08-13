@@ -10,8 +10,7 @@ import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { Entry } from "@/lib/types";
 import {
   PresenceIdentityTile,
-  PublicFooter,
-  PublicPresenceHeader,
+  PublicPageFrame,
 } from "@/app/_components/PublicPresenceFrame";
 
 export const dynamic = "force-dynamic";
@@ -42,21 +41,13 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
   const isNote = entry.kind === "note";
 
   return (
-    <main
+    <PublicPageFrame
       className="permalink-shell"
       style={{ "--accent": resolvePresentationAccent(profile?.accentColor) } as CSSProperties}
+      profile={profile}
+      displayName={displayName}
+      identityHref="/"
     >
-      <PublicPresenceHeader
-        displayName={displayName}
-        identityHref="/"
-        label="Update navigation"
-        actionsLabel="Update actions"
-        action={{
-          href: "/",
-          label: "All updates",
-          accessibleName: "Return to this Aitta and all public updates",
-        }}
-      />
       <div className="permalink-content">
         <article className={`permalink-entry permalink-kind-${entry.kind}`}>
           <header className="permalink-header">
@@ -100,8 +91,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
           <a className="text-link" href={`/api/v1/entries/${entry.id}`}>View as JSON</a>
         </footer>
       </div>
-      <PublicFooter profile={profile} />
-    </main>
+    </PublicPageFrame>
   );
 }
 

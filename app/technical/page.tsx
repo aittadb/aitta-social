@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import {
-  PublicFooter,
-  PublicPresenceHeader,
+  PublicPageFrame,
 } from "@/app/_components/PublicPresenceFrame";
 
 export const metadata: Metadata = {
@@ -13,19 +12,12 @@ export const metadata: Metadata = {
 
 export default function TechnicalPage() {
   return (
-    <main className="public-shell technical-shell">
-      <PublicPresenceHeader
-        displayName="Independent Aitta"
-        identityHref="/"
-        label="Technical navigation"
-        actionsLabel="Technical actions"
-        action={{
-          href: "/",
-          label: "Aitta",
-          accessibleName: "Return to this Aitta",
-        }}
-      />
-
+    <PublicPageFrame
+      className="technical-shell"
+      profile={null}
+      displayName="Independent Aitta"
+      identityHref="/"
+    >
       <article className="public-information-page" aria-labelledby="technical-title">
         <header>
           <p className="eyebrow">Technical</p>
@@ -91,7 +83,6 @@ export default function TechnicalPage() {
         </section>
       </article>
 
-      <PublicFooter profile={null} />
-    </main>
+    </PublicPageFrame>
   );
 }
