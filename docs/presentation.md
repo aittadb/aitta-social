@@ -254,8 +254,18 @@ display name, short description, canonical URL fallback, and longer
 introduction. They sit in one bounded primary fieldset before the existing
 preview, optional public details, and presentation controls. Location, website,
 external links, accent, density, and attribution retain their complete existing
-payload and remain secondary; their more compact compositions belong to
-TASK-161 and TASK-162 rather than this save-journey change.
+payload and remain secondary.
+
+Optional public details use one native `details` disclosure after the preview.
+Its visible summary names the three public categories and shows the concise
+current count, such as “1 of 3 added.” The fields remain mounted while the
+section is closed, so values, native labels, browser validation, and save
+payloads do not change. Existing optional values open the section by default;
+an invalid optional URL or a field-specific server error reopens it before the
+owner is asked to correct that detail. The disclosure has a 44-pixel-or-larger
+summary target, wraps long text, becomes a one-column form at phone widths, and
+uses the shared focus, forced-colors, and reduced-motion behavior. Its native
+disclosure marker remains visible as the open/closed affordance.
 
 The readiness panel is explicitly server-saved. A separate saved/unsaved strip
 compares every current form value with its exact loaded baseline: all required

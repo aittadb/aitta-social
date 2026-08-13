@@ -818,6 +818,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .identity-draft-preview small { color: var(--muted); }
 .owner-form fieldset { margin: 0; padding: 0 0 3rem; border: 0; }
 .owner-form fieldset.identity-secondary-fields { padding-top: 3rem; border-top: 1px solid var(--line); }
+.identity-optional-details { margin: 0 0 3rem; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.identity-optional-details summary { min-height: var(--control-min-height); padding: 0.7rem 0; color: var(--ink); cursor: pointer; font-family: var(--sans); font-size: 1.05rem; font-weight: 700; overflow-wrap: anywhere; }
+.identity-optional-details summary::marker { color: var(--accent); font-size: 0.9em; }
+.identity-optional-details summary > span:first-child { margin-right: 0.75rem; }
+.identity-optional-details-count { color: var(--muted); font-family: var(--sans); font-size: 0.8rem; font-weight: 650; white-space: nowrap; }
+.identity-optional-details-content { padding: 0.5rem 0 1.25rem; }
+.identity-optional-details-content > p { max-width: 62ch; margin: 0 0 1.25rem; color: var(--muted); overflow-wrap: anywhere; }
 .owner-form legend { margin-bottom: 1.5rem; font-family: var(--sans); font-size: 1.4rem; font-weight: 700; }
 .field-grid { display: grid; gap: 1.25rem; }
 .field-grid-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -920,6 +927,7 @@ code { padding: 0.12rem 0.3rem; overflow-wrap: anywhere; border-radius: 4px; bac
   .owner-summary > div { padding-inline: 0.65rem; }
   .owner-summary strong { font-size: 0.95rem; }
   .field-grid-two { grid-template-columns: 1fr; }
+  .identity-optional-details-count { white-space: normal; }
   .identity-readiness, .identity-form-readiness, .identity-draft-preview { grid-template-columns: minmax(0, 1fr); }
   .identity-save-state { grid-template-columns: 1fr; gap: 0.25rem; }
   .owner-form fieldset.identity-primary-fields { padding: 1rem 1rem 0; }

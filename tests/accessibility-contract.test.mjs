@@ -235,7 +235,7 @@ test("client mutation controls announce status and use semantic form controls", 
   assert.match(entryForm, /aria-invalid=\{Boolean\(fieldErrors\.body\) \|\| undefined\}/);
   assert.match(profileForm, /<fieldset className="identity-primary-fields">/);
   assert.match(profileForm, /<legend>Required Identity<\/legend>/);
-  assert.match(profileForm, /<legend>Optional public details<\/legend>/);
+  assert.match(profileForm, /<details[\s\S]*className="identity-optional-details"[\s\S]*<summary>[\s\S]*Optional public details/);
   assert.match(profileForm, /<legend>Presentation<\/legend>/);
   assert.doesNotMatch(profileForm, /accountType|name="accountType"|>Presence type/);
 });

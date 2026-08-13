@@ -238,7 +238,17 @@ test("Identity journey remains semantic, touch-friendly, responsive, and motion-
   assert.match(formSource, /saved canonical fallback is invalid and was omitted from this form/i);
   assert.doesNotMatch(formSource, /setDirty\(true\)/);
   assert.match(formSource, /<fieldset className="identity-primary-fields">[\s\S]*Display name[\s\S]*Short description[\s\S]*Canonical URL fallback[\s\S]*Longer introduction[\s\S]*<\/fieldset>/);
-  assert.match(formSource, /<fieldset className="identity-secondary-fields">[\s\S]*Optional public details/);
+  assert.match(formSource, /<details[\s\S]*className="identity-optional-details"[\s\S]*open=\{optionalDetailsOpen\}[\s\S]*onToggle=\{\(event\) => setOptionalDetailsOpen\(event\.currentTarget\.open\)\}/);
+  assert.match(formSource, /<summary>[\s\S]*Optional public details[\s\S]*\{optionalDetailsCount\} of 3 added[\s\S]*<\/summary>/);
+  assert.match(formSource, /function hasOptionalPublicDetails\([\s\S]*optionalPublicDetailsCount\(values\) > 0/);
+  assert.match(formSource, /useState\(\(\) => hasOptionalPublicDetails\(loadedValues\)\)/);
+  assert.match(formSource, /const optionalDetailsRef = useRef<HTMLDetailsElement>\(null\)/);
+  assert.match(formSource, /function openOptionalDetails\(\)[\s\S]*details && !details\.open\) details\.open = true[\s\S]*setOptionalDetailsOpen\(true\)/);
+  assert.match(formSource, /onInvalidCapture=\{revealInvalidOptionalDetails\}/);
+  assert.match(formSource, /function revealInvalidOptionalDetails\([\s\S]*optionalPublicDetailFieldNames\.has\(fieldName\)[\s\S]*openOptionalDetails\(\)/);
+  assert.match(formSource, /hasInvalidOptionalPublicDetails\(formElement\)[\s\S]*openOptionalDetails\(\)[\s\S]*formElement\.reportValidity\(\)/);
+  assert.match(formSource, /hasOptionalPublicDetailErrors\(failure\.fieldErrors\)[\s\S]*openOptionalDetails\(\)/);
+  assert.match(formSource, /<details[\s\S]*<Field label="Location \(optional\)"[\s\S]*<Field label="Website \(optional\)"[\s\S]*name="externalLinks"/);
   assert.match(formSource, /formElement\.checkValidity\(\)[\s\S]*formElement\.reportValidity\(\)/);
   assert.match(formSource, /aria-invalid=\{Boolean\(error\) \|\| undefined\}/);
   assert.match(formSource, /<FieldError name=\{name\} error=\{error\} \/>/);
@@ -258,6 +268,9 @@ test("Identity journey remains semantic, touch-friendly, responsive, and motion-
   assert.match(css, /\.field input\[aria-invalid="true"\][^}]*border-color:\s*var\(--danger\)/s);
   assert.match(css, /\.identity-draft-preview > \*\s*\{[^}]*min-width:\s*0/s);
   assert.match(css, /\.identity-draft-preview p:not\(\.eyebrow\)\s*\{[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.identity-optional-details summary\s*\{[^}]*min-height:\s*var\(--control-min-height\)/s);
+  assert.match(css, /\.identity-optional-details summary::marker\s*\{[^}]*color:\s*var\(--accent\)/s);
+  assert.match(css, /\.identity-optional-details-content > p\s*\{[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.owner-wordmark, \.owner-topbar \.owner-public-link, \.owner-footer a\s*\{[^}]*min-height:\s*var\(--control-min-height\)/s);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-readiness[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-content\s*\{[^}]*width:\s*calc\(100% - 28px\)/);

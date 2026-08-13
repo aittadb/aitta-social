@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useRef,
   useState,
   type CSSProperties,
   type FormEvent,
@@ -40,6 +41,11 @@ const profileFieldNames = new Set<ProfileFieldName>([
   "density",
   "hidePoweredBy",
 ]);
+const optionalPublicDetailFieldNames = new Set<ProfileFieldName>([
+  "location",
+  "website",
+  "externalLinks",
+]);
 
 export function ProfileForm({
   profile,
@@ -58,6 +64,9 @@ export function ProfileForm({
   const [dirty, setDirty] = useState(false);
   const [recoveryRequired, setRecoveryRequired] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const optionalDetailsRef = useRef<HTMLDetailsElement>(null);
+  const [optionalDetailsOpen, setOptionalDetailsOpen] = useState(() => hasOptionalPublicDetails(loadedValues));
+  const [optionalDetailsCount, setOptionalDetailsCount] = useState(() => optionalPublicDetailsCount(loadedValues));
   const [preview, setPreview] = useState<DraftPreview>({
     displayName: profile?.displayName ?? "",
     shortDescription: profile?.shortDescription ?? "",
@@ -72,8 +81,22 @@ export function ProfileForm({
     setBusy(false);
   }
 
+  function openOptionalDetails() {
+    const details = optionalDetailsRef.current;
+    if (details && !details.open) details.open = true;
+    setOptionalDetailsOpen(true);
+  }
+
+  function revealInvalidOptionalDetails(event: FormEvent<HTMLFormElement>) {
+    const control = event.target;
+    if (!(control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)) return;
+    const fieldName = profileFieldName(control.name);
+    if (fieldName && optionalPublicDetailFieldNames.has(fieldName)) openOptionalDetails();
+  }
+
   function updatePreview(event: FormEvent<HTMLFormElement>) {
     const form = new FormData(event.currentTarget);
+    setOptionalDetailsCount(optionalPublicDetailsCount(formValues(form)));
     setPreview({
       displayName: String(form.get("displayName") ?? ""),
       shortDescription: String(form.get("shortDescription") ?? ""),
@@ -104,6 +127,7 @@ export function ProfileForm({
     setFieldErrors({});
     setStatus("");
     if (!formElement.checkValidity()) {
+      if (hasInvalidOptionalPublicDetails(formElement)) openOptionalDetails();
       setStatus("Identity was not saved. Complete the required fields and correct invalid URLs.");
       formElement.reportValidity();
       return;
@@ -151,6 +175,7 @@ export function ProfileForm({
       }
       const failure = await definitiveFailure(response);
       setFieldErrors(failure.fieldErrors);
+      if (hasOptionalPublicDetailErrors(failure.fieldErrors)) openOptionalDetails();
       setStatus(failure.message);
       focusFirstInvalidField(formElement, failure.fieldErrors);
     } catch {
@@ -161,7 +186,7 @@ export function ProfileForm({
   }
 
   return (
-    <form className="owner-form" aria-label="Identity and profile settings" onSubmit={submit} onInput={updatePreview} aria-busy={busy} noValidate>
+    <form className="owner-form" aria-label="Identity and profile settings" onSubmit={submit} onInput={updatePreview} onInvalidCapture={revealInvalidOptionalDetails} aria-busy={busy} noValidate>
       <section className={`identity-form-readiness identity-readiness-${readiness.state}`} aria-labelledby="identity-form-readiness-title">
         <div>
           <p className="eyebrow">Server-saved readiness</p>
@@ -262,27 +287,38 @@ export function ProfileForm({
         </div>
       </aside>
 
-      <fieldset className="identity-secondary-fields">
-        <legend>Optional public details</legend>
-        <div className="field-grid field-grid-two">
-          <Field label="Location (optional)" name="location" maxLength={120} defaultValue={profile?.location ?? ""} error={fieldErrors.location} />
-          <Field label="Website (optional)" name="website" type="url" defaultValue={profile?.website ?? ""} placeholder="https://example.com" error={fieldErrors.website} />
+      <details
+        ref={optionalDetailsRef}
+        className="identity-optional-details"
+        open={optionalDetailsOpen}
+        onToggle={(event) => setOptionalDetailsOpen(event.currentTarget.open)}
+      >
+        <summary>
+          <span>Optional public details</span>
+          <span className="identity-optional-details-count">{optionalDetailsCount} of 3 added</span>
+        </summary>
+        <div className="identity-optional-details-content">
+          <p>Location, website, and external links appear publicly only when you add them.</p>
+          <div className="field-grid field-grid-two">
+            <Field label="Location (optional)" name="location" maxLength={120} defaultValue={profile?.location ?? ""} error={fieldErrors.location} />
+            <Field label="Website (optional)" name="website" type="url" defaultValue={profile?.website ?? ""} placeholder="https://example.com" error={fieldErrors.website} />
+          </div>
+          <label className="field" htmlFor="profile-externalLinks">
+            <span>External links (optional)</span>
+            <textarea
+              id="profile-externalLinks"
+              name="externalLinks"
+              rows={4}
+              defaultValue={profile?.externalLinks.map((link) => `${link.label} | ${link.url}`).join("\n")}
+              placeholder={"Documentation | https://example.com/docs\nContact | https://example.com/contact"}
+              aria-invalid={Boolean(fieldErrors.externalLinks) || undefined}
+              aria-describedby={describedBy("external-links-help", errorId("externalLinks", fieldErrors.externalLinks))}
+            />
+            <small id="external-links-help">One per line in “Label | URL” form. Maximum eight.</small>
+            <FieldError name="externalLinks" error={fieldErrors.externalLinks} />
+          </label>
         </div>
-        <label className="field" htmlFor="profile-externalLinks">
-          <span>External links (optional)</span>
-          <textarea
-            id="profile-externalLinks"
-            name="externalLinks"
-            rows={4}
-            defaultValue={profile?.externalLinks.map((link) => `${link.label} | ${link.url}`).join("\n")}
-            placeholder={"Documentation | https://example.com/docs\nContact | https://example.com/contact"}
-            aria-invalid={Boolean(fieldErrors.externalLinks) || undefined}
-            aria-describedby={describedBy("external-links-help", errorId("externalLinks", fieldErrors.externalLinks))}
-          />
-          <small id="external-links-help">One per line in “Label | URL” form. Maximum eight.</small>
-          <FieldError name="externalLinks" error={fieldErrors.externalLinks} />
-        </label>
-      </fieldset>
+      </details>
 
       <fieldset className="identity-secondary-fields">
         <legend>Presentation</legend>
@@ -383,6 +419,16 @@ function requiredCount(preview: DraftPreview): number {
     .length;
 }
 
+function optionalPublicDetailsCount(values: Pick<FormValues, "location" | "website" | "externalLinks">): number {
+  return [values.location, values.website, values.externalLinks]
+    .filter((value) => value.trim().length > 0)
+    .length;
+}
+
+function hasOptionalPublicDetails(values: Pick<FormValues, "location" | "website" | "externalLinks">): boolean {
+  return optionalPublicDetailsCount(values) > 0;
+}
+
 function initialFormValues(profile: ProfileInput | null, canonicalDefault: string): FormValues {
   return {
     displayName: profile?.displayName ?? "",
@@ -468,6 +514,17 @@ function describedBy(...ids: Array<string | undefined>): string | undefined {
 function profileFieldName(value: string): ProfileFieldName | null {
   if (value.startsWith("externalLinks.")) return "externalLinks";
   return profileFieldNames.has(value as ProfileFieldName) ? value as ProfileFieldName : null;
+}
+
+function hasOptionalPublicDetailErrors(errors: FieldErrors): boolean {
+  return Object.keys(errors).some((fieldName) => optionalPublicDetailFieldNames.has(fieldName as ProfileFieldName));
+}
+
+function hasInvalidOptionalPublicDetails(form: HTMLFormElement): boolean {
+  return [...optionalPublicDetailFieldNames].some((fieldName) => {
+    const control = form.elements.namedItem(fieldName);
+    return (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) && !control.validity.valid;
+  });
 }
 
 async function definitiveFailure(response: Response): Promise<{ message: string; fieldErrors: FieldErrors }> {
