@@ -1,5 +1,26 @@
 # Changelog
 
+- **TASK-193 — Negotiated current hypermedia JSON for published update documents.**
+  `GET` and `HEAD /entries/{id}` now retain their HTML default while returning a
+  current, allowlisted JSON document at the same unversioned canonical URI when
+  bounded `Accept` strictly prefers JSON. The product-specific Worker dispatch
+  has a bounded 4 KiB/16-range media parser, HTML tie/default behavior,
+  feature-local JSON/error types, JSON `406` for rejected GET requests,
+  empty-body matching HEAD responses, and `Vary: Accept`. It reserves and
+  marker-gates one internal route, strips every caller marker, rejects direct
+  internal access before Vinext/D1, clears only JSON-dispatch queries, and
+  leaves other routes/methods untouched. The existing `/api/v1` detail resource
+  is unchanged. Validation: integrated commit
+  `1c1ba1bc1f5c424d3d887ae1df11a10221b8e4c4`; focused compiled-worker/v1/CSP
+  checks passed 29/29, full validation passed 297/297, migration generation
+  found no schema change, production audit found zero vulnerabilities, and
+  diff checks passed. Independent security/integration review found no
+  P0/P1/P2 issue. Disposable compiled-Worker evidence covers HTML/JSON,
+  320/390/1440, DPR-4, forced colors, reduced motion, coarse touch, native
+  focus/navigation, no overflow/private canaries, and clean console. No hosted,
+  data, configuration, schema, migration, deployment, or external state
+  changed.
+
 - **TASK-182 — Reused common Aitta chrome in the private owner workspace.**
   Authorized Home, Identity, new-update, and update-edit documents now share a
   clear private owner header, exactly three native owner destinations with one
