@@ -251,6 +251,23 @@ when present. It contains no competing action. Counts, update rows, update
 actions, and their unchanged update-state text remain available below in a compact sans-serif
 hierarchy; the empty state does not reserve a large blank panel.
 
+## Owner update composer
+
+The compact owner composer keeps required update text first. Its Kind control
+changes only plain-language guidance: Note is a short update; Article is a
+fuller update; Announcement is time-sensitive; and Link requires both text
+that explains the destination and a complete destination URL. Article and
+Announcement say that a title helps readers, while every kind makes optional
+fields explicit. Link uses the native required state for its destination; the
+server remains the authority for all existing validation.
+
+Changing Kind never removes, clears, or remounts entered text, title, or
+destination values. This lets an owner compare kinds before saving without
+losing work. The body remains the primary field and the guidance stays within
+the existing compact, bounded owner form at phone and desktop widths. The
+composer retains its existing private-draft, definitive-failure, and
+unknown-result recovery copy and behavior.
+
 The Identity route makes its four required values the first editing task:
 display name, short description, canonical URL fallback, and longer
 introduction. They sit in one bounded primary fieldset before optional public

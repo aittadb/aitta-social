@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { ENTRY_KINDS, type EntryKind } from "@/lib/constants";
 import type { Entry } from "@/lib/types";
 import { classifyOwnerMutationResponse } from "../_components/owner-mutation-outcome";
 
@@ -15,12 +16,29 @@ const entryFieldNames = new Set<EntryFieldName>([
 ]);
 const MAX_SERVER_ERROR_LENGTH = 240;
 
+const entryKindGuidance: Record<EntryKind, string> = {
+  note: "A short update. Text is required; a title and destination URL are optional.",
+  article: "A fuller update. Text is required; a title helps readers, and a destination URL is optional.",
+  announcement: "A time-sensitive update. Text is required; a title helps readers, and a destination URL is optional.",
+  link: "Share a destination. Text is required to explain the link, and a destination URL is required. A title is optional.",
+};
+
 export function EntryForm({ entry }: { entry: Entry | null }) {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [recoveryRequired, setRecoveryRequired] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [kind, setKind] = useState<EntryKind>(entry?.kind ?? "note");
   const isPublished = entry?.state === "published";
+
+  function changeKind(event: ChangeEvent<HTMLSelectElement>) {
+    const nextKind = event.currentTarget.value;
+    if (!isEntryKind(nextKind)) return;
+    setKind(nextKind);
+    if (nextKind !== "link" && fieldErrors.destinationUrl) {
+      setFieldErrors((current) => ({ ...current, destinationUrl: undefined }));
+    }
+  }
 
   function showUnconfirmedSave() {
     setStatus("The save result is unknown. Do not submit again from this page; the first request may have succeeded. Check this Aitta’s saved state before retrying.");
@@ -139,15 +157,16 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
             <select
               id="entry-kind"
               name="kind"
-              defaultValue={entry?.kind ?? "note"}
+              value={kind}
+              onChange={changeKind}
               aria-invalid={Boolean(fieldErrors.kind) || undefined}
-              aria-describedby={errorId("kind", fieldErrors.kind)}
+              aria-describedby={describedBy("entry-kind-help", errorId("kind", fieldErrors.kind))}
             >
-              <option value="note">Note</option>
-              <option value="article">Article</option>
-              <option value="link">Link</option>
-              <option value="announcement">Announcement</option>
+              {ENTRY_KINDS.map((entryKind) => (
+                <option key={entryKind} value={entryKind}>{entryKind[0].toUpperCase()}{entryKind.slice(1)}</option>
+              ))}
             </select>
+            <small className="entry-kind-guidance" id="entry-kind-help">{entryKindGuidance[kind]}</small>
             <FieldError name="kind" error={fieldErrors.kind} />
           </label>
           <label className="field" htmlFor="entry-title">
@@ -165,16 +184,18 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
         </div>
 
         <label className="field" htmlFor="entry-destinationUrl">
-          <span>Destination URL (optional; required for Link)</span>
+          <span>{kind === "link" ? "Destination URL (required for Link)" : "Destination URL (optional)"}</span>
           <input
             id="entry-destinationUrl"
             name="destinationUrl"
             type="url"
+            required={kind === "link"}
             defaultValue={entry?.destinationUrl ?? ""}
             placeholder="https://example.com/resource"
             aria-invalid={Boolean(fieldErrors.destinationUrl) || undefined}
-            aria-describedby={errorId("destinationUrl", fieldErrors.destinationUrl)}
+            aria-describedby={describedBy("entry-destination-help", errorId("destinationUrl", fieldErrors.destinationUrl))}
           />
+          <small className="entry-destination-guidance" id="entry-destination-help">{kind === "link" ? "Use the complete https:// or http:// address this update should open." : "Leave this empty unless the update should point to a web address."}</small>
           <FieldError name="destinationUrl" error={fieldErrors.destinationUrl} />
         </label>
       </fieldset>
@@ -211,6 +232,10 @@ function describedBy(...ids: Array<string | undefined>): string | undefined {
 function entryFieldName(value: string): EntryFieldName | null {
   if (value === "entryKind") return "kind";
   return entryFieldNames.has(value as EntryFieldName) ? value as EntryFieldName : null;
+}
+
+function isEntryKind(value: string): value is EntryKind {
+  return ENTRY_KINDS.includes(value as EntryKind);
 }
 
 async function definitiveFailure(response: Response): Promise<{ message: string; fieldErrors: FieldErrors }> {

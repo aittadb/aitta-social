@@ -15,7 +15,7 @@ import {
 
 const ownerEmail = "owner@example.com";
 
-test("the owner composer is body-first, compact, private-aware, and preserves loaded values", async () => {
+test("the owner composer is body-first, compact, private-aware, and makes every kind clear", async () => {
   const longTitle = `${"OwnerComposerTitle".repeat(11)}OwnerComposer`;
   const longBody = `${"LongUnbrokenComposerBody".repeat(160)}\nA second line remains visible.`;
   const destinationUrl = "https://example.com/a-very-long-destination/path?source=owner-composer";
@@ -40,6 +40,8 @@ test("the owner composer is body-first, compact, private-aware, and preserves lo
   assert.match(newHtml, /Saving creates a private draft in this Aitta/i);
   assert.match(newHtml, /<strong id="entry-save-context-title">New private draft<\/strong>/i);
   assert.match(newHtml, /Nothing becomes public from this form/i);
+  assert.match(newHtml, /A short update\. Text is required; a title and destination URL are optional\./i);
+  assert.match(newHtml, /Destination URL \(optional\)/i);
   assert.equal(countMatches(newHtml, />Save private draft<\/button>/gi), 1);
   assert.match(newHtml, />Back to this Aitta<\/a>/i);
 
@@ -48,7 +50,9 @@ test("the owner composer is body-first, compact, private-aware, and preserves lo
   assert.match(editHtml, new RegExp(escapeRegex(longTitle)));
   assert.match(editHtml, new RegExp(escapeRegex(longBody)));
   assert.match(editHtml, new RegExp(escapeRegex(destinationUrl)));
-  assert.match(editHtml, /<option value="link" selected="">Link<\/option>/i);
+  assert.match(editHtml, /Share a destination\. Text is required to explain the link, and a destination URL is required\. A title is optional\./i);
+  assert.match(editHtml, /Destination URL \(required for Link\)/i);
+  assert.match(editHtml, /required=""/i);
   assert.equal(countMatches(editHtml, />Save private draft<\/button>/gi), 1);
 
   const publishedHtml = await ownerHtml("/owner/entries/composer-published", makeEnv({
@@ -65,6 +69,19 @@ test("the owner composer is body-first, compact, private-aware, and preserves lo
   assert.match(publishedHtml, /<strong id="entry-save-context-title">Editing a public update<\/strong>/i);
   assert.match(publishedHtml, /without changing its publication state/i);
   assert.equal(countMatches(publishedHtml, />Save update<\/button>/gi), 1);
+  assert.match(publishedHtml, /A time-sensitive update\. Text is required; a title helps readers, and a destination URL is optional\./i);
+
+  const articleHtml = await ownerHtml("/owner/entries/composer-article", makeEnv({
+    db: new FakeD1({ entries: [entryRow({
+      id: "composer-article",
+      kind: "article",
+      title: "Longer reading",
+      body: "An article still starts with its required text.",
+      state: "draft",
+    })] }),
+    ownerEmail,
+  }));
+  assert.match(articleHtml, /A fuller update\. Text is required; a title helps readers, and a destination URL is optional\./i);
 
   assert.ok(source.indexOf('name="body"') < source.indexOf('name="kind"'), "body must precede kind");
   assert.ok(source.indexOf('name="body"') < source.indexOf('name="title"'), "body must precede title");
@@ -73,6 +90,19 @@ test("the owner composer is body-first, compact, private-aware, and preserves lo
   assert.match(source, /kind: form\.get\("kind"\)/);
   assert.match(source, /title: form\.get\("title"\)/);
   assert.match(source, /destinationUrl: form\.get\("destinationUrl"\)/);
+  assert.match(source, /const \[kind, setKind\] = useState<EntryKind>\(entry\?\.kind \?\? "note"\)/);
+  assert.match(source, /import \{ ENTRY_KINDS, type EntryKind \} from "@\/lib\/constants"/);
+  assert.match(source, /ENTRY_KINDS\.map\(\(entryKind\)/);
+  assert.match(source, /value=\{kind\}[\s\S]*onChange=\{changeKind\}/);
+  assert.match(source, /required=\{kind === "link"\}/);
+  assert.match(source, /function changeKind\(event: ChangeEvent<HTMLSelectElement>\)[\s\S]*setKind\(nextKind\)/);
+  assert.match(source, /function changeKind\(event: ChangeEvent<HTMLSelectElement>\)[\s\S]*nextKind !== "link" && fieldErrors\.destinationUrl[\s\S]*destinationUrl: undefined/s);
+  assert.match(source, /function isEntryKind\(value: string\): value is EntryKind[\s\S]*ENTRY_KINDS\.includes\(value as EntryKind\)/);
+  assert.doesNotMatch(source, /key=\{kind\}/, "kind guidance must not remount fields and lose their values");
+  assert.match(source, /defaultValue=\{entry\?\.body \?\? ""\}/);
+  assert.match(source, /defaultValue=\{entry\?\.title \?\? ""\}/);
+  assert.match(source, /defaultValue=\{entry\?\.destinationUrl \?\? ""\}/);
+  assert.match(css, /\.entry-kind-guidance, \.entry-destination-guidance\s*\{[^}]*min-height:\s*1\.5rem/s);
   assert.match(css, /\.entry-editor-form\s*\{[^}]*width:\s*min\(100%, 760px\)/s);
   assert.match(css, /\.entry-editor-form textarea\[name="body"\]\s*\{[^}]*min-height:\s*220px/s);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.entry-editor-form textarea\[name="body"\]\s*\{[^}]*min-height:\s*190px/s);

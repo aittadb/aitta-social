@@ -888,6 +888,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .entry-editor-fields legend { padding: 0 0.35rem; margin: 0; font-size: 1.05rem; }
 .entry-editor-form .field { min-width: 0; margin-bottom: 1rem; }
 .entry-editor-form textarea[name="body"] { min-height: 220px; font-family: var(--sans); font-size: 1.05rem; }
+.entry-kind-guidance, .entry-destination-guidance { min-height: 1.5rem; overflow-wrap: anywhere; }
+.entry-kind-guidance { padding-left: 0.65rem; border-left: 3px solid var(--accent); }
 .entry-editor-footer .form-status { flex: 1 0 100%; overflow-wrap: anywhere; }
 
 .owner-access-state { width: min(760px, calc(100% - 40px)); min-height: 100vh; display: grid; place-content: center; margin: 0 auto; }
