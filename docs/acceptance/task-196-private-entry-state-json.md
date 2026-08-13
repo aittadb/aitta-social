@@ -65,12 +65,14 @@ client parsing, and deletion non-regression. Existing lifecycle, owner-security,
 assisted, first-update, functional, and reproducibility suites retain the
 surrounding behavior.
 
-## Rendered local evidence and residual
+## Rendered local evidence
 
-A disposable local Miniflare/D1 fixture served the same production build with
-only synthetic owner or non-owner identity, two synthetic updates, and
-one-shot local state-response faults. Its owner HTML and the compiled CSS and
-JavaScript assets each returned `200` before the interaction checks. No hosted
+The fresh disposable local Miniflare/D1 fixture at
+`http://127.0.0.1:43197` served the frozen `5bb97c0` production build without
+a source or build change. It used only synthetic owner or non-owner identity,
+two synthetic updates, and one-shot local state-response faults. Owner HTML,
+the emitted CSS, the emitted JavaScript, and the preloaded WOFF2 each returned
+`200` with their browser-appropriate content types before the checks. No hosted
 Site, hosted data, setting, credential, identity, or external service was
 used.
 
@@ -92,19 +94,38 @@ used.
   yours to administer** with no owner navigation, entry actions, or private
   canary.
 
-The browser surface became unavailable after those interaction observations,
-so this record deliberately does **not** claim the remaining required visual
-matrix: 320/390/1440 widths, literal 400-percent zoom or an equivalent
-measured reflow row, focus measurements, 44-pixel measurements, forced colors,
-reduced motion, coarse pointer, or a fresh clean-console observation. Those
-are an explicit TASK-196 residual and must be collected against this frozen
-candidate before the task can be completed or integrated.
+The in-app-browser owner layout measurements were:
 
-## Validation and residuals
+| Viewport and state | Observed result |
+| --- | --- |
+| `320×800` CSS pixels | Document and body widths were `305/305`; 25 controls were present; the smallest target was 44 CSS pixels; every lifecycle action was in bounds. The pre-existing owner navigation is its own horizontal scroller, so **Pages** began partly outside that scroller's viewport; the document itself did not horizontally overflow. |
+| `390×844` CSS pixels | Document and body widths were `375/375`; the smallest target was 44 CSS pixels; no non-navigation control or lifecycle action was off screen. |
+| `1440×900` CSS pixels | Document and body widths were `1425/1425`; the smallest target was 44 CSS pixels; no non-navigation control or lifecycle action was off screen. |
+| `320×800` CSS pixels at emulated DPR 4 | `devicePixelRatio` was 4, document widths were `320/320`, the smallest target was 44 CSS pixels, and every lifecycle-action rectangle was in bounds. |
 
-Focused state/lifecycle coverage, type/lint checks, migration-drift review,
-and the production dependency audit are recorded against the candidate before
-the final browser residual. The exact full-validation, diff, and independent
-review records must be refreshed after the browser matrix is complete. The
-unmeasured rendered matrix above is the sole known completion blocker; it does
-not authorize a hosted or external mutation.
+Forced-colors `active` and reduced-motion `reduce` both matched under
+emulation. A sampled control resolved to system white, and sampled transition
+and animation durations were `0s`. After touch emulation, both `pointer` and
+`any-pointer` coarse media queries matched and the smallest target remained 44
+CSS pixels. The in-app-browser warning/error log array was `[]`.
+
+A fresh styled Safari pass independently showed the safe non-owner heading
+above with no owner navigation, actions, or private canary, and showed the
+fully styled owner dashboard with both relevant Draft and Published action
+groups during recovery. Safari browser zoom was increased to its maximum, but
+the browser exposed no numeric ratio; this record makes no numeric zoom claim.
+Native Tab did not yield a reliable focused control because focus remained in
+the HTML content, so this record makes no sequential-Tab or rendered-focus
+claim. TASK-196 did not change [`app/globals.css`](../../app/globals.css), so
+the shared focus styling is source-preserved relative to `df5e932`; that is not
+rendered focus evidence.
+
+## Validation
+
+Frozen source candidate `5bb97c0` passed `npm run validate` with `493/493`
+tests. `npm run db:generate` reported no schema drift, and `npm audit
+--omit=dev` reported zero vulnerabilities. An independent source-only Sol
+review found no P0/P1/P2 findings and independently ran the focused
+state/lifecycle/owner-security suites with `45/45` passing. This acceptance
+amendment changes only this evidence record; its final clean diff/status check
+and exact-SHA documentation review are recorded in the handoff.
