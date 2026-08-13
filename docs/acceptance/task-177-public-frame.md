@@ -39,9 +39,44 @@ motion, forced colors, and private-canary exclusion.
 
 ## Rendered evidence
 
-The local compiled Worker journey must be observed at 320, 390, and 1440 CSS
-pixels; 400-percent reflow; keyboard skip/header/footer focus; coarse touch;
-forced colors; and reduced motion. Record no horizontal overflow, no sticky
-obstruction, no private canary, and no console error before tracker
-finalization. This task makes no hosted, data, configuration, schema,
-migration, or deployment mutation.
+The exact compiled Worker from `ae40b4d0fbbc1cd50d5dd280f22ab09000b82e12`
+was exercised only through a disposable local Miniflare/D1 fixture at 320, 390,
+and 1440 CSS pixels. The fixture had one configured published article plus a
+private draft-canary row, neutral unconfigured and storage-unavailable states,
+an owner-hidden-attribution profile, and long unbroken profile/update values.
+It did not use a hosted Site, active configuration, identity, or persisted
+data.
+
+At all 36 state/viewport cells—configured and unconfigured home,
+storage-unavailable home, published permalink, draft and unknown permalink
+404s, global 404, Privacy, Technical, hidden attribution, long home, and long
+permalink—the rendered page had exactly one main landmark, one public
+navigation header, and one shared public footer. The visible `Manage` link
+always targeted `/owner` and exposed the exact accessible name `Manage this
+Aitta’s local sole-owner administration`. Every visible interactive control was
+at least 44 by 44 CSS pixels, none was off-screen, and `scrollWidth` equalled
+`clientWidth`. The expected scrollbar reduced static-page clients to
+305/375/1425 CSS pixels at 320/390/1440, respectively, but never introduced
+horizontal overflow. The shared Powered by attribution appeared everywhere
+except the explicit owner-hidden fixture. Neither private draft canary appeared
+in any public DOM.
+
+At 320 CSS pixels with device pixel ratio 4, forced colors, reduced motion,
+and coarse pointer/touch emulation, the configured page retained equal 320
+client and scroll widths, zero undersized or off-screen controls, and no
+sticky/fixed header or main obstruction. Forced-colors native keyboard focus on
+the Manage link was visible as a 3-pixel outline; its transition and animation
+durations were `0s` and the document scroll behavior was `auto`. Native Tab
+input also visibly focused the header Manage link and footer Privacy and
+Updates links, each with the normal 3-pixel focus outline. The direct native
+focus checks establish the shared header/footer focus treatment; a complete
+sequential-Tab traversal was not separately enumerated. Browser warn/error
+logs were empty after the matrix.
+
+The final source gates for this exact runtime were `npm run validate` 282/282,
+focused public-frame checks 85/85, `npm run db:generate` with no schema change,
+`npm audit --omit=dev` with zero vulnerabilities, and clean diff checks. An
+independent Sol review of `ae40b4d` found no P0, P1, or P2 issue. This
+evidence-only record amendment does not alter the compiled runtime or tests.
+No hosted, data, configuration, schema, migration, or deployment mutation was
+made.
