@@ -36,7 +36,7 @@ export default async function ProfileSettings() {
     hidePoweredBy: profile.hidePoweredBy,
   } : null;
   return (
-    <OwnerShell displayName={access.user.displayName} current="profile">
+    <OwnerShell current="profile">
       <header className="owner-page-header compact-header">
         <div><p className="eyebrow">Public profile</p><h1>Identity</h1><p>Set up the outward profile this Aitta controls. Only a successful save changes its Identity or readiness.</p></div>
       </header>

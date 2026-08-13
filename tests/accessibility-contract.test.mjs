@@ -80,9 +80,9 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /<main[^>]+class="owner-shell/i);
     assert.match(html, /<nav[^>]+aria-label="Owner navigation"/i);
     assert.match(html, /aria-current="page"[^>]*>Identity</i);
-    assert.match(html, /<header class="owner-topbar"><a[^>]+href="\/owner"[^>]*>Manage<\/a><a[^>]+href="\/"[^>]*>View Aitta<\/a><\/header>/i);
+    assert.match(html, /<header class="owner-topbar"[^>]+aria-label="Private owner workspace"[\s\S]*href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>[\s\S]*href="\/"[^>]*>View Aitta<\/a><\/div><\/header>/i);
     assert.match(html, /<nav class="owner-nav"[^>]*><a href="\/owner"[^>]*>Home<\/a><a href="\/owner\/profile"[^>]*>Identity<\/a><a href="\/owner\/entries\/new"[^>]*>New update<\/a><\/nav>/i);
-    assert.match(html, /<footer class="owner-footer">[\s\S]*Private owner workspace[\s\S]*Sign out/i);
+    assert.match(html, /<footer class="owner-footer">[\s\S]*Private owner workspace[\s\S]*aria-label="Technical resources"[\s\S]*>Privacy<\/a>[\s\S]*>Technical<\/a>[\s\S]*>GitHub<\/a>[\s\S]*Sign out/i);
     assert.doesNotMatch(html, /Test Owner|owner-session|owner-user/i);
     assert.match(html, /<form[^>]+class="owner-form"/i);
     assert.match(html, /<fieldset class="identity-primary-fields">/i);
@@ -213,7 +213,7 @@ test("CSS preserves responsive, reduced-motion, focus, touch-target, and no-grad
   assert.match(css, /\.owner-topbar\s*\{[^}]*min-height:\s*calc\(60px \+ env\(safe-area-inset-top\)\)[^}]*padding-top:\s*env\(safe-area-inset-top\)/s);
   assert.match(css, /\.owner-nav\s*\{[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-nav\s*\{[^}]*flex-wrap:\s*nowrap[^}]*overflow-x:\s*auto/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-footer\s*\{[^}]*padding-bottom:\s*max\(0\.5rem,\s*env\(safe-area-inset-bottom\)\)/s);
+  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-footer-inner\s*\{[^}]*padding-bottom:\s*max\(0\.75rem,\s*env\(safe-area-inset-bottom\)\)/s);
   assert.match(css, /\.owner-summary\s*\{[^}]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/s);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-summary > div\s*\{[^}]*padding-inline:\s*0\.65rem[^}]*\}[\s\S]*\.owner-summary strong\s*\{[^}]*font-size:\s*0\.95rem/s);
   assert.doesNotMatch(css, /\.owner-nav[^}]*flex-wrap:\s*wrap|grid-template-columns:\s*220px/);

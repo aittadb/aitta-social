@@ -27,7 +27,7 @@ export default async function OwnerDashboard() {
       ? "Finish your identity"
       : "Complete your identity";
   return (
-    <OwnerShell displayName={access.user.displayName} current="overview">
+    <OwnerShell current="overview">
       <header className="owner-page-header">
         <div>
           <p className="eyebrow">Your Aitta</p>

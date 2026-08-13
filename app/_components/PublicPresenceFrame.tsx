@@ -1,5 +1,6 @@
 import type { Profile } from "@/lib/types";
 import type { CSSProperties, ReactNode } from "react";
+import { AittaFooterResources } from "./AittaFooterResources";
 
 type HeaderAction = {
   href: string;
@@ -106,28 +107,12 @@ function PublicFooter({
           {profile?.displayName ?? "Independent Aitta"}
         </span>
         <div className="public-footer-context">
-          <span className="public-attribution">
-            {!profile?.hidePoweredBy && (
-              <>
-                Powered by <strong><a href="https://aitta.social" rel="noopener noreferrer">AittaSocial</a></strong>
-                <span aria-hidden="true"> · </span>
-              </>
-            )}
-            <a
-              href="https://github.com/aittadb/aitta-social"
-              rel="noopener noreferrer"
-              aria-label="AittaSocial source on GitHub"
-            >
-              GitHub
-            </a>
-          </span>
-          <nav className="technical-links" aria-label="Technical resources">
-            <a href="/privacy">Privacy</a>
-            <a href="/technical">Technical</a>
-            <a href="/.well-known/aitta-social.json">Manifest</a>
-            <a href="/api/v1/site">Profile</a>
-            <a href="/api/v1/entries">Updates</a>
-          </nav>
+          {!profile?.hidePoweredBy ? (
+            <span className="public-attribution">
+              Powered by <strong><a href="https://aitta.social" rel="noopener noreferrer">AittaSocial</a></strong>
+            </span>
+          ) : null}
+          <AittaFooterResources />
         </div>
       </div>
     </footer>

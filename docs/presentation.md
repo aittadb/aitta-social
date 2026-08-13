@@ -244,13 +244,33 @@ and the application never disables system color adjustment.
 
 ## Owner Identity journey
 
-The visually distinct owner workspace uses a neutral 60-pixel application
-header with `Manage` and a quiet `View Aitta` public-view link. A separate, horizontally
-scrollable, non-wrapping route bar contains exactly three destinations: Home,
-Identity, and New update. `Sign out` stays in the compact private-workspace
-footer rather than becoming a route destination or menu item. The accepted
-`displayName` shell input remains compatible with callers but authenticated
-ChatGPT display names are not rendered.
+The visually distinct owner workspace reuses the maintained Aitta header,
+footer, link, focus, touch, and responsive vocabulary without reusing or
+exporting the fixed public-frame composition. Its 60-pixel application header
+names `Manage` and `Private owner workspace`, then offers a quiet `View Aitta`
+public-view link. A separate, horizontally scrollable, non-wrapping route bar
+contains exactly three destinations: Home, Identity, and New update. The
+current destination uses native `aria-current="page"` semantics. `Sign out`
+stays in the private-workspace footer rather than becoming a route destination
+or menu item. Authenticated ChatGPT display data is not accepted or rendered by
+the shell.
+
+One pure fixed resource navigation supplies Privacy, Technical, the official
+GitHub source, Manifest, Profile, and Updates to both public and private
+footers. It accepts no URL, content, identity, profile, authorization, D1, or
+runtime input. Public identity and attribution decisions remain private to the
+fixed public frame; the resource navigation is not a generic frame or footer
+bypass. Owner pages keep one main landmark, one global skip target, one owner
+navigation landmark, and one footer landmark.
+
+Non-owner and missing-owner pages use the same clearly private header and
+resource footer but never render the authorized three-link owner navigation.
+Their `Manage` label is plain text, while `View Aitta`, the fixed resource
+links, and the exact Sites sign-out destination remain available. Those safe
+states are selected before any D1 read and receive no profile, update, owner
+identity, protected setting, or authorization-result value. Signed-out owner
+requests retain the Sites-owned sign-in redirect instead of rendering this
+frame.
 
 Owner Home presents fresh, incomplete, and complete Identity readiness derived
 from saved server state. It renders exactly one state-derived primary action:

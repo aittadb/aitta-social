@@ -69,7 +69,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   assert.match(reloadedIdentity, /Canonical URL fallback/i);
   assert.match(reloadedIdentity, /value="https:\/\/stored\.example\/fallback"/i);
   assert.doesNotMatch(reloadedIdentity, new RegExp(ownerIdentityCanary, "i"));
-  assert.match(reloadedIdentity, /<a class="owner-wordmark" href="\/owner">Manage<\/a>/i);
+  assert.match(reloadedIdentity, /<a class="owner-wordmark" href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
 
   const create = await fetchApp("/api/private/entries", {
     env,

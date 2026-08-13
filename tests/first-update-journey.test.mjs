@@ -315,7 +315,7 @@ test("the single next-step panel uses bounded reads and compact responsive acces
   assert.match(css, /:focus-visible\s*\{[^}]*outline:\s*3px/s);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-content\s*\{[^}]*width:\s*calc\(100% - 28px\)/);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-next-step\s*\{[^}]*grid-template-columns:\s*1fr/);
-  assert.match(css, /\.owner-frame\s*\{[^}]*min-height:\s*calc\(100vh - 165px - env\(safe-area-inset-top\)\)/s);
+  assert.match(css, /\.owner-frame\s*\{[^}]*min-height:\s*calc\(100vh - 215px - env\(safe-area-inset-top\)\)[^}]*flex:\s*1 0 auto/s);
   assert.doesNotMatch(css, /grid-template-columns:\s*220px|min-height:\s*72px/);
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 });
