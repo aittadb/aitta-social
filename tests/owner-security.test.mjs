@@ -156,6 +156,8 @@ test("every private mutation route independently rejects a non-owner before touc
       assert.equal(response.status, 403);
       if (path === "/api/private/profile" || path === "/api/private/entries") {
         assert.equal((await responseJson(response)).error.code, "authorization_denied");
+      } else if (path === "/api/private/entries/entry-1" && method === "PUT") {
+        assert.equal((await responseJson(response)).error.code, "authorization_denied");
       } else {
         assert.deepEqual(await responseJson(response), {
           error: "Administrative access denied.",
@@ -227,7 +229,7 @@ test("authorized draft lifecycle stays private until publish and supports every 
     })),
   });
   assert.equal(editedResponse.status, 200);
-  assert.equal((await responseJson(editedResponse)).data.title, "Ready to publish");
+  assert.equal((await responseJson(editedResponse)).data.attributes.title, "Ready to publish");
 
   const publishedResponse = await fetchApp(`/api/private/entries/${created.id}/state`, {
     env,
@@ -277,7 +279,16 @@ test("authorized draft lifecycle stays private until publish and supports every 
       ...(body === undefined ? {} : { body }),
     });
     assert.equal(missingResponse.status, 404);
-    assert.deepEqual(await responseJson(missingResponse), { error: "Update not found." });
+    const missingDocument = await responseJson(missingResponse);
+    if (method === "PUT" && !path.endsWith("/state")) {
+      assert.deepEqual(missingDocument, {
+        data: null,
+        error: { code: "entry_not_found", message: "Update not found." },
+        links: [],
+      });
+    } else {
+      assert.deepEqual(missingDocument, { error: "Update not found." });
+    }
   }
 });
 

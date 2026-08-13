@@ -304,8 +304,12 @@ Changing Kind never removes, clears, or remounts entered text, title, or
 destination values. This lets an owner compare kinds before saving without
 losing work. The body remains the primary field and the guidance stays within
 the existing compact, bounded owner form at phone and desktop widths. The
-composer retains its existing private-draft, definitive-failure, and
-unknown-result recovery copy and behavior.
+composer retains its private-draft, definitive-failure, and unknown-result
+recovery copy and behavior. Existing-update saves now request JSON explicitly
+and confirm only the exact bounded private update document for the stable
+identifier and Draft or Published state already being edited. A successful
+edit keeps all values in place, announces the saved private or public state,
+and does not publish or unpublish.
 
 The Identity route makes its four required values the first editing task:
 display name, short description, canonical URL fallback, and longer
@@ -422,8 +426,11 @@ wrong-shaped error, an invalid 2xx document, any 5xx response, or a failed fetch
 the open form is retained, another submission is disabled, and the existing
 native saved-state recovery link is shown. The client never follows a response
 URL or accepts an arbitrary `{ data: Entry }` object as proof that creation
-succeeded. Existing-draft and published-update saves retain their current edit
-contract until their separate normalization task.
+succeeded. Existing-draft and published-update saves follow the same recovery
+rule but require an exact `200` owner-entry document whose ID, state, and
+normalized editable values match the current submission. Draft success exposes `publish`; Published success exposes
+`unpublish`; both retain `edit` and `delete`. The client does not infer success
+from status alone, follow a response URL, or change publication state.
 
 The composer performs native required, length, and URL checks before sending a
 request. A definitive 4xx response maps recognized `body`, `title`, `entryKind`,

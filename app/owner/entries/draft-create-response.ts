@@ -21,8 +21,9 @@ const entryFields = new Set<string>(["kind", "title", "body", "destinationUrl"])
 export async function readDraftCreateResponse(response: Response): Promise<DraftCreateResponse> {
   if (response.status >= 500) return { outcome: "unconfirmed" };
   if (response.status === 201 && response.ok) {
-    const body = await readJsonDocument(response);
-    return isPrivateDraftDocument(body)
+    const body = await readPrivateEntryResponseJson(response);
+    return isPrivateEntryDocument(body, { state: "draft", requireNewId: true }) &&
+        body.data.attributes.publishedAt === null
       ? { outcome: "success", id: body.data.id }
       : { outcome: "unconfirmed" };
   }
@@ -31,7 +32,7 @@ export async function readDraftCreateResponse(response: Response): Promise<Draft
   }
 
   const fieldErrors: DraftCreateFailure["fieldErrors"] = {};
-  const body = await readJsonDocument(response);
+  const body = await readPrivateEntryResponseJson(response);
   if (!isPrivateEntryErrorDocument(body)) return { outcome: "unconfirmed" };
   if (body.error.fields) {
     for (const item of body.error.fields) {
@@ -50,14 +51,24 @@ export async function readDraftCreateResponse(response: Response): Promise<Draft
   };
 }
 
-function isPrivateDraftDocument(value: unknown): value is PrivateEntryDocument {
+export function isPrivateEntryDocument(
+  value: unknown,
+  expected: {
+    id?: string;
+    state?: "draft" | "published";
+    requireNewId?: boolean;
+  } = {},
+): value is PrivateEntryDocument {
   if (!isRecord(value) || !hasExactKeys(value, ["data", "links", "actions"])) return false;
   if (!isRecord(value.data) || !hasExactKeys(value.data, ["id", "type", "attributes"])) {
     return false;
   }
   if (
     typeof value.data.id !== "string" ||
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value.data.id) ||
+    (expected.id !== undefined && value.data.id !== expected.id) ||
+    (expected.requireNewId === true &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value.data.id)) ||
+    (expected.id === undefined && expected.requireNewId !== true) ||
     value.data.type !== "owner-entry"
   ) return false;
   if (!isRecord(value.data.attributes) || !hasExactKeys(value.data.attributes, [
@@ -77,8 +88,10 @@ function isPrivateDraftDocument(value: unknown): value is PrivateEntryDocument {
     !isNormalizedBoundedText(attributes.body, 1, 50000) ||
     !isPublicDestination(attributes.destinationUrl) ||
     (attributes.kind === "link" && attributes.destinationUrl === null) ||
-    attributes.state !== "draft" ||
-    attributes.publishedAt !== null ||
+    !(attributes.state === "draft" || attributes.state === "published") ||
+    (expected.state !== undefined && attributes.state !== expected.state) ||
+    !(attributes.publishedAt === null || isTimestamp(attributes.publishedAt)) ||
+    (attributes.state === "published" && attributes.publishedAt === null) ||
     !isTimestamp(attributes.createdAt) ||
     !isTimestamp(attributes.updatedAt)
   ) return false;
@@ -99,11 +112,17 @@ function isPrivateDraftDocument(value: unknown): value is PrivateEntryDocument {
   if (!Array.isArray(value.actions) || value.actions.length !== 3) return false;
   const [editAction, publishAction, deleteAction] = value.actions;
   return isAction(editAction, "edit", "PUT", selfLink.href, true) &&
-    isAction(publishAction, "publish", "PUT", `${selfLink.href}/state`, true) &&
+    isAction(
+      publishAction,
+      attributes.state === "published" ? "unpublish" : "publish",
+      "PUT",
+      `${selfLink.href}/state`,
+      true,
+    ) &&
     isAction(deleteAction, "delete", "DELETE", selfLink.href, false);
 }
 
-async function readJsonDocument(response: Response): Promise<unknown> {
+export async function readPrivateEntryResponseJson(response: Response): Promise<unknown> {
   if (!/^application\/json\b/iu.test(response.headers.get("content-type") ?? "")) return null;
   if (response.body === null) return null;
   const reader = response.body.getReader();
@@ -140,7 +159,7 @@ async function readJsonDocument(response: Response): Promise<unknown> {
   }
 }
 
-function isPrivateEntryErrorDocument(value: unknown): value is {
+export function isPrivateEntryErrorDocument(value: unknown): value is {
   data: null;
   error: {
     code: string;

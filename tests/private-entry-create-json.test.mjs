@@ -486,17 +486,17 @@ test("new-draft client confirms only the exact 201 private-draft document", asyn
   );
 });
 
-test("EntryForm uses the strict create parser without changing edit response handling", async () => {
+test("EntryForm keeps the strict create parser alongside strict edit response handling", async () => {
   const source = await readFile(
     new URL("../app/owner/entries/EntryForm.tsx", import.meta.url),
     "utf8",
   );
   assert.match(source, /import \{ readDraftCreateResponse \} from "\.\/draft-create-response"/u);
-  assert.match(source, /headers: entry[\s\S]*\{ Accept: "application\/json", "Content-Type": "application\/json" \}/u);
+  assert.match(source, /headers: \{ Accept: "application\/json", "Content-Type": "application\/json" \}/u);
   assert.match(source, /if \(!entry\) \{[\s\S]*readDraftCreateResponse\(response\)[\s\S]*result\.outcome === "success"[\s\S]*window\.location\.assign\(`\/owner\/entries\/\$\{encodeURIComponent\(result\.id\)\}`\)/u);
   assert.match(source, /if \(result\.outcome === "unconfirmed"\) \{[\s\S]*showUnconfirmedSave\(\)/u);
   assert.match(source, /setFieldErrors\(result\.fieldErrors\)[\s\S]*focusFirstInvalidField\(formElement, result\.fieldErrors\)/u);
-  assert.match(source, /const outcome = classifyOwnerMutationResponse\(response\)/u);
+  assert.match(source, /const result = await readEntryEditResponse\(response/u);
   assert.doesNotMatch(source, /as \{ data: Entry \}/u);
 });
 

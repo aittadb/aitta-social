@@ -158,11 +158,11 @@ test("draft create and edit preserve all four kinds and exact accepted values", 
     assert.equal(edit.status, 200);
     const saved = (await responseJson(edit)).data;
     assert.equal(saved.id, createdIds[index]);
-    assert.equal(saved.kind, editInput.kind);
-    assert.equal(saved.title, editInput.title);
-    assert.equal(saved.body, editInput.body);
-    assert.equal(saved.destinationUrl, editInput.destinationUrl);
-    assert.equal(saved.state, "draft");
+    assert.equal(saved.attributes.kind, editInput.kind);
+    assert.equal(saved.attributes.title, editInput.title);
+    assert.equal(saved.attributes.body, editInput.body);
+    assert.equal(saved.attributes.destinationUrl, editInput.destinationUrl);
+    assert.equal(saved.attributes.state, "draft");
   }
 });
 
@@ -239,11 +239,7 @@ test("composer validation focuses fields, definitive errors permit retry, and un
 
   assert.match(source, /if \(recoveryRequired\) return;/);
   assert.match(source, /if \(!formElement\.checkValidity\(\)\)[\s\S]*formElement\.reportValidity\(\)/);
-  assert.match(source, /const failure = await definitiveFailure\(response\);[\s\S]*setFieldErrors\(failure\.fieldErrors\);[\s\S]*focusFirstInvalidField\(formElement, failure\.fieldErrors\)/);
-  assert.match(source, /const MAX_SERVER_ERROR_LENGTH = 240;/);
-  assert.match(source, /function safeServerError\(value: unknown\): string \| null/);
-  assert.match(source, /normalized\.length > 0 && normalized\.length <= MAX_SERVER_ERROR_LENGTH/);
-  assert.match(source, /if \(value === "entryKind"\) return "kind"/);
+  assert.match(source, /const result = await readEntryEditResponse\(response[\s\S]*setFieldErrors\(result\.fieldErrors\);[\s\S]*focusFirstInvalidField\(formElement, result\.fieldErrors\)/);
   assert.match(source, /window\.requestAnimationFrame\([\s\S]*form\.elements\.namedItem\(fieldName\)[\s\S]*control\.focus\(\)/);
   assert.match(source, /disabled=\{busy \|\| recoveryRequired\}/);
   assert.match(source, /The save result is unknown\. Do not submit again from this page; the first request may have succeeded/);

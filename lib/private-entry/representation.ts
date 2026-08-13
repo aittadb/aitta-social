@@ -21,7 +21,7 @@ type PrivateEntryLink = {
 
 type PrivateEntryAction =
   | {
-      rel: "edit" | "publish";
+      rel: "edit" | "publish" | "unpublish";
       method: "PUT";
       href: string;
       requestMediaType: typeof PRIVATE_ENTRY_MEDIA_TYPE;
@@ -96,7 +96,7 @@ export function privateEntryDocument(
         requestMediaType: PRIVATE_ENTRY_MEDIA_TYPE,
       },
       {
-        rel: "publish",
+        rel: entry.state === "published" ? "unpublish" : "publish",
         method: "PUT",
         href: state,
         requestMediaType: PRIVATE_ENTRY_MEDIA_TYPE,

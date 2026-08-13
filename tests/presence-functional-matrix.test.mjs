@@ -182,7 +182,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     }),
   });
   assert.equal(editDraft.status, 200);
-  assert.equal((await responseJson(editDraft)).data.state, "draft");
+  assert.equal((await responseJson(editDraft)).data.attributes.state, "draft");
   await assertEntryRow(worker.db, created.id, {
     kind: "announcement",
     title: "A durable edited update",

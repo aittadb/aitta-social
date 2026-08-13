@@ -3,8 +3,8 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { ENTRY_KINDS, type EntryKind } from "@/lib/constants";
 import type { Entry } from "@/lib/types";
-import { classifyOwnerMutationResponse } from "../_components/owner-mutation-outcome";
 import { readDraftCreateResponse } from "./draft-create-response";
+import { readEntryEditResponse } from "./edit-save-response";
 
 type EntryFieldName = "kind" | "title" | "body" | "destinationUrl";
 type FieldErrors = Partial<Record<EntryFieldName, string>>;
@@ -15,7 +15,6 @@ const entryFieldNames = new Set<EntryFieldName>([
   "body",
   "destinationUrl",
 ]);
-const MAX_SERVER_ERROR_LENGTH = 240;
 
 const entryKindGuidance: Record<EntryKind, string> = {
   note: "A short update. Text is required; a title and destination URL are optional.",
@@ -80,9 +79,7 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
     try {
       const response = await fetch(entry ? `/api/private/entries/${encodeURIComponent(entry.id)}` : "/api/private/entries", {
         method: entry ? "PUT" : "POST",
-        headers: entry
-          ? { "Content-Type": "application/json" }
-          : { Accept: "application/json", "Content-Type": "application/json" },
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({
           kind: form.get("kind"),
           title: form.get("title"),
@@ -106,20 +103,26 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
         setBusy(false);
         return;
       }
-      const outcome = classifyOwnerMutationResponse(response);
-      if (outcome === "success") {
+      const result = await readEntryEditResponse(response, {
+        id: entry.id,
+        state: entry.state,
+        kind,
+        title: formText(form.get("title")) || null,
+        body: formText(form.get("body")),
+        destinationUrl: normalizedDestinationUrl(form.get("destinationUrl")),
+      });
+      if (result.outcome === "success") {
         setStatus(isPublished ? "Public update saved." : "Private draft saved.");
         setBusy(false);
         return;
       }
-      if (outcome === "unconfirmed") {
+      if (result.outcome === "unconfirmed") {
         showUnconfirmedSave();
         return;
       }
-      const failure = await definitiveFailure(response);
-      setFieldErrors(failure.fieldErrors);
-      setStatus(failure.message);
-      focusFirstInvalidField(formElement, failure.fieldErrors);
+      setFieldErrors(result.fieldErrors);
+      setStatus(result.message);
+      focusFirstInvalidField(formElement, result.fieldErrors);
     } catch {
       showUnconfirmedSave();
       return;
@@ -244,7 +247,6 @@ function describedBy(...ids: Array<string | undefined>): string | undefined {
 }
 
 function entryFieldName(value: string): EntryFieldName | null {
-  if (value === "entryKind") return "kind";
   return entryFieldNames.has(value as EntryFieldName) ? value as EntryFieldName : null;
 }
 
@@ -252,42 +254,18 @@ function isEntryKind(value: string): value is EntryKind {
   return ENTRY_KINDS.includes(value as EntryKind);
 }
 
-async function definitiveFailure(response: Response): Promise<{ message: string; fieldErrors: FieldErrors }> {
-  const fieldErrors: FieldErrors = {};
-  let safeMessage = "The server rejected this request.";
-  try {
-    const body = await response.json() as unknown;
-    if (body && typeof body === "object" && !Array.isArray(body)) {
-    const record = body as Record<string, unknown>;
-      const error = safeServerError(record.error);
-      if (error) safeMessage = error;
-      if (record.details && typeof record.details === "object" && !Array.isArray(record.details)) {
-        for (const [key, value] of Object.entries(record.details as Record<string, unknown>)) {
-          const fieldName = entryFieldName(key);
-          const error = safeServerError(value);
-          if (fieldName && error && !fieldErrors[fieldName]) {
-            fieldErrors[fieldName] = error;
-          }
-        }
-      }
-    }
-  } catch {
-    // Keep the fixed safe fallback for malformed error responses.
-  }
-  return {
-    message: Object.keys(fieldErrors).length
-      ? "Update was not saved. Correct the highlighted fields and try again."
-      : `Update was not saved. ${safeMessage}`,
-    fieldErrors,
-  };
+function formText(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value.trim() : "";
 }
 
-function safeServerError(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const normalized = value.trim();
-  return normalized.length > 0 && normalized.length <= MAX_SERVER_ERROR_LENGTH
-    ? normalized
-    : null;
+function normalizedDestinationUrl(value: FormDataEntryValue | null): string | null {
+  const source = formText(value);
+  if (!source) return null;
+  try {
+    return new URL(source).toString();
+  } catch {
+    return source;
+  }
 }
 
 function focusFirstInvalidField(form: HTMLFormElement, errors: FieldErrors) {

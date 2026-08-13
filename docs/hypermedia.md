@@ -198,7 +198,20 @@ Draft state, null publication time, identifier, and timestamps; none can be
 selected by the request. The route remains no-store and undiscoverable, and it
 does not grant the browser owner or Sites identity any `/api/v1` machine
 authority. Other private entry operations retain their current contracts until
-their one-operation TASK-195–197 slices land.
+their one-operation TASK-196–197 slices land.
+
+`PUT /api/private/entries/{id}` now uses that policy for one existing update.
+Only after same-origin sole-owner authorization does it negotiate JSON, bound
+and parse the UTF-8 JSON body, validate the four update fields, and run the
+prepared edit. Its `200` response is the same allowlisted `owner-entry`
+resource with stable relative API and owner-editor links. The resource retains
+the identifier, Draft or Published state, and publication time; its current
+state action is `publish` for a draft and `unpublish` for a published update,
+alongside `edit` and `delete`. An unknown identifier is a structured
+`404 entry_not_found`; an uncertain storage result is a safe `500`. Every edit
+result is no-store and varies on `Accept`. Unsupported neighboring methods use
+JSON `405` with `Allow: PUT, DELETE` regardless of `Accept`, while the existing
+bodyless DELETE operation remains on its prior contract until TASK-197.
 
 No statement in this document makes a browser-private endpoint a machine
 credential or public API resource.

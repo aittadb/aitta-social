@@ -92,7 +92,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     })),
   });
   assert.equal(edit.status, 200);
-  assert.equal((await responseJson(edit)).data.state, "draft");
+  assert.equal((await responseJson(edit)).data.attributes.state, "draft");
 
   const reloadedDraft = await ownerHtml(`/owner/entries/${created.id}`, env);
   assert.match(reloadedDraft, /First assisted update/i);
@@ -382,12 +382,12 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(entryForm, /Save update[\s\S]*Save private draft/);
   assert.match(entryForm, /The save result is unknown\. Do not submit again from this page; the first request may have succeeded/);
   assert.match(entryForm, /href=\{entry \? `\/owner\/entries\/\$\{encodeURIComponent\(entry\.id\)\}` : "\/owner"\}/);
-  assert.match(entryForm, /const outcome = classifyOwnerMutationResponse\(response\);[\s\S]*if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}[\s\S]*const failure = await definitiveFailure\(response\);[\s\S]*setFieldErrors\(failure\.fieldErrors\);[\s\S]*focusFirstInvalidField\(formElement, failure\.fieldErrors\);[\s\S]*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
+  assert.match(entryForm, /const result = await readEntryEditResponse\(response,[\s\S]*if \(result\.outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}[\s\S]*setFieldErrors\(result\.fieldErrors\);[\s\S]*focusFirstInvalidField\(formElement, result\.fieldErrors\);[\s\S]*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
   assert.match(entryForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The save result is unknown\.[^\n]+\);\s*setRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);
   assert.match(entryForm, /if \(recoveryRequired\) return;/);
   assert.match(entryForm, /disabled=\{busy \|\| recoveryRequired\}/);
   assert.match(entryForm, /if \(!formElement\.checkValidity\(\)\)[\s\S]*formElement\.reportValidity\(\)/);
-  assert.match(entryForm, /if \(value === "entryKind"\) return "kind"/);
+  assert.match(entryForm, /readEntryEditResponse\(response/);
   assert.match(profileForm, /<form[^>]+aria-label="Identity and profile settings"[^>]+aria-busy=\{busy\}/);
   assert.match(profileForm, /Canonical URL fallback/);
   assert.match(profileForm, /protected runtime URL remains effective and cannot be changed here/);

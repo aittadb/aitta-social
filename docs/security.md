@@ -322,6 +322,32 @@ a redirect, malformed response, invalid success document, or storage failure
 cannot enable a duplicate retry. Draft state remains absent from every public
 HTML and v1 projection.
 
+`PUT /api/private/entries/{id}` applies the same bounded browser-private policy
+without changing publication state. Same-origin and sole-owner authorization
+run before Accept, media, body, parameters, or D1; denial returns an allowlisted
+JSON category without reading the request stream or target. Accepted JSON is
+bounded to 64 KiB and validated as unknown input before the prepared update.
+The response projects only the stable identifier, editable values, retained
+state/timestamps, relative private navigation, and the verified owner's
+currently applicable edit, publish-or-unpublish, and delete actions. It never
+serializes a raw row, private canary, request host, owner identity, protected
+configuration, or machine authority. An unknown target is a safe structured
+404; unexpected authorization-setting, storage, or post-write failure is a
+non-reflective 500 whose result is deliberately unconfirmed. Every normalized
+edit response is no-store and varies on Accept. Neighboring unsupported methods
+advertise the actual `PUT, DELETE` methods, but DELETE retains its existing
+authorization, response bytes, and negotiation behavior until its own task.
+Unsupported neighboring methods always return structured JSON `405` with exact
+`Allow: PUT, DELETE`; only an authorized PUT can reach `406` negotiation.
+
+The edit client accepts success only from an exact bounded `200` owner-entry
+document matching the stable identifier, state, and normalized kind, title,
+body, and destination submitted by the current form. A
+well-formed structured 4xx is definitive and may return only recognized field
+messages. An invalid success document, redirect, non-JSON response, oversized
+response, failed fetch, or 5xx remains unconfirmed, disables another save, and
+requires the owner to reload the server-rendered saved update before retrying.
+
 Worker runtime code uses only supported web and Cloudflare APIs. It must not
 depend on Node built-ins, filesystem access, a durable process, or mutable
 module/process state for correctness or authorization.
