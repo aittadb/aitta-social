@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-203 — Co-located owner-shell CSS and established stylesheet
+  ownership.** `OwnerShell` and `OwnerAccessState` now use the adjacent
+  `OwnerShell.module.css`; its scoped rules own their shell, header,
+  navigation, frame, footer, access-state, and narrow-layout presentation.
+  `globals.css` retains theme tokens, resets, accessibility foundations, and
+  genuinely shared primitives. `AGENTS.md` now requires component-specific
+  CSS modules while reserving global or theme files for color/typography
+  tokens and cross-component foundations. Rendered and source regressions
+  preserve owner states, navigation, links, active state, 44-pixel controls,
+  safe areas, responsive layout, focus, reduced motion, and forced colors;
+  they also prove migrated selectors are absent from the global stylesheet.
+  Validation: independent review found no P0/P1/P2 issues; integrated commit
+  `b2bd90b`; direct checks passed 55 tests; full `npm run validate` passed
+  build, typecheck, lint, repository checks, and 503/503 tests. No route, API,
+  schema, migration, persistence, hosting, deployment, access, data, or
+  external state changed. Residual uncertainty: other feature CSS remains
+  global until separately migrated through focused tasks.
+
 - **TASK-202 — Extracted Technical page information sections into a focused
   component.** Added the feature-local `TechnicalInformationSection`, which
   owns the existing semantic section class plus its exact
