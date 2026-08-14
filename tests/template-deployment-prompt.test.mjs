@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+
 import {
   FakeD1,
   entryRow,
@@ -53,7 +55,7 @@ test("a truly unconfigured deployment leads with the exact prompt and published-
   assert.equal(html.match(/<textarea(?=[^>]+id="deployment-prompt")/gi)?.length, 1);
   assert.ok(html.indexOf("Set up your own Aitta") < html.indexOf("Visible public update"));
   assert.ok(html.indexOf(deploymentPrompt) < html.indexOf("Visible public update"));
-  assert.match(normalizeVisibleText(html), new RegExp(escapeRegex(approvedAittaExplanation), "i"));
+  assert.match(normalizeVisibleText(html), new RegExp(escapeRegExp(approvedAittaExplanation), "i"));
   assert.match(html, /A profile is an Aitta(?:&apos;|&#x27;|')s optional outward identity presentation/i);
   assert.match(html, /This Aitta has no profile yet and no current Hub connection/i);
   assert.match(html, /<label[^>]+for="deployment-prompt"[^>]*>Prompt for ChatGPT<\/label>/i);
@@ -208,8 +210,4 @@ function readPrompt(html) {
 
 function normalizeVisibleText(html) {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

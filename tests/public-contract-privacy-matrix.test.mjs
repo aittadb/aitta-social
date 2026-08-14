@@ -6,6 +6,8 @@ import test from "node:test";
 
 import { Miniflare } from "miniflare";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+
 import {
   APP_ORIGIN,
   D1_DATABASE_ID,
@@ -926,8 +928,4 @@ function assertNoPrivateCanary(value) {
     value,
     /FRESH-RUNTIME\.example|LEGACY-PERSON\.example|\/presence\/\/\//u,
   );
-}
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }

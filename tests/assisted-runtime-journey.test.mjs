@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import ts from "typescript";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+
 import {
   FakeD1,
   entryRow,
@@ -96,7 +98,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
 
   const reloadedDraft = await ownerHtml(`/owner/entries/${created.id}`, env);
   assert.match(reloadedDraft, /First assisted update/i);
-  assert.match(reloadedDraft, new RegExp(escapeRegex(publicBody), "i"));
+  assert.match(reloadedDraft, new RegExp(escapeRegExp(publicBody), "i"));
   assert.match(reloadedDraft, /Save private draft/i);
   await assertPubliclyUnknown(env, created.id, [draftCanary, publicBody]);
 
@@ -120,7 +122,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   const publicHtml = `${await signedOutHome.text()}\n${await signedOutPermalink.text()}`;
   assert.match(publicHtml, /Assisted Field Notes/i);
   assert.match(publicHtml, /First assisted update/i);
-  assert.match(publicHtml, new RegExp(escapeRegex(publicBody), "i"));
+  assert.match(publicHtml, new RegExp(escapeRegExp(publicBody), "i"));
   assert.match(publicHtml, /density-compact/i);
   assert.match(publicHtml, /--accent:#6a4b35/i);
   assert.doesNotMatch(publicHtml, /Powered by AittaSocial/i);
@@ -378,7 +380,7 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*publicly readable on this Aitta at its permalink[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
   assert.match(actions, /role="group"[^>]+aria-label=\{`Actions for \$\{updateLabel\}, update \$\{actionReference\}`\}/);
   for (const action of ["Edit", "Publish", "Open public permalink for", "Unpublish", "Delete"]) {
-    assert.match(actions, new RegExp(`aria-label=\\{\\\`${escapeRegex(action)}[^\\\`]+update \\$\\{actionReference\\}`));
+    assert.match(actions, new RegExp(`aria-label=\\{\\\`${escapeRegExp(action)}[^\\\`]+update \\$\\{actionReference\\}`));
   }
   assert.match(actions, /The publication result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
   assert.match(actions, /The unpublish result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
@@ -540,16 +542,13 @@ async function assertPubliclyUnknown(env, id, canaries) {
   assert.equal(permalink.status, 404);
   assert.equal(detail.status, 404);
   const publicSource = `${await home.text()}\n${await permalink.text()}\n${JSON.stringify(await responseJson(detail))}\n${JSON.stringify(await responseJson(collection))}`;
-  for (const canary of canaries) assert.doesNotMatch(publicSource, new RegExp(escapeRegex(canary), "i"));
+  for (const canary of canaries) assert.doesNotMatch(publicSource, new RegExp(escapeRegExp(canary), "i"));
 }
 
 async function source(path) {
   return readFile(new URL(`../${path}`, import.meta.url), "utf8");
 }
 
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 function countMatches(value, pattern) {
   return [...value.matchAll(pattern)].length;

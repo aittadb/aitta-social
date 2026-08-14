@@ -6,6 +6,8 @@ import test from "node:test";
 
 import { Miniflare } from "miniflare";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+
 import {
   APP_ORIGIN,
   D1_DATABASE_ID,
@@ -648,8 +650,5 @@ function replacementIdentity() {
   };
 }
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-}
 
 assert.equal(D1_DATABASE_NAME, "site-creator-d1");

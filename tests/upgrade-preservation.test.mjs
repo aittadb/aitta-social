@@ -5,6 +5,8 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+
 import {
   APP_ORIGIN,
   OWNER_EMAIL,
@@ -792,8 +794,4 @@ async function responseJson(response) {
 
 async function consumeResponse(response) {
   await response.text();
-}
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }

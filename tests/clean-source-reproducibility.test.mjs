@@ -4,6 +4,8 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+
 import {
   FakeD1,
   fetchApp,
@@ -33,7 +35,7 @@ test("a fresh D1 moves from safe setup to configured empty and published-only wi
   });
   assert.equal(initialPublic.status, 200);
   const initialPublicHtml = await initialPublic.text();
-  assert.match(initialPublicHtml, new RegExp(escapeRegex(deploymentPrompt)));
+  assert.match(initialPublicHtml, new RegExp(escapeRegExp(deploymentPrompt)));
   assert.match(initialPublicHtml, /Set up your own Aitta/i);
   assert.match(initialPublicHtml, /An Aitta is your independently controlled AittaSocial application/i);
   assert.match(initialPublicHtml, /optional outward identity presentation/i);
@@ -150,7 +152,7 @@ test("a fresh D1 moves from safe setup to configured empty and published-only wi
     JSON.stringify(await responseJson(collection)),
   ].join("\n");
   assert.match(publicProjection, /Reviewed public update/);
-  assert.match(publicProjection, new RegExp(escapeRegex(publicBody)));
+  assert.match(publicProjection, new RegExp(escapeRegExp(publicBody)));
   assert.doesNotMatch(publicProjection, new RegExp(draftCanary));
   assert.equal(await trackedSourceFingerprint(), sourceBefore);
 });
@@ -204,8 +206,4 @@ async function trackedSourceFingerprint() {
     hash.update("\0");
   }
   return hash.digest("hex");
-}
-
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

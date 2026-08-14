@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+
 import {
   FakeD1,
   entryRow,
@@ -47,9 +49,9 @@ test("the owner composer is body-first, compact, private-aware, and makes every 
 
   assert.match(editHtml, /<p class="eyebrow">Private draft<\/p>/i);
   assert.match(editHtml, /<strong id="entry-save-context-title">Editing a private draft<\/strong>/i);
-  assert.match(editHtml, new RegExp(escapeRegex(longTitle)));
-  assert.match(editHtml, new RegExp(escapeRegex(longBody)));
-  assert.match(editHtml, new RegExp(escapeRegex(destinationUrl)));
+  assert.match(editHtml, new RegExp(escapeRegExp(longTitle)));
+  assert.match(editHtml, new RegExp(escapeRegExp(longBody)));
+  assert.match(editHtml, new RegExp(escapeRegExp(destinationUrl)));
   assert.match(editHtml, /Share a destination\. Text is required to explain the link, and a destination URL is required\. A title is optional\./i);
   assert.match(editHtml, /Destination URL \(required for Link\)/i);
   assert.match(editHtml, /required=""/i);
@@ -267,9 +269,6 @@ function readSource(path) {
   return readFile(new URL(`../${path}`, import.meta.url), "utf8");
 }
 
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 function countMatches(value, pattern) {
   return [...value.matchAll(pattern)].length;
