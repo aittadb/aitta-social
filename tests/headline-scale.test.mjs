@@ -16,7 +16,10 @@ const LONG_NAME = "N".repeat(200);
 const LONG_TITLE = "T".repeat(200);
 
 test("primary headings use one restrained responsive scale", async () => {
-  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const [css, ownerShellCss] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8"),
+  ]);
 
   assert.match(
     css,
@@ -39,8 +42,8 @@ test("primary headings use one restrained responsive scale", async () => {
     /\.state-page h1\s*\{[^}]*font-size:\s*clamp\(2\.25rem, 4vw, 3\.75rem\)/s,
   );
   assert.match(
-    css,
-    /\.owner-access-state h1\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*clamp\(1\.75rem, 3vw, 2\.25rem\)[^}]*font-weight:\s*700/s,
+    ownerShellCss,
+    /\.accessState h1\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*clamp\(1\.75rem, 3vw, 2\.25rem\)[^}]*font-weight:\s*700/s,
   );
   assert.match(
     css,

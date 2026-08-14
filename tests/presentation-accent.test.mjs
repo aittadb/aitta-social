@@ -214,11 +214,12 @@ test("a malformed persisted legacy accent survives reopen without reaching publi
 });
 
 test("the owner preview uses the shared rule and forced colors stay browser-owned", async () => {
-  const [profileForm, publicPage, permalinkPage, css] = await Promise.all([
+  const [profileForm, publicPage, permalinkPage, css, ownerShellCss] = await Promise.all([
     readFile(new URL("../app/owner/profile/ProfileForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/entries/[id]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8"),
   ]);
 
   for (const source of [profileForm, publicPage, permalinkPage]) {
@@ -230,7 +231,7 @@ test("the owner preview uses the shared rule and forced colors stay browser-owne
   assert.doesNotMatch(css, /forced-color-adjust:\s*none/i);
   assert.doesNotMatch(css, /--owner-(?:ink|panel)\s*:/);
   assert.equal(cssCustomProperty(css, "paper"), LIGHT_SURFACES[1]);
-  assert.match(css, /\.owner-shell\s*\{[^}]*background:\s*var\(--paper\)[^}]*color:\s*var\(--ink\)/s);
+  assert.match(ownerShellCss, /\.shell\s*\{[^}]*background:\s*var\(--paper\)[^}]*color:\s*var\(--ink\)/s);
   assert.equal(cssCustomProperty(css, "paper-raised"), LIGHT_SURFACES[3]);
   assert.match(css, /\.identity-draft-preview\s*\{[^}]*background:\s*var\(--paper-raised\)/s);
   assert.match(css, /\.owner-next-step\s*\{[^}]*border:\s*1px solid var\(--line\)[^}]*border-radius:\s*6px[^}]*background:\s*var\(--paper-raised\)/s);

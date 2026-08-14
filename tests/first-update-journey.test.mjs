@@ -313,9 +313,10 @@ test("the single next-step panel uses bounded reads and compact responsive acces
   assert.match(css, /\.button\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.text-link\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /:focus-visible\s*\{[^}]*outline:\s*3px/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-content\s*\{[^}]*width:\s*calc\(100% - 28px\)/);
+  const ownerShellCss = await readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8");
+  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.content\s*\{[^}]*width:\s*calc\(100% - 28px\)/);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-next-step\s*\{[^}]*grid-template-columns:\s*1fr/);
-  assert.match(css, /\.owner-frame\s*\{[^}]*min-height:\s*calc\(100vh - 215px - env\(safe-area-inset-top\)\)[^}]*flex:\s*1 0 auto/s);
+  assert.match(ownerShellCss, /\.frame\s*\{[^}]*min-height:\s*calc\(100vh - 215px - env\(safe-area-inset-top\)\)[^}]*flex:\s*1 0 auto/s);
   assert.doesNotMatch(css, /grid-template-columns:\s*220px|min-height:\s*72px/);
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 });

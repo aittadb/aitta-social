@@ -114,11 +114,12 @@ test("signed-out owner routes remain exact Sites redirects before D1", async () 
 });
 
 test("owner and public frames share only a pure fixed resource-link primitive", async () => {
-  const [resources, publicFrame, ownerShell, css] = await Promise.all([
+  const [resources, publicFrame, ownerShell, css, ownerShellCss] = await Promise.all([
     readFile(new URL("../app/_components/AittaFooterResources.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/_components/PublicPresenceFrame.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/_components/OwnerShell.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8"),
   ]);
 
   assert.match(resources, /href="\/privacy"[\s\S]*href="\/technical"[\s\S]*href="https:\/\/github\.com\/aittadb\/aitta-social"/u);
@@ -130,24 +131,41 @@ test("owner and public frames share only a pure fixed resource-link primitive", 
   assert.match(publicFrame, /identityHref="\/"[\s\S]*href: "\/owner"/u);
   assert.match(ownerShell, /<OwnerHeader authorized \/>[\s\S]*aria-label="Owner navigation"[\s\S]*<OwnerFooter \/>/u);
   assert.match(ownerShell, /<OwnerHeader authorized=\{false\} \/>[\s\S]*<OwnerFooter \/>/u);
+  for (const className of [
+    "shell", "topbar", "topbarInner", "brand", "wordmark", "contextLabel",
+    "publicLink", "navigation", "frame", "accessFrame", "content", "footer",
+    "footerInner", "footerLabel", "signOut", "accessState", "stateMark",
+  ]) {
+    assert.match(ownerShell, new RegExp(`styles\\.${className}`));
+  }
   assert.doesNotMatch(ownerShell, /displayName|owner-user|owner-session|next\/link/iu);
 
-  assert.match(css, /\.owner-wordmark, \.owner-topbar \.owner-public-link, \.owner-footer a\s*\{[^}]*min-height:\s*var\(--control-min-height\)/su);
-  assert.match(css, /\.owner-topbar \.owner-public-link\s*\{[^}]*border:[^}]*border-radius:[^}]*white-space:\s*nowrap/su);
-  assert.match(css, /\.owner-footer-inner\s*\{[^}]*min-height:\s*110px[^}]*display:\s*flex/su);
+  assert.match(ownerShell, /import styles from "\.\/OwnerShell\.module\.css"/u);
+  assert.match(ownerShellCss, /\.wordmark, \.publicLink, \.footer a\s*\{[^}]*min-height:\s*var\(--control-min-height\)/su);
+  assert.match(ownerShellCss, /\.publicLink\s*\{[^}]*border:[^}]*border-radius:[^}]*white-space:\s*nowrap/su);
+  assert.match(ownerShellCss, /\.footerInner\s*\{[^}]*min-height:\s*110px[^}]*display:\s*flex/su);
   assert.match(css, /\.public-attribution a, \.technical-links a\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/su);
-  assert.match(css, /\.owner-nav\s*>\s*a\s*\{[^}]*min-height:\s*var\(--control-min-height\)/su);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-footer-inner\s*\{[^}]*flex-direction:\s*column/su);
-  assert.doesNotMatch(css, /\.owner-(?:topbar|nav|footer)[^{]*\{[^}]*position:\s*(?:fixed|sticky)/iu);
+  assert.match(ownerShellCss, /\.navigation\s*>\s*a\s*\{[^}]*min-height:\s*var\(--control-min-height\)/su);
+  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.footerInner\s*\{[^}]*flex-direction:\s*column/su);
+  assert.doesNotMatch(ownerShellCss, /position:\s*(?:fixed|sticky)/iu);
+  for (const globalSelector of [
+    "owner-shell", "owner-topbar", "owner-topbar-inner", "owner-brand", "owner-wordmark",
+    "owner-context-label", "owner-public-link", "owner-nav", "owner-frame",
+    "owner-access-frame", "owner-content", "owner-footer", "owner-footer-inner",
+    "owner-footer-label", "owner-signout", "owner-access-state", "owner-state-mark",
+  ]) {
+    assert.doesNotMatch(css, new RegExp(`\\.${globalSelector}\\b`));
+  }
+  assert.doesNotMatch(ownerShellCss, /(?:#[0-9a-f]{3,8}\b|--(?:paper|ink|accent)[\w-]*\s*:)/iu);
 });
 
 function assertOwnerFrame(html, { authorized, current }) {
   assert.equal((html.match(/<main\b/giu) ?? []).length, 1);
   assert.equal((html.match(/id="main-content"/giu) ?? []).length, 1);
   assert.equal((html.match(/<header\b[^>]*aria-label="Private owner workspace"/giu) ?? []).length, 1);
-  assert.equal((html.match(/<footer\b[^>]*class="owner-footer"/giu) ?? []).length, 1);
-  assert.match(html, /class="owner-context-label">Private owner workspace<\/span>/iu);
-  assert.match(html, /class="owner-public-link" href="\/">View Aitta<\/a>/iu);
+  assert.equal((html.match(/<footer\b/giu) ?? []).length, 1);
+  assert.match(html, />Private owner workspace<\/span>/iu);
+  assert.match(html, /href="\/">View Aitta<\/a>/iu);
   assert.match(html, /<nav class="technical-links" aria-label="Technical resources">/iu);
   assert.match(html, /href="\/privacy"[^>]*>Privacy<\/a>/iu);
   assert.match(html, /href="\/technical"[^>]*>Technical<\/a>/iu);
@@ -155,17 +173,17 @@ function assertOwnerFrame(html, { authorized, current }) {
   assert.match(html, /href="\/\.well-known\/aitta-social\.json"[^>]*>Manifest<\/a>/iu);
   assert.match(html, /href="\/api\/v1\/site"[^>]*>Profile<\/a>/iu);
   assert.match(html, /href="\/api\/v1\/entries"[^>]*>Updates<\/a>/iu);
-  assert.match(html, /class="owner-signout" href="\/signout-with-chatgpt\?return_to=%2F">Sign out<\/a>/iu);
+  assert.match(html, /href="\/signout-with-chatgpt\?return_to=%2F">Sign out<\/a>/iu);
 
-  const ownerNav = html.match(/<nav class="owner-nav"[\s\S]*?<\/nav>/iu)?.[0] ?? "";
+  const ownerNav = html.match(/<nav(?![^>]*aria-label="Technical resources")[\s\S]*?<\/nav>/iu)?.[0] ?? "";
   if (authorized) {
-    assert.match(html, /class="owner-wordmark" href="\/owner"[^>]*>Manage<\/a>/iu);
+    assert.match(html, /href="\/owner"[^>]*>Manage<\/a>/iu);
     assert.match(ownerNav, /href="\/owner"[^>]*>Home<\/a>[\s\S]*href="\/owner\/profile"[^>]*>Identity<\/a>[\s\S]*href="\/owner\/entries\/new"[^>]*>New update<\/a>[\s\S]*href="\/owner\/pages\/import"[^>]*>Pages<\/a>/iu);
     assert.equal((ownerNav.match(/<a\b/giu) ?? []).length, 4);
     assert.equal((ownerNav.match(/aria-current="page"/giu) ?? []).length, 1);
     assert.match(ownerNav, new RegExp(`aria-current="page"[^>]*>${current}<\\/a>`, "iu"));
   } else {
-    assert.match(html, /<span class="owner-wordmark">Manage<\/span>/iu);
+    assert.match(html, /<span[^>]*>Manage<\/span>/iu);
     assert.equal(ownerNav, "");
     assert.doesNotMatch(html, /href="\/owner\/profile"|href="\/owner\/entries\/new"|href="\/owner\/pages\/import"|class="owner-form"|class="owner-entry/iu);
   }

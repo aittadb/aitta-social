@@ -332,11 +332,14 @@ test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom
 });
 
 test("normal form-control boundaries preserve non-text contrast", async () => {
-  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const [css, ownerShellCss] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8"),
+  ]);
   const sharedControls = css.match(
     /\.field input, \.field textarea, \.field select\s*\{[^}]*border:\s*1px solid var\(--ink\)[^}]*background:\s*var\(--paper-raised\)[^}]*\}/is,
   );
-  const ownerCanvas = css.match(/\.owner-shell\s*\{[^}]*background:\s*var\(--paper\)/i);
+  const ownerCanvas = ownerShellCss.match(/\.shell\s*\{[^}]*background:\s*var\(--paper\)/i);
   assert.ok(sharedControls, "missing the shared input, textarea, and select colors");
   assert.ok(ownerCanvas, "missing the adjacent owner canvas color");
   const controlBorder = customProperty(css, "ink");

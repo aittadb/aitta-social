@@ -109,12 +109,11 @@ file. Keep this file strictly below 32,000 bytes and run
 
 ### Maintainable TypeScript and React design
 
-- Keep each file a small, precisely named, semantically cohesive unit with one
-  understandable responsibility. Split by domain behavior, not arbitrary line
-  count; do not fragment trivial logic merely to create files.
-- Organize code by feature or domain where practical. A feature should normally
-  own its component, types, tests, hooks, and service files, and use narrow,
-  stable composition points so independent work avoids shared hot spots. Do
+- Keep files small, named, and cohesive. Split by domain
+  behavior, not arbitrary line count; do not fragment trivial logic.
+- Organize code by feature or domain where practical. A feature should own its
+  component, types, tests, hooks, and service files through narrow, stable
+  composition points. Do
   not create catch-all `utils`, `helpers`, `types`, or `components` modules
   when a domain-specific name is possible, or combine unrelated work for
   convenience.
@@ -142,6 +141,9 @@ file. Keep this file strictly below 32,000 bytes and run
   Use a class only for real state or lifecycle. Put other effects behind narrow
   replaceable boundaries; test observable behavior, add defect regressions, and
   keep fixtures focused.
+- Keep component-specific CSS in adjacent modules. Global or theme files retain
+  color and typography tokens, resets, accessibility foundations, and
+  cross-component primitives.
 - Use precise domain names and concise TSDoc or comments for exported contracts
   and non-obvious intent, invariants, edge cases, or registration rules. Remove
   stale comments and examples rather than restating obvious syntax.
