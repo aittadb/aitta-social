@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { publicFooter } from "./helpers/public-footer-contract.mjs";
 
 import {
   FakeD1,
@@ -116,10 +117,6 @@ test("the public footer makes Technical real and uses concise resource labels", 
     }
   }
 });
-
-function publicFooter(html) {
-  return /<footer class="public-footer">[\s\S]*?<\/footer>/i.exec(html)?.[0] ?? "";
-}
 
 test("technical information reuses responsive information-page and interaction contracts", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");

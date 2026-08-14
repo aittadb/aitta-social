@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { publicFooter } from "./helpers/public-footer-contract.mjs";
+
 import {
   FakeD1,
   entryRow,
@@ -115,10 +117,6 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /Nothing becomes public from this form/i);
   });
 });
-
-function publicFooter(html) {
-  return /<footer class="public-footer">[\s\S]*?<\/footer>/i.exec(html)?.[0] ?? "";
-}
 
 test("Aitta and update language stays clear without obsolete Hub controls", async (t) => {
   await t.test("public and owner surfaces use Aitta and update language", async () => {

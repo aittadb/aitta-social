@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { publicFooter } from "./helpers/public-footer-contract.mjs";
+
 import {
   FakeD1,
   entryRow,
@@ -97,7 +99,3 @@ test("only a configured profile controls the public attribution", async () => {
   assert.match(publicFooter(staticHtml), /Powered by\s*<strong><a href="https:\/\/aitta\.social"/i);
   assert.doesNotMatch(staticHtml, /FRAME_STATIC_D1_CANARY/);
 });
-
-function publicFooter(html) {
-  return /<footer class="public-footer">[\s\S]*?<\/footer>/i.exec(html)?.[0] ?? "";
-}

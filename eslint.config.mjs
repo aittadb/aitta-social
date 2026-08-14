@@ -16,10 +16,16 @@ function declarationRestrictions(names, canonicalPath, canonicalName = undefined
       { selector: `Program > ExportNamedDeclaration > FunctionDeclaration[id.name='${name}']`, message },
       { selector: `Program > ExportDefaultDeclaration > FunctionDeclaration[id.name='${name}']`, message },
       { selector: `Program > ExportDefaultDeclaration > FunctionExpression[id.name='${name}']`, message },
+      { selector: `Program > ClassDeclaration[id.name='${name}']`, message },
+      { selector: `Program > ExportNamedDeclaration > ClassDeclaration[id.name='${name}']`, message },
+      { selector: `Program > ExportDefaultDeclaration > ClassDeclaration[id.name='${name}']`, message },
+      { selector: `Program > ExportDefaultDeclaration > ClassExpression[id.name='${name}']`, message },
       { selector: `Program > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='ArrowFunctionExpression']`, message },
       { selector: `Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='ArrowFunctionExpression']`, message },
       { selector: `Program > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='FunctionExpression']`, message },
       { selector: `Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='FunctionExpression']`, message },
+      { selector: `Program > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='ClassExpression']`, message },
+      { selector: `Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='ClassExpression']`, message },
     ];
   });
 }
@@ -32,6 +38,10 @@ const regularExpressionLiteralRestrictions = declarationRestrictions(
   ["escapeRegExp", "escapeRegex"],
   "tests/helpers/regular-expression-literal.mjs",
   "escapeRegExp",
+);
+const publicFooterRestrictions = declarationRestrictions(
+  ["publicFooter"],
+  "tests/helpers/public-footer-contract.mjs",
 );
 const acceptMediaRangeRestrictions = declarationRestrictions(
   ["parseAcceptMediaRanges", "parseMediaRange", "validParameterValue", "splitOutsideQuotes"],
@@ -78,6 +88,7 @@ const eslintConfig = defineConfig([
         "error",
         ...recordShapeRestrictions,
         ...regularExpressionLiteralRestrictions,
+        ...publicFooterRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },
@@ -88,6 +99,7 @@ const eslintConfig = defineConfig([
       "no-restricted-syntax": [
         "error",
         ...regularExpressionLiteralRestrictions,
+        ...publicFooterRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },
@@ -98,6 +110,7 @@ const eslintConfig = defineConfig([
       "no-restricted-syntax": [
         "error",
         ...recordShapeRestrictions,
+        ...publicFooterRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },
@@ -109,6 +122,18 @@ const eslintConfig = defineConfig([
         "error",
         ...recordShapeRestrictions,
         ...regularExpressionLiteralRestrictions,
+        ...publicFooterRestrictions,
+      ],
+    },
+  },
+  {
+    files: ["tests/helpers/public-footer-contract.mjs"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...recordShapeRestrictions,
+        ...regularExpressionLiteralRestrictions,
+        ...acceptMediaRangeRestrictions,
       ],
     },
   },

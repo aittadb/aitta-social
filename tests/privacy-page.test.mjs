@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { publicFooter } from "./helpers/public-footer-contract.mjs";
+
 import {
   FakeD1,
   fetchApp,
@@ -84,10 +86,6 @@ test("public footer always exposes Privacy and GitHub while hiding only powered-
     }
   }
 });
-
-function publicFooter(html) {
-  return /<footer class="public-footer">[\s\S]*?<\/footer>/i.exec(html)?.[0] ?? "";
-}
 
 test("privacy presentation keeps narrow, enlarged-text, touch, focus, and motion contracts", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
