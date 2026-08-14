@@ -1,9 +1,15 @@
 # AittaSocial public protocol 1.0
 
-An Aitta is your independently controlled AittaSocial application. It remains
-authoritative for its identity, content, configuration, and locally stored
-data, whether it is publicly reachable, private, or disconnected from the
-AittaSocial Hub.
+An Aitta is an independently controlled top-level place. The future Aitta
+Network connects Aittas and members only through accepted contracts. The
+AittaSocial Hub is a future trusted identity, discovery,
+relationship, authorization, and coordination service within those contracts;
+it is never content authority or shared content storage.
+This Aitta deployment currently runs one Aitta and remains authoritative for
+its identity, content, configuration, and locally stored data, whether it is
+publicly reachable, private, or disconnected from the AittaSocial Hub. A
+profile is that Aitta's optional outward identity presentation, not the Aitta
+itself.
 
 This document defines the public discovery and read-only JSON contract for one
 Aitta deployment. It is usable independently of the HTML interface and does
@@ -20,15 +26,21 @@ unshipped v2 compatibility lane. After release, an incompatible public change
 requires a new API or protocol version. Optional additive fields may be
 introduced within version 1 only when old clients can safely ignore them.
 
-Canonical human-facing guidance uses Aitta for the owner-controlled
-application, profile for its optional outward identity presentation, and
+Canonical human-facing guidance uses Aitta for the owner-controlled top-level
+place, profile for its optional outward identity presentation, and
 updates for published content. Protocol 1.0 deliberately retains the stable
 `accountType`, `entry`,
 `entries`, `/entries/*`, and `/api/v1/site` names. The terminology change does
 not alter a route, JSON field, schema, migration, or public contract.
 
+Protocol 1.0 `entry` resources are current publishing resources, not Aitta
+Network events or app roots. They carry no network-member, event-parent, app,
+or event-authority meaning. Those future concepts require their own exact,
+versioned Hub contract before this Aitta can adopt them; the direction is
+described separately in [strategy.md](strategy.md).
+
 Configured public HTML, permalink return paths, not-found guidance, and generic
-document metadata name the application as an Aitta. `Independent Aitta` is a
+document metadata name the Aitta. `Independent Aitta` is a
 bounded presentation fallback only when no usable configured display name is
 available; it is not profile data and is never serialized into protocol 1.0.
 Configured profile text remains unchanged owner content. Canonical, robots,
@@ -587,7 +599,10 @@ deployment credential, outbound probe, or registration behavior. The optional
 public `hubVerificationChallenge` described above is only manifest data for a
 control-of-deployment check. It never authorizes a request or causes this
 Aitta to contact Hub. Any future Hub operation requires a separately
-accepted versioned contract; public reads remain independent of Hub.
+accepted versioned contract; public reads remain independent of Hub. In
+particular, current Sites Sign in with ChatGPT provides only local
+sole-owner administration and is not Aitta Network sign-in or membership;
+future member identity requires the exact accepted Hub contract.
 
 ## HTML document metadata is not protocol 1.0
 

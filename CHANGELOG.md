@@ -1,5 +1,28 @@
 # Changelog
 
+- **TASK-197 — Made private update deletion a truthful JSON-first browser
+  API.** `DELETE /api/private/entries/{id}` remains bodyless and now performs
+  same-origin-before-owner authorization before bounded JSON `Accept`
+  negotiation. It returns an allowlisted, no-store `200` deletion
+  acknowledgement, structured no-store `401`/`403`/`404`/`406`/`500` errors,
+  and JSON `405 + Allow: PUT, DELETE` for unsupported methods. The owner client
+  sends `Accept: application/json`, refuses redirects, trusts only the exact
+  stable-ID acknowledgement, and navigates only to its fixed `/owner`
+  destination. Structured 4xx failures remain retryable; malformed, redirect,
+  network, and 5xx outcomes disable only Delete and expose saved-state recovery
+  without retrying. Public unknown parity now covers the current HTML and JSON
+  document, v1 detail, and v1 collection. Validation: integrated commit
+  `71f4b68`; feature candidate `ae0ec8eb919acc9cf01c366f36226b4da7c7756e`;
+  full validation passed 499/499, migration generation found no schema change,
+  production audit found zero vulnerabilities, and diff checks passed. An
+  independent Sol review found no P0/P1/P2 issue and independently passed 75
+  adjacent focused checks. Disposable browser evidence covers draft/published
+  cancellation and success, structured 422, 500/malformed/network recovery,
+  safe non-owner/missing-owner states, 320/390/1440, DPR-4, forced colors,
+  reduced motion, coarse touch, 44-pixel controls, visible focus, and a clean
+  console. No hosted Site, configuration, schema, migration, deployment, or
+  external state changed.
+
 - **TASK-183 — Restored reviewed engineering-policy publication.** An ordinary
   authenticated fast-forward advanced `origin/develop` from `17d2878` to
   `5612b6d8a1228230a2182bc8103a5c4b49e51716`. Read-back confirmed local

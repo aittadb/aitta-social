@@ -8,38 +8,40 @@ file. Keep this file strictly below 32,000 bytes and run
 
 ## Product invariants
 
-- An Aitta is your independently controlled AittaSocial application. It remains
-  authoritative for its identity, content, configuration, and locally stored
-  data, whether it is publicly reachable, private, or disconnected from the
-  AittaSocial Hub.
-- Use **Aitta** and plural **Aittas** as branded nouns. An **Aitta deployment**
-  is a particular running installation of an Aitta; use deployment alone for a
-  packaging, release, or hosting operation. A **profile** is an Aitta's optional
-  outward identity presentation. A **Hub connection** is an owner-authorized
-  relationship between an Aitta and the **AittaSocial Hub**, the network
-  authority and coordination service. Use **AittaSocial app** when a first-time
-  reader needs an immediate generic explanation.
-- One Aitta deployment runs one independently controlled Aitta.
+- **AittaSocial** is the platform/product family. An **Aitta** (plural
+  **Aittas**) is an independently controlled top-level place, not an app,
+  profile, feed, or conversation.
+- An **Aitta deployment** is a running installation; one currently runs one
+  Aitta. A **profile** is its optional outward identity presentation. **Aitta
+  Network** is the future network of Aittas and members; **AittaSocial Hub** is
+  its trusted identity, discovery, relationship, authorization, and
+  coordination service within accepted contracts.
+- A **member** is a future signed-in participant who need not own an Aitta. An
+  **event** is a universal typed message, action, response, transition, or app
+  root. An **app implementation** is trusted versioned software installed in an
+  Aitta; an **app instance** is its concrete event-rooted instance; an **app
+  space** is the root plus authorized descendants, state, people, and nested
+  apps. Feeds/threads are projections, not authority.
+- This repository is **Stage 0**, the identity/publishing POC. Membership,
+  network relationships, recursive events, app spaces, and trusted apps are
+  future stages with no current implementation authority.
 - An Aitta may represent a person, company, project, community, publication,
   AI agent, or another entity. Keep the core identity-neutral.
 - The Aitta owns its public identity, profile, updates, drafts, canonical
   URL, D1 data, design, runtime configuration, and local behavior. Preserve
   `entry` and related names where they are stable internal or protocol terms.
-- Ordinary Identity setup and public HTML are category-neutral. A new profile
-  is inserted with the server-owned protocol 1.0 compatibility value `other`;
-  profile updates must not accept or modify `accountType`. Preserve a legacy
-  stored value and expose it only through the explicit manifest and
-  `/api/v1/site` allowlists. Never use this field for presentation,
-  authorization, Hub trust, capability, or network identity.
-- Public profile and published-update reads operate without Hub. Any future Hub
-  integration is optional and failure-isolated.
-- AittaSocial Hub treats every Aitta deployment as an untrusted external
-  website. Treat every remote Aitta as untrusted. Local authentication claims
-  are never trusted network authentication.
-- Sign in with ChatGPT here enables only possible sole-owner administration of
-  this Aitta. It is not AittaSocial network sign-in or membership.
-- Do not compare or market AittaSocial by naming another social, publishing,
-  blogging, or website product.
+- Identity setup and public HTML are category-neutral. Insert new profiles with
+  server-owned protocol 1.0 `accountType: other`; updates cannot modify it.
+  Preserve legacy values and expose them only through manifest and `/api/v1/site`
+  allowlists, never for presentation, authorization, trust, or capability.
+- Public reads operate without Hub; integration remains optional and
+  failure-isolated. The Hub distrusts deployments; Aittas distrust all remote
+  content and claims.
+- Stage 0 Sign in with ChatGPT enables only possible Sites sole-owner
+  administration. Future member identity is separate from Sites identity,
+  Aitta ownership, and deployment administration; joining must not silently
+  create an Aitta.
+- Market Aitta's value without naming competing products.
 
 ## Repository and scope boundaries
 
@@ -57,22 +59,22 @@ file. Keep this file strictly below 32,000 bytes and run
   storage, shared Aitta runtime libraries, or external infrastructure.
 - Keep R2 null until an accepted same-origin asset task and owner-approved
   hosting change require it.
-- The minimum future network direction is secure optional registration,
-  verified Aitta discovery, explicit one-way Follow and Unfollow, and a
-  private bounded followed-update reader. It is roadmap direction, not active
-  implementation authority; promote only the next contract-backed vertical
-  increment to `PLAN.md`. Never extend it into automatic or reciprocal
-  relationships, popularity counts, public graphs, recommendations, or shared
-  content storage.
-- Do not implement multiple Aittas in one Aitta deployment, extra administrators,
-  roles, teams, invitations, resharing, notifications, advertising, payments,
-  ActivityPub, background federation, plugins, general themes, media uploads,
-  or general OAuth/OIDC. Only an accepted bounded normalized same-origin raster
-  slice may add media upload.
-- Comments, reactions, messages, revisions, retractions, and other future event
-  semantics remain unimplemented unless an accepted versioned event-type
-  vertical slice defines and implements them with its tests and documentation.
-  Never infer a child's meaning from its parent relation alone.
+- Stage 1 direction is membership without Aitta ownership, secure optional
+  registration, verified discovery, direct invitations, one-way Follow/
+  Unfollow, private bounded **Your Network**, and report/block/revocation.
+  It authorizes nothing: each slice needs an accepted contract and `PLAN.md`
+  task. Never infer automatic/reciprocal relationships, popularity, public
+  graphs, recommendations, or shared content storage.
+- Do not implement unaccepted Stage 1 or Stage 2+ work: recursive events/apps/
+  spaces, messaging, App Ideas, declarative creation, adapters, multiple Aittas
+  per deployment, extra administrators, roles, teams, invitations, resharing,
+  notifications, advertising, payments, ActivityPub, background federation,
+  plugins, general code loading, themes, media, or OAuth/OIDC. Only an accepted
+  bounded same-origin raster slice may add media.
+- Future event/app semantics remain unimplemented unless an accepted versioned
+  vertical slice defines them with tests and documentation. Never guess a
+  contract, reinterpret `/api/v1` entries as events, or infer a child's meaning
+  or authorization from its parent relation.
 - Do not add placeholders for excluded or backlog capabilities. Backlog work
   must be accepted and promoted to `PLAN.md` before implementation.
 
@@ -187,43 +189,42 @@ file. Keep this file strictly below 32,000 bytes and run
 
 ## Public contracts and Hub
 
-- Future Aitta Network work uses a separately versioned immutable event
-  contract owned by the AittaSocial Hub repository and adopted here only
-  through an accepted conformance task. An Aitta is authoritative for events it
-  creates; threads and feeds are derived projections and may span Aittas.
-  Preserve `/api/v1` entries and do not automatically reinterpret or project
-  them as events.
-  AittaSocial Hub may support identity, authorization, discovery, and routing
-  but must not become the authoritative participant-content store. A parent
-  reference grants neither access nor delivery. At a remote boundary, an
-  authoring-Aitta reference is an untrusted assertion until a separately
-  accepted authenticity contract verifies it; identifiers, timestamps, and
-  namespaces alone never prove authorship. Treat every remote event, type,
-  parent, and payload as untrusted and bounded.
+- Stage 2+ requires Hub-owned, separately versioned immutable typed event/app
+  contracts and an accepted conformance task here. Preserve `/api/v1` entries;
+  feeds/threads are projections, and entries are never presumed events.
+- Parentage is structure, not discovery, access, delivery, membership, or
+  notification authority; type supplies meaning. Contracts must identify actor,
+  accepting Aitta, root/child/canonical-state authority, every local,
+  participant, cached, derived, or synchronized state, conflicts, and
+  revocation. Root authority gives no descendant authorship.
+- Events carry bounded typed data/state, never executable code, arbitrary HTML,
+  remote scripts, or packages. Only reviewed versioned releases install trusted
+  app implementations. Unknown types fail safely with bounded static/fallback
+  representation and never fetch the sender's implementation.
+- The Hub may authenticate members and coordinate identity, discovery,
+  relationships, authorization, and routing only by accepted contract; it is
+  never content authority/storage. Remote Aitta, actor, authorship, type,
+  parent, and payload claims remain untrusted until exact evidence verifies them.
 - Signed-out and non-owner visitors read only explicit public projections: the
   profile, published entries, and implemented published custom pages. Draft and
   unknown resources are indistinguishable in every public surface.
-- `/api/v1` is the sole versioned integration namespace during this pre-release.
-  An accepted task may reshape an unshipped v1 contract with its tests and
-  protocol documentation; do not add `/api/v2`. After release, require an
-  explicit compatibility decision. Keep discovery at `/.well-known/aitta-social.json`.
+- `/api/v1` is the sole pre-release integration namespace. An accepted task may
+  reshape unshipped v1 with tests/docs; do not add `/api/v2`. Post-release
+  changes require a compatibility decision. Discovery stays at
+  `/.well-known/aitta-social.json`.
 - Preserve the required protocol 1.0 `accountType` field and its documented
   legacy values until a deliberate versioned contract change. Hiding the
   category from ordinary HTML does not authorize dropping, renaming, or
   reinterpreting the public field.
 - Build every public response from an explicit field allowlist. Never serialize
   a D1 row, environment object, authenticated user, or private domain object.
-- Treat document metadata as another explicit public projection. Root metadata
-  may use only the bounded public display name and short description; permalink
-  metadata may additionally use a published entry's bounded public text and
-  timestamps, and an implemented published custom page may use only its bounded
-  normalized title, description, path, and reviewed asset. Construct canonical
-  and sharing URLs from the normalized configured canonical URL, never `Host`
-  or forwarding headers. Missing valid public profile/canonical setup uses
-  neutral `noindex, nofollow` metadata with no canonical URL or image reference.
-  Keep handler-produced HTML dynamic with `no-store` and `must-revalidate` so a
-  publication change or private value is not frozen into a build or cross-
-  request application cache; do not alter JSON/static-asset caching incidentally.
+- Metadata is an allowlisted public projection: root uses only bounded display
+  name/description; permalinks may add published text/timestamps; custom pages
+  use bounded normalized title/description/path/reviewed asset. Build canonical
+  and sharing URLs only from configured canonical URL, never request headers.
+  Invalid profile/canonical setup gets neutral `noindex, nofollow` without URL
+  or image. Handler HTML stays dynamic with `no-store`, `must-revalidate`; do
+  not incidentally change JSON/static-asset caching.
 - Preserve stable entry identifiers, canonical configured URLs, correct
   content/statuses, deterministic pagination, and resource links. A pre-release
   v1 task may replace an unshipped envelope only through a documented, tested
@@ -248,7 +249,7 @@ file. Keep this file strictly below 32,000 bytes and run
   names only where stable internal or public protocol 1.0 compatibility
   requires them.
 - A public owner-management entry must identify local sole-owner
-  administration and must not imply AittaSocial network identity or membership.
+  administration and must not imply Aitta Network identity or membership.
 - Keep public and owner surfaces clearly distinct, responsive, accessible,
   keyboard- and touch-friendly, with excellent typography and useful empty and
   error states.

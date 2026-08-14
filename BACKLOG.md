@@ -1,9 +1,13 @@
 # AittaSocial backlog
 
-This file contains unscheduled possibilities. Backlog items are not commitments
-and must not introduce placeholder tables, routes, interfaces, or empty
-abstractions. Stable `BACKLOG-NNN` identifiers are never renumbered or reused;
-accepted work must be promoted to `PLAN.md` before implementation.
+This file contains specific unscheduled possibilities. Backlog items are not
+commitments and must not introduce placeholder tables, routes, interfaces, or
+empty abstractions. Stable `BACKLOG-NNN` identifiers are never renumbered or
+reused; accepted work must be promoted to `PLAN.md` before implementation.
+
+The Aitta Network's high-level Stages 2–7 belong in `ROADMAP.md`, not here.
+This backlog records only bounded follow-up possibilities once a real need and
+an accepted contract make their scope concrete.
 
 ## Unscheduled possibilities
 
@@ -52,6 +56,13 @@ accepted work must be promoted to `PLAN.md` before implementation.
 - [ ] **BACKLOG-016 — Hosted revoke and disconnect proof.** Deferred from
   `TASK-122`. The retained local contract and implementation work may later be
   followed by a separately approved disposable hosted verification.
+- [ ] **BACKLOG-017 — Deployment-local automated draft creation.** Deferred
+  from `TASK-191`. A future accepted task may consider one narrowly scoped
+  machine-created private draft only after a demonstrated Aitta Network or
+  founding-group need and an explicit security contract. It must remain
+  distinct from a Member, ChatGPT, Codex, and the local owner; it does not
+  authorize general automation, arbitrary code, Hub credentials, or broader
+  administration.
 
 The owner deferred these items on 2026-08-10 because they are not required for
 the next immediately usable Aitta-first release. The smaller core network
@@ -77,3 +88,10 @@ On 2026-08-10 their still-unfinished core network direction returned to
 provenance. `PLAN.md` is authoritative only for the current accepted increment,
 `ROADMAP.md` for future direction, and `CHANGELOG.md` for completed work; this
 file makes no current-capability or delivery claim.
+
+On 2026-08-14, the refined Aitta Network direction retained these specific
+possibilities as unscheduled. Member participation, invitations, following,
+Your Network, reporting, blocking, and revocation remain Stage 1 direction
+rather than an implementation claim until a versioned contract is accepted;
+recursive spaces, conversation, App Ideas, trusted app-development, declarative
+creation, and external adapters remain later roadmap direction.

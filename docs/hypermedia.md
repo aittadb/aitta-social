@@ -5,6 +5,14 @@ does not claim that every described resource exists yet. The application
 remains the first unpublished AittaSocial release, with one versioned
 integration API, `/api/v1`; it carries no `/api/v2` compatibility lane.
 
+An Aitta is an independently controlled top-level place, and one deployment
+currently runs one Aitta. Its profile is an optional outward identity
+presentation. The current protocol 1.0 `entry` resources are publishing
+resources, not Aitta Network events or app roots: they define no member,
+parentage, app, or event-authority model. The future direction in
+[strategy.md](strategy.md) requires a separately accepted exact Hub contract
+before any event or member concept can be adopted here.
+
 The earlier unimplemented v2 proposal is retained only as a dated supersession
 record in [api-v2.md](api-v2.md). TASK-189's acceptance record and CHANGELOG
 entry remain historical evidence and are not rewritten as current capability.

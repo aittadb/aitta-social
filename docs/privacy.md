@@ -1,8 +1,10 @@
 # Privacy and data handling
 
-One Aitta controls and stores its own data in its Aitta deployment's ChatGPT
-Sites D1 database. It does not send Identity or update content to a shared
-content store and does not require another database or external infrastructure.
+One independently controlled top-level Aitta controls and stores its own data
+in its Aitta deployment's ChatGPT Sites D1 database. One deployment currently
+runs one Aitta; a profile is only its optional outward identity presentation.
+It does not send Identity or update content to a shared content store and does
+not require another database or external infrastructure.
 
 This document describes the POC's application-level behavior. The Aitta owner
 remains responsible for the content they publish, their public privacy
@@ -59,7 +61,12 @@ The ChatGPT Sites dispatcher may provide an authenticated user identifier,
 email, and optional name to server code. The POC needs only the authenticated
 email to decide whether the current request belongs to the configured local
 owner. It does not store that identity in D1, publish it, use it as the public
-Identity, or present it as AittaSocial network authentication or membership.
+Identity, or present it as Aitta Network authentication or membership.
+
+Current Sites Sign in with ChatGPT is therefore only local sole-owner
+administration. Future member identity or Aitta Network membership requires an
+exact accepted Hub contract and is not a current data flow; see
+[strategy.md](strategy.md) for the future direction.
 
 The POC does not implement its own OAuth/OIDC provider, identity database,
 passwords, or authentication cookies. Dispatch-owned sign-in behavior and
@@ -205,7 +212,9 @@ That challenge is intentionally public, proves only control of this Aitta
 deployment at verification time, and is not personal identity, authentication,
 a network session, or a trusted connection. Hub's own future registration,
 directory, credentials, and sessions require a separately accepted contract and
-are not this Aitta's current data handling.
+are not this Aitta's current data handling. Current protocol 1.0 entries remain
+publishing resources rather than Network events or app roots; no event or
+member data is stored or sent by this POC.
 
 ## Retention and control
 

@@ -5,11 +5,12 @@ when there is one, give the Aitta its own D1 database, configure its sole
 owner through protected runtime settings, and verify a private checkpoint
 before considering public access.
 
-An Aitta is your independently controlled AittaSocial application. It remains
-authoritative for its identity, content, configuration, and locally stored
-data, whether it is publicly reachable, private, or disconnected from the
-AittaSocial Hub. A profile is an Aitta's optional outward identity presentation.
-The current POC has no Hub connection, and public reads work without one.
+An Aitta is an independently controlled top-level place. One Aitta deployment
+currently runs one Aitta, which remains authoritative for its identity, content,
+configuration, and locally stored data whether it is publicly reachable,
+private, or disconnected from the AittaSocial Hub. A profile is an Aitta's
+optional outward identity presentation. The current POC has no Hub connection,
+and public reads work without one.
 
 When the Aitta-owned D1 profile read succeeds and no profile exists, the public
 template clearly identifies the Aitta as unconfigured and leads with the same
@@ -140,7 +141,8 @@ checking that its key is configured.
 
 1. Open the private Site and choose the local owner-management entry to use Sign
    in with ChatGPT. This sign-in administers only this Aitta; it does not
-   join or sign in to the AittaSocial network.
+   join or sign in to the Aitta Network. Future member identity requires
+   an exact accepted Hub contract; it is not a deployment setup step.
 2. Confirm that the authenticated email matches the protected owner setting by
    reaching the owner workspace, not by displaying either email.
 3. Open `/owner/profile` and configure Identity: display name, short
@@ -326,6 +328,10 @@ The Aitta remains fully readable without this setting. The POC has no Hub
 connection, Hub registration, private Hub control, configured Hub destination,
 deployment credential, or outbound probe. Do not invent any of those behaviors
 without a separately accepted versioned contract.
+
+Current protocol 1.0 entries are publishing resources, not Aitta Network events
+or app roots. The future network direction is recorded in
+[strategy.md](strategy.md); it does not authorize a deployment change here.
 
 Leave `AITTA_SOCIAL_HUB_CHALLENGE` empty unless a separately accepted
 verification process supplies an opaque current challenge. If one is supplied,

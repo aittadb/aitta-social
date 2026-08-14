@@ -6,12 +6,16 @@ visitor to this Site; only this Aitta deployment decides whether that visitor is
 its one local owner. Neither the Aitta nor the AittaSocial Hub may reinterpret
 that decision as trusted network authentication or network membership.
 
+An Aitta is an independently controlled top-level place. This deployment
+currently runs one Aitta; its profile is only that Aitta's optional outward
+identity presentation.
+
 ## Boundaries
 
 | Boundary | Trusted for | Never trusted for |
 | --- | --- | --- |
 | Anonymous or signed-in browser | Rendering public output; submitting validated owner forms | Identity headers, owner claims, destination URLs, write authorization, secrets |
-| Verified ChatGPT Sites ingress | Forwarding the documented signed-in visitor context and operating sign-in routes, but only after that origin's ingress behavior is established | Application-level cryptographic proof, local owner status, machine authentication, or AittaSocial network identity |
+| Verified ChatGPT Sites ingress | Forwarding the documented signed-in visitor context and operating sign-in routes, but only after that origin's ingress behavior is established | Application-level cryptographic proof, local owner status, machine authentication, or Aitta Network identity |
 | AittaSocial server code | Validating inputs, authorizing each operation, projecting public data, using protected settings | Assuming an earlier page check covers a later write |
 | Aitta-owned D1 | Persisting validated profile, entry, accepted page, and minimal local configuration records | Producing a safe public response without an explicit projection |
 | Protected runtime settings | Supplying local owner, canonical URL, and optional public verification challenge to server code | Browser-visible configuration beyond documented public effects or publishable content |
@@ -22,6 +26,28 @@ ChatGPT Sites access policy is a hosting boundary. Keeping a Site private during
 setup is important, but private hosting does not replace application-level
 authorization. Every browser-owner write still performs the same owner and
 same-origin checks that will be used after a public release.
+
+## Future network doctrine (not current implementation)
+
+The future Aitta Network direction in [strategy.md](strategy.md) does not add a
+current Hub operation, credential, endpoint, schema, storage record, or UI.
+Any later integration must adopt an exact accepted Hub contract and keep trust
+scoped to the particular verified operation, evidence, audience, and authority
+that contract defines. A Hub assertion or another Aitta deployment's claim is
+not a general trust grant.
+
+At every remote boundary, data from a Hub, another Aitta, an actor, or an event
+is untrusted and bounded until the accepted contract validates it. A parent
+relationship is structure only; it does not grant discovery, read, write,
+delivery, membership, or other authorization. A future typed event contract
+must separately identify the actor, the accepting Aitta, and the authority for
+the relevant state rather than inferring any of them from a parent or root.
+
+Only typed data may cross that boundary. Executable code, arbitrary HTML,
+scripts, remote implementation loading, and automatic package installation are
+out of scope. Unsupported or unknown types must take an explicit safe fallback
+that exposes only bounded, validated information and never executes or fetches
+sender-supplied implementation code.
 
 ## Sites identity provenance
 
@@ -146,7 +172,7 @@ Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and `/callback`.
 The Aitta must not implement those routes or a general OAuth/OIDC client.
 Sign-in return locations are same-origin relative paths. Human-facing entry to
 this flow must identify sole-owner Aitta administration and must not imply
-AittaSocial network sign-in or membership.
+Aitta Network sign-in or membership.
 
 ## Machine clients
 

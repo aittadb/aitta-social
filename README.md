@@ -13,23 +13,39 @@ Ask before any later source change or deployment, and ask separately before
 public access and before a custom domain.
 ```
 
-An Aitta is your independently controlled AittaSocial application. It remains
-authoritative for its identity, content, configuration, and locally stored
-data, whether it is publicly reachable, private, or disconnected from the
-AittaSocial Hub.
+AittaSocial is the platform and product family for the Aitta Network: a
+network of adaptable social places. An **Aitta** is one independently
+controlled top-level place:
+it remains authoritative for its identity, content, configuration, and locally
+stored data whether it is public, private, or disconnected from the
+AittaSocial Hub. Today, the proof of concept implements that idea as an
+independently controlled Aitta deployment on ChatGPT Sites. One Aitta
+deployment currently runs one Aitta for a person, company, project, community,
+publication, AI agent, or another kind of entity.
 
 An **Aitta deployment** is a particular running installation of an Aitta. A
 **profile** is an Aitta's optional outward identity presentation. A **Hub
-connection** is the owner-authorized relationship between an Aitta and the
-**AittaSocial Hub**, the network authority and coordination service. The
-current POC has no Hub connection. Public profile and published-update reads
-remain Hub-independent.
+connection** is an owner-authorized relationship between an Aitta and the
+**AittaSocial Hub**, a future trusted identity, discovery, relationship,
+authorization, and coordination service for Aitta Network operations within
+accepted contracts. The Hub is not content authority or shared content
+storage.
+The current POC has no Hub connection; public profile and published-update
+reads remain Hub-independent. Use **Aitta** and plural **Aittas** as branded
+nouns; reserve **app** for a trusted, versioned app implementation installed
+in an Aitta.
 
-AittaSocial is independently hosted social software for ChatGPT Sites. One
-Aitta deployment runs one independently controlled Aitta for a person, company,
-project, community, publication, AI agent, or another kind of entity. Use
-**Aitta** and plural **Aittas** as branded nouns; **AittaSocial app** is the
-generic explanation for a first-time reader.
+The future **Aitta Network** is the network of Aittas and members, coordinated
+only through accepted contracts. A member may participate without owning an
+Aitta; membership, ownership, deployment administration, and content authority
+remain separate.
+
+The current POC supports local identity, publishing, and sole-owner
+administration. It does not yet provide network membership, member
+participation without Aitta ownership, invitations, following, or connected
+spaces. Those are future Stage 1 direction, not shipped capability. See the
+[living strategy](docs/strategy.md) for the intended direction and its current
+boundaries.
 
 Project website: [aitta.social](https://aitta.social) · Maintained source:
 [GitHub](https://github.com/aittadb/aitta-social)
@@ -52,11 +68,12 @@ The first version is intentionally small:
 - `/.well-known/aitta-social.json` discovery;
 - read-only public JSON endpoints under `/api/v1`.
 
-The completed Aitta-first POC does not yet include a Hub connection, Hub
+The current Aitta-first POC does not yet include a Hub connection, Hub
 registration, verified discovery, Follow and Unfollow, or a private
 followed-update reader.
-Those are future roadmap increments; the active plan first finishes and checks
-the immediately usable Aitta-first release. Multiple Aittas in one
+Those remain future, contract-dependent Stage 1 direction; the active plan is
+the safety and contract-refinement queue and does not claim those capabilities.
+Multiple Aittas in one
 Aitta deployment, additional administrators, automatic or reciprocal
 relationships, popularity counts, public graphs, recommendations, comments,
 reactions, resharing, messages, notifications, advertising, payments,
@@ -67,11 +84,15 @@ unconfigured.
 ## Owner authorization
 
 ChatGPT sign-in identifies a visitor to this Aitta deployment; it neither joins
-the AittaSocial network nor grants administrative access by itself. Server-side
+the Aitta Network nor grants administrative access by itself. Server-side
 code authorizes writes only when
 the normalized authenticated ChatGPT email matches the protected
 `AITTA_SOCIAL_OWNER_EMAIL` runtime setting. Version one supports exactly one
 owner of this Aitta.
+
+Any future member Sign in with ChatGPT flow is contract-dependent and separate
+from the current Sites sole-owner sign-in. It would not provide independent
+access to ChatGPT conversations, memory, files, tokens, or billing data.
 
 If that setting is absent, every write is disabled and the owner-only workspace
 shows safe setup guidance. The configured owner email is not stored in content,
@@ -226,6 +247,7 @@ private-first setup flow.
 - [In-place upgrade preservation](docs/upgrade.md)
 - [Clean-source reproducibility](docs/reproducibility.md)
 - [Hosted test checkpoint evidence](docs/checkpoint.md)
+- [Living strategy](docs/strategy.md)
 - [Product roadmap](ROADMAP.md)
 - [Implementation plan](PLAN.md)
 - [Post-POC backlog](BACKLOG.md)

@@ -1,9 +1,11 @@
 # Public profile presentation
 
-The default is an Aitta's profile rather than an editorial page. Every human
-public route—configured and unconfigured home, published permalink, Privacy,
-Technical, temporary storage-unavailable, and not-found—uses one compact
-product frame:
+The default is an Aitta's profile rather than an editorial page. An Aitta is an
+independently controlled top-level place, of which one deployment currently
+runs one; its profile is only its optional outward identity presentation. Every
+human public route—configured and unconfigured home, published permalink,
+Privacy, Technical, temporary storage-unavailable, and not-found—uses one
+compact product frame:
 
 1. a 60-pixel single-line header containing the bounded profile display name
    and one
@@ -121,7 +123,7 @@ published-only visibility behavior.
 Historical published rows can exist before a profile is configured. Their
 source uses the bounded compatibility fallback `Independent Aitta` without
 pretending that a profile exists. The same fallback is used only where a
-generic public or entry title needs an application name and no usable
+generic public or entry title needs an Aitta name and no usable
 configured display name exists. Configured display names, descriptions, and
 About content remain authoritative owner content and are never rewritten.
 Public presentation never invents profile data from the setup product name,
@@ -138,13 +140,16 @@ renders the fixed temporary-unavailable state rather than setup guidance.
 
 An Aitta with a configured profile remains intentional with no published
 updates. Its Identity and About content stand on their own before the compact
-explicit empty state, which names the application as this Aitta. Configured
+explicit empty state, which names this Aitta. Configured
 public navigation and sole-owner management labels likewise use Aitta, while
 `profile` remains the term for outward presentation. One update uses the same
 continuous container as many updates, and all
 four supported kinds keep the same source-first structure. Drafts never affect
 public hierarchy, counts, links, or wording.
 Optional Hub availability never selects or modifies any public state.
+Current protocol 1.0 updates are publishing resources, not Aitta Network events
+or app roots. The future network direction in [strategy.md](strategy.md) adds
+no present route, member surface, identity claim, or presentation behavior.
 
 ## Accepted owner-managed website composition
 
@@ -259,7 +264,9 @@ contains exactly four destinations: Home, Identity, New update, and Pages. The
 current destination uses native `aria-current="page"` semantics. `Sign out`
 stays in the private-workspace footer rather than becoming a route destination
 or menu item. Authenticated ChatGPT display data is not accepted or rendered by
-the shell.
+the shell. Current Sites Sign in with ChatGPT remains local sole-owner
+administration, not Aitta Network sign-in or membership; future member identity
+requires an exact accepted Hub contract.
 
 One pure fixed resource navigation supplies Privacy, Technical, the official
 GitHub source, Manifest, Profile, and Updates to both public and private

@@ -54,7 +54,7 @@ test("deployment prompt preserves every setup and approval boundary", () => {
 test("README gives the full approved first-use explanation and profile boundary", () => {
   assert.match(
     readme,
-    /An Aitta is your independently controlled AittaSocial application\. It remains\s+authoritative for its identity, content, configuration, and locally stored\s+data, whether it is publicly reachable, private, or disconnected from the\s+AittaSocial Hub\./,
+    /An \*\*Aitta\*\* is one independently\s+controlled top-level place:\s+it remains authoritative for its identity, content, configuration, and locally\s+stored data whether it is public, private, or disconnected from the\s+AittaSocial Hub\. Today, the proof of concept implements that idea as an\s+independently controlled Aitta deployment on ChatGPT Sites\. One Aitta\s+deployment currently runs one Aitta/i,
   );
   assert.match(readme, /profile\*\* is an Aitta's optional outward identity presentation/i);
   assert.match(readme, /current POC has no Hub connection/i);
