@@ -46,17 +46,29 @@ test("technical information is D1-independent, neutral, and points to the three 
   assert.match(html, /<article class="public-information-page" aria-labelledby="technical-title">/i);
   assert.match(html, /<h1 id="technical-title">Public resources for this Aitta<\/h1>/i);
 
-  for (const [heading, href, label] of [
-    ["Manifest", "/.well-known/aitta-social.json", "Open the discovery manifest"],
-    ["Profile", "/api/v1/site", "Open the public profile resource"],
-    ["Updates", "/api/v1/entries", "Open the published updates resource"],
+  const sectionMatches = [...html.matchAll(/<section class="public-information-section" aria-labelledby="([^"]+)">[\s\S]*?<\/section>/gi)];
+  assert.deepEqual(
+    sectionMatches.map((match) => match[1]),
+    ["technical-manifest", "technical-profile", "technical-updates", "technical-usage"],
+  );
+
+  for (const [index, id, heading, paragraph, href, label] of [
+    [0, "technical-manifest", "Manifest", /The discovery manifest identifies the protocol version, this Aitta(?:&apos;|&#x27;|')s canonical address, and the public profile and updates endpoints when the Aitta is configured\./, "/.well-known/aitta-social.json", "Open the discovery manifest"],
+    [1, "technical-profile", "Profile", /The profile resource contains the configured outward identity and restrained presentation choices through an explicit public field list\./, "/api/v1/site", "Open the public profile resource"],
+    [2, "technical-updates", "Updates", /The updates resource lists published updates in deterministic newest-first pages\. Drafts and unpublished updates are never part of the public collection\./, "/api/v1/entries", "Open the published updates resource"],
   ]) {
-    assert.match(html, new RegExp(`<h2[^>]*>${heading}</h2>`, "i"));
+    const section = sectionMatches[index][0];
+    assert.match(section, new RegExp(`<section class="public-information-section" aria-labelledby="${id}">\\s*<h2 id="${id}">${heading}</h2>`, "i"));
+    assert.match(section, new RegExp(`<p>\\s*${paragraph.source}\\s*</p>`, "i"));
     assert.match(
-      html,
-      new RegExp(`href="${escapeRegExp(href)}"[^>]*>\\s*${label}\\s*</a>`, "i"),
+      section,
+      new RegExp(`<a class="public-information-link" href="${escapeRegExp(href)}">\\s*${label}\\s*</a>`, "i"),
     );
   }
+  const usageSection = sectionMatches[3][0];
+  assert.match(usageSection, /<h2 id="technical-usage">Using the resources<\/h2>/i);
+  assert.match(usageSection, /<p>\s*These routes currently return JSON with the protocol 1\.0 response shapes and cache behavior documented by this application\. Resource links use the configured canonical Aitta URL, not the incoming request host\.\s*<\/p>/i);
+  assert.doesNotMatch(usageSection, /href=/i);
   assert.match(
     html,
     /expose public protocol,\s*configured profile, and published-update information; owner details\s*and drafts stay out/i,
@@ -64,6 +76,17 @@ test("technical information is D1-independent, neutral, and points to the three 
   assert.match(html, /configured canonical Aitta URL, not the incoming request host/i);
   assert.doesNotMatch(html, /<pre\b|\{\s*&quot;protocol&quot;|private owner workspace|sign out/i);
   for (const canary of privateCanaries) assert.equal(html.includes(canary), false);
+});
+
+test("technical page composes all information sections through the focused child", async () => {
+  const source = await readFile(new URL("../app/technical/page.tsx", import.meta.url), "utf8");
+  const sectionSource = await readFile(new URL("../app/technical/TechnicalInformationSection.tsx", import.meta.url), "utf8");
+
+  assert.match(source, /import \{ TechnicalInformationSection \} from "\.\/TechnicalInformationSection"/);
+  assert.equal((source.match(/<TechnicalInformationSection\b/g) ?? []).length, 4);
+  assert.equal((sectionSource.match(/<section className="public-information-section" aria-labelledby=\{headingId\}>/g) ?? []).length, 1);
+  assert.match(sectionSource, /<h2 id=\{headingId\}>\{title\}<\/h2>/);
+  assert.doesNotMatch(source, /<section className="public-information-section"/);
 });
 
 test("the public footer makes Technical real and uses concise resource labels", async () => {

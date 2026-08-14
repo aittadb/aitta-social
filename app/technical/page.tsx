@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import {
   PublicPageFrame,
 } from "@/app/_components/PublicPresenceFrame";
+import { TechnicalInformationSection } from "./TechnicalInformationSection";
 
 export const metadata: Metadata = {
   title: { absolute: "Technical · Independent Aitta" },
@@ -29,8 +30,7 @@ export default function TechnicalPage() {
           </p>
         </header>
 
-        <section className="public-information-section" aria-labelledby="technical-manifest">
-          <h2 id="technical-manifest">Manifest</h2>
+        <TechnicalInformationSection headingId="technical-manifest" title="Manifest">
           <p>
             The discovery manifest identifies the protocol version, this
             Aitta&apos;s canonical address, and the public profile and updates
@@ -41,10 +41,9 @@ export default function TechnicalPage() {
               Open the discovery manifest
             </a>
           </p>
-        </section>
+        </TechnicalInformationSection>
 
-        <section className="public-information-section" aria-labelledby="technical-profile">
-          <h2 id="technical-profile">Profile</h2>
+        <TechnicalInformationSection headingId="technical-profile" title="Profile">
           <p>
             The profile resource contains the configured outward identity and
             restrained presentation choices through an explicit public field
@@ -55,10 +54,9 @@ export default function TechnicalPage() {
               Open the public profile resource
             </a>
           </p>
-        </section>
+        </TechnicalInformationSection>
 
-        <section className="public-information-section" aria-labelledby="technical-updates">
-          <h2 id="technical-updates">Updates</h2>
+        <TechnicalInformationSection headingId="technical-updates" title="Updates">
           <p>
             The updates resource lists published updates in deterministic
             newest-first pages. Drafts and unpublished updates are never part of
@@ -69,17 +67,16 @@ export default function TechnicalPage() {
               Open the published updates resource
             </a>
           </p>
-        </section>
+        </TechnicalInformationSection>
 
-        <section className="public-information-section" aria-labelledby="technical-usage">
-          <h2 id="technical-usage">Using the resources</h2>
+        <TechnicalInformationSection headingId="technical-usage" title="Using the resources">
           <p>
             These routes currently return JSON with the protocol 1.0 response
             shapes and cache behavior documented by this application. Resource
             links use the configured canonical Aitta URL, not the incoming
             request host.
           </p>
-        </section>
+        </TechnicalInformationSection>
       </article>
 
     </PublicPageFrame>
