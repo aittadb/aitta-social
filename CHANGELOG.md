@@ -1,5 +1,22 @@
 # Changelog
 
+- **TASK-200 — Isolated owner browser requests from React components.** Added a
+  narrow shared browser transport plus feature-owned, transport-injectable
+  request functions for entry create/edit/publication/deletion, Identity save,
+  and page preview. All current owner React components now retain UI state,
+  strict response parsing, recovery, focus, and navigation while request
+  construction lives outside `.tsx` files. `AGENTS.md` now prohibits direct
+  component `fetch` calls, preferring small feature-owned request functions and
+  reserving classes for real state or lifecycle. The runtime boundary check
+  enforces the rule for every application `.tsx` file. New unit coverage proves
+  exact request shape, injected transport, DELETE redirect policy, response
+  identity, rejection propagation, and no retry; coupled journey assertions
+  remain intact. Validation: independent review found no P0/P1/P2 issues;
+  integrated `npm run validate` passed build, typecheck, lint, repository
+  checks, and 502/502 tests. No route, API, schema, migration, hosting,
+  deployment, access, data, or external state changed. Residual uncertainty:
+  future browser request work must follow the new feature-owned boundary.
+
 - **TASK-199 — Published contribution and feedback guidance.** Added root
   `CONTRIBUTING.md` and a README discovery link. The guide asks exactly which
   feedback is most useful, prioritizes vision clarity, landing-page messaging,
