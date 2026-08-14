@@ -50,6 +50,8 @@ boundaries.
 Project website: [aitta.social](https://aitta.social) · Maintained source:
 [GitHub](https://github.com/aittadb/aitta-social)
 
+Contribution and feedback guidance: [CONTRIBUTING.md](CONTRIBUTING.md)
+
 Each Aitta owns its public identity, canonical URL, profile, updates, database,
 design, runtime configuration, and local behavior. An Aitta deployment can
 operate publicly without AittaSocial Hub. It uses its own ChatGPT Sites D1
