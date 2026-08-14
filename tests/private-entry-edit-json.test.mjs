@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
-import ts from "typescript";
 
 import {
   FakeD1,
@@ -13,6 +12,10 @@ import {
   responseJson,
   validEntryInput,
 } from "./helpers/worker-harness.mjs";
+import {
+  compileRecordShapeAwareTypeScriptModule,
+  importRecordShapeAwareTypeScriptModule,
+} from "./helpers/record-shape-esm-compiler.mjs";
 
 const ownerEmail = "owner@example.com";
 const privateCanaries = [
@@ -591,23 +594,14 @@ function expectedEdit(document) {
 }
 
 async function compiledEditResponseReader() {
-  const draftSource = await readFile(
+  const draftUrl = await compileRecordShapeAwareTypeScriptModule(
     new URL("../app/owner/entries/draft-create-response.ts", import.meta.url),
-    "utf8",
   );
-  const draftCompiled = ts.transpileModule(draftSource, {
-    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  const draftUrl = `data:text/javascript,${encodeURIComponent(draftCompiled)}`;
-  const editSource = (await readFile(
+  const editModule = await importRecordShapeAwareTypeScriptModule(
     new URL("../app/owner/entries/edit-save-response.ts", import.meta.url),
-    "utf8",
-  )).replace('from "./draft-create-response"', `from "${draftUrl}"`);
-  const editCompiled = ts.transpileModule(editSource, {
-    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  return (await import(`data:text/javascript,${encodeURIComponent(editCompiled)}`))
-    .readEntryEditResponse;
+    { "./draft-create-response": draftUrl },
+  );
+  return editModule.readEntryEditResponse;
 }
 
 function assertPrivateJson(response, status) {

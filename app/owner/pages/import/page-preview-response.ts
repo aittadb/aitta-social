@@ -3,6 +3,7 @@ import {
 } from "@/lib/custom-pages/preview-api";
 import type { PageDocumentV1 } from "@/lib/custom-pages/page-document";
 import { readBoundedPagePreviewJson } from "@/lib/custom-pages/bounded-json-response";
+import { isRecord } from "@/lib/record-shape";
 
 export type PagePreviewResult =
   | { outcome: "success"; document: PageDocumentV1 }
@@ -55,8 +56,4 @@ function safeError(message: string): PagePreviewResult {
 
 function previewFieldName(value: string): PreviewFieldName | null {
   return fieldNames.has(value as PreviewFieldName) ? value as PreviewFieldName : null;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }

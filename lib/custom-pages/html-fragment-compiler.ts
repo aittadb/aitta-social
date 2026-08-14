@@ -16,6 +16,7 @@ import {
   type PagePreviewInputV1,
   type PageSectionV1,
 } from "./page-document";
+import { hasExactKeys, isRecord } from "../record-shape";
 
 type HtmlNode = DefaultTreeAdapterTypes.ChildNode;
 type HtmlElement = DefaultTreeAdapterTypes.Element;
@@ -570,14 +571,6 @@ function hasUrlControl(value: string): boolean {
   });
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function hasExactKeys(value: Record<string, unknown>, expected: string[]): boolean {
-  const actual = Object.keys(value);
-  return actual.length === expected.length && expected.every((key) => actual.includes(key));
-}
 
 function rejectImport(): never {
   throw new PageImportRejectedError();

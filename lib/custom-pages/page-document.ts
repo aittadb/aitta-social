@@ -1,3 +1,5 @@
+import { hasExactKeys, isRecord } from "../record-shape";
+
 export const PAGE_PREVIEW_LIMITS = {
   requestBytes: 192 * 1024,
   normalizedJsonBytes: 128 * 1024,
@@ -357,13 +359,4 @@ function isPageLinkTargetV1(value: unknown): value is PageContentLinkTargetV1 {
 
 function isPageLayoutV1(value: unknown): value is PageLayoutV1 {
   return value === "flow" || value === "split" || value === "cards";
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function hasExactKeys(value: Record<string, unknown>, expected: string[]): boolean {
-  const actual = Object.keys(value);
-  return actual.length === expected.length && expected.every((key) => actual.includes(key));
 }

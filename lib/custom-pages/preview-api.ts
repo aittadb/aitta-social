@@ -4,6 +4,7 @@ import {
   isPageDocumentV1,
   type PageDocumentV1,
 } from "./page-document";
+import { hasExactKeys, isRecord } from "../record-shape";
 
 const MAX_CONTENT_TYPE_BYTES = 1_024;
 const RESPONSE_HEADERS = {
@@ -242,13 +243,4 @@ function requestTooLarge(): PagePreviewRequestError {
     "Request body must be valid JSON within 192 KiB.",
     400,
   );
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function hasExactKeys(value: Record<string, unknown>, expected: string[]): boolean {
-  const actual = Object.keys(value);
-  return actual.length === expected.length && expected.every((key) => actual.includes(key));
 }

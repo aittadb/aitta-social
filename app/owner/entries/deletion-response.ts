@@ -2,6 +2,7 @@ import {
   isPrivateEntryErrorDocument,
   readPrivateEntryResponseJson,
 } from "./draft-create-response";
+import { hasExactKeys, isRecord } from "@/lib/record-shape";
 
 export type DeletionResponse =
   | { outcome: "success" }
@@ -51,13 +52,4 @@ function isJsonResponse(value: string | null): boolean {
 function isLink(value: unknown, rel: "collection" | "recovery"): boolean {
   return isRecord(value) && hasExactKeys(value, ["rel", "href", "mediaType"]) &&
     value.rel === rel && value.href === "/owner" && value.mediaType === "text/html";
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function hasExactKeys(value: Record<string, unknown>, expected: string[]): boolean {
-  const actual = Object.keys(value);
-  return actual.length === expected.length && expected.every((key) => actual.includes(key));
 }

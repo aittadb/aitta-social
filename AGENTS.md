@@ -109,8 +109,8 @@ file. Keep this file strictly below 32,000 bytes and run
 
 ### Maintainable TypeScript and React design
 
-- Keep files small, named, and cohesive. Split by domain
-  behavior, not arbitrary line count; do not fragment trivial logic.
+- Keep files small, named, and cohesive; split by domain behavior, not line
+  count, and do not fragment trivial logic.
 - Organize code by feature or domain where practical. A feature should own its
   component, types, tests, hooks, and service files through narrow, stable
   composition points. Do
@@ -136,14 +136,14 @@ file. Keep this file strictly below 32,000 bytes and run
   Make loading, empty, error, unavailable, and success states explicit, retain
   semantic accessible HTML, and add no UI framework or dependency without an
   accepted product need.
-- Keep logic independently testable. React components must not call `fetch`
+- Keep logic testable. React components must not call `fetch`
   directly; use small feature-owned request functions with injectable transports.
-  Use a class only for real state or lifecycle. Put other effects behind narrow
-  replaceable boundaries; test observable behavior, add defect regressions, and
-  keep fixtures focused.
-- Keep component-specific CSS in adjacent modules. Global or theme files retain
-  color and typography tokens, resets, accessibility foundations, and
-  cross-component primitives.
+  Classes only for real state/lifecycle; keep effects replaceable,
+  test observable behavior, add defect regressions, and keep fixtures focused.
+- Define exact generic predicates once in a narrow leaf; import rather than
+  redeclare matching names.
+- Keep component CSS adjacent. Global/theme files retain color/typography
+  tokens, resets, accessibility foundations, and cross-component primitives.
 - Use precise domain names and concise TSDoc or comments for exported contracts
   and non-obvious intent, invariants, edge cases, or registration rules. Remove
   stale comments and examples rather than restating obvious syntax.

@@ -2,6 +2,7 @@ import {
   type PrivateProfileDocument,
   type PrivateProfileFieldName,
 } from "@/lib/private-profile/representation";
+import { hasExactKeys, isRecord } from "@/lib/record-shape";
 
 export type ProfileSaveFailure = {
   message: string;
@@ -139,13 +140,4 @@ async function readJsonDocument(response: Response): Promise<unknown> {
 function profileFieldName(value: string): PrivateProfileFieldName | null {
   const normalized = value.startsWith("externalLinks.") ? "externalLinks" : value;
   return profileFields.has(normalized) ? normalized as PrivateProfileFieldName : null;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function hasExactKeys(value: Record<string, unknown>, expected: string[]): boolean {
-  const actual = Object.keys(value);
-  return actual.length === expected.length && expected.every((key) => actual.includes(key));
 }

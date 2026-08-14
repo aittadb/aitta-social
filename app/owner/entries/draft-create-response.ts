@@ -2,6 +2,7 @@ import type {
   PrivateEntryDocument,
   PrivateEntryFieldName,
 } from "@/lib/private-entry/representation";
+import { hasExactKeys, isRecord } from "@/lib/record-shape";
 
 export type DraftCreateFailure = {
   message: string;
@@ -255,13 +256,4 @@ function isTimestamp(value: unknown): value is string {
   }
   const time = Date.parse(value);
   return Number.isFinite(time) && new Date(time).toISOString() === value;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function hasExactKeys(value: Record<string, unknown>, expected: string[]): boolean {
-  const actual = Object.keys(value);
-  return actual.length === expected.length && expected.every((key) => actual.includes(key));
 }

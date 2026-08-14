@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
-import ts from "typescript";
 
 import {
   FakeD1,
@@ -12,6 +11,10 @@ import {
   ownerHeaders,
   responseJson,
 } from "./helpers/worker-harness.mjs";
+import {
+  compileRecordShapeAwareTypeScriptModule,
+  importRecordShapeAwareTypeScriptModule,
+} from "./helpers/record-shape-esm-compiler.mjs";
 
 const ownerEmail = "owner@example.com";
 const entryId = "19600000-0000-4000-8000-000000000001";
@@ -387,17 +390,14 @@ function throwingD1() {
 }
 
 async function compiledStateResponseReader() {
-  const draftSource = await readFile(new URL("../app/owner/entries/draft-create-response.ts", import.meta.url), "utf8");
-  const draftCompiled = ts.transpileModule(draftSource, {
-    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  const draftUrl = `data:text/javascript,${encodeURIComponent(draftCompiled)}`;
-  const stateSource = (await readFile(new URL("../app/owner/entries/publication-state-response.ts", import.meta.url), "utf8"))
-    .replace('from "./draft-create-response"', `from "${draftUrl}"`);
-  const stateCompiled = ts.transpileModule(stateSource, {
-    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  return (await import(`data:text/javascript,${encodeURIComponent(stateCompiled)}`)).readPublicationStateResponse;
+  const draftUrl = await compileRecordShapeAwareTypeScriptModule(
+    new URL("../app/owner/entries/draft-create-response.ts", import.meta.url),
+  );
+  const stateModule = await importRecordShapeAwareTypeScriptModule(
+    new URL("../app/owner/entries/publication-state-response.ts", import.meta.url),
+    { "./draft-create-response": draftUrl },
+  );
+  return stateModule.readPublicationStateResponse;
 }
 
 async function compiledPrivateEntryStateRoute() {

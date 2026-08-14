@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
-import ts from "typescript";
 
 import {
   FakeD1,
@@ -12,6 +10,7 @@ import {
   responseJson,
   validProfileInput,
 } from "./helpers/worker-harness.mjs";
+import { importRecordShapeAwareTypeScriptModule } from "./helpers/record-shape-esm-compiler.mjs";
 
 const ownerEmail = "owner@example.com";
 const canonicalUrl = "https://canonical.example/aitta";
@@ -278,15 +277,8 @@ test("unexpected authorization-setting failure is safe JSON before D1", async ()
 });
 
 test("Identity client confirms only the exact JSON success document", async () => {
-  const source = await readFile(
+  const { readProfileSaveResponse } = await importRecordShapeAwareTypeScriptModule(
     new URL("../app/owner/profile/profile-save-response.ts", import.meta.url),
-    "utf8",
-  );
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  const { readProfileSaveResponse } = await import(
-    `data:text/javascript,${encodeURIComponent(compiled)}`
   );
   const successDocument = {
     data: {

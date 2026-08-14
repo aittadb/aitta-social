@@ -1,4 +1,5 @@
 import type { EntryState } from "../constants";
+import { hasExactKeys, isRecord } from "../record-shape";
 import { ValidationError } from "../validation";
 import { privateEntryError } from "./request-response";
 
@@ -20,13 +21,4 @@ export function privateEntryStateMethodNotAllowed(): Response {
     405,
     { headers: { Allow: "PUT" } },
   );
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function hasExactKeys(value: Record<string, unknown>, expected: string[]): boolean {
-  const actual = Object.keys(value);
-  return actual.length === expected.length && expected.every((key) => actual.includes(key));
 }

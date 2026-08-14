@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import ts from "typescript";
 
 import {
   FakeD1,
@@ -11,6 +10,10 @@ import {
   mutationHeaders,
   responseJson,
 } from "./helpers/worker-harness.mjs";
+import {
+  compileRecordShapeAwareTypeScriptModule,
+  importRecordShapeAwareTypeScriptModule,
+} from "./helpers/record-shape-esm-compiler.mjs";
 
 const ownerEmail = "owner@example.com";
 const draftId = "16500000-0000-4000-8000-000000000001";
@@ -183,15 +186,12 @@ function deletionAcknowledgement(id) {
 }
 
 async function compiledDeletionResponseReader() {
-  const draftSource = await readFile(new URL("../app/owner/entries/draft-create-response.ts", import.meta.url), "utf8");
-  const draftCompiled = ts.transpileModule(draftSource, {
-    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  const draftUrl = `data:text/javascript,${encodeURIComponent(draftCompiled)}`;
-  const source = (await readFile(new URL("../app/owner/entries/deletion-response.ts", import.meta.url), "utf8"))
-    .replace('from "./draft-create-response"', `from "${draftUrl}"`);
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  return (await import(`data:text/javascript,${encodeURIComponent(compiled)}`)).readDeletionResponse;
+  const draftUrl = await compileRecordShapeAwareTypeScriptModule(
+    new URL("../app/owner/entries/draft-create-response.ts", import.meta.url),
+  );
+  const deletionModule = await importRecordShapeAwareTypeScriptModule(
+    new URL("../app/owner/entries/deletion-response.ts", import.meta.url),
+    { "./draft-create-response": draftUrl },
+  );
+  return deletionModule.readDeletionResponse;
 }

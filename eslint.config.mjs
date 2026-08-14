@@ -39,6 +39,55 @@ const eslintConfig = defineConfig([
       },
     },
   },
+  {
+    files: ["**/*.{js,mjs,ts,tsx}"],
+    ignores: ["lib/record-shape.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Program > FunctionDeclaration[id.name='isRecord']",
+          message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
+        },
+        {
+          selector: "Program > FunctionDeclaration[id.name='hasExactKeys']",
+          message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
+        },
+        {
+          selector: "Program > ExportNamedDeclaration > FunctionDeclaration[id.name='isRecord']",
+          message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
+        },
+        {
+          selector: "Program > ExportNamedDeclaration > FunctionDeclaration[id.name='hasExactKeys']",
+          message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
+        },
+        {
+          selector: "Program > ExportDefaultDeclaration > FunctionDeclaration[id.name='isRecord']",
+          message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
+        },
+        {
+          selector: "Program > ExportDefaultDeclaration > FunctionDeclaration[id.name='hasExactKeys']",
+          message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
+        },
+        {
+          selector: "Program > VariableDeclaration > VariableDeclarator[id.name='isRecord'][init.type='ArrowFunctionExpression']",
+          message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
+        },
+        {
+          selector: "Program > VariableDeclaration > VariableDeclarator[id.name='hasExactKeys'][init.type='ArrowFunctionExpression']",
+          message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
+        },
+        {
+          selector: "Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='isRecord'][init.type='ArrowFunctionExpression']",
+          message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
+        },
+        {
+          selector: "Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='hasExactKeys'][init.type='ArrowFunctionExpression']",
+          message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
