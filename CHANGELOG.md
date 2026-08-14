@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-206 — Centralized bounded Accept media-range parsing.** Added the
+  dependency-free `lib/accept-media-ranges.ts` leaf as the sole owner of the
+  `AcceptMediaRange` shape and bounded syntax parser: UTF-8 byte/range limits,
+  token and q-value grammar, quoted parameters, and quote-aware splitting.
+  The JSON-only v1 policy and unversioned public-entry HTML/JSON negotiation
+  now import it while preserving their deliberately distinct missing-header
+  defaults, specificity, exclusion, ordering, tie, malformed-header, `406`,
+  and pre-D1 behavior. Regression coverage proves the parser boundary,
+  canonical consumer ownership, and the composed lint restrictions for all
+  canonical helper families. Validation: independent review found no
+  P0/P1/P2 issues; integrated commit `bdbc83d`; focused checks passed 29/29;
+  full `npm run validate` passed build, typecheck, lint, repository checks,
+  and 514/514 tests. No API-contract, route, schema, migration, persistence,
+  hosting, deployment, data, access, or external state changed. Residual
+  uncertainty: the next accepted slice centralizes only the identical public
+  footer test extractor; it does not change public frame behavior or begin a
+  generic test utility framework.
+
 - **TASK-205 — Centralized test regular-expression literal escaping.** Added
   the dependency-free, narrowly named
   `tests/helpers/regular-expression-literal.mjs` as the canonical owner of
