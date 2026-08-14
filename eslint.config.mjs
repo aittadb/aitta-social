@@ -7,115 +7,37 @@ import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-const recordShapeRestrictions = [
-  {
-    selector: "Program > FunctionDeclaration[id.name='isRecord']",
-    message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
-  },
-  {
-    selector: "Program > FunctionDeclaration[id.name='hasExactKeys']",
-    message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > FunctionDeclaration[id.name='isRecord']",
-    message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > FunctionDeclaration[id.name='hasExactKeys']",
-    message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportDefaultDeclaration > FunctionDeclaration[id.name='isRecord']",
-    message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportDefaultDeclaration > FunctionDeclaration[id.name='hasExactKeys']",
-    message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
-  },
-  {
-    selector: "Program > VariableDeclaration > VariableDeclarator[id.name='isRecord'][init.type='ArrowFunctionExpression']",
-    message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
-  },
-  {
-    selector: "Program > VariableDeclaration > VariableDeclarator[id.name='hasExactKeys'][init.type='ArrowFunctionExpression']",
-    message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='isRecord'][init.type='ArrowFunctionExpression']",
-    message: "Import isRecord from lib/record-shape.ts instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='hasExactKeys'][init.type='ArrowFunctionExpression']",
-    message: "Import hasExactKeys from lib/record-shape.ts instead of redeclaring it.",
-  },
-];
+function declarationRestrictions(names, canonicalPath, canonicalName = undefined) {
+  return names.flatMap((name) => {
+    const importedName = canonicalName ?? name;
+    const message = `Import ${importedName} from ${canonicalPath} instead of redeclaring it.`;
+    return [
+      { selector: `Program > FunctionDeclaration[id.name='${name}']`, message },
+      { selector: `Program > ExportNamedDeclaration > FunctionDeclaration[id.name='${name}']`, message },
+      { selector: `Program > ExportDefaultDeclaration > FunctionDeclaration[id.name='${name}']`, message },
+      { selector: `Program > ExportDefaultDeclaration > FunctionExpression[id.name='${name}']`, message },
+      { selector: `Program > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='ArrowFunctionExpression']`, message },
+      { selector: `Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='ArrowFunctionExpression']`, message },
+      { selector: `Program > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='FunctionExpression']`, message },
+      { selector: `Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='${name}'][init.type='FunctionExpression']`, message },
+    ];
+  });
+}
 
-const regularExpressionLiteralRestrictions = [
-  {
-    selector: "Program > FunctionDeclaration[id.name='escapeRegExp']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > FunctionDeclaration[id.name='escapeRegex']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > FunctionDeclaration[id.name='escapeRegExp']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > FunctionDeclaration[id.name='escapeRegex']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportDefaultDeclaration > FunctionDeclaration[id.name='escapeRegExp']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportDefaultDeclaration > FunctionDeclaration[id.name='escapeRegex']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportDefaultDeclaration > FunctionExpression[id.name='escapeRegExp']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportDefaultDeclaration > FunctionExpression[id.name='escapeRegex']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > VariableDeclaration > VariableDeclarator[id.name='escapeRegExp'][init.type='ArrowFunctionExpression']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > VariableDeclaration > VariableDeclarator[id.name='escapeRegex'][init.type='ArrowFunctionExpression']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='escapeRegExp'][init.type='ArrowFunctionExpression']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='escapeRegex'][init.type='ArrowFunctionExpression']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > VariableDeclaration > VariableDeclarator[id.name='escapeRegExp'][init.type='FunctionExpression']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > VariableDeclaration > VariableDeclarator[id.name='escapeRegex'][init.type='FunctionExpression']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='escapeRegExp'][init.type='FunctionExpression']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-  {
-    selector: "Program > ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='escapeRegex'][init.type='FunctionExpression']",
-    message: "Import escapeRegExp from tests/helpers/regular-expression-literal.mjs instead of redeclaring it.",
-  },
-];
+const recordShapeRestrictions = declarationRestrictions(
+  ["isRecord", "hasExactKeys"],
+  "lib/record-shape.ts",
+);
+const regularExpressionLiteralRestrictions = declarationRestrictions(
+  ["escapeRegExp", "escapeRegex"],
+  "tests/helpers/regular-expression-literal.mjs",
+  "escapeRegExp",
+);
+const acceptMediaRangeRestrictions = declarationRestrictions(
+  ["parseAcceptMediaRanges", "parseMediaRange", "validParameterValue", "splitOutsideQuotes"],
+  "lib/accept-media-ranges.ts",
+  "parseAcceptMediaRanges",
+);
 
 const eslintConfig = defineConfig([
   globalIgnores([
@@ -152,19 +74,42 @@ const eslintConfig = defineConfig([
   {
     files: ["**/*.{js,mjs,ts,tsx}"],
     rules: {
-      "no-restricted-syntax": ["error", ...recordShapeRestrictions, ...regularExpressionLiteralRestrictions],
+      "no-restricted-syntax": [
+        "error",
+        ...recordShapeRestrictions,
+        ...regularExpressionLiteralRestrictions,
+        ...acceptMediaRangeRestrictions,
+      ],
     },
   },
   {
     files: ["lib/record-shape.ts"],
     rules: {
-      "no-restricted-syntax": ["error", ...regularExpressionLiteralRestrictions],
+      "no-restricted-syntax": [
+        "error",
+        ...regularExpressionLiteralRestrictions,
+        ...acceptMediaRangeRestrictions,
+      ],
     },
   },
   {
     files: ["tests/helpers/regular-expression-literal.mjs"],
     rules: {
-      "no-restricted-syntax": ["error", ...recordShapeRestrictions],
+      "no-restricted-syntax": [
+        "error",
+        ...recordShapeRestrictions,
+        ...acceptMediaRangeRestrictions,
+      ],
+    },
+  },
+  {
+    files: ["lib/accept-media-ranges.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...recordShapeRestrictions,
+        ...regularExpressionLiteralRestrictions,
+      ],
     },
   },
 ]);
