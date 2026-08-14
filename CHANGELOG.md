@@ -1,5 +1,24 @@
 # Changelog
 
+- **TASK-207 — Centralized public-footer contract extraction in tests.** Added
+  the dependency-free `tests/helpers/public-footer-contract.mjs` leaf as the
+  sole owner of `publicFooter`; the four Technical, Privacy, accessibility,
+  and public-frame consumers now import it. Its deliberately narrow extractor
+  retains the first case-insensitive exact public-footer match and the empty
+  result for absent or nonmatching markup. Regression coverage proves output,
+  canonical ownership, consumer imports, and lint enforcement. The reusable
+  lint restriction now also rejects module-scope class declarations and named
+  class expressions for every protected helper name, closing the same-name
+  class gap rather than guarding only functions. Validation: independent
+  review found and corrected that P2 gap; final re-review found no P0/P1/P2
+  issues; integrated commit `2017202`; cumulative focused checks passed
+  14/14; full `npm run validate` passed build, typecheck, lint, repository
+  checks, and 517/517 tests. No production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted slice shares only the existing
+  private JSON response test contract, preserving its deliberate
+  case-sensitive preview variant.
+
 - **TASK-206 — Centralized bounded Accept media-range parsing.** Added the
   dependency-free `lib/accept-media-ranges.ts` leaf as the sole owner of the
   `AcceptMediaRange` shape and bounded syntax parser: UTF-8 byte/range limits,
