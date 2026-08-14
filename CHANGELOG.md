@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-201 — Split page import controls into focused feature-owned
+  components.** Extracted narrow `PageImportTextField` and
+  `PageImportTextareaField` components within the page-import feature. They
+  own the existing labels, optional marker, help/error rendering, exact ARIA
+  associations, and busy handling, while `PageImportForm` retains submission,
+  strict response handling, local error clearing, focus ordering, status,
+  preview, and normalized JSON orchestration. The three source controls retain
+  their exact names, limits, required/optional state, rows, spell-check,
+  source styling, fragment help/error IDs, and help-before-error description
+  order. Focused regression coverage now pins those configurations and the
+  component boundary. Validation: independently reviewed with no P0/P1/P2
+  findings; integrated commit `bae6bf9`; focused checks passed 111/111; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  502/502 tests. No route, API, schema, migration, persistence, hosting,
+  deployment, access, data, or external state changed. Residual uncertainty:
+  future page-import fields should remain feature-local unless a distinct,
+  accepted shared-control need emerges.
+
 - **TASK-200 — Isolated owner browser requests from React components.** Added a
   narrow shared browser transport plus feature-owned, transport-injectable
   request functions for entry create/edit/publication/deletion, Identity save,
