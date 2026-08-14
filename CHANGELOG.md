@@ -1,5 +1,27 @@
 # Changelog
 
+- **TASK-205 — Centralized test regular-expression literal escaping.** Added
+  the dependency-free, narrowly named
+  `tests/helpers/regular-expression-literal.mjs` as the canonical owner of
+  `escapeRegExp`; all four former `escapeRegExp` and four legacy
+  `escapeRegex` declarations now import it. The helper retains literal
+  matching for metacharacters, ordinary text, slashes, Unicode, hyphens, and
+  newlines. ESLint now rejects all plain, named-export, and default-export
+  top-level function, function-expression, and arrow redefinitions of either
+  spelling outside its canonical helper, without weakening the independent
+  record-shape restrictions. Regression coverage proves helper behavior,
+  canonical consumer imports, canonical allowances, cross-family rejection,
+  and every protected declaration form. Validation: independent review found
+  and corrected two P1 enforcement gaps and one P2 regression-evidence gap;
+  final re-review found no P0/P1/P2 issues; integrated commit `a75afa8`;
+  focused checks passed 3/3; full `npm run validate` passed build, typecheck,
+  lint, repository checks, and 510/510 tests. No production, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: other duplicate helper
+  families remain separate bounded consolidation work; the next accepted
+  slice centralizes only shared Accept media-range parsing, not its distinct
+  response-negotiation policies.
+
 - **TASK-204 — Centralized exact record-shape boundary predicates.** Added the
   dependency-free `lib/record-shape.ts` leaf as the sole owner of `isRecord`
   and `hasExactKeys`; all eight and seven former declarations now import it.
