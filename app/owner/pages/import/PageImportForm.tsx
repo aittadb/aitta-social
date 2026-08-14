@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { PageDocumentV1 } from "@/lib/custom-pages/page-document";
 import { PageDocumentPreview } from "./PageDocumentPreview";
+import { PageImportTextField, PageImportTextareaField } from "./PageImportFields";
 import {
   readPagePreviewResponse,
   type PreviewFieldName,
@@ -75,54 +76,40 @@ export function PageImportForm() {
           <h2>Source fragment</h2>
           <p>Paste page-body HTML only. Scripts, styles, forms, embeds, site chrome, images, and unknown markup are rejected.</p>
         </div>
-        <label className={styles.field}>
-          <span>Page title</span>
-          <input
-            aria-describedby={fieldErrors.title ? "page-preview-title-error" : undefined}
-            aria-invalid={fieldErrors.title ? true : undefined}
-            disabled={busy}
-            maxLength={200}
-            name="title"
-            onInput={clearFieldError}
-            required
-          />
-          {fieldErrors.title ? <span className={styles.error} id="page-preview-title-error">{fieldErrors.title}</span> : null}
-        </label>
-        <label className={styles.field}>
-          <span>Description <span className={styles.optional}>(optional)</span></span>
-          <textarea
-            aria-describedby={fieldErrors.description ? "page-preview-description-error" : undefined}
-            aria-invalid={fieldErrors.description ? true : undefined}
-            disabled={busy}
-            maxLength={500}
-            name="description"
-            onInput={clearFieldError}
-            rows={3}
-          />
-          {fieldErrors.description ? <span className={styles.error} id="page-preview-description-error">{fieldErrors.description}</span> : null}
-        </label>
-        <label className={styles.field}>
-          <span>HTML fragment</span>
-          <textarea
-            aria-describedby={fieldErrors.htmlFragment
-              ? "page-preview-fragment-help page-preview-fragment-error"
-              : "page-preview-fragment-help"}
-            aria-invalid={fieldErrors.htmlFragment ? true : undefined}
-            className={styles.source}
-            disabled={busy}
-            name="htmlFragment"
-            onInput={clearFieldError}
-            required
-            rows={16}
-            spellCheck={false}
-          />
-          <span className={styles.help} id="page-preview-fragment-help">
-            Accepted content: sections, h2–h4 headings, paragraphs, lists, emphasis, code, safe links, and annotated flow, split, or cards groups.
-          </span>
-          {fieldErrors.htmlFragment
-            ? <span className={styles.error} id="page-preview-fragment-error">{fieldErrors.htmlFragment}</span>
-            : null}
-        </label>
+        <PageImportTextField
+          disabled={busy}
+          error={fieldErrors.title}
+          label="Page title"
+          maxLength={200}
+          name="title"
+          onInput={clearFieldError}
+          required
+        />
+        <PageImportTextareaField
+          disabled={busy}
+          error={fieldErrors.description}
+          label="Description"
+          maxLength={500}
+          name="description"
+          onInput={clearFieldError}
+          optional
+          required={false}
+          rows={3}
+        />
+        <PageImportTextareaField
+          disabled={busy}
+          error={fieldErrors.htmlFragment}
+          errorId="page-preview-fragment-error"
+          help="Accepted content: sections, h2–h4 headings, paragraphs, lists, emphasis, code, safe links, and annotated flow, split, or cards groups."
+          helpId="page-preview-fragment-help"
+          label="HTML fragment"
+          name="htmlFragment"
+          onInput={clearFieldError}
+          required
+          rows={16}
+          spellCheck={false}
+          variant="source"
+        />
         <div className={styles.formFooter}>
           <button className="button" type="submit" disabled={busy}>
             {busy ? "Normalizing…" : "Create safe preview"}

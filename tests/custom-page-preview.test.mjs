@@ -373,24 +373,39 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
 });
 
 test("the owner journey renders only the closed document and keeps raw source in its textarea", async () => {
-  const [form, renderer, route, shell, stylesheet] = await Promise.all([
+  const [form, fields, renderer, route, shell, stylesheet] = await Promise.all([
     readFile(new URL("../app/owner/pages/import/PageImportForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/pages/import/PageImportFields.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/pages/import/PageDocumentPreview.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/private/pages/preview/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/_components/OwnerShell.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/pages/import/page-preview.module.css", import.meta.url), "utf8"),
   ]);
-  const sources = `${form}\n${renderer}\n${route}`;
+  const sources = `${form}\n${fields}\n${renderer}\n${route}`;
   assert.doesNotMatch(sources, /dangerouslySetInnerHTML|srcDoc|innerHTML|outerHTML|eval\(|new Function/u);
   assert.doesNotMatch(route, /getProfile|createEntry|update|delete|fetch\(/u);
   assert.match(form, /import \{ previewPageRequest \} from "\.\/page-preview-request"/u);
+  assert.match(form, /import \{ PageImportTextField, PageImportTextareaField \} from "\.\/PageImportFields"/u);
   assert.doesNotMatch(form, /\bfetch\s*\(/u);
+  assert.doesNotMatch(fields, /\bfetch\s*\(/u);
+  assert.match(fields, /export function PageImportTextField/u);
+  assert.match(fields, /export function PageImportTextareaField/u);
+  assert.match(fields, /<label className=\{styles\.field\}>/u);
+  assert.match(fields, /const errorId = suppliedErrorId \?\? `page-preview-\$\{name\}-error`/u);
+  assert.match(fields, /const helpId = help \? suppliedHelpId \?\? `page-preview-\$\{name\}-help` : undefined/u);
+  assert.match(fields, /aria-describedby=\{error \? errorId : undefined\}/u);
+  assert.match(fields, /const describedBy = \[helpId, error \? errorId : undefined\]\.filter\(Boolean\)\.join\(" "\) \|\| undefined/u);
+  assert.match(fields, /className=\{variant === "source" \? styles\.source : undefined\}/u);
+  assert.match(fields, /\{help && helpId \? <span className=\{styles\.help\} id=\{helpId\}>/u);
+  assert.match(fields, /\{error \? <span className=\{styles\.error\} id=\{errorId\}>/u);
+  assert.match(form, /<PageImportTextField\s+disabled=\{busy\}\s+error=\{fieldErrors\.title\}\s+label="Page title"\s+maxLength=\{200\}\s+name="title"\s+onInput=\{clearFieldError\}\s+required\s+\/>/u);
+  assert.match(form, /<PageImportTextareaField\s+disabled=\{busy\}\s+error=\{fieldErrors\.description\}\s+label="Description"\s+maxLength=\{500\}\s+name="description"\s+onInput=\{clearFieldError\}\s+optional\s+required=\{false\}\s+rows=\{3\}\s+\/>/u);
+  assert.match(form, /<PageImportTextareaField\s+disabled=\{busy\}\s+error=\{fieldErrors\.htmlFragment\}\s+errorId="page-preview-fragment-error"\s+help="Accepted content: sections, h2–h4 headings, paragraphs, lists, emphasis, code, safe links, and annotated flow, split, or cards groups\."\s+helpId="page-preview-fragment-help"\s+label="HTML fragment"\s+name="htmlFragment"\s+onInput=\{clearFieldError\}\s+required\s+rows=\{16\}\s+spellCheck=\{false\}\s+variant="source"\s+\/>/u);
+  assert.match(form, /name="title"/u);
+  assert.match(form, /name="description"/u);
   assert.match(form, /name="htmlFragment"/u);
   assert.match(form, /JSON\.stringify\(document, null, 2\)/u);
   assert.match(form, /aria-busy=\{busy\}/u);
-  assert.equal((form.match(/disabled=\{busy\}/gu) ?? []).length, 4);
-  assert.equal((form.match(/aria-invalid=\{fieldErrors\./gu) ?? []).length, 3);
-  assert.equal((form.match(/onInput=\{clearFieldError\}/gu) ?? []).length, 3);
   assert.match(form, /requestAnimationFrame\(\(\) => focusFirstInvalidField/u);
   assert.match(form, /previewHeadingRef\.current\?\.focus\(\)/u);
   assert.match(form, /excludes the raw HTML still visible in the source textarea/u);
