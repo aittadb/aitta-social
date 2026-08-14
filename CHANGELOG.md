@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-204 — Centralized exact record-shape boundary predicates.** Added the
+  dependency-free `lib/record-shape.ts` leaf as the sole owner of `isRecord`
+  and `hasExactKeys`; all eight and seven former declarations now import it.
+  The predicates retain their original type narrowing and own-enumerable key
+  semantics across owner response readers, custom-page parsing, and private
+  entry validation. A narrow data-URL test compiler resolves only parsed
+  `record-shape` imports, and ESLint rejects plain, named-export, and
+  default-export top-level redefinitions outside the canonical module.
+  Regression coverage proves behavior, consumer ownership, lint enforcement,
+  and import rewriting without changing comments or ordinary strings.
+  Validation: independent review found no P0/P1/P2 issues; integrated commit
+  `95d6460`; focused checks passed 4/4; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 507/507 tests. No route, API,
+  schema, migration, persistence, hosting, deployment, access, data, or
+  external state changed. Residual uncertainty: other audited duplicate helper
+  families require separate bounded consolidation tasks; framework route
+  exports are not generic helpers.
+
 - **TASK-203 — Co-located owner-shell CSS and established stylesheet
   ownership.** `OwnerShell` and `OwnerAccessState` now use the adjacent
   `OwnerShell.module.css`; its scoped rules own their shell, header,
