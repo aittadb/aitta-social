@@ -12,6 +12,7 @@ import type { PrivateProfileFieldName } from "@/lib/private-profile/representati
 import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { ProfileInput } from "@/lib/types";
 import { readProfileSaveResponse } from "./profile-save-response";
+import { saveProfileRequest } from "./profile-save-request";
 
 type DraftPreview = Pick<
   ProfileInput,
@@ -183,21 +184,17 @@ export function ProfileForm({
           : { label: line.slice(0, separator).trim(), url: line.slice(separator + 1).trim() };
       });
     try {
-      const response = await fetch("/api/private/profile", {
-        method: "PUT",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          displayName: form.get("displayName"),
-          shortDescription: form.get("shortDescription"),
-          introduction: form.get("introduction"),
-          location: form.get("location"),
-          website: form.get("website"),
-          externalLinks,
-          canonicalUrl: form.get("canonicalUrl"),
-          accentColor: form.get("accentColor"),
-          density: form.get("density"),
-          hidePoweredBy: form.get("hidePoweredBy") === "on",
-        }),
+      const response = await saveProfileRequest({
+        displayName: form.get("displayName"),
+        shortDescription: form.get("shortDescription"),
+        introduction: form.get("introduction"),
+        location: form.get("location"),
+        website: form.get("website"),
+        externalLinks,
+        canonicalUrl: form.get("canonicalUrl"),
+        accentColor: form.get("accentColor"),
+        density: form.get("density"),
+        hidePoweredBy: form.get("hidePoweredBy") === "on",
       });
       const result = await readProfileSaveResponse(response);
       if (result.outcome === "success") {

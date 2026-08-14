@@ -93,7 +93,9 @@ test("delete controls have an irreversible update-specific confirmation and isol
   assert.match(actions, /window\.confirm\(`Delete “\$\{updateLabel\}” \(update \$\{actionReference\}\) permanently\? This cannot be undone\.`\)/);
   assert.match(actions, /if \(!confirmed\) \{\s*setMessage\("Deletion cancelled\. This update was not deleted\."\);\s*return;/);
   assert.match(actions, /import \{ readDeletionResponse \} from "\.\.\/entries\/deletion-response"/u);
-  assert.match(actions, /fetch\(`\/api\/private\/entries\/\$\{encodeURIComponent\(id\)\}`, \{\s*method: "DELETE",\s*headers: \{ Accept: "application\/json" \},\s*redirect: "error"/u);
+  assert.match(actions, /import \{ changeEntryStateRequest, deleteEntryRequest \} from "\.\.\/entries\/entry-mutation-requests"/u);
+  assert.match(actions, /const response = await deleteEntryRequest\(id\);/u);
+  assert.doesNotMatch(actions, /\bfetch\s*\(/u);
   assert.match(actions, /readDeletionResponse\(response, id\)/u);
   assert.match(actions, /if \(outcome\.outcome === "success"\) \{\s*window\.location\.assign\("\/owner"\);/u);
   assert.match(actions, /The server rejected this deletion request\. \$\{outcome\.message\}/u);
@@ -103,7 +105,7 @@ test("delete controls have an irreversible update-specific confirmation and isol
   assert.match(actions, /disabled=\{busy \|\| lifecycleRecoveryRequired\}[\s\S]*Publish/);
   assert.match(actions, /href="\/owner"[\s\S]*Check this Aitta’s saved state/);
   assert.doesNotMatch(actions, /Reload Your presence|This update was deleted|This update remains/i);
-  assert.equal((actions.match(/fetch\(/g) ?? []).length, 2, "delete makes one request and has no retry path");
+  assert.equal((actions.match(/deleteEntryRequest\(/g) ?? []).length, 1, "delete makes one request and has no retry path");
 
   for (const document of [presentation, deployment]) {
     assert.match(document, /delet/i);

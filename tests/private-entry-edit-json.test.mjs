@@ -515,7 +515,8 @@ test("EntryForm sends JSON Accept and uses strict edit recovery without changing
     "utf8",
   );
   assert.match(source, /import \{ readEntryEditResponse \} from "\.\/edit-save-response"/u);
-  assert.match(source, /headers: \{ Accept: "application\/json", "Content-Type": "application\/json" \}/u);
+  assert.match(source, /import \{ createEntryRequest, editEntryRequest \} from "\.\/entry-mutation-requests"/u);
+  assert.doesNotMatch(source, /\bfetch\s*\(/u);
   assert.match(source, /if \(!entry\) \{[\s\S]*readDraftCreateResponse\(response\)/u);
   assert.match(source, /readEntryEditResponse\(response, \{[\s\S]*id: entry\.id,[\s\S]*state: entry\.state/u);
   assert.match(source, /kind,[\s\S]*title: formText\(form\.get\("title"\)\) \|\| null,[\s\S]*body: formText\(form\.get\("body"\)\),[\s\S]*destinationUrl: normalizedDestinationUrl/u);

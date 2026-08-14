@@ -137,11 +137,11 @@ file. Keep this file strictly below 32,000 bytes and run
   Make loading, empty, error, unavailable, and success states explicit, retain
   semantic accessible HTML, and add no UI framework or dependency without an
   accepted product need.
-- Keep meaningful pure logic independently testable. Put storage, network,
-  browser, timer, and other effects behind narrow explicit boundaries that
-  tests can replace locally; test components through observable behavior, add
-  regressions for defects, and avoid enormous shared fixtures or application-
-  wide setup for a focused feature.
+- Keep logic independently testable. React components must not call `fetch`
+  directly; use small feature-owned request functions with injectable transports.
+  Use a class only for real state or lifecycle. Put other effects behind narrow
+  replaceable boundaries; test observable behavior, add defect regressions, and
+  keep fixtures focused.
 - Use precise domain names and concise TSDoc or comments for exported contracts
   and non-obvious intent, invariants, edge cases, or registration rules. Remove
   stale comments and examples rather than restating obvious syntax.

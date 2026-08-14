@@ -492,7 +492,8 @@ test("EntryForm keeps the strict create parser alongside strict edit response ha
     "utf8",
   );
   assert.match(source, /import \{ readDraftCreateResponse \} from "\.\/draft-create-response"/u);
-  assert.match(source, /headers: \{ Accept: "application\/json", "Content-Type": "application\/json" \}/u);
+  assert.match(source, /import \{ createEntryRequest, editEntryRequest \} from "\.\/entry-mutation-requests"/u);
+  assert.doesNotMatch(source, /\bfetch\s*\(/u);
   assert.match(source, /if \(!entry\) \{[\s\S]*readDraftCreateResponse\(response\)[\s\S]*result\.outcome === "success"[\s\S]*window\.location\.assign\(`\/owner\/entries\/\$\{encodeURIComponent\(result\.id\)\}`\)/u);
   assert.match(source, /if \(result\.outcome === "unconfirmed"\) \{[\s\S]*showUnconfirmedSave\(\)/u);
   assert.match(source, /setFieldErrors\(result\.fieldErrors\)[\s\S]*focusFirstInvalidField\(formElement, result\.fieldErrors\)/u);

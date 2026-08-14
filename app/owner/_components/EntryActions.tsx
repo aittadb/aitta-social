@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { readDeletionResponse } from "../entries/deletion-response";
+import { changeEntryStateRequest, deleteEntryRequest } from "../entries/entry-mutation-requests";
 import { readPublicationStateResponse } from "../entries/publication-state-response";
 
 export function EntryActions({ id, state, label }: { id: string; state: "draft" | "published"; label: string }) {
@@ -32,11 +33,7 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
     setBusy(true);
     setMessage(nextState === "published" ? "Publishing this update…" : "Returning this update to Draft…");
     try {
-      const response = await fetch(`/api/private/entries/${encodeURIComponent(id)}/state`, {
-        method: "PUT",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ state: nextState }),
-      });
+      const response = await changeEntryStateRequest(id, nextState);
       const result = await readPublicationStateResponse(response, { id, state: nextState });
       if (result.outcome === "success") {
         window.location.reload();
@@ -73,11 +70,7 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
     setBusy(true);
     setMessage("Deleting update…");
     try {
-      const response = await fetch(`/api/private/entries/${encodeURIComponent(id)}`, {
-        method: "DELETE",
-        headers: { Accept: "application/json" },
-        redirect: "error",
-      });
+      const response = await deleteEntryRequest(id);
       const outcome = await readDeletionResponse(response, id);
       if (outcome.outcome === "success") {
         window.location.assign("/owner");

@@ -4,6 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import { ENTRY_KINDS, type EntryKind } from "@/lib/constants";
 import type { Entry } from "@/lib/types";
 import { readDraftCreateResponse } from "./draft-create-response";
+import { createEntryRequest, editEntryRequest } from "./entry-mutation-requests";
 import { readEntryEditResponse } from "./edit-save-response";
 
 type EntryFieldName = "kind" | "title" | "body" | "destinationUrl";
@@ -77,16 +78,15 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
     setStatus(entry ? "Saving update…" : "Saving private draft…");
     const form = new FormData(formElement);
     try {
-      const response = await fetch(entry ? `/api/private/entries/${encodeURIComponent(entry.id)}` : "/api/private/entries", {
-        method: entry ? "PUT" : "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          kind: form.get("kind"),
-          title: form.get("title"),
-          body: form.get("body"),
-          destinationUrl: form.get("destinationUrl"),
-        }),
-      });
+      const requestBody = {
+        kind: form.get("kind"),
+        title: form.get("title"),
+        body: form.get("body"),
+        destinationUrl: form.get("destinationUrl"),
+      };
+      const response = entry
+        ? await editEntryRequest(entry.id, requestBody)
+        : await createEntryRequest(requestBody);
       if (!entry) {
         const result = await readDraftCreateResponse(response);
         if (result.outcome === "success") {

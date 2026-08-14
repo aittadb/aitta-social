@@ -7,6 +7,7 @@ import {
   readPagePreviewResponse,
   type PreviewFieldName,
 } from "./page-preview-response";
+import { previewPageRequest } from "./page-preview-request";
 import styles from "./page-preview.module.css";
 
 type FieldErrors = Partial<Record<PreviewFieldName, string>>;
@@ -45,15 +46,11 @@ export function PageImportForm() {
     setBusy(true);
     setStatus("Normalizing the page fragment…");
     try {
-      const response = await fetch("/api/private/pages/preview", {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          schemaVersion: 1,
-          title: values.get("title"),
-          description: values.get("description"),
-          htmlFragment: values.get("htmlFragment"),
-        }),
+      const response = await previewPageRequest({
+        schemaVersion: 1,
+        title: values.get("title"),
+        description: values.get("description"),
+        htmlFragment: values.get("htmlFragment"),
       });
       const result = await readPagePreviewResponse(response);
       if (result.outcome === "success") {

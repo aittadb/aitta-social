@@ -79,7 +79,8 @@ test("publish controls make Draft and Published meaning, confirmation, definitiv
   assert.match(actions, /The server rejected this unpublish request\. \$\{failure\}/);
   assert.doesNotMatch(actions, /This update was not published|This update remains published/);
   assert.match(actions, /Check this Aitta’s current saved state/);
-  assert.equal((actions.match(/fetch\(/g) ?? []).length, 2, "state and delete each make one request with no retry loop");
+  assert.equal((actions.match(/changeEntryStateRequest\(/g) ?? []).length, 1, "state makes one request with no retry loop");
+  assert.equal((actions.match(/deleteEntryRequest\(/g) ?? []).length, 1, "delete makes one request with no retry loop");
 
   for (const document of [presentation, deployment, privacy]) {
     assert.match(document, /Draft|Published|publish/i);

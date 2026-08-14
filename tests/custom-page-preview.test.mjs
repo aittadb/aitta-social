@@ -383,6 +383,8 @@ test("the owner journey renders only the closed document and keeps raw source in
   const sources = `${form}\n${renderer}\n${route}`;
   assert.doesNotMatch(sources, /dangerouslySetInnerHTML|srcDoc|innerHTML|outerHTML|eval\(|new Function/u);
   assert.doesNotMatch(route, /getProfile|createEntry|update|delete|fetch\(/u);
+  assert.match(form, /import \{ previewPageRequest \} from "\.\/page-preview-request"/u);
+  assert.doesNotMatch(form, /\bfetch\s*\(/u);
   assert.match(form, /name="htmlFragment"/u);
   assert.match(form, /JSON\.stringify\(document, null, 2\)/u);
   assert.match(form, /aria-busy=\{busy\}/u);

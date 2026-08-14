@@ -13,6 +13,9 @@ async function inspect(directory) {
       assert.doesNotMatch(source, /\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|INDEX)\b/i, `${target.pathname} contains runtime DDL`);
       assert.doesNotMatch(source, /from ["']node:/, `${target.pathname} imports a Node built-in`);
       assert.doesNotMatch(source, /\bprocess\.(?:env|cwd|exit|argv)\b/, `${target.pathname} depends on Node process state`);
+      if (directory.pathname.includes("/app/") && entry.name.endsWith(".tsx")) {
+        assert.doesNotMatch(source, /\bfetch\s*\(/, `${target.pathname} calls fetch directly; use a feature-owned request function`);
+      }
     }
   }
 }
