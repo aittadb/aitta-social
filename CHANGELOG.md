@@ -1,5 +1,20 @@
 # Changelog
 
+- **TASK-199 — Published contribution and feedback guidance.** Added root
+  `CONTRIBUTING.md` and a README discovery link. The guide asks exactly which
+  feedback is most useful, prioritizes vision clarity, landing-page messaging,
+  and potential contributors for ideas, and directs desired outcomes to GitHub
+  Issues. It makes clear that the maintainer is not soliciting third-party
+  source-code contributions or pull requests in this agentic coding workflow,
+  while welcoming concrete problem, constraint, evidence, and risk reports.
+  It also states that a future Aitta is planned for discussing ideas without
+  claiming that capability exists today. Independent review found and corrected
+  that future-Aitta wording. Validation: focused instruction, plan, license,
+  instance, runtime, migration, exact-text/link, and diff checks passed before
+  integration; integrated `npm run validate` passed build, strict typecheck,
+  lint, and 499/499 tests. No runtime, schema, migration, hosting, deployment,
+  external state, or sibling repository changed.
+
 - **TASK-197 — Made private update deletion a truthful JSON-first browser
   API.** `DELETE /api/private/entries/{id}` remains bodyless and now performs
   same-origin-before-owner authorization before bounded JSON `Accept`
