@@ -1,5 +1,20 @@
 # Changelog
 
+- **TASK-202 — Extracted Technical page information sections into a focused
+  component.** Added the feature-local `TechnicalInformationSection`, which
+  owns the existing semantic section class plus its exact
+  `aria-labelledby`/`h2` relationship. `TechnicalPage` retains the four
+  explicit section IDs, headings, prose, order, native resource links, and
+  link classes. Rendered regression coverage locks the ordered sections, exact
+  content, accessibility associations, links, and link-free usage section;
+  source coverage confirms the narrow component composition. Validation:
+  independent review found no P0/P1/P2 issues; integrated commit `ad898e9`;
+  focused checks passed 4/4; full `npm run validate` passed build, typecheck,
+  lint, repository checks, and 503/503 tests. No route, API, CSS, schema,
+  migration, persistence, hosting, deployment, access, data, or external
+  state changed. Residual uncertainty: this remains a Technical-page boundary,
+  not a general information-page component.
+
 - **TASK-201 — Split page import controls into focused feature-owned
   components.** Extracted narrow `PageImportTextField` and
   `PageImportTextareaField` components within the page-import feature. They
