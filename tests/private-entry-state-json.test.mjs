@@ -384,14 +384,18 @@ function throwingD1() {
 }
 
 async function compiledStateResponseReader() {
-  const [draftUrl, mediaTypeUrl] = await Promise.all([
+  const [privateEntryErrorFieldNameUrl, mediaTypeUrl] = await Promise.all([
     compileRecordShapeAwareTypeScriptModule(
-      new URL("../app/owner/entries/draft-create-response.ts", import.meta.url),
+      new URL("../app/owner/entries/private-entry-error-field-name.ts", import.meta.url),
     ),
     compileRecordShapeAwareTypeScriptModule(
       new URL("../app/owner/entries/json-response-media-type.ts", import.meta.url),
     ),
   ]);
+  const draftUrl = await compileRecordShapeAwareTypeScriptModule(
+    new URL("../app/owner/entries/draft-create-response.ts", import.meta.url),
+    { "./private-entry-error-field-name": privateEntryErrorFieldNameUrl },
+  );
   const stateModule = await importRecordShapeAwareTypeScriptModule(
     new URL("../app/owner/entries/publication-state-response.ts", import.meta.url),
     {

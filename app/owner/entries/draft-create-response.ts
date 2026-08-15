@@ -3,6 +3,7 @@ import type {
   PrivateEntryFieldName,
 } from "@/lib/private-entry/representation";
 import { hasExactKeys, isRecord } from "@/lib/record-shape";
+import { privateEntryErrorFieldName } from "./private-entry-error-field-name";
 
 export type DraftCreateFailure = {
   message: string;
@@ -16,7 +17,6 @@ export type DraftCreateResponse =
 
 const MAX_RESPONSE_BYTES = 64 * 1024;
 const MAX_ERROR_FIELDS = 16;
-const entryFields = new Set<string>(["kind", "title", "body", "destinationUrl"]);
 
 /** Treats an invalid 201 document as unconfirmed because the draft may exist. */
 export async function readDraftCreateResponse(response: Response): Promise<DraftCreateResponse> {
@@ -37,7 +37,7 @@ export async function readDraftCreateResponse(response: Response): Promise<Draft
   if (!isPrivateEntryErrorDocument(body)) return { outcome: "unconfirmed" };
   if (body.error.fields) {
     for (const item of body.error.fields) {
-      const fieldName = entryFieldName(item.name);
+      const fieldName = privateEntryErrorFieldName(item.name);
       if (fieldName && !fieldErrors[fieldName]) {
         fieldErrors[fieldName] = item.message;
       }
@@ -214,11 +214,6 @@ function isPublicDestination(value: unknown): value is string | null {
 
 function isBoundedMessage(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && value.length <= 240;
-}
-
-function entryFieldName(value: string): PrivateEntryFieldName | null {
-  const normalized = value === "entryKind" ? "kind" : value;
-  return entryFields.has(normalized) ? normalized as PrivateEntryFieldName : null;
 }
 
 function isLink(

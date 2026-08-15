@@ -191,6 +191,15 @@ const legacyOwnerEntryJsonResponseMediaTypeRestrictions = declarationRestriction
   "app/owner/entries/json-response-media-type.ts",
   "isOwnerEntryJsonResponseMediaType",
 );
+const privateEntryErrorFieldNameRestrictions = declarationRestrictions(
+  ["privateEntryErrorFieldName"],
+  "app/owner/entries/private-entry-error-field-name.ts",
+);
+const legacyPrivateEntryErrorFieldNameRestrictions = declarationRestrictions(
+  ["entryFieldName"],
+  "app/owner/entries/private-entry-error-field-name.ts",
+  "privateEntryErrorFieldName",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -228,6 +237,8 @@ const declarationRestrictionSets = [
   migrationInventoryRestrictions,
   ownerEntryJsonResponseMediaTypeRestrictions,
   legacyOwnerEntryJsonResponseMediaTypeRestrictions,
+  privateEntryErrorFieldNameRestrictions,
+  legacyPrivateEntryErrorFieldNameRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -258,6 +269,7 @@ const canonicalDeclarationFiles = [
   ["lib/entry-kind-label.ts", entryKindLabelRestrictions],
   ["tests/helpers/migration-inventory.mjs", migrationInventoryRestrictions],
   ["app/owner/entries/json-response-media-type.ts", ownerEntryJsonResponseMediaTypeRestrictions],
+  ["app/owner/entries/private-entry-error-field-name.ts", privateEntryErrorFieldNameRestrictions],
 ];
 
 const eslintConfig = defineConfig([

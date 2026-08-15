@@ -55,7 +55,7 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
       control instanceof HTMLTextAreaElement ||
       control instanceof HTMLSelectElement
     ) {
-      const fieldName = entryFieldName(control.name);
+      const fieldName = entryFormFieldName(control.name);
       if (fieldName && fieldErrors[fieldName]) {
         setFieldErrors((current) => ({ ...current, [fieldName]: undefined }));
       }
@@ -242,7 +242,7 @@ function errorId(name: EntryFieldName, error?: string): string | undefined {
   return error ? `entry-${name}-error` : undefined;
 }
 
-function entryFieldName(value: string): EntryFieldName | null {
+function entryFormFieldName(value: string): EntryFieldName | null {
   return entryFieldNames.has(value as EntryFieldName) ? value as EntryFieldName : null;
 }
 

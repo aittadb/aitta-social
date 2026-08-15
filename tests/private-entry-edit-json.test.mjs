@@ -489,14 +489,18 @@ test("edit client confirms only exact 200 owner-entry documents", async () => {
       error: {
         code: "validation_failed",
         message: "The submitted update values are invalid.",
-        fields: [{ name: "destinationUrl", code: "invalid", message: "Use a public URL." }],
+        fields: [
+          { name: "entryKind", code: "invalid", message: "Choose a kind." },
+          { name: "unknown", code: "invalid", message: "Do not expose this field." },
+          { name: "kind", code: "invalid", message: "Second kind message." },
+        ],
       },
       links: [],
     }, { status: 422 }), expectedDraft),
     {
       outcome: "definitive-error",
       message: "Update was not saved. Correct the highlighted fields and try again.",
-      fieldErrors: { destinationUrl: "Use a public URL." },
+      fieldErrors: { kind: "Choose a kind." },
     },
   );
   assert.deepEqual(
@@ -595,12 +599,19 @@ function expectedEdit(document) {
 }
 
 async function compiledEditResponseReader() {
+  const privateEntryErrorFieldNameUrl = await compileRecordShapeAwareTypeScriptModule(
+    new URL("../app/owner/entries/private-entry-error-field-name.ts", import.meta.url),
+  );
   const draftUrl = await compileRecordShapeAwareTypeScriptModule(
     new URL("../app/owner/entries/draft-create-response.ts", import.meta.url),
+    { "./private-entry-error-field-name": privateEntryErrorFieldNameUrl },
   );
   const editModule = await importRecordShapeAwareTypeScriptModule(
     new URL("../app/owner/entries/edit-save-response.ts", import.meta.url),
-    { "./draft-create-response": draftUrl },
+    {
+      "./draft-create-response": draftUrl,
+      "./private-entry-error-field-name": privateEntryErrorFieldNameUrl,
+    },
   );
   return editModule.readEntryEditResponse;
 }

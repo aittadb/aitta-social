@@ -12,7 +12,10 @@ import {
   responseJson,
   validEntryInput,
 } from "./helpers/worker-harness.mjs";
-import { importRecordShapeAwareTypeScriptModule } from "./helpers/record-shape-esm-compiler.mjs";
+import {
+  compileRecordShapeAwareTypeScriptModule,
+  importRecordShapeAwareTypeScriptModule,
+} from "./helpers/record-shape-esm-compiler.mjs";
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
 
 const ownerEmail = "owner@example.com";
@@ -398,8 +401,12 @@ test("unexpected authorization-setting failure is safe JSON before D1", async ()
 });
 
 test("new-draft client confirms only the exact 201 private-draft document", async () => {
+  const privateEntryErrorFieldNameUrl = await compileRecordShapeAwareTypeScriptModule(
+    new URL("../app/owner/entries/private-entry-error-field-name.ts", import.meta.url),
+  );
   const { readDraftCreateResponse } = await importRecordShapeAwareTypeScriptModule(
     new URL("../app/owner/entries/draft-create-response.ts", import.meta.url),
+    { "./private-entry-error-field-name": privateEntryErrorFieldNameUrl },
   );
   const document = draftDocument();
   assert.deepEqual(
@@ -456,14 +463,18 @@ test("new-draft client confirms only the exact 201 private-draft document", asyn
       error: {
         code: "validation_failed",
         message: "The submitted update values are invalid.",
-        fields: [{ name: "destinationUrl", code: "invalid", message: "Use a public URL." }],
+        fields: [
+          { name: "entryKind", code: "invalid", message: "Choose a kind." },
+          { name: "unknown", code: "invalid", message: "Do not expose this field." },
+          { name: "kind", code: "invalid", message: "Second kind message." },
+        ],
       },
       links: [],
     }, { status: 422 })),
     {
       outcome: "definitive-error",
       message: "Update was not saved. Correct the highlighted fields and try again.",
-      fieldErrors: { destinationUrl: "Use a public URL." },
+      fieldErrors: { kind: "Choose a kind." },
     },
   );
   assert.deepEqual(
