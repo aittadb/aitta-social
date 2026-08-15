@@ -4,6 +4,7 @@ import test from "node:test";
 import { ESLint } from "eslint";
 
 import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
 
 const productionConsumers = [
   "lib/api-v1/entry-collection.ts",
@@ -75,10 +76,10 @@ test("lint rejects duplicate RFC 6570 path-segment declarations and retains earl
     { filePath: "lib/rfc6570-path-segment.ts" },
   );
 
-  assert.equal(restrictedSyntaxErrors(results), duplicates.length);
-  assert.equal(restrictedSyntaxErrors([canonical]), 0);
-  assert.equal(restrictedSyntaxErrors([recordShapeInCanonical]), 1);
-  assert.equal(restrictedSyntaxErrors([legacyInCanonical]), 0);
+  assert.equal(restrictedSyntaxErrorCount(...results), duplicates.length);
+  assert.equal(restrictedSyntaxErrorCount(canonical), 0);
+  assert.equal(restrictedSyntaxErrorCount(recordShapeInCanonical), 1);
+  assert.equal(restrictedSyntaxErrorCount(legacyInCanonical), 0);
 });
 
 function declarationForms(name) {
@@ -102,8 +103,4 @@ function declarationForms(name) {
     `var ${name} = () => null;`,
     `export var ${name} = () => null;`,
   ];
-}
-
-function restrictedSyntaxErrors(results) {
-  return results.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length;
 }

@@ -4,6 +4,7 @@ import test from "node:test";
 import { ESLint } from "eslint";
 
 import { parseAcceptMediaRanges } from "../lib/accept-media-ranges.ts";
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
 
 const consumers = [
   "lib/api-v1/accept.ts",
@@ -131,12 +132,8 @@ test("lint rejects duplicate Accept parsers without weakening earlier canonical 
     { filePath: "lib/accept-media-ranges.ts" },
   );
 
-  assert.equal(restrictedSyntaxErrors(results), duplicates.length);
-  assert.equal(restrictedSyntaxErrors([canonical]), 0);
-  assert.equal(restrictedSyntaxErrors([recordShapeInParser]), 1);
-  assert.equal(restrictedSyntaxErrors([regularExpressionInParser]), 1);
+  assert.equal(restrictedSyntaxErrorCount(...results), duplicates.length);
+  assert.equal(restrictedSyntaxErrorCount(canonical), 0);
+  assert.equal(restrictedSyntaxErrorCount(recordShapeInParser), 1);
+  assert.equal(restrictedSyntaxErrorCount(regularExpressionInParser), 1);
 });
-
-function restrictedSyntaxErrors(results) {
-  return results.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length;
-}

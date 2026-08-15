@@ -9,6 +9,7 @@ import {
   hasUrlControl,
 } from "../lib/custom-pages/page-text-boundaries.ts";
 import { importCustomPageDocumentModules } from "./helpers/custom-page-document-esm-compiler.mjs";
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
 
 const boundaryNames = ["characterLength", "hasForbiddenTextControl", "hasUrlControl"];
 const visibleTextNames = ["pageInlineVisibleText", "visibleInlineText", "inlineVisibleText"];
@@ -151,16 +152,16 @@ test("lint rejects boundary and legacy visible-text redeclarations without weake
     { filePath: "lib/custom-pages/page-text-boundaries.ts" },
   );
 
-  assert.equal(restrictedSyntaxErrors(results), duplicates.length);
+  assert.equal(restrictedSyntaxErrorCount(...results), duplicates.length);
   assert.equal(boundariesCanonical.errorCount, 0);
   assert.equal(documentCanonical.errorCount, 0);
-  assert.equal(restrictedSyntaxErrors([boundaryInDocument]), 1);
-  assert.equal(restrictedSyntaxErrors([visibleTextInBoundary]), 1);
+  assert.equal(restrictedSyntaxErrorCount(boundaryInDocument), 1);
+  assert.equal(restrictedSyntaxErrorCount(visibleTextInBoundary), 1);
   assert.equal(
-    restrictedSyntaxErrors(legacyVisibleTextInDocument),
+    restrictedSyntaxErrorCount(...legacyVisibleTextInDocument),
     visibleTextNames.slice(1).length * declarationForms("visibleInlineText").length,
   );
-  assert.equal(restrictedSyntaxErrors([recordShapeInBoundary]), 1);
+  assert.equal(restrictedSyntaxErrorCount(recordShapeInBoundary), 1);
 });
 
 function declarationForms(name) {
@@ -180,8 +181,4 @@ function declarationForms(name) {
     `const ${name} = class ${name} {};`,
     `export const ${name} = class ${name} {};`,
   ];
-}
-
-function restrictedSyntaxErrors(results) {
-  return results.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length;
 }

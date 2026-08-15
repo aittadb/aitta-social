@@ -4,6 +4,7 @@ import test from "node:test";
 import { ESLint } from "eslint";
 
 import { errorDocument } from "./helpers/error-document-contract.mjs";
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
 
 const consumers = [
   "tests/api-v1-root.test.mjs",
@@ -69,11 +70,7 @@ test("lint rejects every duplicate error-document declaration and preserves all 
     "function errorDocument() {}",
     { filePath: "lib/record-shape.ts" },
   );
-  assert.equal(restrictedSyntaxErrors(results), duplicates.length);
+  assert.equal(restrictedSyntaxErrorCount(...results), duplicates.length);
   assert.equal(canonical.errorCount, 0);
-  assert.equal(restrictedSyntaxErrors([recordShapeCanonicalDuplicate]), 1);
+  assert.equal(restrictedSyntaxErrorCount(recordShapeCanonicalDuplicate), 1);
 });
-
-function restrictedSyntaxErrors(results) {
-  return results.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length;
-}

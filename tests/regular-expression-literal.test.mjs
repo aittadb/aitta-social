@@ -4,6 +4,7 @@ import test from "node:test";
 import { ESLint } from "eslint";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
 
 const consumers = [
   "tests/technical-page.test.mjs",
@@ -89,17 +90,13 @@ test("lint rejects duplicate escape helpers and retains canonical allowances", a
   );
 
   assert.equal(
-    results.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length,
+    restrictedSyntaxErrorCount(...results),
     duplicates.length,
   );
   assert.equal(canonicalEscape.errorCount, 0);
   assert.equal(canonicalRecordShape.errorCount, 0);
-  assert.equal(restrictedSyntaxErrors(escapeCanonicalRecordShapeDuplicate), 1);
-  assert.equal(restrictedSyntaxErrors(escapeCanonicalExactKeysDuplicate), 1);
-  assert.equal(restrictedSyntaxErrors(recordShapeCanonicalEscapeDuplicate), 1);
-  assert.equal(restrictedSyntaxErrors(recordShapeCanonicalLegacyEscapeDuplicate), 1);
+  assert.equal(restrictedSyntaxErrorCount(escapeCanonicalRecordShapeDuplicate), 1);
+  assert.equal(restrictedSyntaxErrorCount(escapeCanonicalExactKeysDuplicate), 1);
+  assert.equal(restrictedSyntaxErrorCount(recordShapeCanonicalEscapeDuplicate), 1);
+  assert.equal(restrictedSyntaxErrorCount(recordShapeCanonicalLegacyEscapeDuplicate), 1);
 });
-
-function restrictedSyntaxErrors(result) {
-  return result.messages.filter(({ ruleId }) => ruleId === "no-restricted-syntax").length;
-}

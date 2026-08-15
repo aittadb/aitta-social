@@ -4,6 +4,7 @@ import test from "node:test";
 import { ESLint } from "eslint";
 
 import { publicFooter } from "./helpers/public-footer-contract.mjs";
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
 
 const consumers = [
   "tests/technical-page.test.mjs",
@@ -61,9 +62,9 @@ test("lint rejects duplicate public footer declarations and retains canonical al
     { filePath: "tests/helpers/public-footer-contract.mjs" },
   );
   assert.equal(
-    results.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length,
+    restrictedSyntaxErrorCount(...results),
     duplicates.length,
   );
   assert.equal(canonical.errorCount, 0);
-  assert.equal(recordShapeCanonical.messages.filter(({ ruleId }) => ruleId === "no-restricted-syntax").length, 1);
+  assert.equal(restrictedSyntaxErrorCount(recordShapeCanonical), 1);
 });

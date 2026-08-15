@@ -4,6 +4,7 @@ import test from "node:test";
 import { ESLint } from "eslint";
 
 import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
 
 const consumers = [
   "tests/assisted-runtime-journey.test.mjs",
@@ -77,13 +78,9 @@ test("lint rejects canonical and legacy acknowledgement redeclarations while all
     { filePath: "tests/helpers/deletion-acknowledgement-contract.mjs" },
   );
   assert.equal(
-    results.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length,
+    restrictedSyntaxErrorCount(...results),
     duplicates.length,
   );
-  assert.equal(restrictedSyntaxErrors(canonical), 0);
-  assert.equal(restrictedSyntaxErrors(legacyCanonical), 1);
+  assert.equal(restrictedSyntaxErrorCount(canonical), 0);
+  assert.equal(restrictedSyntaxErrorCount(legacyCanonical), 1);
 });
-
-function restrictedSyntaxErrors(result) {
-  return result.messages.filter(({ ruleId }) => ruleId === "no-restricted-syntax").length;
-}

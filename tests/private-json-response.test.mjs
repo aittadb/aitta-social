@@ -4,6 +4,7 @@ import test from "node:test";
 import { ESLint } from "eslint";
 
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
 
 const consumers = [
   "tests/private-profile-json.test.mjs",
@@ -95,12 +96,8 @@ test("lint rejects duplicate private JSON assertions and retains canonical allow
     "function isRecord(value) { return Boolean(value); }",
     { filePath: "tests/helpers/private-json-response.mjs" },
   );
-  assert.equal(restrictedSyntaxErrors(results), duplicates.length);
+  assert.equal(restrictedSyntaxErrorCount(...results), duplicates.length);
   assert.equal(canonical.errorCount, 0);
-  assert.equal(restrictedSyntaxErrors([recordShapeCanonicalDuplicate]), 1);
-  assert.equal(restrictedSyntaxErrors([privateJsonRecordShapeDuplicate]), 1);
+  assert.equal(restrictedSyntaxErrorCount(recordShapeCanonicalDuplicate), 1);
+  assert.equal(restrictedSyntaxErrorCount(privateJsonRecordShapeDuplicate), 1);
 });
-
-function restrictedSyntaxErrors(results) {
-  return results.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length;
-}

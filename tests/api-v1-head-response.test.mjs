@@ -4,6 +4,7 @@ import test from "node:test";
 import { ESLint } from "eslint";
 
 import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
 
 const headerNames = ["content-type", "cache-control", "vary", "allow", "location"];
 const consumers = [
@@ -107,12 +108,8 @@ test("lint rejects duplicate API v1 HEAD assertions and retains canonical allowa
     { filePath: "tests/helpers/api-v1-head-response.mjs" },
   );
 
-  assert.equal(restrictedSyntaxErrors(results), duplicates.length);
+  assert.equal(restrictedSyntaxErrorCount(...results), duplicates.length);
   assert.equal(canonical.errorCount, 0);
-  assert.equal(restrictedSyntaxErrors(legacyResults), legacyDuplicates.length);
-  assert.equal(restrictedSyntaxErrors([recordShapeDuplicate]), 1);
+  assert.equal(restrictedSyntaxErrorCount(...legacyResults), legacyDuplicates.length);
+  assert.equal(restrictedSyntaxErrorCount(recordShapeDuplicate), 1);
 });
-
-function restrictedSyntaxErrors(results) {
-  return results.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length;
-}

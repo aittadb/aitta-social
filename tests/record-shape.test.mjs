@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { ESLint } from "eslint";
 
+import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.mjs";
+
 import {
   importRecordShapeAwareTypeScriptModule,
   rewriteTypeScriptImportSpecifiers,
@@ -79,7 +81,7 @@ test("lint rejects duplicate top-level record-shape predicate declarations", asy
   );
 
   assert.equal(
-    duplicates.flatMap(({ messages }) => messages).filter(({ ruleId }) => ruleId === "no-restricted-syntax").length,
+    restrictedSyntaxErrorCount(...duplicates),
     10,
   );
   assert.equal(canonical.errorCount, 0);
