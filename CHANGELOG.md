@@ -1,5 +1,21 @@
 # Changelog
 
+- **TASK-212 — Centralized RFC 6570 path-segment expansion.** Added the
+  dependency-free `lib/rfc6570-path-segment.ts` leaf as the sole owner of the
+  opaque identifier encoder. Four production consumers and three existing test
+  consumers now import it. The implementation retains RFC 6570 level-1 output:
+  unreserved ASCII only, uppercase UTF-8 percent triplets, slash and percent
+  double encoding, empty input, and the existing `URIError` for unpaired
+  surrogates. Regression coverage pins fixed reserved/Unicode/control output,
+  direct ownership/imports, and lint restrictions. Validation: independent
+  review found no P0/P1/P2 issues; integrated commit `92f3320`; focused
+  affected suites passed 113/113; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 533/533 tests. No metadata, route,
+  API, schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: unrelated metadata and direct
+  ID interpolation are not duplicate helper bodies and remain outside this
+  behavior-preserving slice.
+
 - **TASK-211 — Centralized custom-page text boundary primitives.** Added the
   dependency-free `lib/custom-pages/page-text-boundaries.ts` leaf as the sole
   owner of Unicode code-point length and the text/URL control-character
