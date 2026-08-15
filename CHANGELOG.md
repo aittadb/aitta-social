@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-229 — Centralized private-entry error field-name recognition.** Added
+  the runtime-dependency-free
+  `app/owner/entries/private-entry-error-field-name.ts` leaf as the sole owner
+  of the response-field allowlist and `entryKind` alias normalization. Create
+  and edit response readers now share it while retaining unknown-field
+  omission, first-message-wins, structured 4xx, status/fallback, bounded-read,
+  and recovery behavior. The stricter form-control recognizer is now clearly
+  named `entryFormFieldName` and remains independent. Four direct isolated
+  TypeScript test-module import maps were updated only to resolve the new
+  static dependency. Validation: independent review found no P0/P1/P2 issues;
+  integrated commit `5df82a1`; focused checks passed 93/93; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  596/596 tests. No dependency, observable production behavior, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted task shares
+  only test JSON response-body parsing while retaining all suite-level response
+  contracts.
+
 - **TASK-228 — Centralized owner-entry JSON response media-type recognition.**
   Added the dependency-free `app/owner/entries/json-response-media-type.ts`
   leaf as the sole owner of the narrow owner-entry JSON media-type predicate.
