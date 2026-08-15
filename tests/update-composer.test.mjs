@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { countMatches } from "./helpers/regular-expression-match-count.mjs";
 
 import {
   FakeD1,
@@ -267,9 +268,4 @@ async function ownerHtml(path, env) {
 
 function readSource(path) {
   return readFile(new URL(`../${path}`, import.meta.url), "utf8");
-}
-
-
-function countMatches(value, pattern) {
-  return [...value.matchAll(pattern)].length;
 }

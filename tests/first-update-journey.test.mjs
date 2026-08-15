@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { countMatches } from "./helpers/regular-expression-match-count.mjs";
+
 import {
   FakeD1,
   entryRow,
@@ -363,10 +365,6 @@ function ownerPageHeader(html) {
   const match = html.match(/<header class="owner-page-header">[\s\S]*?<\/header>/i);
   assert.ok(match, "expected the owner page header");
   return match[0];
-}
-
-function countMatches(value, pattern) {
-  return (value.match(pattern) ?? []).length;
 }
 
 function isBoundedFirstStateQuery(query) {

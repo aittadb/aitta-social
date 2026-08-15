@@ -5,6 +5,7 @@ import ts from "typescript";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
 import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
+import { countMatches } from "./helpers/regular-expression-match-count.mjs";
 
 import {
   FakeD1,
@@ -537,9 +538,4 @@ async function assertPubliclyUnknown(env, id, canaries) {
 
 async function source(path) {
   return readFile(new URL(`../${path}`, import.meta.url), "utf8");
-}
-
-
-function countMatches(value, pattern) {
-  return [...value.matchAll(pattern)].length;
 }

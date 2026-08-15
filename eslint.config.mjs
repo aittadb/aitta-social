@@ -105,6 +105,10 @@ const orderedTextAssertionRestrictions = declarationRestrictions(
   ["assertOrdered"],
   "tests/helpers/ordered-text-assertion.mjs",
 );
+const regularExpressionMatchCountRestrictions = declarationRestrictions(
+  ["countMatches"],
+  "tests/helpers/regular-expression-match-count.mjs",
+);
 const cssClampPixelsRestrictions = declarationRestrictions(
   ["clampPixels"],
   "tests/helpers/css-clamp-pixels.mjs",
@@ -128,6 +132,7 @@ const declarationRestrictionSets = [
   legacyPageInlineVisibleTextRestrictions,
   rfc6570PathSegmentRestrictions,
   orderedTextAssertionRestrictions,
+  regularExpressionMatchCountRestrictions,
   cssClampPixelsRestrictions,
 ];
 
@@ -146,6 +151,7 @@ const canonicalDeclarationFiles = [
   ["lib/custom-pages/page-document.ts", pageInlineVisibleTextRestrictions],
   ["lib/rfc6570-path-segment.ts", rfc6570PathSegmentRestrictions],
   ["tests/helpers/ordered-text-assertion.mjs", orderedTextAssertionRestrictions],
+  ["tests/helpers/regular-expression-match-count.mjs", regularExpressionMatchCountRestrictions],
   ["tests/helpers/css-clamp-pixels.mjs", cssClampPixelsRestrictions],
 ];
 
