@@ -1,0 +1,43 @@
+/**
+ * Shared design tokens.
+ *
+ * Purpose:
+ * - Store centralized palette, spacing, radii, borders, and behavioral constants.
+ * - Provide reusable size/shape variables consumed by all layers.
+ *
+ * Do not include:
+ * - component-specific selectors.
+ * - responsive layout rules.
+ * - semantic typography variants.
+ */
+:root {
+  --paper: #f3f0e8;
+  --paper-raised: #fbfaf6;
+  --ink: #18201e;
+  --muted: #5e6763;
+  --line: #c9ccc4;
+  --accent: #31554d;
+  --accent-contrast: #ffffff;
+  --danger: #8b2d2d;
+  --focus-dark: #18201e;
+  --focus-light: #ffffff;
+
+  --paper-radius: 16px;
+  --paper-radius-small: 6px;
+  --paper-radius-xsmall: 4px;
+  --paper-outline: 1px solid var(--line);
+
+  --surface-padding: 1.25rem;
+  --shell-max-width: 1120px;
+  --shell-safe-x: max(16px, env(safe-area-inset-left));
+  --shell-safe-right: max(16px, env(safe-area-inset-right));
+
+  --control-min-height: 44px;
+  --control-radius: 12px;
+
+  --z-footer: 100;
+
+  --serif: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
+  --sans: var(--font-geist-sans), Arial, sans-serif;
+  --mono: var(--font-geist-mono), monospace;
+}

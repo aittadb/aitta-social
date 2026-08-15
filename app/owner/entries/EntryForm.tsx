@@ -7,6 +7,8 @@ import { describedBy } from "../form-field-description";
 import { readDraftCreateResponse } from "./draft-create-response";
 import { createEntryRequest, editEntryRequest } from "./entry-mutation-requests";
 import { readEntryEditResponse } from "./edit-save-response";
+import sharedStyles from "../_components/owner-form-shared.module.css";
+import styles from "./EntryForm.module.css";
 
 type EntryFieldName = "kind" | "title" | "body" | "destinationUrl";
 type FieldErrors = Partial<Record<EntryFieldName, string>>;
@@ -59,10 +61,8 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
     await submitEntryForm({
       event,
       recoveryRequired,
-      busy,
       entry,
       kind,
-      fieldErrors,
       setFieldErrors,
       setStatus,
       setBusy,
@@ -87,7 +87,7 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
 
   return (
     <form
-      className="owner-form entry-editor-form"
+      className={`${sharedStyles['owner-form']} ${styles['entry-editor-form']}`}
       aria-label={entry ? "Edit update" : "Create private draft"}
       onSubmit={handleSubmit}
       onInput={clearFieldError}
@@ -115,7 +115,7 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
 
 function EntryContextHeader({ context, isPublished }: { context: EntryContext; isPublished: boolean }) {
   return (
-    <section className="entry-save-context" aria-labelledby="entry-save-context-title">
+    <section className={styles['entry-save-context']} aria-labelledby="entry-save-context-title">
       <strong id="entry-save-context-title">{context.heading}</strong>
       <span>{isPublished
         ? "Saving replaces this Aitta’s public update without changing its publication state."
@@ -139,9 +139,9 @@ function EntryFields({
   recovery: boolean;
 }) {
   return (
-    <fieldset className="entry-editor-fields" aria-disabled={recovery}>
+    <fieldset className={styles['entry-editor-fields']} aria-disabled={recovery}>
       <legend>Update content</legend>
-      <label className="field entry-body-field" htmlFor="entry-body">
+      <label className={`${sharedStyles['owner-form-field']} ${styles['entry-body-field']}`} htmlFor="entry-body">
         <span>Text</span>
         <textarea
           id="entry-body"
@@ -157,8 +157,8 @@ function EntryFields({
         <FieldError name="body" error={fieldErrors.body} />
       </label>
 
-      <div className="field-grid field-grid-two">
-        <label className="field" htmlFor="entry-kind">
+      <div className={`${sharedStyles['owner-form-field-grid']} ${sharedStyles['owner-form-field-grid-two']}`}>
+        <label className={sharedStyles['owner-form-field']} htmlFor="entry-kind">
           <span>Kind</span>
           <select
             id="entry-kind"
@@ -174,10 +174,10 @@ function EntryFields({
               </option>
             ))}
           </select>
-          <small className="entry-kind-guidance" id="entry-kind-help">{entryKindGuidance[kind]}</small>
+          <small className={styles['entry-kind-guidance']} id="entry-kind-help">{entryKindGuidance[kind]}</small>
           <FieldError name="kind" error={fieldErrors.kind} />
         </label>
-        <label className="field" htmlFor="entry-title">
+          <label className={sharedStyles['owner-form-field']} htmlFor="entry-title">
           <span>Title (optional)</span>
           <input
             id="entry-title"
@@ -191,7 +191,7 @@ function EntryFields({
         </label>
       </div>
 
-      <label className="field" htmlFor="entry-destinationUrl">
+      <label className={sharedStyles['owner-form-field']} htmlFor="entry-destinationUrl">
         <span>{kind === "link" ? "Destination URL (required for Link)" : "Destination URL (optional)"}</span>
           <input
           id="entry-destinationUrl"
@@ -203,7 +203,7 @@ function EntryFields({
           aria-invalid={Boolean(fieldErrors.destinationUrl) || undefined}
           aria-describedby={describedBy("entry-destination-help", errorId("destinationUrl", fieldErrors.destinationUrl))}
         />
-        <small className="entry-destination-guidance" id="entry-destination-help">
+        <small className={styles['entry-destination-guidance']} id="entry-destination-help">
           {kind === "link"
             ? "Use the complete https:// or http:// address this update should open."
             : "Leave this empty unless the update should point to a web address."}
@@ -228,17 +228,17 @@ function EntryFooter({
   isPublished: boolean;
 }) {
   return (
-    <div className="form-footer entry-editor-footer">
+    <div className={`${sharedStyles['owner-form-footer']} ${styles['entry-editor-footer']}`}>
       <button className="button" type="submit" disabled={busy || recoveryRequired}>
         {entry && isPublished ? "Save update" : "Save private draft"}
       </button>
       <a className="button button-quiet" href="/owner">Back to this Aitta</a>
-      <p className="form-status" role="status" aria-live="polite" aria-atomic="true">{status}</p>
+      <p className={sharedStyles['owner-form-status']} role="status" aria-live="polite" aria-atomic="true">{status}</p>
       {recoveryRequired ? (
-        <a
-          className="button button-quiet"
-          href={entry ? `/owner/entries/${encodeURIComponent(entry.id)}` : "/owner"}
-        >
+          <a
+            className="button button-quiet"
+            href={entry ? `/owner/entries/${encodeURIComponent(entry.id)}` : "/owner"}
+          >
           {entry ? "Reload saved update before retrying" : "Check saved updates before retrying"}
         </a>
       ) : null}
@@ -315,7 +315,6 @@ async function submitEntryForm({
         setStatus,
         setBusy,
         setRecoveryRequired,
-        entryId: encodeURIComponent(entry?.id ?? ""),
       });
     }
 

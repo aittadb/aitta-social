@@ -4,6 +4,7 @@ import type { Entry } from "@/lib/types";
 import { EntryActions } from "./_components/EntryActions";
 import { OwnerAccessState, OwnerShell } from "./_components/OwnerShell";
 import { requireOwnerPage } from "./owner-access";
+import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ export default async function OwnerDashboard() {
       : "Complete your identity";
   return (
     <OwnerShell current="overview">
-      <header className="owner-page-header">
+      <header className={styles['owner-page-header']}>
         <div>
           <p className="eyebrow">Your Aitta</p>
           <h1>{heading}</h1>
@@ -41,24 +42,24 @@ export default async function OwnerDashboard() {
 
       <OwnerNextStep readiness={readiness} journey={firstUpdate} />
 
-      <section className="owner-summary" aria-label="Aitta summary">
+      <section className={styles['owner-summary']} aria-label="Aitta summary">
         <Summary label="Identity" value={readiness.state === "complete" ? "Ready" : readiness.state === "incomplete" ? "Incomplete" : "Not started"} />
         <Summary label="Published" value={String(published)} />
         <Summary label="Drafts" value={String(entries.length - published)} />
       </section>
 
-      <section className="owner-section" aria-labelledby="owner-entries-title">
-        <div className="owner-section-heading">
+      <section className={styles['owner-section']} aria-labelledby="owner-entries-title">
+        <div className={styles['owner-section-heading']}>
           <div><p className="eyebrow">Local content</p><h2 id="owner-entries-title">Updates</h2></div>
           {entries.length ? <a className="text-link" href="/owner/entries/new">Create update</a> : null}
         </div>
-        {entries.length ? (
-          <div className="owner-entry-list">
-            {entries.map((entry) => (
-              <article className="owner-entry-row" key={entry.id}>
-                <div className="owner-entry-copy">
-                  <div className="entry-meta"><span>{entry.kind}</span><span className={`state state-${entry.state}`}>{entry.state}</span></div>
-                  <h3><a href={`/owner/entries/${entry.id}`}>{entry.title ?? entry.body.slice(0, 90)}</a></h3>
+          {entries.length ? (
+            <div className={styles['owner-entry-list']}>
+              {entries.map((entry) => (
+                <article className={styles['owner-entry-row']} key={entry.id}>
+                  <div className={styles['owner-entry-copy']}>
+                    <div className={styles['entry-meta']}><span>{entry.kind}</span><span className={`${styles['owner-state']} ${entry.state === "published" ? styles['state-published'] : ""}`}>{entry.state}</span></div>
+                    <h3><a href={`/owner/entries/${entry.id}`}>{entry.title ?? entry.body.slice(0, 90)}</a></h3>
                   <p>Updated {formatDate(entry.updatedAt)}</p>
                 </div>
                 <EntryActions id={entry.id} state={entry.state} label={entry.title ?? entry.body.slice(0, 90)} />
@@ -66,7 +67,7 @@ export default async function OwnerDashboard() {
             ))}
           </div>
         ) : (
-          <div className="owner-empty">
+          <div className={styles['owner-empty']}>
             <h3>Nothing to manage yet</h3>
             <p>Create a draft, shape it privately, and publish it when it is ready.</p>
           </div>
@@ -103,7 +104,7 @@ function OwnerNextStep({
   const progress = readiness.requirementsComplete;
   return (
     <section
-      className={`owner-next-step owner-next-step-${readiness.state}`}
+      className={styles['owner-next-step']}
       aria-labelledby="owner-next-step-title"
     >
       <div>
@@ -111,13 +112,13 @@ function OwnerNextStep({
         <h2 id="owner-next-step-title">{content.title}</h2>
         <p>{content.message}</p>
         {readiness.canonicalUrl ? (
-          <p className="effective-canonical">
+          <p className={styles['effective-canonical']}>
             <span>Public URL · {readiness.canonicalSource === "runtime" ? "protected Site setting" : "saved Identity"}</span>
             <code>{readiness.canonicalUrl}</code>
           </p>
         ) : null}
       </div>
-      <div className="owner-next-step-progress">
+      <div className={styles['owner-next-step-progress']}>
         <label htmlFor="identity-progress">Identity readiness: {progress} of 2 requirements complete</label>
         <progress id="identity-progress" max="2" value={progress}>{progress} of 2</progress>
       </div>

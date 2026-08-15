@@ -102,17 +102,51 @@ function parseEntryDocument(
   if (!isRecord(value) || !hasExactKeys(value, ["data", "links", "actions"])) return null;
   if (!isRecord(value.data) || !hasExactKeys(value.data, ["id", "type", "attributes"])) return null;
 
-  const hasExpectedId = typeof value.data.id === "string" &&
-    (expected.id === undefined || value.data.id === expected.id) &&
-    (expected.requireNewId !== true || isDraftId(value.data.id));
-  if (!hasExpectedId || value.data.type !== "owner-entry") return null;
+  const entryId = parseEntryId(value.data.id, expected);
+  if (entryId === null || value.data.type !== "owner-entry") return null;
+  const attributes = parseEntryAttributes(value.data.attributes);
+  if (attributes === null) return null;
+  if (expected.state !== undefined && attributes.state !== expected.state) return null;
 
-  const encodedId = encodeURIComponent(value.data.id).replace(/[!'()*]/g, (character) =>
+  const encodedId = encodeURIComponent(entryId).replace(/[!'()*]/g, (character) =>
     `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
   );
   const selfLinkHref = `/api/private/entries/${encodedId}`;
 
-  if (!isRecord(value.data.attributes) || !hasExactKeys(value.data.attributes, [
+  return {
+    attributes: {
+      kind: attributes.kind,
+      title: attributes.title,
+      body: attributes.body,
+      destinationUrl: attributes.destinationUrl,
+      state: attributes.state,
+    },
+    links: value.links as unknown[],
+    actions: value.actions as unknown[],
+    encodedId,
+    state: attributes.state,
+    selfLinkHref,
+  };
+}
+
+function parseEntryId(
+  value: unknown,
+  expected: { id?: string; requireNewId?: boolean },
+): string | null {
+  if (typeof value !== "string") return null;
+  if (expected.id !== undefined && value !== expected.id) return null;
+  if (expected.requireNewId === true && !isDraftId(value)) return null;
+  return value;
+}
+
+function parseEntryAttributes(attributes: unknown): {
+  kind: string;
+  title: string | null;
+  body: string;
+  destinationUrl: string | null;
+  state: "draft" | "published";
+} | null {
+  if (!isRecord(attributes) || !hasExactKeys(attributes, [
     "kind",
     "title",
     "body",
@@ -126,33 +160,21 @@ function parseEntryDocument(
   }
 
   if (
-    expected.state !== undefined &&
-    (value.data.attributes.state !== expected.state)
-  ) {
-    return null;
-  }
-
-  const attributes = value.data.attributes;
-  if (
     !isNormalizedBoundedText(attributes.kind, 1, 32) ||
-    !isRecord(attributes.kind)
+    (typeof attributes.title !== "string" && attributes.title !== null) ||
+    !isNormalizedBoundedText(attributes.body, 1, 50000) ||
+    !isValidDestination(attributes.destinationUrl) ||
+    !isEntryState(attributes.state)
   ) {
     return null;
   }
 
   return {
-    attributes: {
-      kind: attributes.kind,
-      title: attributes.title,
-      body: attributes.body,
-      destinationUrl: attributes.destinationUrl,
-      state: attributes.state,
-    },
-    links: value.links,
-    actions: value.actions,
-    encodedId,
+    kind: attributes.kind,
+    title: attributes.title,
+    body: attributes.body,
+    destinationUrl: attributes.destinationUrl,
     state: attributes.state,
-    selfLinkHref,
   };
 }
 
@@ -264,7 +286,7 @@ export function isPrivateEntryErrorDocument(value: unknown): value is {
   }
   if (value.error.fields === undefined) return true;
 
-  return isBoundedErrorFields(value.error.fields);
+  return isBoundedErrorFields(value.error.fields as unknown[]);
 }
 
 const ALLOWED_ENTRY_KIND = new Set<string>(["note", "article", "announcement", "link"]);
@@ -286,6 +308,14 @@ function isBoundedMessage(value: unknown): value is string {
 
 function isNormalizedBoundedText(value: unknown, minimum: number, maximum: number): value is string {
   return typeof value === "string" && value === value.trim() && value.length >= minimum && value.length <= maximum;
+}
+
+function isEntryState(value: unknown): value is "draft" | "published" {
+  return value === "draft" || value === "published";
+}
+
+function isValidDestination(value: unknown): value is string | null {
+  return value === null || typeof value === "string";
 }
 
 function isPublicDestination(value: unknown): value is string | null {

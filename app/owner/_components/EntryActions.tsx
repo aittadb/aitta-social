@@ -4,6 +4,7 @@ import { useState } from "react";
 import { readDeletionResponse } from "../entries/deletion-response";
 import { changeEntryStateRequest, deleteEntryRequest } from "../entries/entry-mutation-requests";
 import { readPublicationStateResponse } from "../entries/publication-state-response";
+import styles from "./EntryActions.module.css";
 
 export function EntryActions({ id, state, label }: { id: string; state: "draft" | "published"; label: string }) {
   const [busy, setBusy] = useState(false);
@@ -89,13 +90,13 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
 
   return (
     <div
-      className="entry-actions"
+      className={styles['entry-actions']}
       role="group"
       aria-label={`Actions for ${updateLabel}, update ${actionReference}`}
       aria-describedby={lifecycleDescriptionId}
       aria-busy={busy}
     >
-      <p className="form-status" id={lifecycleDescriptionId}>
+      <p className={styles['entry-actions-status']} id={lifecycleDescriptionId}>
         <strong>{state === "draft" ? "Draft" : "Published"}</strong>
         {state === "draft"
           ? " — only the owner can read this update. Publishing makes it publicly readable on this Aitta."
@@ -111,7 +112,7 @@ export function EntryActions({ id, state, label }: { id: string; state: "draft" 
         </>
       )}
       <button className="button button-small button-danger" type="button" disabled={busy || deletionRecoveryRequired} onClick={remove} aria-label={`Delete ${updateLabel}, update ${actionReference}`}>Delete</button>
-      <span className="form-status" role="status" aria-live="polite" aria-atomic="true">{message}</span>
+      <span className={styles['entry-actions-status']} role="status" aria-live="polite" aria-atomic="true">{message}</span>
       {lifecycleRecoveryRequired ? (
         <a className="button button-small button-quiet" href="/owner" aria-label={`Check current state of ${updateLabel}, update ${actionReference}`}>
           Check this Aitta’s current saved state

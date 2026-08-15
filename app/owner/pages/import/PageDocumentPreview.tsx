@@ -15,16 +15,16 @@ export function PageDocumentPreview({
   headingRef: RefObject<HTMLHeadingElement | null>;
 }) {
   return (
-    <article className={styles.preview} aria-label={`Normalized page preview: ${document.title}`}>
-      <header className={styles.previewHeader}>
-        <p className={styles.previewLabel}>Normalized page preview</p>
+    <article className={styles['page-import-preview']} aria-label={`Normalized page preview: ${document.title}`}>
+      <header className={styles['page-import-preview-header']}>
+        <p className={styles['preview-label']}>Normalized page preview</p>
         <h2 ref={headingRef} tabIndex={-1}>{document.title}</h2>
         {document.description ? <p>{document.description}</p> : null}
       </header>
-      <div className={styles.sections}>
+      <div className={styles['page-import-sections']}>
         {document.sections.map((section, index) => (
           <section
-            className={`${styles.section} ${layoutClass(section.layout)}`}
+            className={`${styles['page-import-section']} ${layoutClass(section.layout)}`}
             id={section.fragment ? previewFragmentId(section.fragment) : undefined}
             key={`${section.fragment ?? "section"}-${index}`}
           >
@@ -53,7 +53,7 @@ function PreviewBlock({ block }: { block: PageBlockV1 }) {
     }
     case "linkGroup":
       return (
-        <div className={styles.linkGroup}>
+        <div className={styles['link-group']}>
           {block.links.map((link, index) => (
             <PreviewLink destination={link.destination} key={`${link.label}-${index}`}>
               {link.label}
@@ -63,9 +63,9 @@ function PreviewBlock({ block }: { block: PageBlockV1 }) {
       );
     case "group":
       return (
-        <div className={`${styles.group} ${layoutClass(block.layout)}`}>
+        <div className={`${styles['page-import-group']} ${layoutClass(block.layout)}`}>
           {block.blocks.map((child, index) => (
-            <div className={styles.groupItem} key={`${child.type}-${index}`}>
+            <div className={styles['page-import-group-item']} key={`${child.type}-${index}`}>
               <PreviewBlock block={child} />
             </div>
           ))}
@@ -125,9 +125,9 @@ function PreviewLink({
 }
 
 function layoutClass(layout: "flow" | "split" | "cards"): string {
-  if (layout === "split") return styles.split;
-  if (layout === "cards") return styles.cards;
-  return styles.flow;
+  if (layout === "split") return styles['page-import-split'];
+  if (layout === "cards") return styles['page-import-cards'];
+  return styles['page-import-flow'];
 }
 
 function previewFragmentId(fragment: string): string {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import styles from "./information-page.module.css";
 import {
   PublicPageFrame,
 } from "@/app/_components/PublicPresenceFrame";
@@ -10,13 +11,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-type PrivacySection = {
+type PrivacySectionContent = {
   id: string;
   heading: string;
   body: string[];
 };
 
-const privacySections: PrivacySection[] = [
+const privacySections: PrivacySectionContent[] = [
   {
     id: "privacy-public",
     heading: "What is public",
@@ -64,9 +65,9 @@ const privacySections: PrivacySection[] = [
   },
 ];
 
-function PrivacySection({ id, heading, body }: PrivacySection) {
+function PrivacySection({ id, heading, body }: PrivacySectionContent) {
   return (
-    <section className="public-information-section" aria-labelledby={id}>
+    <section className={styles.publicInformationSection} aria-labelledby={id}>
       <h2 id={id}>{heading}</h2>
       {body.map((paragraph) => (
         <p key={`${id}-${paragraph.slice(0, 16)}`}>{paragraph}</p>
@@ -82,11 +83,11 @@ export default function PrivacyPage() {
       profile={null}
       displayName="Independent Aitta"
     >
-      <article className="public-information-page" aria-labelledby="privacy-title">
+      <article className={styles.publicInformationPage} aria-labelledby="privacy-title">
         <header>
           <p className="eyebrow">Privacy</p>
           <h1 id="privacy-title">How this Aitta handles data</h1>
-          <p className="public-information-lead">
+          <p className={styles.publicInformationLead}>
             This page describes the current application behavior. It does not
             invent an operator identity, contact address, consent service, or
             legal promise for the owner of this Aitta.

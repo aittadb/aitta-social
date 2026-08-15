@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import styles from "./information-page.module.css";
 import {
   PublicPageFrame,
 } from "@/app/_components/PublicPresenceFrame";
@@ -18,11 +19,11 @@ export default function TechnicalPage() {
       profile={null}
       displayName="Independent Aitta"
     >
-      <article className="public-information-page" aria-labelledby="technical-title">
+      <article className={styles.publicInformationPage} aria-labelledby="technical-title">
         <header>
           <p className="eyebrow">Technical</p>
           <h1 id="technical-title">Public resources for this Aitta</h1>
-          <p className="public-information-lead">
+          <p className={styles.publicInformationLead}>
             AittaSocial protocol 1.0 provides a small set of public,
             machine-readable resources. They expose public protocol,
             configured profile, and published-update information; owner details
@@ -37,7 +38,7 @@ export default function TechnicalPage() {
             endpoints when the Aitta is configured.
           </p>
           <p>
-            <a className="public-information-link" href="/.well-known/aitta-social.json">
+            <a className={styles.publicInformationLink} href="/.well-known/aitta-social.json">
               Open the discovery manifest
             </a>
           </p>
@@ -50,7 +51,7 @@ export default function TechnicalPage() {
             list.
           </p>
           <p>
-            <a className="public-information-link" href="/api/v1/site">
+            <a className={styles.publicInformationLink} href="/api/v1/site">
               Open the public profile resource
             </a>
           </p>
@@ -63,7 +64,7 @@ export default function TechnicalPage() {
             the public collection.
           </p>
           <p>
-            <a className="public-information-link" href="/api/v1/entries">
+            <a className={styles.publicInformationLink} href="/api/v1/entries">
               Open the published updates resource
             </a>
           </p>

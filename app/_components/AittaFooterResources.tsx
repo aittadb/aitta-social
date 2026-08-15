@@ -1,7 +1,9 @@
 /** Fixed Aitta resources shared by public and private human-page footers. */
+import styles from "./AittaFooterResources.module.css";
+
 export function AittaFooterResources() {
   return (
-    <nav className="technical-links" aria-label="Technical resources">
+    <nav className={styles['footer-resources']} aria-label="Technical resources">
       <a href="/privacy">Privacy</a>
       <a href="/technical">Technical</a>
       <a

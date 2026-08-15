@@ -1,6 +1,7 @@
 import { OwnerAccessState, OwnerShell } from "../../_components/OwnerShell";
 import { requireOwnerPage } from "../../owner-access";
 import { PageImportForm } from "./PageImportForm";
+import styles from "../page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,7 @@ export default async function ImportPage() {
   if (access.status !== "owner") return <OwnerAccessState status={access.status} />;
   return (
     <OwnerShell current="pages">
-      <header className="owner-page-header compact-header">
+      <header className={`${styles.ownerPageHeader} ${styles.compactHeader}`}>
         <div>
           <p className="eyebrow">Website content</p>
           <h1>Import a page</h1>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { CSSProperties } from 'react';
+import styles from "./page.module.css";
 import { notFound } from 'next/navigation';
 import { getEntry, getProfile } from '@/db/repository';
 import { publicEntryMetadata, unavailableEntryMetadata } from '@/lib/public-metadata';
@@ -34,12 +35,12 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
       profile={profile}
       displayName={displayName}
     >
-      <div className="permalink-content">
-        <article className={`permalink-entry permalink-kind-${entry.kind}`}>
-          <header className="permalink-header">
-            <div className="permalink-source-row">
+      <div className={styles['permalink-content']}>
+        <article className={styles['permalink-entry']}>
+          <header className={styles['permalink-header']}>
+            <div className={styles['permalink-source-row']}>
               <a
-                className="permalink-source-identity"
+                className={styles['permalink-source-identity']}
                 href="/"
               >
                 <PresenceIdentityTile
@@ -48,9 +49,9 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
                 />
                 <span>{displayName}</span>
               </a>
-              <div className="permalink-context">
+              <div className={styles['permalink-context']}>
                 {!isNote && <span className="update-kind">{entryKindLabel(entry.kind)}</span>}
-                <span className="permalink-time">
+                <span className={styles['permalink-time']}>
                   Published <time dateTime={publishedAt}>{formatLongDate(publishedAt)}</time>
                 </span>
               </div>
@@ -63,11 +64,11 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
               <h1 className="visually-hidden">{`${entryKindLabel(entry.kind)} update from ${displayName}`}</h1>
             )}
           </header>
-          <div className={`permalink-body${isNote ? ' permalink-note-body' : ''}`}>{entry.body}</div>
-          {isNote && entry.title && <p className="permalink-note-title">{entry.title}</p>}
+          <div className={`${styles['permalink-body']}${isNote ? ` ${styles['permalink-note-body']}` : ""}`}>{entry.body}</div>
+          {isNote && entry.title && <p className={styles['permalink-note-title']}>{entry.title}</p>}
           {entry.destinationUrl && (
             <a
-              className="permalink-destination"
+              className={styles['permalink-destination']}
               href={entry.destinationUrl}
               rel="noopener noreferrer"
             >
@@ -76,10 +77,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             </a>
           )}
         </article>
-        <nav
-          className="permalink-footer"
-          aria-label="Update actions"
-        >
+        <nav className={styles['permalink-footer']} aria-label="Update actions">
           <a
             className="button"
             href="/"

@@ -1,0 +1,84 @@
+/**
+ * Styles owned by EntryForm.
+ */
+.entry-editor-form {
+  width: min(100%, 760px);
+}
+
+.entry-save-context {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.25rem 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  background: var(--paper-raised);
+}
+
+.entry-save-context strong,
+.entry-save-context span {
+  overflow-wrap: anywhere;
+}
+
+.entry-save-context span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.entry-editor-fields {
+  margin: 0 0 1.25rem;
+  padding: 1.1rem 1.1rem 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper-raised);
+}
+
+.entry-editor-fields legend {
+  padding: 0 0.35rem;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.entry-editor-footer {
+  justify-content: start;
+}
+
+.entry-body-field textarea {
+  min-height: 220px;
+  font-family: var(--sans);
+  font-size: 1.05rem;
+}
+
+.entry-kind-guidance {
+  min-height: 1.5rem;
+  overflow-wrap: anywhere;
+  padding-left: 0.65rem;
+  border-left: 3px solid var(--accent);
+}
+
+.entry-kind-guidance {
+  min-height: 1.5rem;
+  overflow-wrap: anywhere;
+  padding-left: 0.65rem;
+  border-left: 3px solid var(--accent);
+}
+
+.entry-destination-guidance {
+  min-height: 1.5rem;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .entry-editor-fields {
+    padding: 0.9rem 0.9rem 0;
+  }
+
+  .entry-body-field textarea {
+    min-height: 190px;
+  }
+
+  .entry-editor-form {
+    width: min(100%, 760px);
+  }
+}

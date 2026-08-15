@@ -1,0 +1,63 @@
+/**
+ * Shared theme-level wrappers and high-contrast/interaction tokens.
+ *
+ * Purpose:
+ * - theme-wide variable overrides for the main shell layers.
+ * - accessibility behavior that applies broadly.
+ *
+ * Do not include:
+ * - component-specific arrangement rules.
+ * - page content styles.
+ * - component-owned card/state details.
+ */
+.public-shell,
+.permalink-shell {
+  --paper: #f3f0e8;
+  --paper-raised: #fffcf5;
+  --ink: #181b17;
+  --muted: #667067;
+  --line: #d9d5c9;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.public-shell {
+  --paper: #f3f0e8;
+}
+
+.permalink-shell {
+  --paper: #f3f0e8;
+}
+
+.public-shell .eyebrow {
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+    box-shadow: none;
+  }
+
+  .identity-draft-preview {
+    border-left-color: CanvasText;
+  }
+
+  .identity-appearance-preview-unsaved {
+    border-left-color: Highlight;
+  }
+}

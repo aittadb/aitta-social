@@ -70,9 +70,9 @@ export function PageImportForm() {
   }
 
   return (
-    <div className={styles.workspace}>
-      <form aria-busy={busy} className={styles.form} onSubmit={submit} noValidate>
-        <div className={styles.formIntro}>
+    <div className={styles['page-import-workspace']}>
+      <form aria-busy={busy} className={styles['page-import-form']} onSubmit={submit} noValidate>
+        <div className={styles['page-import-form-intro']}>
           <h2>Source fragment</h2>
           <p>Paste page-body HTML only. Scripts, styles, forms, embeds, site chrome, images, and unknown markup are rejected.</p>
         </div>
@@ -110,25 +110,25 @@ export function PageImportForm() {
           spellCheck={false}
           variant="source"
         />
-        <div className={styles.formFooter}>
+        <div className={styles['page-import-form-footer']}>
           <button className="button" type="submit" disabled={busy}>
             {busy ? "Normalizing…" : "Create safe preview"}
           </button>
-          <p aria-live="polite" className={styles.status} role="status">{status}</p>
+          <p aria-live="polite" className={styles['page-import-status']} role="status">{status}</p>
         </div>
       </form>
 
       {document ? (
-        <div className={styles.result}>
+        <div className={styles['page-import-result']}>
           <PageDocumentPreview document={document} headingRef={previewHeadingRef} />
-          <section className={styles.normalized} aria-labelledby="normalized-document-title">
-            <div className={styles.normalizedHeader}>
+          <section className={styles['page-import-normalized']} aria-labelledby="normalized-document-title">
+            <div className={styles['page-import-normalized-header']}>
               <h2 id="normalized-document-title">Exact normalized PageDocumentV1</h2>
               <p>This closed document excludes the raw HTML still visible in the source textarea above.</p>
             </div>
             <textarea
               aria-label="Exact normalized PageDocumentV1 JSON"
-              className={styles.normalizedJson}
+              className={styles['page-import-normalized-json']}
               readOnly
               rows={18}
               value={JSON.stringify(document, null, 2)}

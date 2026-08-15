@@ -1,0 +1,31 @@
+/**
+ * Styles owned by EntryActions component.
+ */
+.entry-actions {
+  min-width: 0;
+  justify-content: end;
+}
+
+.entry-actions-status {
+  flex: 1 0 100%;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.entry-actions-status:empty {
+  display: none;
+}
+
+.entry-list-action {
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .entry-actions {
+    justify-content: start;
+  }
+
+  .entry-actions-status {
+    text-align: left;
+  }
+}

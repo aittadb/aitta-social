@@ -5,6 +5,7 @@ import { normalizeCanonicalUrl } from "@/lib/validation";
 import { OwnerAccessState, OwnerShell } from "../_components/OwnerShell";
 import { requireOwnerPage } from "../owner-access";
 import { ProfileForm } from "./ProfileForm";
+import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ export default async function ProfileSettings() {
   } : null;
   return (
     <OwnerShell current="profile">
-      <header className="owner-page-header compact-header">
+      <header className={`${styles.ownerPageHeader} ${styles.compactHeader}`}>
         <div><p className="eyebrow">Public profile</p><h1>Identity</h1><p>Set up the outward profile this Aitta controls. Only a successful save changes its Identity or readiness.</p></div>
       </header>
       <ProfileForm

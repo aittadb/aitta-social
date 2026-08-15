@@ -14,6 +14,8 @@ import type { ProfileInput } from "@/lib/types";
 import { describedBy } from "../form-field-description";
 import { readProfileSaveResponse } from "./profile-save-response";
 import { saveProfileRequest } from "./profile-save-request";
+import sharedStyles from "../_components/owner-form-shared.module.css";
+import styles from "./ProfileForm.module.css";
 
 type DraftPreview = Pick<
   ProfileInput,
@@ -37,7 +39,7 @@ type FormValues = {
   externalLinks: string;
   canonicalUrl: string;
   accentColor: string;
-  density: string;
+  density: ProfileInput["density"];
   hidePoweredBy: boolean;
 };
 
@@ -200,14 +202,14 @@ export function ProfileForm({
   }
 
   return (
-    <form className="owner-form" aria-label="Identity and profile settings" onSubmit={submit} onInput={updatePreview} onInvalidCapture={revealInvalidOptionalDetails} aria-busy={busy} noValidate>
-      <section className={`identity-form-readiness identity-readiness-${readiness.state}`} aria-labelledby="identity-form-readiness-title">
+    <form className={styles['owner-form-root']} aria-label="Identity and profile settings" onSubmit={submit} onInput={updatePreview} onInvalidCapture={revealInvalidOptionalDetails} aria-busy={busy} noValidate>
+      <section className={`${styles['identity-form-readiness']} ${readiness.state === "complete" ? styles['identity-readiness-complete'] : styles['identity-readiness-incomplete']}`} aria-labelledby="identity-form-readiness-title">
         <div>
           <p className="eyebrow">Server-saved readiness</p>
           <h2 id="identity-form-readiness-title">{readinessTitle(readiness.state)}</h2>
           <p>{canonicalExplanation(readiness, canonicalDefaultSource)}</p>
           {readiness.canonicalUrl ? (
-            <p className="effective-canonical">
+            <p className={styles.effectiveCanonical}>
               <span>Effective public URL · {canonicalSourceLabel(readiness.canonicalSource)}</span>
               <code>{readiness.canonicalUrl}</code>
             </p>
@@ -216,7 +218,7 @@ export function ProfileForm({
         <a className="text-link" href="/">Preview saved public profile</a>
       </section>
 
-      <p className={`identity-save-state ${saveStateClass(dirty, profile, canonicalDefaultSource)}`} aria-live="polite">
+      <p className={`${styles['owner-save-state']} ${styles[saveStateClass(dirty, profile, canonicalDefaultSource)]}`} aria-live="polite">
         <strong>{dirty
           ? "Unsaved changes"
           : canonicalDefaultSource === "invalid-stored-omitted" && profile
@@ -239,11 +241,11 @@ export function ProfileForm({
               : "Complete the required fields and save to create this Aitta’s outward profile."}</span>
       </p>
 
-      <fieldset className="identity-primary-fields">
+      <fieldset className={styles['primary-fields']}>
         <legend>Required Identity</legend>
-        <p className="fieldset-introduction">These four fields create the outward profile this Aitta controls.</p>
+        <p className={styles['fieldset-introduction']}>These four fields create the outward profile this Aitta controls.</p>
         <Field label="Display name" name="displayName" required maxLength={100} defaultValue={profile?.displayName} error={fieldErrors.displayName} />
-        <label className="field" htmlFor="profile-shortDescription">
+        <label className={sharedStyles['owner-form-field']} htmlFor="profile-shortDescription">
           <span>Short description</span>
           <textarea
             id="profile-shortDescription"
@@ -268,7 +270,7 @@ export function ProfileForm({
           help={canonicalFieldHelp(readiness.canonicalSource, canonicalDefaultSource)}
           error={fieldErrors.canonicalUrl}
         />
-        <label className="field" htmlFor="profile-introduction">
+          <label className={sharedStyles['owner-form-field']} htmlFor="profile-introduction">
           <span>Longer introduction</span>
           <textarea
             id="profile-introduction"
@@ -286,21 +288,21 @@ export function ProfileForm({
 
       <details
         ref={optionalDetailsRef}
-        className="identity-optional-details"
+        className={styles['optional-details']}
         open={optionalDetailsOpen}
         onToggle={(event) => setOptionalDetailsOpen(event.currentTarget.open)}
       >
         <summary>
           <span>Optional public details</span>
-          <span className="identity-optional-details-count">{optionalDetailsCount} of 3 added</span>
+          <span className={styles['optional-details-count']}>{optionalDetailsCount} of 3 added</span>
         </summary>
-        <div className="identity-optional-details-content">
+          <div className={styles['optional-details-content']}>
           <p>Location, website, and external links appear publicly only when you add them.</p>
-          <div className="field-grid field-grid-two">
+          <div className={`${sharedStyles['owner-form-field-grid']} ${sharedStyles['owner-form-field-grid-two']}`}>
             <Field label="Location (optional)" name="location" maxLength={120} defaultValue={profile?.location ?? ""} error={fieldErrors.location} />
             <Field label="Website (optional)" name="website" type="url" defaultValue={profile?.website ?? ""} placeholder="https://example.com" error={fieldErrors.website} />
           </div>
-          <label className="field" htmlFor="profile-externalLinks">
+            <label className={sharedStyles['owner-form-field']} htmlFor="profile-externalLinks">
             <span>External links (optional)</span>
             <textarea
               id="profile-externalLinks"
@@ -317,12 +319,12 @@ export function ProfileForm({
         </div>
       </details>
 
-      <fieldset className="identity-secondary-fields">
+      <fieldset className={styles['secondary-fields']}>
         <legend>Appearance</legend>
-        <p className="fieldset-introduction">Optional restrained choices for this Aitta’s public profile and update list.</p>
-        <div className="identity-appearance-layout">
-          <div className="identity-appearance-controls">
-            <label className="field color-field" htmlFor="profile-accentColor">
+        <p className={styles['fieldset-introduction']}>Optional restrained choices for this Aitta’s public profile and update list.</p>
+        <div className={styles['identity-appearance-layout']}>
+          <div className={styles['identity-appearance-controls']}>
+            <label className={`${sharedStyles['owner-form-field']} ${sharedStyles['owner-form-color-field']}`} htmlFor="profile-accentColor">
               <span>Accent color</span>
               <input
                 id="profile-accentColor"
@@ -337,7 +339,7 @@ export function ProfileForm({
                 : "The saved choice stays exact. This preview derives a contrast-safe display color."}</small>
               <FieldError name="accentColor" error={fieldErrors.accentColor} />
             </label>
-            <label className="field" htmlFor="profile-density">
+            <label className={sharedStyles['owner-form-field']} htmlFor="profile-density">
               <span>Update spacing</span>
               <select
                 id="profile-density"
@@ -352,17 +354,17 @@ export function ProfileForm({
               <small id="density-help">Choose comfortable or compact spacing for public updates.</small>
               <FieldError name="density" error={fieldErrors.density} />
             </label>
-            <label className="check-field"><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” attribution</span></label>
+            <label className={sharedStyles['owner-form-check-field']}><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” attribution</span></label>
           </div>
 
-          <aside
-            className={`identity-draft-preview identity-appearance-preview density-${previewDensity(preview.density)}`}
+            <aside
+              className={`${styles['identity-draft-preview']} ${styles['identity-appearance-preview']} ${styles[previewDensity(preview.density) === "compact" ? "identityAppearanceCompact" : "identityAppearanceRegular"]}`}
             aria-labelledby="identity-draft-preview-title"
             style={{ "--accent": resolvePresentationAccent(preview.accentColor) } as CSSProperties}
           >
-            <div className="identity-appearance-preview-heading">
+            <div className={styles['identity-appearance-preview-heading']}>
               <p className="eyebrow">Appearance preview</p>
-              <p className={`identity-appearance-preview-state ${dirty ? "identity-appearance-preview-unsaved" : profile ? "identity-appearance-preview-saved" : "identity-appearance-preview-new"}`}>
+              <p className={`${styles['identity-appearance-preview-state']} ${dirty ? styles['identity-appearance-preview-unsaved'] : profile ? styles['identity-appearance-preview-saved'] : styles['identity-appearance-preview-new']}`}>
                 <strong>{dirty ? "Unsaved preview" : profile ? "Saved appearance" : "Appearance not saved"}</strong>
                 <span>{dirty
                   ? "These choices are temporary until Save Identity succeeds."
@@ -374,35 +376,35 @@ export function ProfileForm({
               <p>{preview.shortDescription.trim() || "A short description will introduce this profile."}</p>
             </div>
 
-            <div className="identity-draft-progress">
+            <div className={styles['identity-draft-progress']}>
               <label htmlFor="identity-draft-progress">Fields filled in this form: {requiredCount(preview)} of 4</label>
               <progress id="identity-draft-progress" max="4" value={requiredCount(preview)}>{requiredCount(preview)} of 4</progress>
               <small>This local count is not server readiness. {dirty ? "It remains temporary until Save Identity succeeds." : canonicalDefaultSource === "invalid-stored-omitted" ? "The preview excludes the invalid saved canonical fallback described above." : canonicalDefaultSource === "runtime-substitution" ? "The preview includes the safe runtime URL substitution described above." : profile ? "The preview uses the loaded saved values." : "Nothing has been saved yet."}</small>
             </div>
 
-            <div className="identity-appearance-sample" aria-label="Public update appearance sample">
-              <div className="identity-appearance-sample-summary" aria-label="Current appearance choices">
+            <div className={styles['identity-appearance-sample']} aria-label="Public update appearance sample">
+              <div className={styles['identity-appearance-sample-summary']} aria-label="Current appearance choices">
                 <span>Spacing · {previewDensity(preview.density) === "compact" ? "Compact" : "Comfortable"}</span>
                 <span>Attribution · {preview.hidePoweredBy ? "Hidden" : "Visible"}</span>
               </div>
-              <article className="identity-appearance-sample-update">
+              <article className={styles['identity-appearance-sample-update']}>
                 <strong>Example public update</strong>
                 <span>Spacing changes here without changing update content.</span>
               </article>
-              <article className="identity-appearance-sample-update">
+              <article className={styles['identity-appearance-sample-update']}>
                 <strong>Another public update</strong>
                 <span>The preview remains local until the complete form is saved.</span>
               </article>
-              {preview.hidePoweredBy ? null : <p className="identity-appearance-sample-attribution">Powered by AittaSocial</p>}
+              {preview.hidePoweredBy ? null : <p className={styles['identity-appearance-sample-attribution']}>Powered by AittaSocial</p>}
             </div>
           </aside>
         </div>
       </fieldset>
 
-      <div className="form-footer">
+      <div className={sharedStyles['owner-form-footer']}>
         <button className="button" type="submit" disabled={busy || recoveryRequired}>Save Identity</button>
         <a className="button button-quiet" href="/">Preview saved public profile</a>
-        <p className="form-status" role="status" aria-live="polite" aria-atomic="true">{status}</p>
+        <p className={sharedStyles['owner-form-status']} role="status" aria-live="polite" aria-atomic="true">{status}</p>
         {recoveryRequired ? <a className="button button-quiet" href="/owner/profile">Reload saved Identity before retrying</a> : null}
       </div>
     </form>
@@ -525,7 +527,7 @@ function Field({ label, name, type = "text", help, error, ...props }: FieldProps
   const inputId = `profile-${name}`;
   const helpId = help ? `${inputId}-help` : undefined;
   return (
-    <label className="field" htmlFor={inputId}>
+    <label className={sharedStyles['owner-form-field']} htmlFor={inputId}>
       <span>{label}</span>
       <input
         id={inputId}
@@ -638,7 +640,7 @@ function extractFormValues(form: FormData): FormValues {
     externalLinks: String(form.get("externalLinks") ?? ""),
     canonicalUrl: String(form.get("canonicalUrl") ?? ""),
     accentColor: String(form.get("accentColor") ?? defaultAccentPreference),
-    density: String(form.get("density") ?? "comfortable"),
+    density: parseDensity(form.get("density")),
     hidePoweredBy: form.get("hidePoweredBy") === "on",
   };
 }
@@ -653,6 +655,10 @@ function toDraftPreview(values: FormValues): DraftPreview {
     density: values.density,
     hidePoweredBy: values.hidePoweredBy,
   };
+}
+
+function parseDensity(value: FormDataEntryValue | null): ProfileInput["density"] {
+  return value === "compact" ? "compact" : "comfortable";
 }
 
 

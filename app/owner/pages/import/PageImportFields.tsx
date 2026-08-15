@@ -40,8 +40,8 @@ export function PageImportTextField({
   const errorId = suppliedErrorId ?? `page-preview-${name}-error`;
 
   return (
-    <label className={styles.field}>
-      <span>{label}{optional ? <span className={styles.optional}> (optional)</span> : null}</span>
+    <label className={styles['page-import-field']}>
+      <span>{label}{optional ? <span className={styles['page-import-optional']}> (optional)</span> : null}</span>
       <input
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? true : undefined}
@@ -51,7 +51,7 @@ export function PageImportTextField({
         onInput={onInput}
         required={required}
       />
-      {error ? <span className={styles.error} id={errorId}>{error}</span> : null}
+      {error ? <span className={styles['page-import-error']} id={errorId}>{error}</span> : null}
     </label>
   );
 }
@@ -77,12 +77,12 @@ export function PageImportTextareaField({
   const describedBy = [helpId, error ? errorId : undefined].filter(Boolean).join(" ") || undefined;
 
   return (
-    <label className={styles.field}>
-      <span>{label}{optional ? <span className={styles.optional}> (optional)</span> : null}</span>
+    <label className={styles['page-import-field']}>
+      <span>{label}{optional ? <span className={styles['page-import-optional']}> (optional)</span> : null}</span>
       <textarea
         aria-describedby={describedBy}
         aria-invalid={error ? true : undefined}
-        className={variant === "source" ? styles.source : undefined}
+        className={variant === "source" ? styles['page-import-source'] : undefined}
         disabled={disabled}
         maxLength={maxLength}
         name={name}
@@ -91,8 +91,8 @@ export function PageImportTextareaField({
         rows={rows}
         spellCheck={spellCheck}
       />
-      {help && helpId ? <span className={styles.help} id={helpId}>{help}</span> : null}
-      {error ? <span className={styles.error} id={errorId}>{error}</span> : null}
+      {help && helpId ? <span className={styles['page-import-help']} id={helpId}>{help}</span> : null}
+      {error ? <span className={styles['page-import-error']} id={errorId}>{error}</span> : null}
     </label>
   );
 }

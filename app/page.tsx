@@ -13,6 +13,7 @@ import {
   PresenceIdentityTile,
   PublicPageFrame,
 } from "./_components/PublicPresenceFrame";
+import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -50,14 +51,14 @@ export default async function Home() {
       profile={profile}
       displayName={profile.displayName}
     >
-      <div className="public-presence-column">
-        <section className="presence-identity" id="account" aria-labelledby="account-name">
-          <div className="presence-identity-field" aria-hidden="true" />
-          <div className="presence-profile">
+      <div className={styles['public-presence-column']}>
+        <section className={styles['presence-identity']} id="account" aria-labelledby="account-name">
+          <div className={styles['presence-identity-field']} aria-hidden="true" />
+          <div className={styles['presence-profile']}>
             <PresenceIdentityTile displayName={profile.displayName} />
-            <div className="presence-heading">
+            <div className={styles['presence-heading']}>
               <h1 id="account-name">{profile.displayName}</h1>
-              <p className="presence-summary">{profile.shortDescription}</p>
+              <p className={styles['presence-summary']}>{profile.shortDescription}</p>
             </div>
             <PresenceDetails profile={profile} />
             <About introduction={profile.introduction} />
@@ -96,17 +97,17 @@ function UnconfiguredPresence({ entries }: { entries: Entry[] }) {
       profile={null}
       displayName="Independent Aitta"
     >
-      <div className="public-wide-content">
-        <section className="template-start" id="start" aria-labelledby="template-title">
-          <div className="template-introduction">
+      <div className={styles.publicWideContent}>
+        <section className={styles['template-start']} id="start" aria-labelledby="template-title">
+          <div className={styles['template-introduction']}>
             <p className="eyebrow">Start with one prompt</p>
             <h1 id="template-title">Set up your own Aitta</h1>
-            <p className="identity-summary">
+            <p className={styles['identity-summary']}>
               An Aitta is your independently controlled AittaSocial application. It remains
               authoritative for its identity, content, configuration, and locally stored data,
               whether it is publicly reachable, private, or disconnected from the AittaSocial Hub.
             </p>
-            <p className="identity-summary">
+            <p className={styles['identity-summary']}>
               A profile is an Aitta&apos;s optional outward identity presentation. This Aitta has no
               profile yet and no current Hub connection. Give the prompt to ChatGPT to keep setup
               private, reuse the right Site, and guide you through the first Identity.
@@ -140,7 +141,7 @@ function UnavailablePresence() {
           Its storage could not be read. Try again shortly. No setup, profile, or public content
           has been changed.
         </p>
-        <div className="button-row">
+        <div className={styles.buttonRow}>
           <a className="button" href="/">Try again</a>
         </div>
       </section>
@@ -160,10 +161,10 @@ function EntriesSection({
   identityHref: string;
 }) {
   return (
-    <section className="updates-section" aria-labelledby="entries-title">
+    <section className={styles['updates-section']} aria-labelledby="entries-title">
       <h2 id="entries-title">Updates</h2>
       {entries.length ? (
-        <ol className="update-stream">
+        <ol className={styles['update-stream']}>
           {entries.map((entry) => (
             <li key={entry.id}>
               <UpdateItem
@@ -175,7 +176,7 @@ function EntriesSection({
           ))}
         </ol>
       ) : (
-        <div className="empty-public">
+        <div className={styles['empty-public']}>
           <h3>No published updates yet</h3>
           <p>
             {configured
@@ -186,6 +187,13 @@ function EntriesSection({
       )}
     </section>
   );
+}
+
+function kindClass(kind: Entry["kind"]): string {
+  if (kind === "note") return styles.updateKindNote;
+  if (kind === "article") return styles['update-kind-article'];
+  if (kind === "announcement") return styles['update-kind-announcement'];
+  return styles['update-kind-link'];
 }
 
 function UpdateItem({
@@ -202,16 +210,16 @@ function UpdateItem({
   const isNote = entry.kind === "note";
 
   return (
-    <article className={`update-item update-kind-${entry.kind}`}>
-      <header className="update-source-row">
-        <a className="update-source-identity" href={identityHref}>
+    <article className={`${styles['update-item']} ${kindClass(entry.kind)}`}>
+      <header className={styles['update-source-row']}>
+        <a className={styles['update-source-identity']} href={identityHref}>
           <PresenceIdentityTile displayName={displayName} size="update" />
           <span>{displayName}</span>
         </a>
-        <div className="update-context">
-          {!isNote && <span className="update-kind">{entryKindLabel(entry.kind)}</span>}
+        <div className={styles['update-context']}>
+          {!isNote && <span className={styles['update-kind']}>{entryKindLabel(entry.kind)}</span>}
           <a
-            className="update-time"
+            className={styles['update-time']}
             href={permalink}
             aria-label={`Open update published ${formatDate(publishedAt)}`}
           >
@@ -222,17 +230,17 @@ function UpdateItem({
 
       {isNote ? (
         <>
-          <p className="update-body update-note-body">{entry.body}</p>
+          <p className={`${styles['update-body']} ${styles['update-note-body']}`}>{entry.body}</p>
           {entry.title && (
-            <a className="update-note-title" href={permalink}>{entry.title}</a>
+            <a className={styles['update-note-title']} href={permalink}>{entry.title}</a>
           )}
         </>
       ) : (
         <>
           {entry.title && (
-            <h3 className="update-title"><a href={permalink}>{entry.title}</a></h3>
+            <h3 className={styles['update-title']}><a href={permalink}>{entry.title}</a></h3>
           )}
-          <p className="update-body update-excerpt">{excerpt(entry.body)}</p>
+          <p className={`${styles['update-body']} ${styles['update-excerpt']}`}>{excerpt(entry.body)}</p>
         </>
       )}
 
@@ -256,7 +264,7 @@ function PresenceDetails({ profile }: { profile: Profile }) {
   }
 
   return (
-    <aside className="presence-details" aria-label="Profile details">
+    <aside className={styles['presence-details']} aria-label="Profile details">
       {profile.location && <PresenceDetail label="Location" value={profile.location} />}
       {profile.website && (
         <PresenceDetail
@@ -277,7 +285,7 @@ function PresenceDetails({ profile }: { profile: Profile }) {
 
 function PresenceDetail({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <p className="presence-detail">
+    <p className={styles['presence-detail']}>
       <span>{label}</span>
       <strong>{value}</strong>
     </p>
@@ -289,16 +297,16 @@ function About({ introduction }: { introduction: string }) {
 
   const summary = summarizeAbout(introduction);
   return (
-    <section className="presence-about" aria-labelledby="about-title">
+    <section className={styles['presence-about']} aria-labelledby="about-title">
       <h2 id="about-title">About</h2>
       {summary === introduction ? (
-        <p className="presence-about-copy">{introduction}</p>
+        <p className={styles['presence-about-copy']}>{introduction}</p>
       ) : (
         <>
-          <p className="presence-about-copy">{summary}</p>
+          <p className={styles['presence-about-copy']}>{summary}</p>
           <details>
             <summary>Read full About</summary>
-            <p className="presence-about-copy presence-about-full">{introduction}</p>
+            <p className={`${styles['presence-about-copy']} ${styles['presence-about-full']}`}>{introduction}</p>
           </details>
         </>
       )}

@@ -24,7 +24,10 @@
     "runtime:check": "node scripts/check-runtime-boundaries.mjs",
     "reproducibility:check": "npm audit --omit=dev && node scripts/check-clean-source.mjs",
     "sites:package": "node scripts/require-active-hosting.mjs && npm run build",
-    "hygiene": "npm run agents:check && npm run typecheck && npm run lint && npm run duplicates",
+    "css:class-prefixes": "node scripts/check-css-class-prefixes.mjs",
+    "css:stylelint": "stylelint 'app/**/*.css'",
+    "hygiene": "npm run hygiene:all",
+    "hygiene:all": "npm run agents:check && npm run license:check && npm run plan:check && npm run instance:check && npm run runtime:check && npm run db:check && npm run typecheck && npm run lint && npm run duplicates && npm run css:class-prefixes && npm run css:stylelint",
     "validate": "npm run agents:check && npm run license:check && npm run plan:check && npm run instance:check && npm run runtime:check && npm run db:check && npm run typecheck && npm run lint && npm test"
   },
   "dependencies": {
@@ -52,6 +55,7 @@
     "globals": "16.4.0",
     "jscpd": "^5.0.15",
     "react-server-dom-webpack": "19.2.6",
+    "stylelint": "^16.26.1",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
     "typescript-eslint": "8.59.3",

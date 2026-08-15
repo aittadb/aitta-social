@@ -8,16 +8,16 @@ export function OwnerShell(props: {
 }) {
   const { current, children } = props;
   return (
-    <main className={styles.shell}>
+    <main className={styles['owner-shell']}>
       <OwnerHeader authorized />
-      <nav className={styles.navigation} aria-label="Owner navigation">
+      <nav className={styles['owner-navigation']} aria-label="Owner navigation">
         <OwnerNavLink href="/owner" active={current === "overview"}>Home</OwnerNavLink>
         <OwnerNavLink href="/owner/profile" active={current === "profile"}>Identity</OwnerNavLink>
         <OwnerNavLink href="/owner/entries/new" active={current === "entries"}>New update</OwnerNavLink>
         <OwnerNavLink href="/owner/pages/import" active={current === "pages"}>Pages</OwnerNavLink>
       </nav>
-      <div className={styles.frame}>
-        <div className={styles.content}>{children}</div>
+      <div className={styles['owner-frame']}>
+        <div className={styles['owner-content']}>{children}</div>
       </div>
       <OwnerFooter />
     </main>
@@ -26,11 +26,11 @@ export function OwnerShell(props: {
 
 export function OwnerAccessState({ status }: { status: "not-owner" | "unconfigured" }) {
   return (
-    <main className={styles.shell}>
+    <main className={styles['owner-shell']}>
       <OwnerHeader authorized={false} />
-      <div className={`${styles.frame} ${styles.accessFrame}`}>
-        <div className={styles.accessState}>
-          <div className={styles.stateMark} aria-hidden="true">A</div>
+      <div className={`${styles['owner-frame']} ${styles['owner-access-frame']}`}>
+        <div className={styles['owner-access-state']}>
+        <div className={styles['owner-state-mark']} aria-hidden="true">A</div>
           <p className="eyebrow">Owner administration</p>
           <h1>{status === "unconfigured" ? "Administration is safely disabled" : "This Aitta is not yours to administer"}</h1>
           <p>
@@ -50,17 +50,17 @@ export function OwnerAccessState({ status }: { status: "not-owner" | "unconfigur
 
 function OwnerHeader({ authorized }: { authorized: boolean }) {
   return (
-    <header className={styles.topbar} aria-label="Private owner workspace">
-      <div className={styles.topbarInner}>
-        <div className={styles.brand}>
+    <header className={styles['owner-topbar']} aria-label="Private owner workspace">
+      <div className={styles['owner-topbar-inner']}>
+        <div className={styles['owner-brand']}>
           {authorized ? (
-            <a className={styles.wordmark} href="/owner" aria-label="Manage this Aitta’s local sole-owner administration">Manage</a>
+            <a className={styles['owner-wordmark']} href="/owner" aria-label="Manage this Aitta’s local sole-owner administration">Manage</a>
           ) : (
-            <span className={styles.wordmark}>Manage</span>
+            <span className={styles['owner-wordmark']}>Manage</span>
           )}
-          <span className={styles.contextLabel}>Private owner workspace</span>
+          <span className={styles['owner-context-label']}>Private owner workspace</span>
         </div>
-        <a className={styles.publicLink} href="/">View Aitta</a>
+        <a className={styles['owner-public-link']} href="/">View Aitta</a>
       </div>
     </header>
   );
@@ -68,11 +68,11 @@ function OwnerHeader({ authorized }: { authorized: boolean }) {
 
 function OwnerFooter() {
   return (
-    <footer className={styles.footer}>
-      <div className={styles.footerInner}>
-        <span className={styles.footerLabel}>Private owner workspace</span>
+    <footer className={styles['owner-footer']}>
+      <div className={styles['owner-footer-inner']}>
+        <span className={styles['owner-footer-label']}>Private owner workspace</span>
         <AittaFooterResources />
-        <a className={styles.signOut} href={chatGPTSignOutPath("/")}>Sign out</a>
+        <a className={styles['owner-sign-out']} href={chatGPTSignOutPath("/")}>Sign out</a>
       </div>
     </footer>
   );

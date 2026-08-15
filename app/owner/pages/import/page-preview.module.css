@@ -1,12 +1,12 @@
-.workspace {
+.page-import-workspace {
   display: grid;
   gap: 2rem;
   min-width: 0;
 }
 
-.form,
-.normalized,
-.preview {
+.page-import-form,
+.page-import-normalized,
+.page-import-preview {
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -14,35 +14,35 @@
   background: var(--paper-raised);
 }
 
-.form {
+.page-import-form {
   display: grid;
   gap: 1.25rem;
   padding: clamp(1rem, 3vw, 1.5rem);
 }
 
-.formIntro h2,
-.normalizedHeader h2,
-.previewHeader h2 {
+.page-import-form-intro h2,
+.page-import-normalized-header h2,
+.page-import-preview-header h2 {
   margin: 0;
   overflow-wrap: anywhere;
 }
 
-.formIntro p,
-.normalizedHeader p,
-.previewHeader p {
+.page-import-form-intro p,
+.page-import-normalized-header p,
+.page-import-preview-header p {
   margin: 0.4rem 0 0;
   color: var(--muted);
 }
 
-.field {
+.page-import-field {
   display: grid;
   gap: 0.45rem;
   min-width: 0;
   font-weight: 700;
 }
 
-.field input,
-.field textarea {
+.page-import-field input,
+.page-import-field textarea {
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--line);
@@ -53,67 +53,67 @@
   font-weight: 400;
 }
 
-.source,
-.normalizedJson {
+.page-import-source,
+.page-import-normalized-json {
   font-family: var(--mono);
   font-size: 0.86rem;
   line-height: 1.5;
 }
 
-.source {
+.page-import-source {
   resize: vertical;
   overflow-wrap: normal;
   white-space: pre;
   overflow: auto;
 }
 
-.optional,
-.help,
-.status {
+.page-import-optional,
+.page-import-help,
+.page-import-status {
   color: var(--muted);
   font-weight: 400;
 }
 
-.help,
-.error,
-.status {
+.page-import-help,
+.page-import-error,
+.page-import-status {
   font-size: 0.88rem;
 }
 
-.error {
+.page-import-error {
   color: var(--danger);
 }
 
-.formFooter {
+.page-import-form-footer {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem 1rem;
 }
 
-.status {
+.page-import-status {
   flex: 1 1 18rem;
   margin: 0;
   overflow-wrap: anywhere;
 }
 
-.result {
+.page-import-result {
   display: grid;
   gap: 2rem;
   min-width: 0;
 }
 
-.preview {
+.page-import-preview {
   color: #18201e;
 }
 
-.previewHeader,
-.normalizedHeader {
+.page-import-preview-header,
+.page-import-normalized-header {
   padding: clamp(1rem, 4vw, 2rem);
   border-bottom: 1px solid var(--line);
 }
 
-.previewLabel {
+.preview-label {
   font-family: var(--mono);
   font-size: 0.75rem;
   font-weight: 750;
@@ -121,29 +121,29 @@
   text-transform: uppercase;
 }
 
-.sections {
+.page-import-sections {
   display: grid;
   gap: clamp(1.5rem, 5vw, 3rem);
   padding: clamp(1rem, 4vw, 2rem);
 }
 
-.section,
-.group,
-.groupItem {
+.page-import-section,
+.page-import-group,
+.page-import-group-item {
   min-width: 0;
 }
 
-.section h2,
-.section h3,
-.section h4,
-.section p,
-.section ol,
-.section ul,
-.groupItem > :first-child {
+.page-import-section h2,
+.page-import-section h3,
+.page-import-section h4,
+.page-import-section p,
+.page-import-section ol,
+.page-import-section ul,
+.page-import-group-item > :first-child {
   overflow-wrap: anywhere;
 }
 
-.section a {
+.page-import-section a {
   min-width: 44px;
   min-height: 44px;
   display: inline-flex;
@@ -151,32 +151,32 @@
   overflow-wrap: anywhere;
 }
 
-.flow {
+.page-import-flow {
   display: grid;
   gap: 1rem;
 }
 
-.split,
-.cards {
+.page-import-split,
+.page-import-cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.cards > .groupItem,
-.section.cards > :not(h2):not(h3):not(h4) {
+.page-import-cards > .page-import-group-item,
+.page-import-section.page-import-cards > :not(h2):not(h3):not(h4) {
   padding: 1rem;
   border: 1px solid var(--line);
   border-radius: 8px;
 }
 
-.linkGroup {
+.link-group {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1rem;
 }
 
-.normalizedJson {
+.normalized-json {
   display: block;
   width: 100%;
   max-width: 100%;
@@ -192,31 +192,31 @@
 }
 
 @media (max-width: 640px) {
-  .split,
-  .cards {
+  .page-import-split,
+  .page-import-cards {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (forced-colors: active) {
-  .form,
-  .normalized,
-  .preview,
-  .cards > .groupItem,
-  .section.cards > :not(h2):not(h3):not(h4),
-  .field input,
-  .field textarea {
+  .page-import-form,
+  .page-import-normalized,
+  .page-import-preview,
+  .page-import-cards > .page-import-group-item,
+  .page-import-section.page-import-cards > :not(h2):not(h3):not(h4),
+  .page-import-field input,
+  .page-import-field textarea {
     border-color: CanvasText;
   }
 
-  .normalizedJson {
+  .page-import-normalized-json {
     background: Canvas;
     color: CanvasText;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .workspace * {
+  .page-import-workspace * {
     scroll-behavior: auto;
   }
 }
