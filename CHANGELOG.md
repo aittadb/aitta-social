@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-208 — Centralized private JSON response contract assertions in
+  tests.** Added the dependency-free
+  `tests/helpers/private-json-response.mjs` leaf as the sole owner of
+  `assertPrivateJson`; all seven private response consumers now import it.
+  It retains exact status equality, the `application/json` boundary,
+  `cache-control: no-store`, and the case-sensitive `Accept` Vary token. Six
+  former case-insensitive content-type checks use the default; custom-page
+  preview explicitly uses the narrow strict option to retain its existing
+  case-sensitive behavior. Regression coverage proves both modes, ownership,
+  lint enforcement, and negative cache/Vary cases. Validation: independent
+  review found and corrected one P2 evidence gap; final re-review found no
+  P0/P1/P2 issues; integrated commit `596fe8a`; focused checks passed 3/3;
+  full `npm run validate` passed build, typecheck, lint, repository checks,
+  and 520/520 tests. No production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted slice centralizes only six
+  byte-identical error-document test constructors.
+
 - **TASK-207 — Centralized public-footer contract extraction in tests.** Added
   the dependency-free `tests/helpers/public-footer-contract.mjs` leaf as the
   sole owner of `publicFooter`; the four Technical, Privacy, accessibility,
