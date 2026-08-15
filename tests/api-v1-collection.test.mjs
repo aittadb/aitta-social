@@ -10,6 +10,7 @@ import {
   responseJson,
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
+import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
 import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
 const canonicalUrl = "https://canonical.example/aitta";
@@ -207,7 +208,7 @@ test("v1 collection negotiates and validates before D1 and has exact method/HEAD
   const head = await fetchApp("/api/v1/entries", { env, method: "HEAD" });
   assert.equal(head.status, 200);
   assert.equal(await head.text(), "");
-  assertMatchingHeaders(head, get);
+  assertMatchingApiV1HeadHeaders(head, get);
   for (const method of ["POST", "PUT", "PATCH", "DELETE", "OPTIONS"]) {
     const response = await fetchApp("/api/v1/entries", { env, method });
     assertCollectionJson(response, 405, "no-store");
@@ -359,12 +360,6 @@ function assertCollectionJson(response, status, cacheControl) {
   assert(hasVaryToken(response, "authorization"));
   assert.equal(varyTokens(response).filter((token) => token === "accept").length, 1);
   assert.equal(varyTokens(response).filter((token) => token === "authorization").length, 1);
-}
-
-function assertMatchingHeaders(head, get) {
-  for (const name of ["content-type", "cache-control", "vary", "allow", "location"]) {
-    assert.equal(head.headers.get(name), get.headers.get(name), name);
-  }
 }
 
 function hasVaryToken(response, token) {

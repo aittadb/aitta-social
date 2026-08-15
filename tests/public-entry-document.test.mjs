@@ -86,7 +86,7 @@ test("unversioned entry document keeps HTML as default and selects JSON only whe
   });
   assertHtml(htmlHead, 200);
   assert.equal(await htmlHead.text(), "");
-  assertMatchingHeaders(htmlHead, htmlGet);
+  assertMatchingEntryDocumentHeaders(htmlHead, htmlGet);
 });
 
 test("unversioned entry document rejects malformed, excluded, and unsupported Accept before D1", async () => {
@@ -166,7 +166,7 @@ test("unversioned JSON allowlists all four kinds, omissions, links, HEAD, and qu
   });
   assert.equal(head.status, get.status);
   assert.equal(await head.text(), "");
-  assertMatchingHeaders(head, get);
+  assertMatchingEntryDocumentHeaders(head, get);
   assertPublishedOnlyDetailQueries(db, [
     ...entries.map(({ id }) => id),
     "article-id",
@@ -426,7 +426,7 @@ test("unversioned representation is feature-local while v1 detail stays byte-for
     headers: { accept: "application/json" },
   });
   assert.equal(await again.text(), baselineBody);
-  assertMatchingHeaders(again, baseline);
+  assertMatchingEntryDocumentHeaders(again, baseline);
 
   for (const accept of ["text/html", "application/json;q=0", "application/json,"]) {
     const response = await fetchApp("/api/v1/entries/public-entry", {
@@ -521,7 +521,7 @@ function assertJson(response, status, cacheControl) {
   assert(hasVaryToken(response, "accept"));
 }
 
-function assertMatchingHeaders(left, right) {
+function assertMatchingEntryDocumentHeaders(left, right) {
   for (const name of [
     "content-type",
     "cache-control",

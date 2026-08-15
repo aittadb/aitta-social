@@ -11,6 +11,7 @@ import {
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { assertApiJson } from "./helpers/api-v1-json-response.mjs";
+import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
 
 const canonicalUrl = "https://canonical.example/aitta";
 const privateCanaries = [
@@ -226,7 +227,7 @@ test("known v1 discovery resources have exact methods, Allow, and HEAD behavior"
     const head = await fetchApp(path, { env, method: "HEAD" });
     assert.equal(head.status, 200);
     assert.equal(await head.text(), "");
-    assertMatchingHeadHeaders(head, get);
+    assertMatchingApiV1HeadHeaders(head, get);
     assert.notEqual(getBody, "");
 
     for (const method of ["POST", "PUT", "PATCH", "DELETE", "OPTIONS"]) {
@@ -270,7 +271,7 @@ test("unknown v1 paths are bounded JSON 404s for every conventional method", asy
   const head = await fetchApp("/api/v1/not-a-resource/deeper", { env, method: "HEAD" });
   assert.equal(head.status, 404);
   assert.equal(await head.text(), "");
-  assertMatchingHeadHeaders(head, get);
+  assertMatchingApiV1HeadHeaders(head, get);
   assert.deepEqual(env.DB.queries, []);
 });
 
@@ -363,12 +364,6 @@ test("manifest and root discover the profile and published collection", async ()
   assert.equal(v2.status, 404);
   assert.doesNotMatch(v2.headers.get("content-type") ?? "", /^application\/json\b/iu);
 });
-
-function assertMatchingHeadHeaders(head, get) {
-  for (const name of ["content-type", "cache-control", "vary", "allow", "location"]) {
-    assert.equal(head.headers.get(name), get.headers.get(name), name);
-  }
-}
 
 function assertNoCanary(value) {
   const serialized = JSON.stringify(value);

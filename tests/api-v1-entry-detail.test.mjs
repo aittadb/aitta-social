@@ -10,6 +10,7 @@ import {
   responseJson,
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
+import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
 import { assertApiJson } from "./helpers/api-v1-json-response.mjs";
 import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
@@ -148,7 +149,7 @@ test("v1 entry detail negotiates before D1 and has exact method and HEAD behavio
   const head = await fetchApp("/api/v1/entries/entry-1", { env, method: "HEAD" });
   assert.equal(head.status, 200);
   assert.equal(await head.text(), "");
-  assertMatchingHeaders(head, get);
+  assertMatchingApiV1HeadHeaders(head, get);
 
   const rejectedHead = await fetchApp("/api/v1/entries/entry-1", {
     env,
@@ -282,12 +283,6 @@ function jsonLink(rel, href) {
   return { rel, href, mediaType: "application/json" };
 }
 
-
-function assertMatchingHeaders(head, get) {
-  for (const name of ["content-type", "cache-control", "vary", "allow", "location"]) {
-    assert.equal(head.headers.get(name), get.headers.get(name), name);
-  }
-}
 
 function assertPublishedOnlyDetailQueries(db, ids) {
   const entryQueries = db.queries.filter(({ sql }) => /from entries/iu.test(sql));

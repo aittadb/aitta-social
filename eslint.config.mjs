@@ -64,6 +64,15 @@ const apiV1JsonResponseRestrictions = declarationRestrictions(
   ["assertApiJson"],
   "tests/helpers/api-v1-json-response.mjs",
 );
+const apiV1HeadResponseCanonicalRestrictions = declarationRestrictions(
+  ["assertMatchingApiV1HeadHeaders"],
+  "tests/helpers/api-v1-head-response.mjs",
+);
+const apiV1HeadResponseLegacyRestrictions = declarationRestrictions(
+  ["assertMatchingHeaders", "assertMatchingHeadHeaders"],
+  "tests/helpers/api-v1-head-response.mjs",
+  "assertMatchingApiV1HeadHeaders",
+);
 const acceptMediaRangeRestrictions = declarationRestrictions(
   ["parseAcceptMediaRanges", "parseMediaRange", "validParameterValue", "splitOutsideQuotes"],
   "lib/accept-media-ranges.ts",
@@ -97,6 +106,8 @@ const declarationRestrictionSets = [
   privateJsonResponseRestrictions,
   errorDocumentRestrictions,
   apiV1JsonResponseRestrictions,
+  apiV1HeadResponseCanonicalRestrictions,
+  apiV1HeadResponseLegacyRestrictions,
   acceptMediaRangeRestrictions,
   pageTextBoundaryRestrictions,
   pageInlineVisibleTextRestrictions,
@@ -112,6 +123,7 @@ const canonicalDeclarationFiles = [
   ["tests/helpers/private-json-response.mjs", privateJsonResponseRestrictions],
   ["tests/helpers/error-document-contract.mjs", errorDocumentRestrictions],
   ["tests/helpers/api-v1-json-response.mjs", apiV1JsonResponseRestrictions],
+  ["tests/helpers/api-v1-head-response.mjs", apiV1HeadResponseCanonicalRestrictions],
   ["lib/accept-media-ranges.ts", acceptMediaRangeRestrictions],
   ["lib/custom-pages/page-text-boundaries.ts", pageTextBoundaryRestrictions],
   ["lib/custom-pages/page-document.ts", pageInlineVisibleTextRestrictions],

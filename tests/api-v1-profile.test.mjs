@@ -11,6 +11,7 @@ import {
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { assertApiJson } from "./helpers/api-v1-json-response.mjs";
+import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
 
 const canonicalUrl = "https://canonical.example/aitta";
 const canaries = [
@@ -201,7 +202,7 @@ test("v1 profile has exact method, Allow, and HEAD behavior", async () => {
   const head = await fetchApp("/api/v1/site", { env, method: "HEAD" });
   assert.equal(head.status, 200);
   assert.equal(await head.text(), "");
-  assertMatchingHeaders(head, get);
+  assertMatchingApiV1HeadHeaders(head, get);
 
   for (const method of ["POST", "PUT", "PATCH", "DELETE", "OPTIONS"]) {
     const response = await fetchApp("/api/v1/site", { env, method });
@@ -334,12 +335,6 @@ function jsonLink(rel, href) {
 
 function htmlLink(rel, href) {
   return { rel, href, mediaType: "text/html" };
-}
-
-function assertMatchingHeaders(left, right) {
-  for (const name of ["content-type", "cache-control", "vary", "allow", "location"]) {
-    assert.equal(left.headers.get(name), right.headers.get(name), name);
-  }
 }
 
 function assertNoCanary(value) {
