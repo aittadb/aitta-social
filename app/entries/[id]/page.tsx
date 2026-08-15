@@ -6,8 +6,8 @@ import {
   publicEntryMetadata,
   unavailableEntryMetadata,
 } from "@/lib/public-metadata";
+import { entryKindLabel } from "@/lib/entry-kind-label";
 import { resolvePresentationAccent } from "@/lib/presentation-accent";
-import type { Entry } from "@/lib/types";
 import {
   PresenceIdentityTile,
   PublicPageFrame,
@@ -56,7 +56,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
                 <span>{displayName}</span>
               </a>
               <div className="permalink-context">
-                {!isNote && <span className="update-kind">{kindLabel(entry.kind)}</span>}
+                {!isNote && <span className="update-kind">{entryKindLabel(entry.kind)}</span>}
                 <span className="permalink-time">
                   Published <time dateTime={publishedAt}>{formatLongDate(publishedAt)}</time>
                 </span>
@@ -67,7 +67,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             ) : entry.title ? (
               <h1>{entry.title}</h1>
             ) : (
-              <h1 className="visually-hidden">{`${kindLabel(entry.kind)} update from ${displayName}`}</h1>
+              <h1 className="visually-hidden">{`${entryKindLabel(entry.kind)} update from ${displayName}`}</h1>
             )}
           </header>
           <div className={`permalink-body${isNote ? " permalink-note-body" : ""}`}>
@@ -99,8 +99,4 @@ function formatLongDate(value: string): string {
   return Number.isNaN(date.valueOf())
     ? value
     : new Intl.DateTimeFormat("en", { dateStyle: "long", timeStyle: "short" }).format(date);
-}
-
-function kindLabel(kind: Entry["kind"]): string {
-  return `${kind.charAt(0).toUpperCase()}${kind.slice(1)}`;
 }

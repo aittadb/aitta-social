@@ -5,6 +5,7 @@ import {
   publicPresenceMetadata,
   unavailablePublicMetadata,
 } from "@/lib/public-metadata";
+import { entryKindLabel } from "@/lib/entry-kind-label";
 import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { Entry, Profile } from "@/lib/types";
 import { DeploymentPrompt } from "./_components/DeploymentPrompt";
@@ -208,7 +209,7 @@ function UpdateItem({
           <span>{displayName}</span>
         </a>
         <div className="update-context">
-          {!isNote && <span className="update-kind">{kindLabel(entry.kind)}</span>}
+          {!isNote && <span className="update-kind">{entryKindLabel(entry.kind)}</span>}
           <a
             className="update-time"
             href={permalink}
@@ -321,10 +322,6 @@ function excerpt(value: string): string {
   const candidate = characters.slice(0, 237).join("").trimEnd();
   const boundary = Math.max(candidate.lastIndexOf(" "), candidate.lastIndexOf("\n"));
   return `${boundary >= 120 ? candidate.slice(0, boundary).trimEnd() : candidate}…`;
-}
-
-function kindLabel(kind: Entry["kind"]): string {
-  return `${kind.charAt(0).toUpperCase()}${kind.slice(1)}`;
 }
 
 function readableHost(value: string): string {

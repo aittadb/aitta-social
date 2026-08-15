@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { entryKindLabel } from "./entry-kind-label";
 import type { Entry, Profile } from "./types";
 import { resolveCanonicalUrl, withoutTrailingSlash } from "./public-resources";
 
@@ -70,7 +71,7 @@ export function publicEntryMetadata(
     ? metadataText(profile.displayName, "Independent Aitta", 100)
     : "Independent Aitta";
   const updateTitle = metadataText(
-    entry.title ?? `${capitalize(entry.kind)} update`,
+    entry.title ?? `${entryKindLabel(entry.kind)} update`,
     "Published update",
     160,
   );
@@ -127,8 +128,4 @@ function metadataText(value: string, fallback: string, maxLength: number): strin
   if (!compact) return fallback;
   if (compact.length <= maxLength) return compact;
   return `${compact.slice(0, maxLength - 1).trimEnd()}…`;
-}
-
-function capitalize(value: string): string {
-  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }

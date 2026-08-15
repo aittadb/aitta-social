@@ -169,6 +169,15 @@ const ownerFormFieldDescriptionRestrictions = declarationRestrictions(
   ["describedBy"],
   "app/owner/form-field-description.ts",
 );
+const entryKindLabelRestrictions = declarationRestrictions(
+  ["entryKindLabel"],
+  "lib/entry-kind-label.ts",
+);
+const legacyEntryKindLabelRestrictions = declarationRestrictions(
+  ["kindLabel"],
+  "lib/entry-kind-label.ts",
+  "entryKindLabel",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -201,6 +210,8 @@ const declarationRestrictionSets = [
   canonicalRepositorySourceRestrictions,
   legacyRepositorySourceRestrictions,
   ownerFormFieldDescriptionRestrictions,
+  entryKindLabelRestrictions,
+  legacyEntryKindLabelRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -228,6 +239,7 @@ const canonicalDeclarationFiles = [
   ["tests/helpers/css-clamp-pixels.mjs", cssClampPixelsRestrictions],
   ["tests/helpers/repository-source.mjs", canonicalRepositorySourceRestrictions],
   ["app/owner/form-field-description.ts", ownerFormFieldDescriptionRestrictions],
+  ["lib/entry-kind-label.ts", entryKindLabelRestrictions],
 ];
 
 const eslintConfig = defineConfig([
