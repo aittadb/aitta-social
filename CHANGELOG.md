@@ -1,5 +1,21 @@
 # Changelog
 
+- **TASK-224 — Centralized discarded response-body consumption in tests.**
+  Added the dependency-free `tests/helpers/response-body-consumption.mjs` leaf
+  as the sole owner of `consumeResponse`. The helper awaits exactly one
+  `response.text()` call, discards its fulfilled body, resolves to `undefined`,
+  and propagates its original rejection. Both consumers import it while all
+  seven surrounding lifecycle/status/authorization/persistence/privacy
+  assertions remain local. Regression coverage proves async completion,
+  exactly-once behavior, discarded output, rejection identity, ownership, and
+  the complete lint matrix. Validation: independent review found no P0/P1/P2
+  issues; integrated commit `b4f04ed`; focused checks passed 9/9; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  577/577 tests. No dependency, production behavior, route, API, schema,
+  migration, persistence, hosting, deployment, data, access, or external state
+  changed. Residual uncertainty: the next accepted task shares only the exact
+  owner-form ARIA description composition while preserving rendered semantics.
+
 - **TASK-223 — Centralized Vary-header tokenization in tests.** Added the
   dependency-free `tests/helpers/vary-header-tokens.mjs` leaf as the sole owner
   of Vary token splitting, trimming, lowercase normalization, ordering,
