@@ -1,5 +1,20 @@
 # Changelog
 
+- **TASK-214 — Centralized API v1 HEAD response-header assertions.** Added the
+  dependency-free `tests/helpers/api-v1-head-response.mjs` leaf as the sole
+  owner of exact five-header GET↔HEAD parity checks: content type, cache
+  control, Vary, Allow, and Location. The four API v1 consumers now import it.
+  The broader public-entry document comparison was deliberately renamed rather
+  than generalized, retaining its CSP check and all callers. Validation:
+  independent review found and corrected one P2 legacy-name exception gap;
+  final re-review found no P0/P1/P2 issues; integrated commit `2020a50`; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  539/539 tests. No production, route, API, schema, migration, persistence,
+  hosting, deployment, data, access, or external state changed. Residual
+  uncertainty: the next accepted task centralizes only the repeated ESLint
+  diagnostic counter while preserving each test's own fixtures and expected
+  results.
+
 - **TASK-213 — Centralized deletion acknowledgement fixtures.** Added the
   dependency-free `tests/helpers/deletion-acknowledgement-contract.mjs` leaf
   as the sole owner of the owner-entry-deletion receipt fixture; all four
