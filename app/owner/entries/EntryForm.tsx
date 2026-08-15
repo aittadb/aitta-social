@@ -3,6 +3,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { ENTRY_KINDS, type EntryKind } from "@/lib/constants";
 import type { Entry } from "@/lib/types";
+import { describedBy } from "../form-field-description";
 import { readDraftCreateResponse } from "./draft-create-response";
 import { createEntryRequest, editEntryRequest } from "./entry-mutation-requests";
 import { readEntryEditResponse } from "./edit-save-response";
@@ -239,11 +240,6 @@ function FieldError({ name, error }: { name: EntryFieldName; error?: string }) {
 
 function errorId(name: EntryFieldName, error?: string): string | undefined {
   return error ? `entry-${name}-error` : undefined;
-}
-
-function describedBy(...ids: Array<string | undefined>): string | undefined {
-  const value = ids.filter(Boolean).join(" ");
-  return value || undefined;
 }
 
 function entryFieldName(value: string): EntryFieldName | null {

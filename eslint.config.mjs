@@ -165,6 +165,10 @@ const assistedRuntimeLegacySourceRestrictions = declarationRestrictions(
   "tests/helpers/repository-source.mjs",
   "readRepositorySource",
 );
+const ownerFormFieldDescriptionRestrictions = declarationRestrictions(
+  ["describedBy"],
+  "app/owner/form-field-description.ts",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -196,6 +200,7 @@ const declarationRestrictionSets = [
   cssClampPixelsRestrictions,
   canonicalRepositorySourceRestrictions,
   legacyRepositorySourceRestrictions,
+  ownerFormFieldDescriptionRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -222,6 +227,7 @@ const canonicalDeclarationFiles = [
   ["tests/helpers/regular-expression-match-count.mjs", regularExpressionMatchCountRestrictions],
   ["tests/helpers/css-clamp-pixels.mjs", cssClampPixelsRestrictions],
   ["tests/helpers/repository-source.mjs", canonicalRepositorySourceRestrictions],
+  ["app/owner/form-field-description.ts", ownerFormFieldDescriptionRestrictions],
 ];
 
 const eslintConfig = defineConfig([

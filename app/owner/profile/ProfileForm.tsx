@@ -11,6 +11,7 @@ import type { IdentityReadiness } from "@/lib/identity-readiness";
 import type { PrivateProfileFieldName } from "@/lib/private-profile/representation";
 import { resolvePresentationAccent } from "@/lib/presentation-accent";
 import type { ProfileInput } from "@/lib/types";
+import { describedBy } from "../form-field-description";
 import { readProfileSaveResponse } from "./profile-save-response";
 import { saveProfileRequest } from "./profile-save-request";
 
@@ -580,11 +581,6 @@ function FieldError({ name, error }: { name: ProfileFieldName; error?: string })
 
 function errorId(name: ProfileFieldName, error?: string): string | undefined {
   return error ? `profile-${name}-error` : undefined;
-}
-
-function describedBy(...ids: Array<string | undefined>): string | undefined {
-  const value = ids.filter(Boolean).join(" ");
-  return value || undefined;
 }
 
 function profileFieldName(value: string): ProfileFieldName | null {
