@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-230 — Centralized JSON response-body parsing in tests.** Added the
+  Node-test-only `tests/helpers/json-response-body.mjs` leaf as the sole owner
+  of `responseJson`. The functional matrix and upgrade suite import it
+  directly; the worker harness re-exports it so its existing consumers retain
+  their API without test-environment coupling. Status, cache, Vary, privacy,
+  and allowlist assertions remain suite-owned. Regression coverage pins exact
+  values, case/suffix media recognition, fail-before-read non-JSON behavior,
+  malformed JSON, one accepted body read, ownership, and the full lint matrix.
+  Independent review confirmed the harness's former assertion/read ordering
+  was unobservable for existing callers. Validation: review found no P0/P1/P2
+  issues; integrated commit `1c19186`; focused checks passed 7/7; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  603/603 tests. No dependency, observable production behavior, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted task shares
+  only throwing-D1 test fixtures while retaining every suite's storage-failure
+  assertions.
+
 - **TASK-229 — Centralized private-entry error field-name recognition.** Added
   the runtime-dependency-free
   `app/owner/entries/private-entry-error-field-name.ts` leaf as the sole owner
