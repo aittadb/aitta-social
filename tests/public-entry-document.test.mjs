@@ -11,6 +11,7 @@ import {
   responseJson,
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
+import { assertPublishedOnlyDetailQueries } from "./helpers/published-entry-detail-query-contract.mjs";
 import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
 const canonicalUrl = "https://canonical.example/aitta";
@@ -548,14 +549,6 @@ function hasVaryToken(response, token) {
     .split(",")
     .map((value) => value.trim().toLowerCase())
     .includes(token);
-}
-
-function assertPublishedOnlyDetailQueries(db, ids) {
-  const entryQueries = db.queries.filter(({ sql }) => /from entries/iu.test(sql));
-  assert.equal(entryQueries.length, ids.length);
-  assert(entryQueries.every(({ sql }) => /where id = \? and state = \?/iu.test(sql)));
-  assert.deepEqual(entryQueries.map(({ values }) => values),
-    ids.map((id) => [id, "published"]));
 }
 
 function assertNoCanary(value) {

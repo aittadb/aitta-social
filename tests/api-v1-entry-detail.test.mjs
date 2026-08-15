@@ -13,6 +13,7 @@ import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
 import { assertApiJson } from "./helpers/api-v1-json-response.mjs";
 import { expectedApiV1JsonLink } from "./helpers/api-v1-json-link.mjs";
+import { assertPublishedOnlyDetailQueries } from "./helpers/published-entry-detail-query-contract.mjs";
 import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
 const canonicalUrl = "https://canonical.example/aitta";
@@ -278,14 +279,6 @@ function detailDocument(entry) {
     ],
     actions: [],
   };
-}
-
-function assertPublishedOnlyDetailQueries(db, ids) {
-  const entryQueries = db.queries.filter(({ sql }) => /from entries/iu.test(sql));
-  assert.equal(entryQueries.length, ids.length);
-  assert(entryQueries.every(({ sql }) => /where id = \? and state = \?/iu.test(sql)));
-  assert.deepEqual(entryQueries.map(({ values }) => values),
-    ids.map((id) => [id, "published"]));
 }
 
 function assertNoCanary(value) {
