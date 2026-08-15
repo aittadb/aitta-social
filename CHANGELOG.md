@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-218 — Centralized regular-expression match counting in tests.** Added
+  the dependency-free `tests/helpers/regular-expression-match-count.mjs` leaf
+  as the sole owner of `countMatches`. Two identical `matchAll` declarations
+  and one behaviorally equivalent `match` declaration now import it; all 21
+  existing call sites use fresh global regular-expression literals, preserving
+  their counts while the helper deliberately retains `matchAll` rejection for
+  non-global patterns. Regression coverage proves zero, single, multiple,
+  case-insensitive, zero-width, and rejection behavior, canonical ownership,
+  three consumer imports, and the full declaration-restriction matrix.
+  Validation: independent review found and the implementation corrected one P1
+  cross-family lint-test expectation; final re-review found no P0/P1/P2 issues;
+  integrated commit `897b085`; focused checks passed 34/34; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  554/554 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task shares only exact repository
+  source reads and retains each consumer's path and assertion ownership.
+
 - **TASK-217 — Centralized CSS clamp pixel calculations in tests.** Added the
   dependency-free `tests/helpers/css-clamp-pixels.mjs` leaf as the sole owner
   of `clampPixels`. Both visual-contract tests now import it, preserving the
