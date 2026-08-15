@@ -9,6 +9,7 @@ import { Miniflare } from "miniflare";
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
 import { consumeResponse } from "./helpers/response-body-consumption.mjs";
 import { migrationInventory } from "./helpers/migration-inventory.mjs";
+import { responseJson } from "./helpers/json-response-body.mjs";
 
 import {
   APP_ORIGIN,
@@ -559,10 +560,6 @@ async function html(worker, pathname, headers = {}) {
   return response.text();
 }
 
-async function responseJson(response) {
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
-  return JSON.parse(await response.text());
-}
 
 function assertLeadingPrompt(source) {
   assert.match(source, /Start with one prompt/i);

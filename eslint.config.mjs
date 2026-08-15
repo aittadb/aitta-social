@@ -200,6 +200,10 @@ const legacyPrivateEntryErrorFieldNameRestrictions = declarationRestrictions(
   "app/owner/entries/private-entry-error-field-name.ts",
   "privateEntryErrorFieldName",
 );
+const jsonResponseBodyRestrictions = declarationRestrictions(
+  ["responseJson"],
+  "tests/helpers/json-response-body.mjs",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -239,6 +243,7 @@ const declarationRestrictionSets = [
   legacyOwnerEntryJsonResponseMediaTypeRestrictions,
   privateEntryErrorFieldNameRestrictions,
   legacyPrivateEntryErrorFieldNameRestrictions,
+  jsonResponseBodyRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -270,6 +275,7 @@ const canonicalDeclarationFiles = [
   ["tests/helpers/migration-inventory.mjs", migrationInventoryRestrictions],
   ["app/owner/entries/json-response-media-type.ts", ownerEntryJsonResponseMediaTypeRestrictions],
   ["app/owner/entries/private-entry-error-field-name.ts", privateEntryErrorFieldNameRestrictions],
+  ["tests/helpers/json-response-body.mjs", jsonResponseBodyRestrictions],
 ];
 
 const eslintConfig = defineConfig([
