@@ -1,5 +1,22 @@
 # Changelog
 
+- **TASK-226 — Centralized public entry-kind display labels.** Added the
+  dependency-free `lib/entry-kind-label.ts` leaf as the sole owner of
+  `entryKindLabel`. The home page, permalink page, and metadata fallback now
+  share it while preserving every fixed kind label, note-label suppression,
+  titleless permalink heading, and titleless metadata text. The independent
+  literal public-contract oracle remains local. Regression coverage pins all
+  four labels, titleless metadata, consumer ownership, and the complete lint
+  matrix; the legacy `kindLabel` remains prohibited even inside the canonical
+  leaf. Validation: an ownership-edge correction was made before integration;
+  final independent re-review found no P0/P1/P2 issues; integrated commit
+  `1dcda7e`; focused checks passed 40/40; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 584/584 tests. No dependency,
+  observable production behavior, route, API, schema, migration, persistence,
+  hosting, deployment, data, access, or external state changed. Residual
+  uncertainty: the next accepted task shares only test migration inventory and
+  retains each matrix's own migration assertions.
+
 - **TASK-225 — Centralized owner-form ARIA description composition.** Added the
   dependency-free `app/owner/form-field-description.ts` leaf as the sole owner
   of `describedBy`. Both owner forms now import it while all eight existing
