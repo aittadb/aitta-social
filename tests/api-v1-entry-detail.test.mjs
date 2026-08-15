@@ -12,6 +12,7 @@ import {
 import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
 import { assertApiJson } from "./helpers/api-v1-json-response.mjs";
+import { expectedApiV1JsonLink } from "./helpers/api-v1-json-link.mjs";
 import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
 const canonicalUrl = "https://canonical.example/aitta";
@@ -266,9 +267,9 @@ function detailDocument(entry) {
       },
     },
     links: [
-      jsonLink("self", `${canonicalUrl}/api/v1/entries/${encodedId}`),
-      jsonLink("collection", `${canonicalUrl}/api/v1/entries`),
-      jsonLink("profile", `${canonicalUrl}/api/v1/schema`),
+      expectedApiV1JsonLink("self", `${canonicalUrl}/api/v1/entries/${encodedId}`),
+      expectedApiV1JsonLink("collection", `${canonicalUrl}/api/v1/entries`),
+      expectedApiV1JsonLink("profile", `${canonicalUrl}/api/v1/schema`),
       {
         rel: "alternate",
         href: `${canonicalUrl}/entries/${encodedId}`,
@@ -278,11 +279,6 @@ function detailDocument(entry) {
     actions: [],
   };
 }
-
-function jsonLink(rel, href) {
-  return { rel, href, mediaType: "application/json" };
-}
-
 
 function assertPublishedOnlyDetailQueries(db, ids) {
   const entryQueries = db.queries.filter(({ sql }) => /from entries/iu.test(sql));

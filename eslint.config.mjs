@@ -7,10 +7,10 @@ import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-function declarationRestrictions(names, canonicalPath, canonicalName = undefined) {
+function declarationRestrictions(names, canonicalPath, canonicalName = undefined, guidance = undefined) {
   return names.flatMap((name) => {
     const importedName = canonicalName ?? name;
-    const message = `Import ${importedName} from ${canonicalPath} instead of redeclaring it.`;
+    const message = guidance ?? `Import ${importedName} from ${canonicalPath} instead of redeclaring it.`;
     return [
       { selector: `Program > FunctionDeclaration[id.name='${name}']`, message },
       { selector: `Program > ExportNamedDeclaration > FunctionDeclaration[id.name='${name}']`, message },
@@ -68,6 +68,18 @@ const errorDocumentRestrictions = declarationRestrictions(
 const apiV1JsonResponseRestrictions = declarationRestrictions(
   ["assertApiJson"],
   "tests/helpers/api-v1-json-response.mjs",
+);
+const apiV1JsonLinkRestrictions = declarationRestrictions(
+  ["jsonLink"],
+  "lib/public-entry-document/representation.ts",
+  undefined,
+  "Keep jsonLink private to lib/public-entry-document/representation.ts; tests use the independent expectedApiV1JsonLink oracle from tests/helpers/api-v1-json-link.mjs.",
+);
+const apiV1JsonLinkExpectationRestrictions = declarationRestrictions(
+  ["expectedApiV1JsonLink"],
+  "tests/helpers/api-v1-json-link.mjs",
+  undefined,
+  "Import expectedApiV1JsonLink from tests/helpers/api-v1-json-link.mjs instead of redeclaring this independent test expectation.",
 );
 const apiV1HeadResponseCanonicalRestrictions = declarationRestrictions(
   ["assertMatchingApiV1HeadHeaders"],
@@ -147,6 +159,8 @@ const declarationRestrictionSets = [
   privateJsonResponseRestrictions,
   errorDocumentRestrictions,
   apiV1JsonResponseRestrictions,
+  apiV1JsonLinkRestrictions,
+  apiV1JsonLinkExpectationRestrictions,
   apiV1HeadResponseCanonicalRestrictions,
   apiV1HeadResponseLegacyRestrictions,
   acceptMediaRangeRestrictions,
@@ -172,6 +186,8 @@ const canonicalDeclarationFiles = [
   ["tests/helpers/private-json-response.mjs", privateJsonResponseRestrictions],
   ["tests/helpers/error-document-contract.mjs", errorDocumentRestrictions],
   ["tests/helpers/api-v1-json-response.mjs", apiV1JsonResponseRestrictions],
+  ["tests/helpers/api-v1-json-link.mjs", apiV1JsonLinkExpectationRestrictions],
+  ["lib/public-entry-document/representation.ts", apiV1JsonLinkRestrictions],
   ["tests/helpers/api-v1-head-response.mjs", apiV1HeadResponseCanonicalRestrictions],
   ["lib/accept-media-ranges.ts", acceptMediaRangeRestrictions],
   ["lib/custom-pages/page-text-boundaries.ts", pageTextBoundaryRestrictions],

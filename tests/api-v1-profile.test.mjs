@@ -11,6 +11,7 @@ import {
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { assertApiJson } from "./helpers/api-v1-json-response.mjs";
+import { expectedApiV1JsonLink } from "./helpers/api-v1-json-link.mjs";
 import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
 
 const canonicalUrl = "https://canonical.example/aitta";
@@ -98,8 +99,8 @@ test("v1 profile returns the exact public singleton and canonical ordered relati
       },
     },
     links: [
-      jsonLink("self", `${canonicalUrl}/api/v1/site`),
-      jsonLink("profile", `${canonicalUrl}/api/v1/schema`),
+      expectedApiV1JsonLink("self", `${canonicalUrl}/api/v1/site`),
+      expectedApiV1JsonLink("profile", `${canonicalUrl}/api/v1/schema`),
       htmlLink("social.aitta.profile", canonicalUrl),
     ],
     actions: [],
@@ -129,8 +130,8 @@ test("v1 profile omits absent optional fields and retains stored canonical fallb
   assert.equal("website" in body.data.attributes, false);
   assert.deepEqual(body.data.attributes.externalLinks, []);
   assert.deepEqual(body.links, [
-    jsonLink("self", "https://stored.example/profile/api/v1/site"),
-    jsonLink("profile", "https://stored.example/profile/api/v1/schema"),
+    expectedApiV1JsonLink("self", "https://stored.example/profile/api/v1/site"),
+    expectedApiV1JsonLink("profile", "https://stored.example/profile/api/v1/schema"),
     htmlLink("social.aitta.profile", "https://stored.example/profile"),
   ]);
   assert.doesNotMatch(JSON.stringify(body), /HOST_PRIVATE_CANARY/iu);
@@ -328,10 +329,6 @@ test("v1 discovery advertises the profile and published collection", async () =>
   });
   assert.equal(manifest.accountType, "agent");
 });
-
-function jsonLink(rel, href) {
-  return { rel, href, mediaType: "application/json" };
-}
 
 function htmlLink(rel, href) {
   return { rel, href, mediaType: "text/html" };

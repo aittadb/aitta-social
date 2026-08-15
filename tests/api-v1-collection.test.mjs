@@ -11,6 +11,7 @@ import {
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
+import { expectedApiV1JsonLink } from "./helpers/api-v1-json-link.mjs";
 import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
 const canonicalUrl = "https://canonical.example/aitta";
@@ -40,11 +41,11 @@ test("v1 collection represents an empty or draft-only Aitta as one empty page", 
     data: [],
     pagination: { page: 1, pageSize: 20 },
     links: [
-      jsonLink("self", `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`),
-      jsonLink("first", `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`),
-      jsonLink("last", `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`),
-      jsonLink("profile", `${canonicalUrl}/api/v1/schema`),
-      jsonLink("social.aitta.profile", `${canonicalUrl}/api/v1/site`),
+      expectedApiV1JsonLink("self", `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`),
+      expectedApiV1JsonLink("first", `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`),
+      expectedApiV1JsonLink("last", `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`),
+      expectedApiV1JsonLink("profile", `${canonicalUrl}/api/v1/schema`),
+      expectedApiV1JsonLink("social.aitta.profile", `${canonicalUrl}/api/v1/site`),
     ],
     actions: [],
   };
@@ -100,7 +101,7 @@ test("v1 collection allowlists all four published entry kinds and optional omiss
   assert.deepEqual(
     body.links.filter(({ rel }) => rel === "item"),
     entries.map(({ id }) =>
-      jsonLink("item", `${canonicalUrl}/api/v1/entries/${rfc6570PathSegment(id)}`)
+      expectedApiV1JsonLink("item", `${canonicalUrl}/api/v1/entries/${rfc6570PathSegment(id)}`)
     ),
   );
   assert.equal(
@@ -333,11 +334,6 @@ function entryResource(entry) {
     },
   };
 }
-
-function jsonLink(rel, href) {
-  return { rel, href, mediaType: "application/json" };
-}
-
 
 function pageUrl(page, pageSize) {
   return `${canonicalUrl}/api/v1/entries?page=${page}&pageSize=${pageSize}`;
