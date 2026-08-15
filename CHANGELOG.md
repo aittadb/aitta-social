@@ -1,5 +1,22 @@
 # Changelog
 
+- **TASK-227 — Centralized repository migration inventory in tests.** Added the
+  Node-test-only `tests/helpers/migration-inventory.mjs` leaf as the sole owner
+  of `migrationInventory`. Both migration matrices now pass their repository
+  root to it while their provenance, fresh-install, upgrade, and
+  migration-application assertions remain local. The helper preserves the
+  precise regular-file name filter, `drizzle/` paths, lexical ordering, and
+  filesystem failure propagation; regression coverage also rejects matching
+  directories and symlinks. Validation: independent review found and the
+  implementation corrected one P2 symlink-exclusion evidence gap; final
+  re-review found no P0/P1/P2 issues; integrated commit `62f0d4a`; focused
+  checks passed 4/4; full `npm run validate` passed build, typecheck, lint,
+  repository checks, and 588/588 tests. No dependency, production behavior,
+  route, API, schema, migration, persistence, hosting, deployment, data,
+  access, or external state changed. Residual uncertainty: the next accepted
+  task shares only owner-entry JSON response media-type recognition while
+  retaining consumer response expectations.
+
 - **TASK-226 — Centralized public entry-kind display labels.** Added the
   dependency-free `lib/entry-kind-label.ts` leaf as the sole owner of
   `entryKindLabel`. The home page, permalink page, and metadata fallback now
