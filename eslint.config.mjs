@@ -113,6 +113,20 @@ const cssClampPixelsRestrictions = declarationRestrictions(
   ["clampPixels"],
   "tests/helpers/css-clamp-pixels.mjs",
 );
+const canonicalRepositorySourceRestrictions = declarationRestrictions(
+  ["readRepositorySource"],
+  "tests/helpers/repository-source.mjs",
+);
+const legacyRepositorySourceRestrictions = declarationRestrictions(
+  ["readSource"],
+  "tests/helpers/repository-source.mjs",
+  "readRepositorySource",
+);
+const assistedRuntimeLegacySourceRestrictions = declarationRestrictions(
+  ["source"],
+  "tests/helpers/repository-source.mjs",
+  "readRepositorySource",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -134,6 +148,8 @@ const declarationRestrictionSets = [
   orderedTextAssertionRestrictions,
   regularExpressionMatchCountRestrictions,
   cssClampPixelsRestrictions,
+  canonicalRepositorySourceRestrictions,
+  legacyRepositorySourceRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -153,6 +169,7 @@ const canonicalDeclarationFiles = [
   ["tests/helpers/ordered-text-assertion.mjs", orderedTextAssertionRestrictions],
   ["tests/helpers/regular-expression-match-count.mjs", regularExpressionMatchCountRestrictions],
   ["tests/helpers/css-clamp-pixels.mjs", cssClampPixelsRestrictions],
+  ["tests/helpers/repository-source.mjs", canonicalRepositorySourceRestrictions],
 ];
 
 const eslintConfig = defineConfig([
@@ -205,6 +222,12 @@ const eslintConfig = defineConfig([
       ],
     },
   })),
+  {
+    files: ["tests/assisted-runtime-journey.test.mjs"],
+    rules: {
+      "no-restricted-syntax": ["error", ...declarationRestrictionSets.flat(), ...assistedRuntimeLegacySourceRestrictions],
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
 import { countMatches } from "./helpers/regular-expression-match-count.mjs";
+import { readRepositorySource } from "./helpers/repository-source.mjs";
 
 import {
   FakeD1,
@@ -35,8 +35,8 @@ test("the owner composer is body-first, compact, private-aware, and makes every 
   const [newHtml, editHtml, source, css] = await Promise.all([
     ownerHtml("/owner/entries/new", env),
     ownerHtml(`/owner/entries/${entry.id}`, env),
-    readSource("app/owner/entries/EntryForm.tsx"),
-    readSource("app/globals.css"),
+    readRepositorySource("app/owner/entries/EntryForm.tsx"),
+    readRepositorySource("app/globals.css"),
   ]);
 
   assert.match(newHtml, /<p class="eyebrow">Private workspace<\/p>/i);
@@ -234,10 +234,10 @@ test("draft validation and authorization fail without mutation and private value
 
 test("composer validation focuses fields, definitive errors permit retry, and uncertain saves lock retry", async () => {
   const [source, css, presentation, deployment] = await Promise.all([
-    readSource("app/owner/entries/EntryForm.tsx"),
-    readSource("app/globals.css"),
-    readSource("docs/presentation.md"),
-    readSource("docs/deployment.md"),
+    readRepositorySource("app/owner/entries/EntryForm.tsx"),
+    readRepositorySource("app/globals.css"),
+    readRepositorySource("docs/presentation.md"),
+    readRepositorySource("docs/deployment.md"),
   ]);
 
   assert.match(source, /if \(recoveryRequired\) return;/);
@@ -264,8 +264,4 @@ async function ownerHtml(path, env) {
   });
   assert.equal(response.status, 200);
   return response.text();
-}
-
-function readSource(path) {
-  return readFile(new URL(`../${path}`, import.meta.url), "utf8");
 }

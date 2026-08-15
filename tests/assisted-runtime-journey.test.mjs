@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 import ts from "typescript";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
 import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
 import { countMatches } from "./helpers/regular-expression-match-count.mjs";
+import { readRepositorySource } from "./helpers/repository-source.mjs";
 
 import {
   FakeD1,
@@ -317,7 +317,7 @@ test("a whitespace-only stored fallback is omitted rather than called an exact s
 });
 
 test("owner mutation response policy treats 4xx as definitive and 5xx as unconfirmed", async () => {
-  const moduleSource = await source("app/owner/_components/owner-mutation-outcome.ts");
+  const moduleSource = await readRepositorySource("app/owner/_components/owner-mutation-outcome.ts");
   const compiled = ts.transpileModule(moduleSource, {
     compilerOptions: {
       module: ts.ModuleKind.ES2022,
@@ -354,18 +354,18 @@ test("owner controls expose semantic, per-update actions, explicit publication c
     presentationDoc,
     outcomePolicy,
   ] = await Promise.all([
-    source("app/owner/_components/EntryActions.tsx"),
-    source("app/owner/entries/EntryForm.tsx"),
-    source("app/owner/profile/ProfileForm.tsx"),
-    source("app/owner/profile/page.tsx"),
-    source("app/owner/page.tsx"),
-    source("app/owner/entries/[id]/page.tsx"),
-    source("app/globals.css"),
-    source("docs/deployment.md"),
-    source("docs/security.md"),
-    source("docs/privacy.md"),
-    source("docs/presentation.md"),
-    source("app/owner/_components/owner-mutation-outcome.ts"),
+    readRepositorySource("app/owner/_components/EntryActions.tsx"),
+    readRepositorySource("app/owner/entries/EntryForm.tsx"),
+    readRepositorySource("app/owner/profile/ProfileForm.tsx"),
+    readRepositorySource("app/owner/profile/page.tsx"),
+    readRepositorySource("app/owner/page.tsx"),
+    readRepositorySource("app/owner/entries/[id]/page.tsx"),
+    readRepositorySource("app/globals.css"),
+    readRepositorySource("docs/deployment.md"),
+    readRepositorySource("docs/security.md"),
+    readRepositorySource("docs/privacy.md"),
+    readRepositorySource("docs/presentation.md"),
+    readRepositorySource("app/owner/_components/owner-mutation-outcome.ts"),
   ]);
 
   assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*publicly readable on this Aitta at its permalink[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
@@ -427,7 +427,7 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(css, /\.button\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.field input, \.field textarea, \.field select\s*\{[^}]*min-height:\s*48px/s);
   assert.match(css, /:focus-visible\s*\{[^}]*outline:\s*3px/s);
-  const ownerShellCss = await readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8");
+  const ownerShellCss = await readRepositorySource("app/owner/_components/OwnerShell.module.css");
   assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.content\s*\{\s*width:\s*calc\(100% - 28px\)/);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.form-footer\s*\{[^}]*flex-direction:\s*column/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
@@ -476,7 +476,7 @@ test("a maximum-length unbroken owner title and the full action set retain shrin
       }),
       ownerEmail,
     })),
-    source("app/globals.css"),
+    readRepositorySource("app/globals.css"),
   ]);
   const row = html.match(/<article class="owner-entry-row"[\s\S]*?<\/article>/)?.[0];
   assert.ok(row, "the populated owner route must render its update row");
@@ -496,7 +496,7 @@ test("a maximum-length unbroken owner title and the full action set retain shrin
 test("the complete native checkbox label retains its owner touch-target source contract", async () => {
   const [html, css] = await Promise.all([
     ownerHtml("/owner/profile", makeEnv({ db: new FakeD1(), ownerEmail })),
-    source("app/globals.css"),
+    readRepositorySource("app/globals.css"),
   ]);
   assert.match(
     html,
@@ -534,8 +534,4 @@ async function assertPubliclyUnknown(env, id, canaries) {
   assert.equal(detail.status, 404);
   const publicSource = `${await home.text()}\n${await permalink.text()}\n${JSON.stringify(await responseJson(detail))}\n${JSON.stringify(await responseJson(collection))}`;
   for (const canary of canaries) assert.doesNotMatch(publicSource, new RegExp(escapeRegExp(canary), "i"));
-}
-
-async function source(path) {
-  return readFile(new URL(`../${path}`, import.meta.url), "utf8");
 }

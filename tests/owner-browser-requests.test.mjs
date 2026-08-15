@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFile } from "node:fs/promises";
 import ts from "typescript";
+
+import { readRepositorySource } from "./helpers/repository-source.mjs";
 
 test("owner request functions preserve every owner mutation request and inject transport", async () => {
   const { entries, profile, pagePreview } = await loadRequestModules();
@@ -56,7 +57,7 @@ test("owner React components use request boundaries and keep strict response rea
     "app/owner/entries/EntryForm.tsx",
     "app/owner/profile/ProfileForm.tsx",
     "app/owner/pages/import/PageImportForm.tsx",
-  ].map(readSource));
+  ].map(readRepositorySource));
   for (const source of components) assert.doesNotMatch(source, /\bfetch\s*\(/u);
   assert.match(components[0], /changeEntryStateRequest\(id, nextState\)/u);
   assert.match(components[0], /deleteEntryRequest\(id\)/u);
@@ -93,9 +94,9 @@ function jsonCall(input, method, body) {
 async function loadRequestModules() {
   const boundaryUrl = await transpiledModuleUrl("app/owner/owner-browser-request.ts");
   const [entrySource, profileSource, pageSource] = await Promise.all([
-    readSource("app/owner/entries/entry-mutation-requests.ts"),
-    readSource("app/owner/profile/profile-save-request.ts"),
-    readSource("app/owner/pages/import/page-preview-request.ts"),
+    readRepositorySource("app/owner/entries/entry-mutation-requests.ts"),
+    readRepositorySource("app/owner/profile/profile-save-request.ts"),
+    readRepositorySource("app/owner/pages/import/page-preview-request.ts"),
   ]);
   const [entries, profile, pagePreview] = await Promise.all([
     import(transpiled(entrySource.replace("../owner-browser-request", boundaryUrl))),
@@ -106,7 +107,7 @@ async function loadRequestModules() {
 }
 
 async function transpiledModuleUrl(path) {
-  return transpiled(await readSource(path));
+  return transpiled(await readRepositorySource(path));
 }
 
 function transpiled(source) {
@@ -114,8 +115,4 @@ function transpiled(source) {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   return `data:text/javascript,${encodeURIComponent(compiled)}`;
-}
-
-function readSource(path) {
-  return readFile(new URL(`../${path}`, import.meta.url), "utf8");
 }
