@@ -1,5 +1,22 @@
 # Changelog
 
+- **TASK-228 — Centralized owner-entry JSON response media-type recognition.**
+  Added the dependency-free `app/owner/entries/json-response-media-type.ts`
+  leaf as the sole owner of the narrow owner-entry JSON media-type predicate.
+  Publication-state and deletion response readers now share it while preserving
+  their status/redirect gates, exact document validation, bounded reads,
+  structured-error handling, and unconfirmed fallbacks. Literal consumer
+  expectations still independently cover accepted and rejected media types.
+  Regression coverage also pins the TypeScript test-module import boundary and
+  complete declaration-ownership matrix. Validation: independent review found
+  no P0/P1/P2 issues; integrated commit `3e22518`; focused checks passed;
+  full `npm run validate` passed build, typecheck, lint, repository checks, and
+  592/592 tests. No dependency, observable production behavior, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted task shares
+  only private-entry response field-name recognition while retaining consumer
+  response expectations.
+
 - **TASK-227 — Centralized repository migration inventory in tests.** Added the
   Node-test-only `tests/helpers/migration-inventory.mjs` leaf as the sole owner
   of `migrationInventory`. Both migration matrices now pass their repository
