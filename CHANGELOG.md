@@ -1,5 +1,24 @@
 # Changelog
 
+- **TASK-215 — Centralized ESLint restricted-syntax diagnostic counting in
+  tests.** Added the dependency-free
+  `tests/helpers/eslint-restricted-syntax.mjs` leaf as the sole owner of
+  `restrictedSyntaxErrorCount(...results)`, which counts only messages whose
+  rule ID is `no-restricted-syntax`. Nine local `restrictedSyntaxErrors`
+  declarations and five equivalent inline counters across eleven existing test
+  modules now import and call it, while each module retains its own lint
+  fixtures, canonical allowances, cross-family restrictions, and expected
+  counts. Regression coverage proves zero, mixed, and batched diagnostics,
+  canonical ownership, consumer imports, legacy-name removal, and the complete
+  lint declaration matrix. Validation: independent review found no P0/P1/P2
+  issues; integrated commit `310546c`; focused checks passed 39/39; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  542/542 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task shares only the two exact
+  ordered-text assertions while retaining each consumer's page-specific
+  contract.
+
 - **TASK-214 — Centralized API v1 HEAD response-header assertions.** Added the
   dependency-free `tests/helpers/api-v1-head-response.mjs` leaf as the sole
   owner of exact five-header GET↔HEAD parity checks: content type, cache
