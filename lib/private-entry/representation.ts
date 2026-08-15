@@ -1,4 +1,5 @@
 import type { Entry } from "../types";
+import { rfc6570PathSegment } from "../rfc6570-path-segment";
 
 const PRIVATE_ENTRY_MEDIA_TYPE = "application/json" as const;
 
@@ -75,7 +76,7 @@ export type PrivateEntryDeletionDocument = {
 export function privateEntryDocument(
   entry: Entry,
 ): PrivateEntryDocument {
-  const encodedId = privateEntryIdPathSegment(entry.id);
+  const encodedId = rfc6570PathSegment(entry.id);
   const self = `/api/private/entries/${encodedId}`;
   const state = `${self}/state`;
   return {
@@ -133,10 +134,4 @@ export function privateEntryDeletionDocument(id: string): PrivateEntryDeletionDo
     ],
     actions: [],
   };
-}
-
-function privateEntryIdPathSegment(id: string): string {
-  return encodeURIComponent(id).replace(/[!'()*]/g, (character) =>
-    `%${character.charCodeAt(0).toString(16).toUpperCase()}`
-  );
 }

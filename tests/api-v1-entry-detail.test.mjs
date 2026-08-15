@@ -11,6 +11,7 @@ import {
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { assertApiJson } from "./helpers/api-v1-json-response.mjs";
+import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
 const canonicalUrl = "https://canonical.example/aitta";
 const canaries = [
@@ -281,11 +282,6 @@ function jsonLink(rel, href) {
   return { rel, href, mediaType: "application/json" };
 }
 
-function rfc6570PathSegment(id) {
-  return encodeURIComponent(id).replace(/[!'()*]/g, (character) =>
-    `%${character.charCodeAt(0).toString(16).toUpperCase()}`
-  );
-}
 
 function assertMatchingHeaders(head, get) {
   for (const name of ["content-type", "cache-control", "vary", "allow", "location"]) {

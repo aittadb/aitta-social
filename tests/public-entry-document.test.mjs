@@ -11,6 +11,7 @@ import {
   responseJson,
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
+import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
 const canonicalUrl = "https://canonical.example/aitta";
 const privateCanaries = [
@@ -409,7 +410,7 @@ test("unversioned representation is feature-local while v1 detail stays byte-for
   assert.doesNotMatch(response, /apiV1/);
   assert.doesNotMatch(route, /@\/lib\/api-v1\/(?:representation|response|entry-detail)/);
   assert.match(representation, /apiV1EntryResource/);
-  assert.match(representation, /apiV1EntryIdPathSegment/);
+  assert.match(representation, /rfc6570PathSegment/);
   assert.doesNotMatch(v1Route, /public-entry-document/);
 
   const entry = entryRow({ id: "public-entry" });
@@ -503,11 +504,6 @@ function hostileHeaders(overrides = {}) {
   };
 }
 
-function rfc6570PathSegment(id) {
-  return encodeURIComponent(id).replace(/[!'()*]/g, (character) =>
-    `%${character.charCodeAt(0).toString(16).toUpperCase()}`
-  );
-}
 
 function assertHtml(response, status) {
   assert.equal(response.status, status);

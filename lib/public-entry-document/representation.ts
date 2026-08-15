@@ -1,6 +1,6 @@
 import type { Entry } from "../types";
+import { rfc6570PathSegment } from "../rfc6570-path-segment";
 import {
-  apiV1EntryIdPathSegment,
   apiV1EntryResource,
 } from "../api-v1/entry-collection";
 
@@ -24,7 +24,7 @@ export function publicEntryDocument(
   entry: Entry,
   canonicalUrl: string,
 ): PublicEntryDocument {
-  const encodedId = apiV1EntryIdPathSegment(entry.id);
+  const encodedId = rfc6570PathSegment(entry.id);
   const documentHref = `${canonicalUrl}/entries/${encodedId}`;
   const links: PublicEntryDocumentLink[] = [
     jsonLink("self", documentHref),

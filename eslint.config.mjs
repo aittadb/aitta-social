@@ -73,6 +73,11 @@ const legacyPageInlineVisibleTextRestrictions = declarationRestrictions(
   "lib/custom-pages/page-document.ts",
   "pageInlineVisibleText",
 );
+const rfc6570PathSegmentRestrictions = declarationRestrictions(
+  ["rfc6570PathSegment", "apiV1EntryIdPathSegment", "privateEntryIdPathSegment"],
+  "lib/rfc6570-path-segment.ts",
+  "rfc6570PathSegment",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -85,6 +90,7 @@ const declarationRestrictionSets = [
   pageTextBoundaryRestrictions,
   pageInlineVisibleTextRestrictions,
   legacyPageInlineVisibleTextRestrictions,
+  rfc6570PathSegmentRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -97,6 +103,7 @@ const canonicalDeclarationFiles = [
   ["lib/accept-media-ranges.ts", acceptMediaRangeRestrictions],
   ["lib/custom-pages/page-text-boundaries.ts", pageTextBoundaryRestrictions],
   ["lib/custom-pages/page-document.ts", pageInlineVisibleTextRestrictions],
+  ["lib/rfc6570-path-segment.ts", rfc6570PathSegmentRestrictions],
 ];
 
 const eslintConfig = defineConfig([
