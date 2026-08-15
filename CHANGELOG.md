@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-221 — Centralized API v1 JSON-link expectations in tests.** Added the
+  dependency-free `tests/helpers/api-v1-json-link.mjs` leaf as the sole owner
+  of a fresh literal `expectedApiV1JsonLink(rel, href)` expectation. The three
+  API v1 test consumers now import it while retaining their fixtures, ordering,
+  pagination/resource expectations, private canaries, and assertion ownership.
+  The production `jsonLink` builder remains private, byte-for-byte unchanged,
+  and independent. Regression coverage proves exact, empty/Unicode, fresh
+  expectations, consumer ownership, and full lint behavior. Validation:
+  independent review found and the implementation corrected one P2 lint
+  diagnostic that could have suggested importing private production code; final
+  re-review found no P0/P1/P2 issues; integrated commit `02a01ef`; focused
+  checks passed 22/22; full `npm run validate` passed build, typecheck, lint,
+  repository checks, and 565/565 tests. No dependency, production behavior,
+  route, API, schema, migration, persistence, hosting, deployment, data,
+  access, or external state changed. Residual uncertainty: the next accepted
+  task shares only identical query assertions, not test harnesses or response
+  oracles.
+
 - **TASK-220 — Centralized inline-style attribute extraction in tests.** Added
   the dependency-free `tests/helpers/inline-style-attribute-values.mjs` leaf as
   the sole owner of the existing whitespace-prefixed, case-insensitive,
