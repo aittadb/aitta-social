@@ -105,6 +105,10 @@ const orderedTextAssertionRestrictions = declarationRestrictions(
   ["assertOrdered"],
   "tests/helpers/ordered-text-assertion.mjs",
 );
+const cssClampPixelsRestrictions = declarationRestrictions(
+  ["clampPixels"],
+  "tests/helpers/css-clamp-pixels.mjs",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -124,6 +128,7 @@ const declarationRestrictionSets = [
   legacyPageInlineVisibleTextRestrictions,
   rfc6570PathSegmentRestrictions,
   orderedTextAssertionRestrictions,
+  cssClampPixelsRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -141,6 +146,7 @@ const canonicalDeclarationFiles = [
   ["lib/custom-pages/page-document.ts", pageInlineVisibleTextRestrictions],
   ["lib/rfc6570-path-segment.ts", rfc6570PathSegmentRestrictions],
   ["tests/helpers/ordered-text-assertion.mjs", orderedTextAssertionRestrictions],
+  ["tests/helpers/css-clamp-pixels.mjs", cssClampPixelsRestrictions],
 ];
 
 const eslintConfig = defineConfig([

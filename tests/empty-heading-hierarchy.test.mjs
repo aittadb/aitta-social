@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { clampPixels } from "./helpers/css-clamp-pixels.mjs";
 import {
   FakeD1,
   fetchApp,
@@ -127,7 +128,3 @@ test("SSR keeps Updates h2 before the empty h3 without changing empty-state mean
     assert.doesNotMatch(html, new RegExp(PRIVATE_CANARY));
   }
 });
-
-function clampPixels(minRem, preferredVw, maxRem, width) {
-  return Math.min(maxRem * 16, Math.max(minRem * 16, width * preferredVw / 100));
-}

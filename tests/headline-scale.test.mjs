@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { clampPixels } from "./helpers/css-clamp-pixels.mjs";
 import {
   entryRow,
   FakeD1,
@@ -142,8 +143,4 @@ async function html(path, env, headers = {}) {
     headers: { accept: "text/html", ...headers },
   });
   return response.text();
-}
-
-function clampPixels(minRem, preferredVw, maxRem, width) {
-  return Math.min(maxRem * 16, Math.max(minRem * 16, width * preferredVw / 100));
 }
