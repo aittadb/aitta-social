@@ -178,6 +178,10 @@ const legacyEntryKindLabelRestrictions = declarationRestrictions(
   "lib/entry-kind-label.ts",
   "entryKindLabel",
 );
+const migrationInventoryRestrictions = declarationRestrictions(
+  ["migrationInventory"],
+  "tests/helpers/migration-inventory.mjs",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -212,6 +216,7 @@ const declarationRestrictionSets = [
   ownerFormFieldDescriptionRestrictions,
   entryKindLabelRestrictions,
   legacyEntryKindLabelRestrictions,
+  migrationInventoryRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -240,6 +245,7 @@ const canonicalDeclarationFiles = [
   ["tests/helpers/repository-source.mjs", canonicalRepositorySourceRestrictions],
   ["app/owner/form-field-description.ts", ownerFormFieldDescriptionRestrictions],
   ["lib/entry-kind-label.ts", entryKindLabelRestrictions],
+  ["tests/helpers/migration-inventory.mjs", migrationInventoryRestrictions],
 ];
 
 const eslintConfig = defineConfig([

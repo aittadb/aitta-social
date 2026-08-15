@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -8,6 +8,7 @@ import { Miniflare } from "miniflare";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
 import { consumeResponse } from "./helpers/response-body-consumption.mjs";
+import { migrationInventory } from "./helpers/migration-inventory.mjs";
 
 import {
   APP_ORIGIN,
@@ -52,7 +53,7 @@ test("TASK-060 provenance remains bound to the reviewed functional candidate", a
     assert.equal(await sha256(relativePath), digest, `${relativePath} changed after review`);
   }
 
-  const migrations = await migrationInventory();
+  const migrations = await migrationInventory(REPOSITORY_ROOT);
   assert.equal(migrations[0], historicalMigration);
   assert(migrations.length > 0);
 });
@@ -283,7 +284,7 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
   }));
   await applyMigrationSql(worker.db, await readRepositoryFile(historicalMigration));
   await applyFixtureSql(worker.db, await readRepositoryFile(historicalFixture));
-  for (const migration of (await migrationInventory()).slice(1)) {
+  for (const migration of (await migrationInventory(REPOSITORY_ROOT)).slice(1)) {
     await applyMigrationSql(worker.db, await readRepositoryFile(migration));
   }
 
@@ -474,15 +475,8 @@ async function createFunctionalWorker({
   };
 }
 
-async function migrationInventory() {
-  return (await readdir(path.join(REPOSITORY_ROOT, "drizzle"), { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && /^\d+_.+\.sql$/u.test(entry.name))
-    .map((entry) => `drizzle/${entry.name}`)
-    .sort();
-}
-
 async function applyCandidateMigrations(db) {
-  for (const migration of await migrationInventory()) {
+  for (const migration of await migrationInventory(REPOSITORY_ROOT)) {
     await applyMigrationSql(db, await readRepositoryFile(migration));
   }
 }

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -7,6 +7,7 @@ import test from "node:test";
 import { Miniflare } from "miniflare";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { migrationInventory } from "./helpers/migration-inventory.mjs";
 
 import {
   APP_ORIGIN,
@@ -237,15 +238,8 @@ async function assertSourceProvenance() {
     assert.equal(await sha256(relativePath), digest, `${relativePath} must remain reviewed`);
   }
 
-  const migrations = await migrationInventory();
+  const migrations = await migrationInventory(REPOSITORY_ROOT);
   assert.deepEqual(migrations, [historicalMigration]);
-}
-
-async function migrationInventory() {
-  return (await readdir(path.join(REPOSITORY_ROOT, "drizzle"), { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && /^\d+_.+\.sql$/u.test(entry.name))
-    .map((entry) => `drizzle/${entry.name}`)
-    .sort();
 }
 
 async function createMatrixWorker({ persistPath, canonicalUrl }) {
@@ -290,7 +284,7 @@ async function createMatrixWorker({ persistPath, canonicalUrl }) {
 }
 
 async function prepareFixture(db, matrixCase) {
-  const migrations = await migrationInventory();
+  const migrations = await migrationInventory(REPOSITORY_ROOT);
   if (matrixCase.lineage === "fresh") {
     for (const migration of migrations) {
       await applyMigrationSql(db, await readRepositoryFile(migration));
