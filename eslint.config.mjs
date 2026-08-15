@@ -117,6 +117,15 @@ const orderedTextAssertionRestrictions = declarationRestrictions(
   ["assertOrdered"],
   "tests/helpers/ordered-text-assertion.mjs",
 );
+const varyHeaderTokensRestrictions = declarationRestrictions(
+  ["varyHeaderTokens"],
+  "tests/helpers/vary-header-tokens.mjs",
+);
+const legacyVaryHeaderTokensRestrictions = declarationRestrictions(
+  ["hasVaryToken", "varyTokens"],
+  "tests/helpers/vary-header-tokens.mjs",
+  "varyHeaderTokens",
+);
 const publishedEntryDetailQueryRestrictions = declarationRestrictions(
   ["assertPublishedOnlyDetailQueries"],
   "tests/helpers/published-entry-detail-query-contract.mjs",
@@ -173,6 +182,8 @@ const declarationRestrictionSets = [
   legacyPageInlineVisibleTextRestrictions,
   rfc6570PathSegmentRestrictions,
   orderedTextAssertionRestrictions,
+  varyHeaderTokensRestrictions,
+  legacyVaryHeaderTokensRestrictions,
   publishedEntryDetailQueryRestrictions,
   inlineStyleAttributeValuesCanonicalRestrictions,
   inlineStyleAttributeValuesLegacyRestrictions,
@@ -199,6 +210,7 @@ const canonicalDeclarationFiles = [
   ["lib/custom-pages/page-document.ts", pageInlineVisibleTextRestrictions],
   ["lib/rfc6570-path-segment.ts", rfc6570PathSegmentRestrictions],
   ["tests/helpers/ordered-text-assertion.mjs", orderedTextAssertionRestrictions],
+  ["tests/helpers/vary-header-tokens.mjs", varyHeaderTokensRestrictions],
   ["tests/helpers/published-entry-detail-query-contract.mjs", publishedEntryDetailQueryRestrictions],
   ["tests/helpers/inline-style-attribute-values.mjs", inlineStyleAttributeValuesCanonicalRestrictions],
   ["tests/helpers/regular-expression-match-count.mjs", regularExpressionMatchCountRestrictions],

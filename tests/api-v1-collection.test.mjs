@@ -12,6 +12,7 @@ import {
 import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { assertMatchingApiV1HeadHeaders } from "./helpers/api-v1-head-response.mjs";
 import { expectedApiV1JsonLink } from "./helpers/api-v1-json-link.mjs";
+import { varyHeaderTokens } from "./helpers/vary-header-tokens.mjs";
 import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
 const canonicalUrl = "https://canonical.example/aitta";
@@ -352,20 +353,10 @@ function assertCollectionJson(response, status, cacheControl) {
   assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
   assert.equal(response.headers.get("cache-control"), cacheControl);
   assert.equal(response.headers.get("location"), null);
-  assert(hasVaryToken(response, "accept"));
-  assert(hasVaryToken(response, "authorization"));
-  assert.equal(varyTokens(response).filter((token) => token === "accept").length, 1);
-  assert.equal(varyTokens(response).filter((token) => token === "authorization").length, 1);
-}
-
-function hasVaryToken(response, token) {
-  return varyTokens(response).includes(token);
-}
-
-function varyTokens(response) {
-  return (response.headers.get("vary") ?? "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase());
+  assert(varyHeaderTokens(response).includes("accept"));
+  assert(varyHeaderTokens(response).includes("authorization"));
+  assert.equal(varyHeaderTokens(response).filter((token) => token === "accept").length, 1);
+  assert.equal(varyHeaderTokens(response).filter((token) => token === "authorization").length, 1);
 }
 
 function assertPublishedOnlyQueries(db) {

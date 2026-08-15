@@ -12,6 +12,7 @@ import {
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { assertPublishedOnlyDetailQueries } from "./helpers/published-entry-detail-query-contract.mjs";
+import { varyHeaderTokens } from "./helpers/vary-header-tokens.mjs";
 import { rfc6570PathSegment } from "../lib/rfc6570-path-segment.ts";
 
 const canonicalUrl = "https://canonical.example/aitta";
@@ -511,7 +512,7 @@ function assertHtml(response, status) {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/iu);
   assert.equal(response.headers.get("cache-control"), "no-store, must-revalidate");
   assert.match(response.headers.get("content-security-policy") ?? "", /default-src 'none'/);
-  assert(hasVaryToken(response, "accept"));
+  assert(varyHeaderTokens(response).includes("accept"));
 }
 
 function assertJson(response, status, cacheControl) {
@@ -519,7 +520,7 @@ function assertJson(response, status, cacheControl) {
   assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
   assert.equal(response.headers.get("cache-control"), cacheControl);
   assert.equal(response.headers.get("content-security-policy"), null);
-  assert(hasVaryToken(response, "accept"));
+  assert(varyHeaderTokens(response).includes("accept"));
 }
 
 function assertMatchingEntryDocumentHeaders(left, right) {
@@ -542,13 +543,6 @@ function selectedHeaders(response) {
     "content-security-policy",
     "location",
   ].map((name) => [name, response.headers.get(name)]));
-}
-
-function hasVaryToken(response, token) {
-  return (response.headers.get("vary") ?? "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .includes(token);
 }
 
 function assertNoCanary(value) {
