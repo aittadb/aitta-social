@@ -1,5 +1,21 @@
 # Changelog
 
+- **TASK-213 — Centralized deletion acknowledgement fixtures.** Added the
+  dependency-free `tests/helpers/deletion-acknowledgement-contract.mjs` leaf
+  as the sole owner of the owner-entry-deletion receipt fixture; all four
+  consumers now import it while their test-specific assertion wrappers remain
+  local. The helper produces fresh root, data, attributes, arrays, and link
+  objects with the exact original collection/recovery HTML links and empty
+  actions. Validation: independent review found and corrected one P1 legacy
+  lint-exception hole and one P2 nested-freshness evidence gap; final
+  re-review found no P0/P1/P2 issues; integrated commit `e9f51c2`; focused
+  deletion checks passed 52/52; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 536/536 tests. No production, route,
+  API, schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted task shares
+  only exact API v1 HEAD parity headers; the broader public-entry document
+  assertion remains intentionally local.
+
 - **TASK-212 — Centralized RFC 6570 path-segment expansion.** Added the
   dependency-free `lib/rfc6570-path-segment.ts` leaf as the sole owner of the
   opaque identifier encoder. Four production consumers and three existing test
