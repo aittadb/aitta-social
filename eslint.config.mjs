@@ -182,6 +182,15 @@ const migrationInventoryRestrictions = declarationRestrictions(
   ["migrationInventory"],
   "tests/helpers/migration-inventory.mjs",
 );
+const ownerEntryJsonResponseMediaTypeRestrictions = declarationRestrictions(
+  ["isOwnerEntryJsonResponseMediaType"],
+  "app/owner/entries/json-response-media-type.ts",
+);
+const legacyOwnerEntryJsonResponseMediaTypeRestrictions = declarationRestrictions(
+  ["isJsonResponse"],
+  "app/owner/entries/json-response-media-type.ts",
+  "isOwnerEntryJsonResponseMediaType",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -217,6 +226,8 @@ const declarationRestrictionSets = [
   entryKindLabelRestrictions,
   legacyEntryKindLabelRestrictions,
   migrationInventoryRestrictions,
+  ownerEntryJsonResponseMediaTypeRestrictions,
+  legacyOwnerEntryJsonResponseMediaTypeRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -246,6 +257,7 @@ const canonicalDeclarationFiles = [
   ["app/owner/form-field-description.ts", ownerFormFieldDescriptionRestrictions],
   ["lib/entry-kind-label.ts", entryKindLabelRestrictions],
   ["tests/helpers/migration-inventory.mjs", migrationInventoryRestrictions],
+  ["app/owner/entries/json-response-media-type.ts", ownerEntryJsonResponseMediaTypeRestrictions],
 ];
 
 const eslintConfig = defineConfig([

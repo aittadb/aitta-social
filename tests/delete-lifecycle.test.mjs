@@ -170,12 +170,20 @@ function assertDeletionAcknowledgement(value, id) {
 }
 
 async function compiledDeletionResponseReader() {
-  const draftUrl = await compileRecordShapeAwareTypeScriptModule(
-    new URL("../app/owner/entries/draft-create-response.ts", import.meta.url),
-  );
+  const [draftUrl, mediaTypeUrl] = await Promise.all([
+    compileRecordShapeAwareTypeScriptModule(
+      new URL("../app/owner/entries/draft-create-response.ts", import.meta.url),
+    ),
+    compileRecordShapeAwareTypeScriptModule(
+      new URL("../app/owner/entries/json-response-media-type.ts", import.meta.url),
+    ),
+  ]);
   const deletionModule = await importRecordShapeAwareTypeScriptModule(
     new URL("../app/owner/entries/deletion-response.ts", import.meta.url),
-    { "./draft-create-response": draftUrl },
+    {
+      "./draft-create-response": draftUrl,
+      "./json-response-media-type": mediaTypeUrl,
+    },
   );
   return deletionModule.readDeletionResponse;
 }

@@ -1,4 +1,5 @@
 import type { EntryState } from "@/lib/constants";
+import { isOwnerEntryJsonResponseMediaType } from "./json-response-media-type";
 import {
   isPrivateEntryDocument,
   isPrivateEntryErrorDocument,
@@ -16,7 +17,7 @@ export async function readPublicationStateResponse(
   expected: { id: string; state: EntryState },
 ): Promise<PublicationStateResponse> {
   if (response.status >= 500) return { outcome: "unconfirmed" };
-  if (!isJsonResponse(response.headers.get("content-type"))) {
+  if (!isOwnerEntryJsonResponseMediaType(response.headers.get("content-type"))) {
     return { outcome: "unconfirmed" };
   }
   if (response.status === 200 && response.ok) {
@@ -33,8 +34,4 @@ export async function readPublicationStateResponse(
   return isPrivateEntryErrorDocument(body)
     ? { outcome: "definitive-error", message: body.error.message }
     : { outcome: "unconfirmed" };
-}
-
-function isJsonResponse(value: string | null): boolean {
-  return value !== null && /^application\/json(?:\s*;\s*charset=utf-8)?$/iu.test(value);
 }

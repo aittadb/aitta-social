@@ -2,6 +2,7 @@ import {
   isPrivateEntryErrorDocument,
   readPrivateEntryResponseJson,
 } from "./draft-create-response";
+import { isOwnerEntryJsonResponseMediaType } from "./json-response-media-type";
 import { hasExactKeys, isRecord } from "@/lib/record-shape";
 
 export type DeletionResponse =
@@ -14,7 +15,7 @@ export async function readDeletionResponse(
   response: Response,
   expectedId: string,
 ): Promise<DeletionResponse> {
-  if (response.redirected || response.status >= 500 || !isJsonResponse(response.headers.get("content-type"))) {
+  if (response.redirected || response.status >= 500 || !isOwnerEntryJsonResponseMediaType(response.headers.get("content-type"))) {
     return { outcome: "unconfirmed" };
   }
   if (response.status === 200 && response.ok) {
@@ -43,10 +44,6 @@ function isDeletionAcknowledgement(value: unknown, expectedId: string): boolean 
   const [collection, recovery] = value.links;
   return isLink(collection, "collection") && isLink(recovery, "recovery") &&
     Array.isArray(value.actions) && value.actions.length === 0;
-}
-
-function isJsonResponse(value: string | null): boolean {
-  return value !== null && /^application\/json(?:\s*;\s*charset=utf-8)?$/iu.test(value);
 }
 
 function isLink(value: unknown, rel: "collection" | "recovery"): boolean {
