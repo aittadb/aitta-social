@@ -10,6 +10,7 @@ import {
   ownerHeaders,
   responseJson,
 } from "./helpers/worker-harness.mjs";
+import { assertPrivateJson } from "./helpers/private-json-response.mjs";
 
 const ownerEmail = "owner@example.com";
 const safeInput = {
@@ -37,7 +38,7 @@ const safeInput = {
 
 test("authorized import returns the exact closed PageDocumentV1 without storage", async () => {
   const response = await preview(safeInput, { env: makeEnv({ db: throwingD1(), ownerEmail }) });
-  assertPrivateJson(response, 200);
+  assertPrivateJson(response, 200, { caseInsensitiveContentType: false });
   assert.deepEqual(await responseJson(response), {
     data: {
       id: "page-preview",
@@ -191,7 +192,7 @@ test("all untrusted markup, URL, tree, and fragment failures share one non-refle
   for (const [label, htmlFragment] of cases) {
     await t.test(label, async () => {
       const response = await preview({ ...safeInput, htmlFragment });
-      assertPrivateJson(response, 422);
+      assertPrivateJson(response, 422, { caseInsensitiveContentType: false });
       const body = await responseJson(response);
       assert.deepEqual(body, {
         data: null,
@@ -216,7 +217,7 @@ test("field, request, and output bounds fail closed without truncation", async (
   for (const [label, input] of fieldCases) {
     await t.test(label, async () => {
       const response = await preview(input);
-      assertPrivateJson(response, 422);
+      assertPrivateJson(response, 422, { caseInsensitiveContentType: false });
       const body = await responseJson(response);
       assert.equal(body.error.code, "validation_failed");
       assert.doesNotMatch(JSON.stringify(body), /FIELD_PRIVATE_CANARY/u);
@@ -238,14 +239,14 @@ test("field, request, and output bounds fail closed without truncation", async (
   for (const [label, htmlFragment] of importCases) {
     await t.test(label, async () => {
       const response = await preview({ ...safeInput, htmlFragment });
-      assertPrivateJson(response, 422);
+      assertPrivateJson(response, 422, { caseInsensitiveContentType: false });
       assert.equal((await responseJson(response)).error.code, "import_rejected");
     });
   }
 
   await t.test("request body bytes", async () => {
     const response = await preview({ ...safeInput, htmlFragment: `<p>${"x".repeat(192 * 1024)}</p>` });
-    assertPrivateJson(response, 400);
+    assertPrivateJson(response, 400, { caseInsensitiveContentType: false });
     assert.equal((await responseJson(response)).error.code, "request_too_large");
   });
 });
@@ -288,7 +289,7 @@ test("same-origin and sole-owner denials precede negotiation, media, body, and D
       headers: { ...fixture.headers, accept: "text/html", "content-type": "text/plain" },
       body: "AUTH_BODY_PRIVATE_CANARY",
     });
-    assertPrivateJson(response, fixture.status);
+    assertPrivateJson(response, fixture.status, { caseInsensitiveContentType: false });
     const body = await responseJson(response);
     assert.equal(body.error.code, fixture.code, fixture.label);
     assert.doesNotMatch(JSON.stringify(body), /AUTH_BODY_PRIVATE_CANARY/u);
@@ -300,11 +301,11 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
     const response = await preview(safeInput, {
       headers: accept === undefined ? {} : { accept },
     });
-    assertPrivateJson(response, 200);
+    assertPrivateJson(response, 200, { caseInsensitiveContentType: false });
   }
   for (const accept of ["text/html", "application/json;q=0", "application/json,", "application/json;q=2"]) {
     const response = await preview(safeInput, { headers: { accept } });
-    assertPrivateJson(response, 406);
+    assertPrivateJson(response, 406, { caseInsensitiveContentType: false });
     assert.equal((await responseJson(response)).error.code, "not_acceptable");
   }
 
@@ -318,7 +319,7 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
       headers,
       body: JSON.stringify(safeInput),
     });
-    assertPrivateJson(response, 415);
+    assertPrivateJson(response, 415, { caseInsensitiveContentType: false });
     assert.equal((await responseJson(response)).error.code, "unsupported_media_type");
   }
 
@@ -329,7 +330,7 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
       headers: mutationHeaders(ownerEmail),
       body,
     });
-    assertPrivateJson(response, 400);
+    assertPrivateJson(response, 400, { caseInsensitiveContentType: false });
     assert.equal((await responseJson(response)).error.code, "invalid_json");
   }
 
@@ -352,7 +353,7 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
           method,
           headers,
         });
-        assertPrivateJson(response, 405);
+        assertPrivateJson(response, 405, { caseInsensitiveContentType: false });
         assert.equal(response.headers.get("allow"), "POST");
         assert.equal((await responseJson(response)).error.code, "method_not_allowed");
       });
@@ -366,7 +367,7 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
         method,
         headers: { accept: "text/html" },
       });
-      assertPrivateJson(response, 403);
+      assertPrivateJson(response, 403, { caseInsensitiveContentType: false });
       assert.equal((await responseJson(response)).error.code, "authorization_denied");
     });
   }
@@ -475,13 +476,6 @@ async function preview(input, options = {}) {
     headers: { ...mutationHeaders(ownerEmail), ...options.headers },
     body: options.body ?? JSON.stringify(input),
   });
-}
-
-function assertPrivateJson(response, status) {
-  assert.equal(response.status, status);
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/u);
-  assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.ok((response.headers.get("vary") ?? "").split(",").map((value) => value.trim()).includes("Accept"));
 }
 
 function throwingD1() {

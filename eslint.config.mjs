@@ -43,6 +43,10 @@ const publicFooterRestrictions = declarationRestrictions(
   ["publicFooter"],
   "tests/helpers/public-footer-contract.mjs",
 );
+const privateJsonResponseRestrictions = declarationRestrictions(
+  ["assertPrivateJson"],
+  "tests/helpers/private-json-response.mjs",
+);
 const acceptMediaRangeRestrictions = declarationRestrictions(
   ["parseAcceptMediaRanges", "parseMediaRange", "validParameterValue", "splitOutsideQuotes"],
   "lib/accept-media-ranges.ts",
@@ -89,6 +93,7 @@ const eslintConfig = defineConfig([
         ...recordShapeRestrictions,
         ...regularExpressionLiteralRestrictions,
         ...publicFooterRestrictions,
+        ...privateJsonResponseRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },
@@ -100,6 +105,7 @@ const eslintConfig = defineConfig([
         "error",
         ...regularExpressionLiteralRestrictions,
         ...publicFooterRestrictions,
+        ...privateJsonResponseRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },
@@ -111,6 +117,7 @@ const eslintConfig = defineConfig([
         "error",
         ...recordShapeRestrictions,
         ...publicFooterRestrictions,
+        ...privateJsonResponseRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },
@@ -122,6 +129,7 @@ const eslintConfig = defineConfig([
         "error",
         ...recordShapeRestrictions,
         ...regularExpressionLiteralRestrictions,
+        ...privateJsonResponseRestrictions,
         ...publicFooterRestrictions,
       ],
     },
@@ -133,6 +141,19 @@ const eslintConfig = defineConfig([
         "error",
         ...recordShapeRestrictions,
         ...regularExpressionLiteralRestrictions,
+        ...acceptMediaRangeRestrictions,
+        ...privateJsonResponseRestrictions,
+      ],
+    },
+  },
+  {
+    files: ["tests/helpers/private-json-response.mjs"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...recordShapeRestrictions,
+        ...regularExpressionLiteralRestrictions,
+        ...publicFooterRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },

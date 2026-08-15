@@ -11,6 +11,7 @@ import {
   validProfileInput,
 } from "./helpers/worker-harness.mjs";
 import { importRecordShapeAwareTypeScriptModule } from "./helpers/record-shape-esm-compiler.mjs";
+import { assertPrivateJson } from "./helpers/private-json-response.mjs";
 
 const ownerEmail = "owner@example.com";
 const canonicalUrl = "https://canonical.example/aitta";
@@ -357,15 +358,6 @@ async function saveWith({ db = new FakeD1({ profile: null }), headers = {}, body
     headers: { ...mutationHeaders(ownerEmail), ...headers },
     body: body ?? JSON.stringify(validProfileInput()),
   });
-}
-
-function assertPrivateJson(response, status) {
-  assert.equal(response.status, status);
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
-  assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.ok(
-    (response.headers.get("vary") ?? "").split(",").map((value) => value.trim()).includes("Accept"),
-  );
 }
 
 function assertNoCanary(value) {

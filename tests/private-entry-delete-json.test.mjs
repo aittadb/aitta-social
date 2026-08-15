@@ -10,6 +10,7 @@ import {
   ownerHeaders,
   responseJson,
 } from "./helpers/worker-harness.mjs";
+import { assertPrivateJson } from "./helpers/private-json-response.mjs";
 
 const ownerEmail = "owner@example.com";
 const entryId = "19700000-0000-4000-8000-000000000001";
@@ -174,13 +175,6 @@ function acknowledgement(id) {
 
 function errorDocument(code, message) {
   return { data: null, error: { code, message }, links: [] };
-}
-
-function assertPrivateJson(response, status) {
-  assert.equal(response.status, status);
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
-  assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.ok((response.headers.get("vary") ?? "").split(",").map((value) => value.trim()).includes("Accept"));
 }
 
 function assertNoCanary(value) {

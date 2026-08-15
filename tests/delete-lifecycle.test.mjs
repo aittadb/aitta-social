@@ -14,6 +14,7 @@ import {
   compileRecordShapeAwareTypeScriptModule,
   importRecordShapeAwareTypeScriptModule,
 } from "./helpers/record-shape-esm-compiler.mjs";
+import { assertPrivateJson } from "./helpers/private-json-response.mjs";
 
 const ownerEmail = "owner@example.com";
 const draftId = "16500000-0000-4000-8000-000000000001";
@@ -162,13 +163,6 @@ test("deletion client accepts only the exact acknowledgement and exact structure
   assert.deepEqual(await readDeletionResponse(oversized, draftId), { outcome: "unconfirmed" });
   assert.ok(pulls <= 6);
 });
-
-function assertPrivateJson(response, status) {
-  assert.equal(response.status, status);
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
-  assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.ok((response.headers.get("vary") ?? "").split(",").map((value) => value.trim()).includes("Accept"));
-}
 
 function assertDeletionAcknowledgement(value, id) {
   assert.deepEqual(value, deletionAcknowledgement(id));

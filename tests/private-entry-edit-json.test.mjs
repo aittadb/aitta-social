@@ -16,6 +16,7 @@ import {
   compileRecordShapeAwareTypeScriptModule,
   importRecordShapeAwareTypeScriptModule,
 } from "./helpers/record-shape-esm-compiler.mjs";
+import { assertPrivateJson } from "./helpers/private-json-response.mjs";
 
 const ownerEmail = "owner@example.com";
 const privateCanaries = [
@@ -602,15 +603,6 @@ async function compiledEditResponseReader() {
     { "./draft-create-response": draftUrl },
   );
   return editModule.readEntryEditResponse;
-}
-
-function assertPrivateJson(response, status) {
-  assert.equal(response.status, status);
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
-  assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.ok(
-    (response.headers.get("vary") ?? "").split(",").map((value) => value.trim()).includes("Accept"),
-  );
 }
 
 function assertNoCanary(value) {
