@@ -1,5 +1,22 @@
 # Changelog
 
+- **TASK-223 — Centralized Vary-header tokenization in tests.** Added the
+  dependency-free `tests/helpers/vary-header-tokens.mjs` leaf as the sole owner
+  of Vary token splitting, trimming, lowercase normalization, ordering,
+  repetitions, empty segments, and the existing missing-header `[""]` result.
+  Three consumers now import it while retaining their status, content-type,
+  cache, location, CSP, membership, exact-once, and privacy assertions.
+  Regression coverage proves token behavior, ownership, legacy removal, and
+  full declaration ownership. Validation: independent review found and the
+  implementation corrected one P2 missing cross-family lint regression; final
+  re-review found no P0/P1/P2 issues; integrated commit `f0952b1`; focused
+  checks passed 21/21; full `npm run validate` passed build, typecheck, lint,
+  repository checks, and 573/573 tests. No dependency, production behavior,
+  route, API, schema, migration, persistence, hosting, deployment, data,
+  access, or external state changed. Residual uncertainty: the next accepted
+  task shares only discarded response-body consumption and preserves every
+  surrounding lifecycle assertion.
+
 - **TASK-222 — Centralized published-entry detail query assertions in tests.**
   Added the dependency-free
   `tests/helpers/published-entry-detail-query-contract.mjs` leaf as the sole
