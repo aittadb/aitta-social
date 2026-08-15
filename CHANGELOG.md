@@ -1,5 +1,24 @@
 # Changelog
 
+- **TASK-211 — Centralized custom-page text boundary primitives.** Added the
+  dependency-free `lib/custom-pages/page-text-boundaries.ts` leaf as the sole
+  owner of Unicode code-point length and the text/URL control-character
+  predicates. The HTML-fragment compiler and PageDocument validator now import
+  it; their control boundaries, limits, errors, rejection behavior, and URL
+  normalization are unchanged. The byte-identical inline visible-text
+  recursion is now the canonical `pageInlineVisibleText` export in the
+  existing PageDocument module, keeping the import graph acyclic. Regression
+  coverage includes Unicode scalars and lone surrogates, controls, nested
+  inline text, consumer behavior, and lint ownership. Validation: strict
+  independent review found and corrected one P1 legacy-name exemption hole;
+  final re-review found no P0/P1/P2 issues; integrated commit `9e7f45c`;
+  cumulative focused restriction checks passed 27/27; full `npm run validate`
+  passed build, typecheck, lint, repository checks, and 530/530 tests. No
+  route, API, schema, migration, persistence, hosting, deployment, data,
+  access, or external state changed. Residual uncertainty: the next accepted
+  slice centralizes only the exact RFC 6570 opaque path encoder; unrelated
+  metadata/link encoding behavior remains intentionally out of scope.
+
 - **TASK-210 — Centralized API v1 JSON response expectations in tests.** Added
   the dependency-free `tests/helpers/api-v1-json-response.mjs` leaf as the
   sole owner of `assertApiJson`; API v1 profile, root, and entry-detail tests
