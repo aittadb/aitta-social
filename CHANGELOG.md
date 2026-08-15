@@ -1,5 +1,21 @@
 # Changelog
 
+- **TASK-220 — Centralized inline-style attribute extraction in tests.** Added
+  the dependency-free `tests/helpers/inline-style-attribute-values.mjs` leaf as
+  the sole owner of the existing whitespace-prefixed, case-insensitive,
+  double-quoted `style` attribute extraction. Both security-sensitive appearance
+  tests now import it while retaining their HTML fixtures, accent-resolution and
+  persistence assertions, and private canaries. Regression coverage proves
+  absent, ordered, repeated, uppercase, empty-value, `data-style`, and
+  single-quoted behavior plus ownership, imports, and the full
+  declaration-restriction matrix. Validation: independent review found no
+  P0/P1/P2 issues; integrated commit `16cec08`; focused checks passed 17/17;
+  full `npm run validate` passed build, typecheck, lint, repository checks, and
+  561/561 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task shares API v1 JSON-link
+  expectations without coupling them to the independent production builder.
+
 - **TASK-219 — Centralized repository-source reads in tests.** Added the
   dependency-free Node-test `tests/helpers/repository-source.mjs` leaf as the
   sole owner of `readRepositorySource(path)`. It preserves the existing
