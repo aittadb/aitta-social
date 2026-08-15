@@ -13,6 +13,7 @@ import {
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
 import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
+import { throwingD1 } from "./helpers/throwing-d1.mjs";
 
 const ownerEmail = "owner@example.com";
 const entryId = "19700000-0000-4000-8000-000000000001";
@@ -70,7 +71,7 @@ test("DELETE accepts bounded JSON-compatible Accept and rejects excluded, malfor
     "application/json;q=2",
     `application/json;note=${"x".repeat(4096)}`,
   ]) {
-    const response = await deleteWith(entryId, { db: throwingD1(), headers: { accept } });
+    const response = await deleteWith(entryId, { db: throwingD1(privateCanaries[1]), headers: { accept } });
     assertPrivateJson(response, 406);
     assert.equal((await responseJson(response)).error.code, "not_acceptable");
   }
@@ -78,10 +79,10 @@ test("DELETE accepts bounded JSON-compatible Accept and rejects excluded, malfor
 
 test("DELETE authorization is before Accept, params, D1, and every request-body read", async () => {
   const cases = [
-    ["cross origin", makeEnv({ db: throwingD1(), ownerEmail }), { ...ownerHeaders(ownerEmail), origin: "https://attacker.example" }, 403, "authorization_denied"],
-    ["signed out", makeEnv({ db: throwingD1(), ownerEmail }), { origin: "https://account.example" }, 401, "authentication_required"],
-    ["non-owner", makeEnv({ db: throwingD1(), ownerEmail }), { ...ownerHeaders("other@example.com"), origin: "https://account.example" }, 403, "authorization_denied"],
-    ["missing owner", makeEnv({ db: throwingD1() }), { ...ownerHeaders(ownerEmail), origin: "https://account.example" }, 503, "owner_unavailable"],
+    ["cross origin", makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), { ...ownerHeaders(ownerEmail), origin: "https://attacker.example" }, 403, "authorization_denied"],
+    ["signed out", makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), { origin: "https://account.example" }, 401, "authentication_required"],
+    ["non-owner", makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), { ...ownerHeaders("other@example.com"), origin: "https://account.example" }, 403, "authorization_denied"],
+    ["missing owner", makeEnv({ db: throwingD1(privateCanaries[1]) }), { ...ownerHeaders(ownerEmail), origin: "https://account.example" }, 503, "owner_unavailable"],
   ];
   for (const [label, env, headers, status, code] of cases) {
     const response = await fetchApp(`/api/private/entries/${entryId}`, {
@@ -102,7 +103,7 @@ test("DELETE authorization is before Accept, params, D1, and every request-body 
       controller.close();
     },
   }, { highWaterMark: 0 });
-  globalThis[Symbol.for("aitta-social.test.cloudflare-env")] = makeEnv({ db: throwingD1(), ownerEmail });
+  globalThis[Symbol.for("aitta-social.test.cloudflare-env")] = makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail });
   const route = await compiledPrivateEntryDeleteRoute();
   const denied = await route.DELETE(new Request(`https://account.example/api/private/entries/${entryId}`, {
     method: "DELETE",
@@ -130,7 +131,7 @@ test("DELETE has no body parser or media requirement after authorization, and un
   assertPrivateJson(unknown, 404);
   assert.deepEqual(await responseJson(unknown), errorDocument("entry_not_found", "Update not found."));
 
-  const failed = await deleteWith(entryId, { db: throwingD1() });
+  const failed = await deleteWith(entryId, { db: throwingD1(privateCanaries[1]) });
   assertPrivateJson(failed, 500);
   assert.deepEqual(await responseJson(failed), errorDocument("delete_failed", "The deletion result could not be confirmed."));
 });
@@ -139,7 +140,7 @@ test("unsupported methods are exact JSON 405 independent of authorization, Accep
   for (const method of ["GET", "HEAD", "POST", "PATCH", "OPTIONS"]) {
     for (const accept of [undefined, "application/json", "text/html", "application/json;q=0", "application/json,"]) {
       const response = await fetchApp(`/api/private/entries/${entryId}`, {
-        env: makeEnv({ db: throwingD1(), ownerEmail }), method,
+        env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), method,
         headers: accept === undefined ? {} : { accept },
       });
       assertPrivateJson(response, 405);
@@ -158,10 +159,6 @@ function deleteWith(id, { db = database(id), headers = {} } = {}) {
 
 function database(id = entryId, values = {}) {
   return new FakeD1({ entries: [entryRow({ id, private_canary: privateCanaries[1], ...values })] });
-}
-
-function throwingD1() {
-  return { prepare() { throw new Error(privateCanaries[1]); } };
 }
 
 function assertNoCanary(value) {

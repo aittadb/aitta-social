@@ -204,6 +204,10 @@ const jsonResponseBodyRestrictions = declarationRestrictions(
   ["responseJson"],
   "tests/helpers/json-response-body.mjs",
 );
+const throwingD1Restrictions = declarationRestrictions(
+  ["throwingD1"],
+  "tests/helpers/throwing-d1.mjs",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -244,6 +248,7 @@ const declarationRestrictionSets = [
   privateEntryErrorFieldNameRestrictions,
   legacyPrivateEntryErrorFieldNameRestrictions,
   jsonResponseBodyRestrictions,
+  throwingD1Restrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -276,6 +281,7 @@ const canonicalDeclarationFiles = [
   ["app/owner/entries/json-response-media-type.ts", ownerEntryJsonResponseMediaTypeRestrictions],
   ["app/owner/entries/private-entry-error-field-name.ts", privateEntryErrorFieldNameRestrictions],
   ["tests/helpers/json-response-body.mjs", jsonResponseBodyRestrictions],
+  ["tests/helpers/throwing-d1.mjs", throwingD1Restrictions],
 ];
 
 const eslintConfig = defineConfig([

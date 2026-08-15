@@ -11,6 +11,7 @@ import {
   responseJson,
 } from "./helpers/worker-harness.mjs";
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
+import { throwingD1 } from "./helpers/throwing-d1.mjs";
 
 const ownerEmail = "owner@example.com";
 const safeInput = {
@@ -37,7 +38,7 @@ const safeInput = {
 };
 
 test("authorized import returns the exact closed PageDocumentV1 without storage", async () => {
-  const response = await preview(safeInput, { env: makeEnv({ db: throwingD1(), ownerEmail }) });
+  const response = await preview(safeInput, { env: makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY"), ownerEmail }) });
   assertPrivateJson(response, 200, { caseInsensitiveContentType: false });
   assert.deepEqual(await responseJson(response), {
     data: {
@@ -255,28 +256,28 @@ test("same-origin and sole-owner denials precede negotiation, media, body, and D
   const cases = [
     {
       label: "cross origin",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY"), ownerEmail }),
       headers: { ...ownerHeaders(ownerEmail), origin: "https://attacker.example" },
       status: 403,
       code: "authorization_denied",
     },
     {
       label: "signed out",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY"), ownerEmail }),
       headers: { origin: "https://account.example" },
       status: 401,
       code: "authentication_required",
     },
     {
       label: "non-owner",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY"), ownerEmail }),
       headers: { ...ownerHeaders("other@example.com"), origin: "https://account.example" },
       status: 403,
       code: "authorization_denied",
     },
     {
       label: "missing owner",
-      env: makeEnv({ db: throwingD1() }),
+      env: makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY") }),
       headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example" },
       status: 503,
       code: "owner_unavailable",
@@ -314,7 +315,7 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
     if (contentType === null) delete headers["content-type"];
     else headers["content-type"] = contentType;
     const response = await fetchApp("/api/private/pages/preview", {
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY"), ownerEmail }),
       method: "POST",
       headers,
       body: JSON.stringify(safeInput),
@@ -325,7 +326,7 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
 
   for (const body of ["", "{", "\ud800"]) {
     const response = await fetchApp("/api/private/pages/preview", {
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY"), ownerEmail }),
       method: "POST",
       headers: mutationHeaders(ownerEmail),
       body,
@@ -349,7 +350,7 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
         };
         if (acceptCase.value !== undefined) headers.accept = acceptCase.value;
         const response = await fetchApp("/api/private/pages/preview", {
-          env: makeEnv({ db: throwingD1(), ownerEmail }),
+          env: makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY"), ownerEmail }),
           method,
           headers,
         });
@@ -363,7 +364,7 @@ test("JSON negotiation, media, syntax, and methods are explicit and bounded", as
   for (const method of ["GET", "HEAD", "PUT", "PATCH", "DELETE", "OPTIONS"]) {
     await t.test(`${method} remains owner protected before negotiation`, async () => {
       const response = await fetchApp("/api/private/pages/preview", {
-        env: makeEnv({ db: throwingD1(), ownerEmail }),
+        env: makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY"), ownerEmail }),
         method,
         headers: { accept: "text/html" },
       });
@@ -471,17 +472,9 @@ test("the client response reader bounds allocation and rejects invalid response 
 
 async function preview(input, options = {}) {
   return fetchApp("/api/private/pages/preview", {
-    env: options.env ?? makeEnv({ db: throwingD1(), ownerEmail }),
+    env: options.env ?? makeEnv({ db: throwingD1("STORAGE_PRIVATE_CANARY"), ownerEmail }),
     method: "POST",
     headers: { ...mutationHeaders(ownerEmail), ...options.headers },
     body: options.body ?? JSON.stringify(input),
   });
-}
-
-function throwingD1() {
-  return {
-    prepare() {
-      throw new Error("STORAGE_PRIVATE_CANARY");
-    },
-  };
 }

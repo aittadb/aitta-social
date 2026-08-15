@@ -16,6 +16,7 @@ import {
   importRecordShapeAwareTypeScriptModule,
 } from "./helpers/record-shape-esm-compiler.mjs";
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
+import { throwingD1 } from "./helpers/throwing-d1.mjs";
 
 const ownerEmail = "owner@example.com";
 const entryId = "19600000-0000-4000-8000-000000000001";
@@ -97,7 +98,7 @@ test("state JSON negotiation defaults to JSON and precedes media and D1", async 
     `application/json;note=${"x".repeat(4096)}`,
   ]) {
     const response = await stateWith(entryId, "published", {
-      db: throwingD1(),
+      db: throwingD1(privateCanaries[1]),
       headers: { accept, "content-type": "text/plain" },
     });
     assertPrivateJson(response, 406);
@@ -169,11 +170,11 @@ test("state media, JSON, and exact-domain failures use distinct statuses without
 
 test("same-origin and owner denials precede Accept, body, params, and D1", async () => {
   const cases = [
-    ["cross origin", makeEnv({ db: throwingD1(), ownerEmail }), { ...ownerHeaders(ownerEmail), origin: "https://attacker.example" }, 403, "authorization_denied"],
-    ["signed out", makeEnv({ db: throwingD1(), ownerEmail }), { origin: "https://account.example" }, 401, "authentication_required"],
-    ["machine only", makeEnv({ db: throwingD1(), ownerEmail }), { origin: "https://account.example", authorization: "Bearer STATE_MACHINE_PRIVATE_CANARY", cookie: `owner=${privateCanaries[0]}` }, 401, "authentication_required"],
-    ["non-owner", makeEnv({ db: throwingD1(), ownerEmail }), { ...ownerHeaders("other@example.com"), origin: "https://account.example" }, 403, "authorization_denied"],
-    ["missing owner", makeEnv({ db: throwingD1() }), { ...ownerHeaders(ownerEmail), origin: "https://account.example" }, 503, "owner_unavailable"],
+    ["cross origin", makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), { ...ownerHeaders(ownerEmail), origin: "https://attacker.example" }, 403, "authorization_denied"],
+    ["signed out", makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), { origin: "https://account.example" }, 401, "authentication_required"],
+    ["machine only", makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), { origin: "https://account.example", authorization: "Bearer STATE_MACHINE_PRIVATE_CANARY", cookie: `owner=${privateCanaries[0]}` }, 401, "authentication_required"],
+    ["non-owner", makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), { ...ownerHeaders("other@example.com"), origin: "https://account.example" }, 403, "authorization_denied"],
+    ["missing owner", makeEnv({ db: throwingD1(privateCanaries[1]) }), { ...ownerHeaders(ownerEmail), origin: "https://account.example" }, 503, "owner_unavailable"],
   ];
   for (const [label, env, headers, status, code] of cases) {
     const response = await fetchApp(`/api/private/entries/${entryId}/state`, {
@@ -194,7 +195,7 @@ test("same-origin and owner denials precede Accept, body, params, and D1", async
       controller.close();
     },
   }, { highWaterMark: 0 });
-  globalThis[Symbol.for("aitta-social.test.cloudflare-env")] = makeEnv({ db: throwingD1(), ownerEmail });
+  globalThis[Symbol.for("aitta-social.test.cloudflare-env")] = makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail });
   const route = await compiledPrivateEntryStateRoute();
   const denied = await route.PUT(new Request(`https://account.example/api/private/entries/${entryId}/state`, {
     method: "PUT",
@@ -216,7 +217,7 @@ test("unknown, storage, and authorization-setting failures are structured and sa
     links: [],
   });
 
-  const failed = await stateWith(entryId, "published", { db: throwingD1() });
+  const failed = await stateWith(entryId, "published", { db: throwingD1(privateCanaries[1]) });
   assertPrivateJson(failed, 500);
   assert.deepEqual(await responseJson(failed), {
     data: null,
@@ -224,7 +225,7 @@ test("unknown, storage, and authorization-setting failures are structured and sa
     links: [],
   });
 
-  const env = makeEnv({ db: throwingD1(), ownerEmail });
+  const env = makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail });
   Object.defineProperty(env, "AITTA_SOCIAL_OWNER_EMAIL", {
     enumerable: true,
     get() { throw new Error("STATE_AUTH_PRIVATE_CANARY"); },
@@ -248,7 +249,7 @@ test("unsupported methods are exact 405 independent of Accept", async () => {
   for (const method of ["GET", "HEAD", "POST", "PATCH", "DELETE", "OPTIONS"]) {
     for (const accept of [undefined, "application/json", "text/html", "application/json;q=0", "application/json,"]) {
       const response = await fetchApp(`/api/private/entries/${entryId}/state`, {
-        env: makeEnv({ db: throwingD1(), ownerEmail }), method,
+        env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), method,
         headers: accept === undefined ? {} : { accept },
       });
       assertPrivateJson(response, 405);
@@ -377,10 +378,6 @@ function assertNoCanary(value) {
   const source = JSON.stringify(value);
   for (const canary of privateCanaries) assert.doesNotMatch(source, new RegExp(canary, "iu"));
   assert.doesNotMatch(source, /STATE_(?:BODY|AUTH|MACHINE|RESPONSE)_PRIVATE_CANARY/iu);
-}
-
-function throwingD1() {
-  return { prepare() { throw new Error(privateCanaries[1]); } };
 }
 
 async function compiledStateResponseReader() {

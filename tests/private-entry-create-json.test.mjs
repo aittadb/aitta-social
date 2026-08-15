@@ -17,6 +17,7 @@ import {
   importRecordShapeAwareTypeScriptModule,
 } from "./helpers/record-shape-esm-compiler.mjs";
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
+import { throwingD1 } from "./helpers/throwing-d1.mjs";
 
 const ownerEmail = "owner@example.com";
 const canonicalUrl = "https://canonical.example/aitta";
@@ -150,7 +151,7 @@ test("draft-create JSON negotiation is bounded and defaults to JSON", async () =
     "application/json;q=2",
     `application/json;note=${"x".repeat(4096)}`,
   ]) {
-    const db = throwingD1();
+    const db = throwingD1(privateCanaries[1]);
     const response = await createWith({ db, headers: { accept } });
     assertPrivateJson(response, 406);
     assert.equal((await responseJson(response)).error.code, "not_acceptable");
@@ -236,21 +237,21 @@ test("same-origin and owner denials precede Accept, media, body, and D1", async 
   const cases = [
     {
       label: "cross origin",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       headers: { ...ownerHeaders(ownerEmail), origin: "https://attacker.example" },
       status: 403,
       code: "authorization_denied",
     },
     {
       label: "signed out",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       headers: { origin: "https://account.example" },
       status: 401,
       code: "authentication_required",
     },
     {
       label: "machine bearer without browser identity",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       headers: {
         origin: "https://account.example",
         authorization: "Bearer MACHINE_PRIVATE_CANARY",
@@ -261,14 +262,14 @@ test("same-origin and owner denials precede Accept, media, body, and D1", async 
     },
     {
       label: "non-owner",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       headers: { ...ownerHeaders("other@example.com"), origin: "https://account.example" },
       status: 403,
       code: "authorization_denied",
     },
     {
       label: "missing owner",
-      env: makeEnv({ db: throwingD1() }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]) }),
       headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example" },
       status: 503,
       code: "owner_unavailable",
@@ -297,7 +298,7 @@ test("same-origin and owner denials precede Accept, media, body, and D1", async 
     },
   }, { highWaterMark: 0 });
   globalThis[Symbol.for("aitta-social.test.cloudflare-env")] = makeEnv({
-    db: throwingD1(),
+    db: throwingD1(privateCanaries[1]),
     ownerEmail,
   });
   const route = await compiledPrivateEntryCreateRoute();
@@ -339,7 +340,7 @@ test("creation needs no profile or canonical setup and failures remain safe", as
     for (const accept of [undefined, "application/json", "text/html", "application/json;q=0", "application/json,"]) {
       await t.test(`${method} with ${accept ?? "missing Accept"}`, async () => {
         const response = await fetchApp("/api/private/entries", {
-          env: makeEnv({ db: throwingD1(), ownerEmail }),
+          env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
           method,
           headers: accept === undefined ? {} : { accept },
         });
@@ -352,7 +353,7 @@ test("creation needs no profile or canonical setup and failures remain safe", as
 
   for (const accept of [undefined, "application/json", "text/html", "application/json;q=0", "application/json,"]) {
     const head = await fetchApp("/api/private/entries", {
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       method: "HEAD",
       headers: accept === undefined ? {} : { accept },
     });
@@ -360,7 +361,7 @@ test("creation needs no profile or canonical setup and failures remain safe", as
     assert.equal(head.headers.get("allow"), "POST");
   }
 
-  const response = await createWith({ db: throwingD1() });
+  const response = await createWith({ db: throwingD1(privateCanaries[1]) });
   assertPrivateJson(response, 500);
   const document = await responseJson(response);
   assert.equal(document.error.code, "create_failed");
@@ -368,7 +369,7 @@ test("creation needs no profile or canonical setup and failures remain safe", as
 });
 
 test("unexpected authorization-setting failure is safe JSON before D1", async () => {
-  const env = makeEnv({ db: throwingD1(), ownerEmail });
+  const env = makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail });
   Object.defineProperty(env, "AITTA_SOCIAL_OWNER_EMAIL", {
     enumerable: true,
     get() {
@@ -556,13 +557,6 @@ function assertNoCanary(value) {
   assert.doesNotMatch(source, /BODY_PRIVATE_CANARY|AUTH_RUNTIME_PRIVATE_CANARY|MACHINE_PRIVATE_CANARY/iu);
 }
 
-function throwingD1() {
-  return {
-    prepare() {
-      throw new Error(privateCanaries[1]);
-    },
-  };
-}
 
 async function compiledPrivateEntryCreateRoute() {
   const directory = new URL("../dist/server/_next/static/", import.meta.url);

@@ -12,6 +12,7 @@ import {
 } from "./helpers/worker-harness.mjs";
 import { importRecordShapeAwareTypeScriptModule } from "./helpers/record-shape-esm-compiler.mjs";
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
+import { throwingD1 } from "./helpers/throwing-d1.mjs";
 
 const ownerEmail = "owner@example.com";
 const canonicalUrl = "https://canonical.example/aitta";
@@ -174,28 +175,28 @@ test("same-origin and owner denials precede media, body, and D1", async () => {
   const cases = [
     {
       label: "cross origin",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[2]), ownerEmail }),
       headers: { ...ownerHeaders(ownerEmail), origin: "https://attacker.example" },
       status: 403,
       code: "authorization_denied",
     },
     {
       label: "signed out",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[2]), ownerEmail }),
       headers: { origin: "https://account.example" },
       status: 401,
       code: "authentication_required",
     },
     {
       label: "non-owner",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[2]), ownerEmail }),
       headers: { ...ownerHeaders("other@example.com"), origin: "https://account.example" },
       status: 403,
       code: "authorization_denied",
     },
     {
       label: "missing owner",
-      env: makeEnv({ db: throwingD1() }),
+      env: makeEnv({ db: throwingD1(privateCanaries[2]) }),
       headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example" },
       status: 503,
       code: "owner_unavailable",
@@ -218,7 +219,7 @@ test("unsupported methods and storage failures remain structured and safe", asyn
   for (const method of ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]) {
     await t.test(method, async () => {
       const response = await fetchApp("/api/private/profile", {
-        env: makeEnv({ db: throwingD1(), ownerEmail }),
+        env: makeEnv({ db: throwingD1(privateCanaries[2]), ownerEmail }),
         method,
         headers: { accept: "application/json" },
       });
@@ -229,7 +230,7 @@ test("unsupported methods and storage failures remain structured and safe", asyn
   }
 
   const head = await fetchApp("/api/private/profile", {
-    env: makeEnv({ db: throwingD1(), ownerEmail }),
+    env: makeEnv({ db: throwingD1(privateCanaries[2]), ownerEmail }),
     method: "HEAD",
     headers: { accept: "application/json" },
   });
@@ -237,7 +238,7 @@ test("unsupported methods and storage failures remain structured and safe", asyn
   assert.equal(head.headers.get("allow"), "PUT");
   assert.equal((await responseJson(head)).error.code, "method_not_allowed");
 
-  const response = await saveWith({ db: throwingD1() });
+  const response = await saveWith({ db: throwingD1(privateCanaries[2]) });
   assertPrivateJson(response, 500);
   const document = await responseJson(response);
   assert.equal(document.error.code, "save_failed");
@@ -245,7 +246,7 @@ test("unsupported methods and storage failures remain structured and safe", asyn
 });
 
 test("unexpected authorization-setting failure is safe JSON before D1", async () => {
-  const env = makeEnv({ db: throwingD1(), ownerEmail });
+  const env = makeEnv({ db: throwingD1(privateCanaries[2]), ownerEmail });
   Object.defineProperty(env, "AITTA_SOCIAL_OWNER_EMAIL", {
     enumerable: true,
     get() {
@@ -364,12 +365,4 @@ function assertNoCanary(value) {
   const source = JSON.stringify(value);
   for (const canary of privateCanaries) assert.doesNotMatch(source, new RegExp(canary, "iu"));
   assert.doesNotMatch(source, /BODY_PRIVATE_CANARY|javascript:PRIVATE_CANARY/iu);
-}
-
-function throwingD1() {
-  return {
-    prepare() {
-      throw new Error(privateCanaries[2]);
-    },
-  };
 }

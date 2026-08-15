@@ -17,6 +17,7 @@ import {
   importRecordShapeAwareTypeScriptModule,
 } from "./helpers/record-shape-esm-compiler.mjs";
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
+import { throwingD1 } from "./helpers/throwing-d1.mjs";
 
 const ownerEmail = "owner@example.com";
 const privateCanaries = [
@@ -163,7 +164,7 @@ test("edit JSON negotiation is bounded, defaults to JSON, and runs before D1", a
     `application/json;note=${"x".repeat(4096)}`,
   ]) {
     const response = await editWith("entry-1", {
-      db: throwingD1(),
+      db: throwingD1(privateCanaries[1]),
       headers: { accept },
     });
     assertPrivateJson(response, 406);
@@ -251,21 +252,21 @@ test("same-origin and owner denials precede Accept, media, body, and D1", async 
   const cases = [
     {
       label: "cross origin",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       headers: { ...ownerHeaders(ownerEmail), origin: "https://attacker.example" },
       status: 403,
       code: "authorization_denied",
     },
     {
       label: "signed out",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       headers: { origin: "https://account.example" },
       status: 401,
       code: "authentication_required",
     },
     {
       label: "machine bearer without browser identity",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       headers: {
         origin: "https://account.example",
         authorization: "Bearer EDIT_MACHINE_PRIVATE_CANARY",
@@ -276,14 +277,14 @@ test("same-origin and owner denials precede Accept, media, body, and D1", async 
     },
     {
       label: "non-owner",
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       headers: { ...ownerHeaders("other@example.com"), origin: "https://account.example" },
       status: 403,
       code: "authorization_denied",
     },
     {
       label: "missing owner",
-      env: makeEnv({ db: throwingD1() }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]) }),
       headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example" },
       status: 503,
       code: "owner_unavailable",
@@ -312,7 +313,7 @@ test("same-origin and owner denials precede Accept, media, body, and D1", async 
     },
   }, { highWaterMark: 0 });
   globalThis[Symbol.for("aitta-social.test.cloudflare-env")] = makeEnv({
-    db: throwingD1(),
+    db: throwingD1(privateCanaries[1]),
     ownerEmail,
   });
   const route = await compiledPrivateEntryEditRoute();
@@ -340,7 +341,7 @@ test("unknown entries, storage failures, and authorization-setting failures rema
     links: [],
   });
 
-  const failed = await editWith("entry-1", { db: throwingD1() });
+  const failed = await editWith("entry-1", { db: throwingD1(privateCanaries[1]) });
   assertPrivateJson(failed, 500);
   assert.deepEqual(await responseJson(failed), {
     data: null,
@@ -348,7 +349,7 @@ test("unknown entries, storage failures, and authorization-setting failures rema
     links: [],
   });
 
-  const env = makeEnv({ db: throwingD1(), ownerEmail });
+  const env = makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail });
   Object.defineProperty(env, "AITTA_SOCIAL_OWNER_EMAIL", {
     enumerable: true,
     get() {
@@ -377,7 +378,7 @@ test("neighbor methods are JSON 405 while DELETE negotiates its own JSON acknowl
   for (const method of ["GET", "POST", "PATCH", "OPTIONS"]) {
     await t.test(method, async () => {
       const response = await fetchApp("/api/private/entries/entry-1", {
-        env: makeEnv({ db: throwingD1(), ownerEmail }),
+        env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
         method,
         headers: { accept: "application/json" },
       });
@@ -388,7 +389,7 @@ test("neighbor methods are JSON 405 while DELETE negotiates its own JSON acknowl
   }
 
   const head = await fetchApp("/api/private/entries/entry-1", {
-    env: makeEnv({ db: throwingD1(), ownerEmail }),
+    env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
     method: "HEAD",
     headers: { accept: "application/json" },
   });
@@ -397,7 +398,7 @@ test("neighbor methods are JSON 405 while DELETE negotiates its own JSON acknowl
 
   for (const accept of [undefined, "text/html", "application/json;q=0", "application/json,"]) {
     const unacceptable = await fetchApp("/api/private/entries/entry-1", {
-      env: makeEnv({ db: throwingD1(), ownerEmail }),
+      env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }),
       method: "GET",
       headers: accept === undefined ? {} : { accept },
     });
@@ -418,7 +419,7 @@ test("neighbor methods are JSON 405 while DELETE negotiates its own JSON acknowl
   }
 
   const excluded = await fetchApp("/api/private/entries/entry-1", {
-    env: makeEnv({ db: throwingD1(), ownerEmail }), method: "DELETE",
+    env: makeEnv({ db: throwingD1(privateCanaries[1]), ownerEmail }), method: "DELETE",
     headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example", accept: "text/html" },
   });
   assertPrivateJson(excluded, 406);
@@ -620,14 +621,6 @@ function assertNoCanary(value) {
   const source = JSON.stringify(value);
   for (const canary of privateCanaries) assert.doesNotMatch(source, new RegExp(canary, "iu"));
   assert.doesNotMatch(source, /EDIT_(?:BODY|AUTH|MACHINE|RESPONSE)_PRIVATE_CANARY/iu);
-}
-
-function throwingD1() {
-  return {
-    prepare() {
-      throw new Error(privateCanaries[1]);
-    },
-  };
 }
 
 async function compiledPrivateEntryEditRoute() {
