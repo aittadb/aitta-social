@@ -1,5 +1,20 @@
 # Changelog
 
+- **TASK-216 — Centralized ordered-text test assertions.** Added the
+  dependency-free `tests/helpers/ordered-text-assertion.mjs` leaf as the sole
+  owner of `assertOrdered`. Both hierarchy tests now import it, preserving the
+  exact sequential `indexOf` behavior, repeated-marker handling, empty-marker
+  handling, and assertion message. Regression coverage proves ordered, missing,
+  reversed, repeated, and empty markers, canonical ownership, consumer imports,
+  and the complete declaration-restriction matrix without weakening earlier
+  helper ownership. Validation: independent review found no P0/P1/P2 issues;
+  integrated commit `bc4d426`; focused checks passed 13/13; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  546/546 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task shares only two exact CSS clamp
+  calculations and retains the tests' separate visual contracts.
+
 - **TASK-215 — Centralized ESLint restricted-syntax diagnostic counting in
   tests.** Added the dependency-free
   `tests/helpers/eslint-restricted-syntax.mjs` leaf as the sole owner of
