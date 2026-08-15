@@ -51,11 +51,35 @@ const errorDocumentRestrictions = declarationRestrictions(
   ["errorDocument"],
   "tests/helpers/error-document-contract.mjs",
 );
+const apiV1JsonResponseRestrictions = declarationRestrictions(
+  ["assertApiJson"],
+  "tests/helpers/api-v1-json-response.mjs",
+);
 const acceptMediaRangeRestrictions = declarationRestrictions(
   ["parseAcceptMediaRanges", "parseMediaRange", "validParameterValue", "splitOutsideQuotes"],
   "lib/accept-media-ranges.ts",
   "parseAcceptMediaRanges",
 );
+
+const declarationRestrictionSets = [
+  recordShapeRestrictions,
+  regularExpressionLiteralRestrictions,
+  publicFooterRestrictions,
+  privateJsonResponseRestrictions,
+  errorDocumentRestrictions,
+  apiV1JsonResponseRestrictions,
+  acceptMediaRangeRestrictions,
+];
+
+const canonicalDeclarationFiles = [
+  ["lib/record-shape.ts", recordShapeRestrictions],
+  ["tests/helpers/regular-expression-literal.mjs", regularExpressionLiteralRestrictions],
+  ["tests/helpers/public-footer-contract.mjs", publicFooterRestrictions],
+  ["tests/helpers/private-json-response.mjs", privateJsonResponseRestrictions],
+  ["tests/helpers/error-document-contract.mjs", errorDocumentRestrictions],
+  ["tests/helpers/api-v1-json-response.mjs", apiV1JsonResponseRestrictions],
+  ["lib/accept-media-ranges.ts", acceptMediaRangeRestrictions],
+];
 
 const eslintConfig = defineConfig([
   globalIgnores([
@@ -94,93 +118,19 @@ const eslintConfig = defineConfig([
     rules: {
       "no-restricted-syntax": [
         "error",
-        ...recordShapeRestrictions,
-        ...regularExpressionLiteralRestrictions,
-        ...publicFooterRestrictions,
-        ...privateJsonResponseRestrictions,
-        ...errorDocumentRestrictions,
-        ...acceptMediaRangeRestrictions,
+        ...declarationRestrictionSets.flat(),
       ],
     },
   },
-  {
-    files: ["lib/record-shape.ts"],
+  ...canonicalDeclarationFiles.map(([file, canonicalRestrictions]) => ({
+    files: [file],
     rules: {
       "no-restricted-syntax": [
         "error",
-        ...regularExpressionLiteralRestrictions,
-        ...publicFooterRestrictions,
-        ...privateJsonResponseRestrictions,
-        ...errorDocumentRestrictions,
-        ...acceptMediaRangeRestrictions,
+        ...declarationRestrictionSets.filter((restrictions) => restrictions !== canonicalRestrictions).flat(),
       ],
     },
-  },
-  {
-    files: ["tests/helpers/regular-expression-literal.mjs"],
-    rules: {
-      "no-restricted-syntax": [
-        "error",
-        ...recordShapeRestrictions,
-        ...publicFooterRestrictions,
-        ...privateJsonResponseRestrictions,
-        ...errorDocumentRestrictions,
-        ...acceptMediaRangeRestrictions,
-      ],
-    },
-  },
-  {
-    files: ["lib/accept-media-ranges.ts"],
-    rules: {
-      "no-restricted-syntax": [
-        "error",
-        ...recordShapeRestrictions,
-        ...regularExpressionLiteralRestrictions,
-        ...privateJsonResponseRestrictions,
-        ...errorDocumentRestrictions,
-        ...publicFooterRestrictions,
-      ],
-    },
-  },
-  {
-    files: ["tests/helpers/public-footer-contract.mjs"],
-    rules: {
-      "no-restricted-syntax": [
-        "error",
-        ...recordShapeRestrictions,
-        ...regularExpressionLiteralRestrictions,
-        ...acceptMediaRangeRestrictions,
-        ...privateJsonResponseRestrictions,
-        ...errorDocumentRestrictions,
-      ],
-    },
-  },
-  {
-    files: ["tests/helpers/private-json-response.mjs"],
-    rules: {
-      "no-restricted-syntax": [
-        "error",
-        ...recordShapeRestrictions,
-        ...regularExpressionLiteralRestrictions,
-        ...publicFooterRestrictions,
-        ...acceptMediaRangeRestrictions,
-        ...errorDocumentRestrictions,
-      ],
-    },
-  },
-  {
-    files: ["tests/helpers/error-document-contract.mjs"],
-    rules: {
-      "no-restricted-syntax": [
-        "error",
-        ...recordShapeRestrictions,
-        ...regularExpressionLiteralRestrictions,
-        ...publicFooterRestrictions,
-        ...privateJsonResponseRestrictions,
-        ...acceptMediaRangeRestrictions,
-      ],
-    },
-  },
+  })),
 ]);
 
 export default eslintConfig;

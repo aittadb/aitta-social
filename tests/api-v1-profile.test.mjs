@@ -10,6 +10,7 @@ import {
   responseJson,
 } from "./helpers/worker-harness.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
+import { assertApiJson } from "./helpers/api-v1-json-response.mjs";
 
 const canonicalUrl = "https://canonical.example/aitta";
 const canaries = [
@@ -335,25 +336,10 @@ function htmlLink(rel, href) {
   return { rel, href, mediaType: "text/html" };
 }
 
-function assertApiJson(response, status, cacheControl) {
-  assert.equal(response.status, status);
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
-  assert.equal(response.headers.get("cache-control"), cacheControl);
-  assert.equal(response.headers.get("location"), null);
-  assert(hasVaryToken(response, "accept"));
-}
-
 function assertMatchingHeaders(left, right) {
   for (const name of ["content-type", "cache-control", "vary", "allow", "location"]) {
     assert.equal(left.headers.get(name), right.headers.get(name), name);
   }
-}
-
-function hasVaryToken(response, token) {
-  return (response.headers.get("vary") ?? "")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .includes(token);
 }
 
 function assertNoCanary(value) {
