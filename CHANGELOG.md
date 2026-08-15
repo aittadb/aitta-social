@@ -1,5 +1,20 @@
 # Changelog
 
+- **TASK-225 — Centralized owner-form ARIA description composition.** Added the
+  dependency-free `app/owner/form-field-description.ts` leaf as the sole owner
+  of `describedBy`. Both owner forms now import it while all eight existing
+  calls, labels, validation states, identifiers, and rendered ARIA semantics
+  remain unchanged. The helper preserves truthy filtering, order, repeats,
+  whitespace, single-space joining, and `undefined` with no description. Its
+  tests also pin help-before-error description order in both forms. Validation:
+  independent review found no P0/P1/P2 issues; integrated commit `1a078c7`;
+  focused checks passed 3/3; full `npm run validate` passed build, typecheck,
+  lint, repository checks, and 580/580 tests. No dependency, observable
+  production behavior, route, API, schema, migration, persistence, hosting,
+  deployment, data, access, or external state changed. Residual uncertainty:
+  the next accepted task shares only entry-kind presentation labels, while
+  retaining independent public contract expectations.
+
 - **TASK-224 — Centralized discarded response-body consumption in tests.**
   Added the dependency-free `tests/helpers/response-body-consumption.mjs` leaf
   as the sole owner of `consumeResponse`. The helper awaits exactly one
