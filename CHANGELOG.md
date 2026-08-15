@@ -1,5 +1,21 @@
 # Changelog
 
+- **TASK-231 — Centralized throwing D1 test fixtures.** Added the
+  dependency-free Node-test-only `tests/helpers/throwing-d1.mjs` leaf as the
+  sole owner of `throwingD1`. All 60 existing calls across six response and
+  preview suites now retain their own storage canary while the fixture supplies
+  a fresh minimal D1-shaped object and fresh native error for every call.
+  Authorization, negotiation, method, body, storage-failure, and privacy
+  assertions remain suite-owned. Regression coverage pins object/error
+  freshness, exact messages, ownership, six imports, and the full lint matrix.
+  Validation: independent review found no P0/P1/P2 issues; integrated commit
+  `eb60778`; focused checks passed 222/222; full `npm run validate` passed
+  build, typecheck, lint, repository checks, and 606/606 tests. No dependency,
+  observable production behavior, route, API, schema, migration, persistence,
+  hosting, deployment, data, access, or external state changed. Residual
+  uncertainty: the next accepted task shares only the public-entry-document
+  unavailable response while retaining route and dispatch boundaries.
+
 - **TASK-230 — Centralized JSON response-body parsing in tests.** Added the
   Node-test-only `tests/helpers/json-response-body.mjs` leaf as the sole owner
   of `responseJson`. The functional matrix and upgrade suite import it
