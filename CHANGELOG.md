@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-222 — Centralized published-entry detail query assertions in tests.**
+  Added the dependency-free
+  `tests/helpers/published-entry-detail-query-contract.mjs` leaf as the sole
+  owner of exact recorded published-entry detail query assertions. Both
+  consumers now import it while their identifiers, response/document oracles,
+  and private canaries remain local. Regression coverage proves correct,
+  unrelated, empty, repeated, wrong-count, missing-predicate, wrong-order,
+  wrong-identifier binding, and non-published-state behavior, plus ownership
+  and the full lint matrix. Validation: independent review found and the
+  implementation corrected one P2 test gap so wrong-ID bindings and wrong-state
+  bindings are independently exercised; final re-review found no P0/P1/P2
+  issues; integrated commit `93972a8`; focused checks passed 19/19; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  570/570 tests. No dependency, production behavior, route, API, schema,
+  migration, persistence, hosting, deployment, data, access, or external state
+  changed. Residual uncertainty: the next accepted task shares only Vary-header
+  tokenization while preserving each response contract's own assertions.
+
 - **TASK-221 — Centralized API v1 JSON-link expectations in tests.** Added the
   dependency-free `tests/helpers/api-v1-json-link.mjs` leaf as the sole owner
   of a fresh literal `expectedApiV1JsonLink(rel, href)` expectation. The three
