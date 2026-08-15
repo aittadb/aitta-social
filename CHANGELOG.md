@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-219 — Centralized repository-source reads in tests.** Added the
+  dependency-free Node-test `tests/helpers/repository-source.mjs` leaf as the
+  sole owner of `readRepositorySource(path)`. It preserves the existing
+  repository-root URL resolution and UTF-8 `readFile` behavior; all three
+  consumers now import it, including the assisted-runtime CSS read, while their
+  paths, transpilation, fixtures, assertions, and expected results remain
+  local. Regression coverage proves root, nested, UTF-8, dot-segment, and
+  missing-file behavior plus canonical ownership, imports, scoped legacy
+  `source` protection, and the full declaration-restriction matrix. Validation:
+  independent review found and the implementation corrected one P1 legacy-name
+  exception hole; final re-review found no P0/P1/P2 issues; integrated commit
+  `266140e`; focused checks passed 26/26; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 558/558 tests. No dependency,
+  production, route, API, schema, migration, persistence, hosting, deployment,
+  data, access, or external state changed. Residual uncertainty: the next
+  accepted task shares only inline-style attribute extraction while retaining
+  each security test's own HTML and canary assertions.
+
 - **TASK-218 — Centralized regular-expression match counting in tests.** Added
   the dependency-free `tests/helpers/regular-expression-match-count.mjs` leaf
   as the sole owner of `countMatches`. Two identical `matchAll` declarations
