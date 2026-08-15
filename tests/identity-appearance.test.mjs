@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { resolvePresentationAccent } from "../lib/presentation-accent.ts";
+import { inlineStyleAttributeValues } from "./helpers/inline-style-attribute-values.mjs";
 import {
   FakeD1,
   fetchApp,
@@ -64,7 +65,7 @@ test("invalid historical accents fail closed only at the preview style boundary"
     densityLabel: "Comfortable",
     attributionLabel: "Visible",
   });
-  for (const style of styleAttributes(html)) {
+  for (const style of inlineStyleAttributeValues(html)) {
     assert.doesNotMatch(style, /TASK162_PRIVATE_CANARY|attacker\.example/i);
   }
   assert.match(html, /name="accentColor"[^>]+value="#31554d"/i);
@@ -175,8 +176,4 @@ function assertAppearancePreview(html, {
   assert.match(html, new RegExp(`Spacing ·[\\s\\S]{0,24}${densityLabel}`, "i"));
   assert.match(html, new RegExp(`Attribution ·[\\s\\S]{0,24}${attributionLabel}`, "i"));
   assert.equal((html.match(/class="identity-appearance-sample-update"/gi) ?? []).length, 2);
-}
-
-function styleAttributes(html) {
-  return [...html.matchAll(/\sstyle="([^"]*)"/gi)].map((match) => match[1]);
 }

@@ -105,6 +105,15 @@ const orderedTextAssertionRestrictions = declarationRestrictions(
   ["assertOrdered"],
   "tests/helpers/ordered-text-assertion.mjs",
 );
+const inlineStyleAttributeValuesCanonicalRestrictions = declarationRestrictions(
+  ["inlineStyleAttributeValues"],
+  "tests/helpers/inline-style-attribute-values.mjs",
+);
+const inlineStyleAttributeValuesLegacyRestrictions = declarationRestrictions(
+  ["styleAttributes"],
+  "tests/helpers/inline-style-attribute-values.mjs",
+  "inlineStyleAttributeValues",
+);
 const regularExpressionMatchCountRestrictions = declarationRestrictions(
   ["countMatches"],
   "tests/helpers/regular-expression-match-count.mjs",
@@ -146,6 +155,8 @@ const declarationRestrictionSets = [
   legacyPageInlineVisibleTextRestrictions,
   rfc6570PathSegmentRestrictions,
   orderedTextAssertionRestrictions,
+  inlineStyleAttributeValuesCanonicalRestrictions,
+  inlineStyleAttributeValuesLegacyRestrictions,
   regularExpressionMatchCountRestrictions,
   cssClampPixelsRestrictions,
   canonicalRepositorySourceRestrictions,
@@ -167,6 +178,7 @@ const canonicalDeclarationFiles = [
   ["lib/custom-pages/page-document.ts", pageInlineVisibleTextRestrictions],
   ["lib/rfc6570-path-segment.ts", rfc6570PathSegmentRestrictions],
   ["tests/helpers/ordered-text-assertion.mjs", orderedTextAssertionRestrictions],
+  ["tests/helpers/inline-style-attribute-values.mjs", inlineStyleAttributeValuesCanonicalRestrictions],
   ["tests/helpers/regular-expression-match-count.mjs", regularExpressionMatchCountRestrictions],
   ["tests/helpers/css-clamp-pixels.mjs", cssClampPixelsRestrictions],
   ["tests/helpers/repository-source.mjs", canonicalRepositorySourceRestrictions],

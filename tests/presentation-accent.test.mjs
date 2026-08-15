@@ -5,6 +5,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { resolvePresentationAccent } from "../lib/presentation-accent.ts";
+import { inlineStyleAttributeValues } from "./helpers/inline-style-attribute-values.mjs";
 import {
   entryRow,
   FakeD1,
@@ -204,7 +205,7 @@ test("a malformed persisted legacy accent survives reopen without reaching publi
   assertRenderedAccent(owner, "identity-draft-preview", DEFAULT_ACCENT);
   assert.doesNotMatch(home, /accent-private-marker|attacker\.example/i);
   assert.doesNotMatch(permalink, /accent-private-marker|attacker\.example/i);
-  for (const style of styleAttributes(owner)) {
+  for (const style of inlineStyleAttributeValues(owner)) {
     assert.doesNotMatch(style, /accent-private-marker|attacker\.example/i);
   }
   assert.doesNotMatch(home, /POC_V0_DRAFT_(?:TITLE|BODY)_PRIVATE_CANARY/);
@@ -252,10 +253,6 @@ function assertRenderedAccent(html, className, expected) {
     html,
     new RegExp(`class="[^"]*${className}[^"]*"[^>]*style="--accent:${expected}"`, "i"),
   );
-}
-
-function styleAttributes(html) {
-  return [...html.matchAll(/\sstyle="([^"]*)"/gi)].map((match) => match[1]);
 }
 
 function cssCustomProperty(css, name) {
