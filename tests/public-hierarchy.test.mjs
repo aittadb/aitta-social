@@ -9,6 +9,7 @@ import {
   makeEnv,
   profileRow,
 } from "./helpers/worker-harness.mjs";
+import { assertOrdered } from "./helpers/ordered-text-assertion.mjs";
 
 const ownerCanary = "HIERARCHY_OWNER_PRIVATE_CANARY@example.test";
 const longVisibleHost = `${"public-presence-segment.".repeat(8)}example.test`;
@@ -376,15 +377,6 @@ test("normal form-control boundaries preserve non-text contrast", async () => {
     /\b(?:appearance|background|border|forced-color-adjust)\s*:/i,
   );
 });
-
-function assertOrdered(source, ...needles) {
-  let position = -1;
-  for (const needle of needles) {
-    const nextPosition = source.indexOf(needle, position + 1);
-    assert.ok(nextPosition > position, `${needle} must follow the preceding semantic element`);
-    position = nextPosition;
-  }
-}
 
 function customProperty(css, name) {
   const match = css.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, "i"));

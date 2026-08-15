@@ -9,6 +9,7 @@ import {
   ownerHeaders,
   profileRow,
 } from "./helpers/worker-harness.mjs";
+import { assertOrdered } from "./helpers/ordered-text-assertion.mjs";
 
 const PRIVATE_CANARY = "EMPTY_HEADING_PRIVATE_CANARY";
 
@@ -129,13 +130,4 @@ test("SSR keeps Updates h2 before the empty h3 without changing empty-state mean
 
 function clampPixels(minRem, preferredVw, maxRem, width) {
   return Math.min(maxRem * 16, Math.max(minRem * 16, width * preferredVw / 100));
-}
-
-function assertOrdered(source, ...needles) {
-  let position = -1;
-  for (const needle of needles) {
-    const nextPosition = source.indexOf(needle, position + 1);
-    assert.ok(nextPosition > position, `${needle} must follow the preceding semantic element`);
-    position = nextPosition;
-  }
 }

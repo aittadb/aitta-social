@@ -101,6 +101,10 @@ const rfc6570PathSegmentRestrictions = declarationRestrictions(
   "lib/rfc6570-path-segment.ts",
   "rfc6570PathSegment",
 );
+const orderedTextAssertionRestrictions = declarationRestrictions(
+  ["assertOrdered"],
+  "tests/helpers/ordered-text-assertion.mjs",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -119,6 +123,7 @@ const declarationRestrictionSets = [
   pageInlineVisibleTextRestrictions,
   legacyPageInlineVisibleTextRestrictions,
   rfc6570PathSegmentRestrictions,
+  orderedTextAssertionRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -135,6 +140,7 @@ const canonicalDeclarationFiles = [
   ["lib/custom-pages/page-text-boundaries.ts", pageTextBoundaryRestrictions],
   ["lib/custom-pages/page-document.ts", pageInlineVisibleTextRestrictions],
   ["lib/rfc6570-path-segment.ts", rfc6570PathSegmentRestrictions],
+  ["tests/helpers/ordered-text-assertion.mjs", orderedTextAssertionRestrictions],
 ];
 
 const eslintConfig = defineConfig([
