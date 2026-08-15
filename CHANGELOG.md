@@ -1,5 +1,21 @@
 # Changelog
 
+- **TASK-209 — Centralized test error-document expectations.** Added the
+  dependency-free `tests/helpers/error-document-contract.mjs` leaf as the
+  sole owner of `errorDocument`; all six API v1, public-entry, and private
+  deletion consumers now import it. The helper returns a fresh exact
+  `{ data: null, error: { code, message }, links: [] }` envelope without
+  changing codes or messages. Regression coverage proves envelope shape,
+  nested freshness, canonical ownership, imports, and the expanded cumulative
+  lint matrix. Validation: independent review found no P0/P1/P2 issues;
+  integrated commit `7a15615`; focused checks passed 44/44; cumulative helper
+  checks passed 20/20; full `npm run validate` passed build, typecheck, lint,
+  repository checks, and 523/523 tests. No production, route, API, schema,
+  migration, persistence, hosting, deployment, data, access, or external
+  state changed. Residual uncertainty: the next accepted slice centralizes
+  only the three exact API v1 JSON response assertions; stricter collection
+  and public-document variants remain intentionally local.
+
 - **TASK-208 — Centralized private JSON response contract assertions in
   tests.** Added the dependency-free
   `tests/helpers/private-json-response.mjs` leaf as the sole owner of
