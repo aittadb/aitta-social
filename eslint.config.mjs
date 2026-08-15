@@ -117,6 +117,10 @@ const orderedTextAssertionRestrictions = declarationRestrictions(
   ["assertOrdered"],
   "tests/helpers/ordered-text-assertion.mjs",
 );
+const responseBodyConsumptionRestrictions = declarationRestrictions(
+  ["consumeResponse"],
+  "tests/helpers/response-body-consumption.mjs",
+);
 const varyHeaderTokensRestrictions = declarationRestrictions(
   ["varyHeaderTokens"],
   "tests/helpers/vary-header-tokens.mjs",
@@ -182,6 +186,7 @@ const declarationRestrictionSets = [
   legacyPageInlineVisibleTextRestrictions,
   rfc6570PathSegmentRestrictions,
   orderedTextAssertionRestrictions,
+  responseBodyConsumptionRestrictions,
   varyHeaderTokensRestrictions,
   legacyVaryHeaderTokensRestrictions,
   publishedEntryDetailQueryRestrictions,
@@ -210,6 +215,7 @@ const canonicalDeclarationFiles = [
   ["lib/custom-pages/page-document.ts", pageInlineVisibleTextRestrictions],
   ["lib/rfc6570-path-segment.ts", rfc6570PathSegmentRestrictions],
   ["tests/helpers/ordered-text-assertion.mjs", orderedTextAssertionRestrictions],
+  ["tests/helpers/response-body-consumption.mjs", responseBodyConsumptionRestrictions],
   ["tests/helpers/vary-header-tokens.mjs", varyHeaderTokensRestrictions],
   ["tests/helpers/published-entry-detail-query-contract.mjs", publishedEntryDetailQueryRestrictions],
   ["tests/helpers/inline-style-attribute-values.mjs", inlineStyleAttributeValuesCanonicalRestrictions],

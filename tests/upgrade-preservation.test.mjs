@@ -6,6 +6,7 @@ import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { consumeResponse } from "./helpers/response-body-consumption.mjs";
 
 import {
   APP_ORIGIN,
@@ -790,8 +791,4 @@ function profileInput(overrides = {}) {
 async function responseJson(response) {
   assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
   return JSON.parse(await response.text());
-}
-
-async function consumeResponse(response) {
-  await response.text();
 }
