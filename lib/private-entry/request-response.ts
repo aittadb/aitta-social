@@ -1,5 +1,9 @@
 import { acceptsApiV1Json } from "../api-v1/accept";
 import { ValidationError } from "../validation";
+import {
+  isJsonUtf8ContentType,
+  readBoundedRequestBody,
+} from "../private/request-body";
 import type {
   PrivateEntryDocument,
   PrivateEntryDeletionDocument,
@@ -7,7 +11,6 @@ import type {
   PrivateEntryErrorField,
 } from "./representation";
 
-const MAX_CONTENT_TYPE_BYTES = 1024;
 const MAX_ENTRY_BODY_BYTES = 64 * 1024;
 const PRIVATE_ENTRY_HEADERS = {
   "Cache-Control": "no-store",
@@ -49,7 +52,17 @@ export async function readPrivateEntryJson(request: Request): Promise<unknown> {
     );
   }
 
-  const bytes = await readBoundedBody(request);
+  const bytes = await readBoundedRequestBody(request, {
+    maxBytes: MAX_ENTRY_BODY_BYTES,
+    onMissingBody: () =>
+      new PrivateEntryRequestError(
+        "invalid_json",
+        "Request body must contain valid JSON within 64 KiB.",
+        400,
+      ),
+    onTooLarge: () =>
+      new PrivateEntryRequestError("request_too_large", "Request body must not exceed 64 KiB.", 400),
+  });
   let source: string;
   try {
     source = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
@@ -137,58 +150,5 @@ export function privateEntryRequestError(error: unknown): Response | null {
 }
 
 function isPrivateEntryJsonMediaType(value: string | null): boolean {
-  if (value === null || new TextEncoder().encode(value).byteLength > MAX_CONTENT_TYPE_BYTES) {
-    return false;
-  }
-  const parts = value.split(";");
-  if (parts.length > 2 || parts[0]?.trim().toLowerCase() !== "application/json") {
-    return false;
-  }
-  if (parts.length === 1) return true;
-  const parameter = parts[1]?.trim() ?? "";
-  const match = /^charset\s*=\s*(?:"([^"]+)"|([^\s"]+))$/iu.exec(parameter);
-  const charset = (match?.[1] ?? match?.[2] ?? "").toLowerCase();
-  return charset === "utf-8";
-}
-
-async function readBoundedBody(request: Request): Promise<Uint8Array> {
-  if (request.body === null) {
-    throw new PrivateEntryRequestError(
-      "invalid_json",
-      "Request body must contain valid JSON within 64 KiB.",
-      400,
-    );
-  }
-  const reader = request.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  try {
-    for (;;) {
-      const chunk = await reader.read();
-      if (chunk.done) break;
-      size += chunk.value.byteLength;
-      if (size > MAX_ENTRY_BODY_BYTES) {
-        throw new PrivateEntryRequestError(
-          "request_too_large",
-          "Request body must not exceed 64 KiB.",
-          400,
-        );
-      }
-      chunks.push(chunk.value);
-    }
-  } finally {
-    try {
-      await reader.cancel();
-    } catch {
-      // The stream may already be closed after a complete read.
-    }
-    reader.releaseLock();
-  }
-  const body = new Uint8Array(size);
-  let offset = 0;
-  for (const chunk of chunks) {
-    body.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return body;
+  return isJsonUtf8ContentType(value);
 }

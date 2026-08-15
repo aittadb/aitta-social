@@ -115,37 +115,18 @@ export function ProfileForm({
   }
 
   function updatePreview(event: FormEvent<HTMLFormElement>) {
-    const form = new FormData(event.currentTarget);
-    const control = event.target;
-    const fieldName = control instanceof HTMLInputElement ||
-      control instanceof HTMLTextAreaElement ||
-      control instanceof HTMLSelectElement
-      ? profileFieldName(control.name)
-      : null;
-    const replacementSelected = historicalAccentReplacementNeeded &&
-      (historicalAccentReplacementChosen || fieldName === "accentColor");
-    setOptionalDetailsCount(optionalPublicDetailsCount(formValues(form)));
-    setPreview({
-      displayName: String(form.get("displayName") ?? ""),
-      shortDescription: String(form.get("shortDescription") ?? ""),
-      introduction: String(form.get("introduction") ?? ""),
-      canonicalUrl: String(form.get("canonicalUrl") ?? ""),
-      accentColor: String(form.get("accentColor") ?? defaultAccentPreference),
-      density: previewDensity(String(form.get("density") ?? "comfortable")),
-      hidePoweredBy: form.get("hidePoweredBy") === "on",
+    updateProfilePreview({
+      event,
+      fieldErrors,
+      loadedValues,
+      setDirty,
+      setOptionalDetailsCount,
+      setPreview,
+      setFieldErrors,
+      historicalAccentReplacementNeeded,
+      historicalAccentReplacementChosen,
+      setHistoricalAccentReplacementChosen,
     });
-    setDirty(!sameFormValues(formValues(form), loadedValues) || replacementSelected);
-
-    if (
-      control instanceof HTMLInputElement ||
-      control instanceof HTMLTextAreaElement ||
-      control instanceof HTMLSelectElement
-    ) {
-      if (fieldName === "accentColor") setHistoricalAccentReplacementChosen(true);
-      if (fieldName && fieldErrors[fieldName]) {
-        setFieldErrors((current) => ({ ...current, [fieldName]: undefined }));
-      }
-    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -521,21 +502,6 @@ function initialFormValues(profile: ProfileInput | null, canonicalDefault: strin
   };
 }
 
-function formValues(form: FormData): FormValues {
-  return {
-    displayName: String(form.get("displayName") ?? ""),
-    shortDescription: String(form.get("shortDescription") ?? ""),
-    introduction: String(form.get("introduction") ?? ""),
-    location: String(form.get("location") ?? ""),
-    website: String(form.get("website") ?? ""),
-    externalLinks: String(form.get("externalLinks") ?? ""),
-    canonicalUrl: String(form.get("canonicalUrl") ?? ""),
-    accentColor: String(form.get("accentColor") ?? defaultAccentPreference),
-    density: String(form.get("density") ?? "comfortable"),
-    hidePoweredBy: form.get("hidePoweredBy") === "on",
-  };
-}
-
 function sameFormValues(left: FormValues, right: FormValues): boolean {
   return Object.keys(left).every((key) => left[key as keyof FormValues] === right[key as keyof FormValues]);
 }
@@ -598,6 +564,98 @@ function hasInvalidOptionalPublicDetails(form: HTMLFormElement): boolean {
     return (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) && !control.validity.valid;
   });
 }
+
+
+type UpdatePreviewInput = {
+  event: FormEvent<HTMLFormElement>;
+  fieldErrors: FieldErrors;
+  loadedValues: FormValues;
+  setDirty: (value: boolean) => void;
+  setOptionalDetailsCount: (value: number | ((current: number) => number)) => void;
+  setPreview: (value: DraftPreview) => void;
+  setFieldErrors: (value: FieldErrors | ((current: FieldErrors) => FieldErrors)) => void;
+  historicalAccentReplacementNeeded: boolean;
+  historicalAccentReplacementChosen: boolean;
+  setHistoricalAccentReplacementChosen: (value: boolean) => void;
+};
+
+function updateProfilePreview({
+  event,
+  fieldErrors,
+  loadedValues,
+  setDirty,
+  setOptionalDetailsCount,
+  setPreview,
+  setFieldErrors,
+  historicalAccentReplacementNeeded,
+  historicalAccentReplacementChosen,
+  setHistoricalAccentReplacementChosen,
+}: UpdatePreviewInput) {
+  const form = new FormData(event.currentTarget);
+  const control = event.target;
+  const fieldName = eventFieldName(control);
+  const replacementSelected = historicalAccentReplacementNeeded &&
+    (historicalAccentReplacementChosen || fieldName === "accentColor");
+
+  const nextValues = extractFormValues(form);
+  setOptionalDetailsCount(optionalPublicDetailsCount(nextValues));
+  setPreview(toDraftPreview(nextValues));
+  setDirty(!sameFormValues(nextValues, loadedValues) || replacementSelected);
+
+  if (
+    control instanceof HTMLInputElement ||
+    control instanceof HTMLTextAreaElement ||
+    control instanceof HTMLSelectElement
+  ) {
+    if (fieldName === "accentColor") {
+      setHistoricalAccentReplacementChosen(true);
+    }
+    if (fieldName && fieldErrors[fieldName]) {
+      setFieldErrors((current) => ({ ...current, [fieldName]: undefined }));
+    }
+  }
+}
+
+function eventFieldName(
+  control: EventTarget | null,
+): ProfileFieldName | null {
+  if (
+    !(control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement ||
+    control instanceof HTMLSelectElement)
+  ) {
+    return null;
+  }
+  return profileFieldName(control.name);
+}
+
+function extractFormValues(form: FormData): FormValues {
+  return {
+    displayName: String(form.get("displayName") ?? ""),
+    shortDescription: String(form.get("shortDescription") ?? ""),
+    introduction: String(form.get("introduction") ?? ""),
+    location: String(form.get("location") ?? ""),
+    website: String(form.get("website") ?? ""),
+    externalLinks: String(form.get("externalLinks") ?? ""),
+    canonicalUrl: String(form.get("canonicalUrl") ?? ""),
+    accentColor: String(form.get("accentColor") ?? defaultAccentPreference),
+    density: String(form.get("density") ?? "comfortable"),
+    hidePoweredBy: form.get("hidePoweredBy") === "on",
+  };
+}
+
+function toDraftPreview(values: FormValues): DraftPreview {
+  return {
+    displayName: values.displayName,
+    shortDescription: values.shortDescription,
+    introduction: values.introduction,
+    canonicalUrl: values.canonicalUrl,
+    accentColor: values.accentColor,
+    density: values.density,
+    hidePoweredBy: values.hidePoweredBy,
+  };
+}
+
+
 
 function focusFirstInvalidField(form: HTMLFormElement, errors: FieldErrors) {
   const [fieldName] = Object.keys(errors) as ProfileFieldName[];

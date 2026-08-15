@@ -32,6 +32,80 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      complexity: ['warn', 16],
+      'max-classes-per-file': ['error', 1],
+      'max-lines': [
+        'warn',
+        {
+          max: 320,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+      'max-lines-per-function': [
+        'warn',
+        {
+          max: 90,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+    },
+  },
+  {
+    files: ['lib/**/*.ts'],
+    rules: {
+      complexity: ['warn', 20],
+      'max-lines-per-function': ['warn', {
+        max: 140,
+        skipBlankLines: true,
+        skipComments: true,
+      }],
+    },
+  },
+  {
+    files: ['lib/custom-pages/**/*.{ts,tsx}'],
+    rules: {
+      complexity: ['warn', 28],
+      'max-lines': ['warn', {
+        max: 560,
+        skipBlankLines: true,
+        skipComments: true,
+      }],
+    },
+  },
+  {
+    files: ['app/owner/**/*.{ts,tsx}'],
+    rules: {
+      complexity: ['warn', 18],
+      'max-lines-per-function': ['warn', {
+        max: 140,
+        skipBlankLines: true,
+        skipComments: true,
+      }],
+      'max-lines': ['warn', {
+        max: 620,
+        skipBlankLines: true,
+        skipComments: true,
+      }],
+    },
+  },
+  {
+    files: ['app/owner/profile/ProfileForm.tsx'],
+    rules: {
+      complexity: ['warn', 100],
+      'max-lines-per-function': ['warn', {
+        max: 420,
+        skipBlankLines: true,
+        skipComments: true,
+      }],
+      'max-lines': ['off'],
+    },
+  },
+  {
+    files: ['app/**/page.tsx', 'app/**/layout.tsx', 'app/page.tsx', 'app/layout.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 );

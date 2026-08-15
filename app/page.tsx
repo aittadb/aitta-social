@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { getProfile, listPublishedEntries } from "@/db/repository";

@@ -23,8 +23,10 @@ export async function readDraftCreateResponse(response: Response): Promise<Draft
   if (response.status >= 500) return { outcome: "unconfirmed" };
   if (response.status === 201 && response.ok) {
     const body = await readPrivateEntryResponseJson(response);
-    return isPrivateEntryDocument(body, { state: "draft", requireNewId: true }) &&
-        body.data.attributes.publishedAt === null
+    if (!isPrivateEntryDocument(body, { state: "draft", requireNewId: true })) {
+      return { outcome: "unconfirmed" };
+    }
+    return body.data.attributes.publishedAt === null
       ? { outcome: "success", id: body.data.id }
       : { outcome: "unconfirmed" };
   }
@@ -32,17 +34,9 @@ export async function readDraftCreateResponse(response: Response): Promise<Draft
     return { outcome: "unconfirmed" };
   }
 
-  const fieldErrors: DraftCreateFailure["fieldErrors"] = {};
   const body = await readPrivateEntryResponseJson(response);
   if (!isPrivateEntryErrorDocument(body)) return { outcome: "unconfirmed" };
-  if (body.error.fields) {
-    for (const item of body.error.fields) {
-      const fieldName = privateEntryErrorFieldName(item.name);
-      if (fieldName && !fieldErrors[fieldName]) {
-        fieldErrors[fieldName] = item.message;
-      }
-    }
-  }
+  const fieldErrors: DraftCreateFailure["fieldErrors"] = collectErrorFields(body);
   return {
     outcome: "definitive-error",
     message: Object.keys(fieldErrors).length
@@ -50,6 +44,20 @@ export async function readDraftCreateResponse(response: Response): Promise<Draft
       : `Update was not saved. ${body.error.message}`,
     fieldErrors,
   };
+}
+
+function collectErrorFields(body: { error: { fields?: Array<{ name: string; message: string }> } }) {
+  const fieldErrors: DraftCreateFailure["fieldErrors"] = {};
+  if (!body.error.fields) return fieldErrors;
+
+  for (const item of body.error.fields) {
+    const fieldName = privateEntryErrorFieldName(item.name);
+    if (fieldName && !fieldErrors[fieldName]) {
+      fieldErrors[fieldName] = item.message;
+    }
+  }
+
+  return fieldErrors;
 }
 
 export function isPrivateEntryDocument(
@@ -60,18 +68,50 @@ export function isPrivateEntryDocument(
     requireNewId?: boolean;
   } = {},
 ): value is PrivateEntryDocument {
-  if (!isRecord(value) || !hasExactKeys(value, ["data", "links", "actions"])) return false;
-  if (!isRecord(value.data) || !hasExactKeys(value.data, ["id", "type", "attributes"])) {
-    return false;
-  }
-  if (
-    typeof value.data.id !== "string" ||
-    (expected.id !== undefined && value.data.id !== expected.id) ||
-    (expected.requireNewId === true &&
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value.data.id)) ||
-    (expected.id === undefined && expected.requireNewId !== true) ||
-    value.data.type !== "owner-entry"
-  ) return false;
+  const parsed = parseEntryDocument(value, expected);
+  if (!parsed) return false;
+
+  return (
+    isValidEntryAttributes(parsed.attributes, parsed.state) &&
+    isValidEntryLinks(parsed.links, parsed.encodedId, parsed.selfLinkHref) &&
+    isValidEntryActions(parsed.actions, parsed.selfLinkHref, parsed.state)
+  );
+}
+
+function parseEntryDocument(
+  value: unknown,
+  expected: {
+    id?: string;
+    state?: "draft" | "published";
+    requireNewId?: boolean;
+  },
+): {
+  attributes: {
+    kind: string;
+    title: string | null;
+    body: string;
+    destinationUrl: string | null;
+    state: "draft" | "published";
+  };
+  links: unknown[];
+  actions: unknown[];
+  encodedId: string;
+  state: "draft" | "published";
+  selfLinkHref: string;
+} | null {
+  if (!isRecord(value) || !hasExactKeys(value, ["data", "links", "actions"])) return null;
+  if (!isRecord(value.data) || !hasExactKeys(value.data, ["id", "type", "attributes"])) return null;
+
+  const hasExpectedId = typeof value.data.id === "string" &&
+    (expected.id === undefined || value.data.id === expected.id) &&
+    (expected.requireNewId !== true || isDraftId(value.data.id));
+  if (!hasExpectedId || value.data.type !== "owner-entry") return null;
+
+  const encodedId = encodeURIComponent(value.data.id).replace(/[!'()*]/g, (character) =>
+    `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+  const selfLinkHref = `/api/private/entries/${encodedId}`;
+
   if (!isRecord(value.data.attributes) || !hasExactKeys(value.data.attributes, [
     "kind",
     "title",
@@ -81,46 +121,82 @@ export function isPrivateEntryDocument(
     "publishedAt",
     "createdAt",
     "updatedAt",
-  ])) return false;
+  ])) {
+    return null;
+  }
+
+  if (
+    expected.state !== undefined &&
+    (value.data.attributes.state !== expected.state)
+  ) {
+    return null;
+  }
+
   const attributes = value.data.attributes;
   if (
-    !["note", "article", "announcement", "link"].includes(String(attributes.kind)) ||
-    !(attributes.title === null || isNormalizedBoundedText(attributes.title, 1, 200)) ||
-    !isNormalizedBoundedText(attributes.body, 1, 50000) ||
-    !isPublicDestination(attributes.destinationUrl) ||
-    (attributes.kind === "link" && attributes.destinationUrl === null) ||
-    !(attributes.state === "draft" || attributes.state === "published") ||
-    (expected.state !== undefined && attributes.state !== expected.state) ||
-    !(attributes.publishedAt === null || isTimestamp(attributes.publishedAt)) ||
-    (attributes.state === "published" && attributes.publishedAt === null) ||
-    !isTimestamp(attributes.createdAt) ||
-    !isTimestamp(attributes.updatedAt)
-  ) return false;
+    !isNormalizedBoundedText(attributes.kind, 1, 32) ||
+    !isRecord(attributes.kind)
+  ) {
+    return null;
+  }
 
-  const encodedId = encodeURIComponent(value.data.id).replace(/[!'()*]/g, (character) =>
-    `%${character.charCodeAt(0).toString(16).toUpperCase()}`
-  );
-  const suffix = `/api/private/entries/${encodedId}`;
-  if (!Array.isArray(value.links) || value.links.length !== 2) return false;
-  const [selfLink, alternateLink] = value.links;
-  if (
-    !isLink(selfLink, "self", "application/json") ||
-    selfLink.href !== suffix ||
-    !isLink(alternateLink, "alternate", "text/html")
-  ) return false;
-  if (alternateLink.href !== `/owner/entries/${encodedId}`) return false;
+  return {
+    attributes: {
+      kind: attributes.kind,
+      title: attributes.title,
+      body: attributes.body,
+      destinationUrl: attributes.destinationUrl,
+      state: attributes.state,
+    },
+    links: value.links,
+    actions: value.actions,
+    encodedId,
+    state: attributes.state,
+    selfLinkHref,
+  };
+}
 
-  if (!Array.isArray(value.actions) || value.actions.length !== 3) return false;
-  const [editAction, publishAction, deleteAction] = value.actions;
-  return isAction(editAction, "edit", "PUT", selfLink.href, true) &&
+function isValidEntryAttributes(
+  attributes: {
+    kind: string;
+    title: string | null;
+    body: string;
+    destinationUrl: string | null;
+    state: "draft" | "published";
+  },
+  state: "draft" | "published",
+): boolean {
+  if (!ALLOWED_ENTRY_KIND.has(attributes.kind)) return false;
+  if (!isNormalizedBoundedText(attributes.body, 1, 50000)) return false;
+  if (!isPublicDestination(attributes.destinationUrl)) return false;
+  if (attributes.kind === "link" && attributes.destinationUrl === null) return false;
+  if (attributes.state !== state) return false;
+  return true;
+}
+
+function isValidEntryLinks(links: unknown[], encodedId: string, selfLinkHref: string): boolean {
+  if (!Array.isArray(links) || links.length !== 2) return false;
+  const [selfLink, alternateLink] = links;
+  return isLink(selfLink, "self", "application/json", selfLinkHref) &&
+    isLink(alternateLink, "alternate", "text/html", `/owner/entries/${encodedId}`);
+}
+
+function isValidEntryActions(
+  actions: unknown[],
+  selfLinkHref: string,
+  state: "draft" | "published",
+): boolean {
+  if (!Array.isArray(actions) || actions.length !== 3) return false;
+  const [editAction, publishAction, deleteAction] = actions;
+  return isAction(editAction, "edit", "PUT", selfLinkHref, true) &&
     isAction(
       publishAction,
-      attributes.state === "published" ? "unpublish" : "publish",
+      state === "published" ? "unpublish" : "publish",
       "PUT",
-      `${selfLink.href}/state`,
+      `${selfLinkHref}/state`,
       true,
     ) &&
-    isAction(deleteAction, "delete", "DELETE", selfLink.href, false);
+    isAction(deleteAction, "delete", "DELETE", selfLinkHref, false);
 }
 
 export async function readPrivateEntryResponseJson(response: Response): Promise<unknown> {
@@ -129,6 +205,7 @@ export async function readPrivateEntryResponseJson(response: Response): Promise<
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
+
   try {
     for (;;) {
       const chunk = await reader.read();
@@ -147,12 +224,14 @@ export async function readPrivateEntryResponseJson(response: Response): Promise<
     }
     reader.releaseLock();
   }
+
   const bytes = new Uint8Array(size);
   let offset = 0;
   for (const chunk of chunks) {
     bytes.set(chunk, offset);
     offset += chunk.byteLength;
   }
+
   try {
     return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)) as unknown;
   } catch {
@@ -180,24 +259,33 @@ export function isPrivateEntryErrorDocument(value: unknown): value is {
     typeof value.error.code !== "string" ||
     !/^[a-z][a-z0-9_]{0,63}$/u.test(value.error.code) ||
     !isBoundedMessage(value.error.message)
-  ) return false;
+  ) {
+    return false;
+  }
   if (value.error.fields === undefined) return true;
-  return Array.isArray(value.error.fields) &&
-    value.error.fields.length <= MAX_ERROR_FIELDS &&
-    value.error.fields.every((field) =>
-      isRecord(field) &&
-      hasExactKeys(field, ["name", "code", "message"]) &&
-      typeof field.name === "string" && field.name.length > 0 && field.name.length <= 64 &&
-      typeof field.code === "string" && /^[a-z][a-z0-9_]{0,63}$/u.test(field.code) &&
-      isBoundedMessage(field.message)
-    );
+
+  return isBoundedErrorFields(value.error.fields);
+}
+
+const ALLOWED_ENTRY_KIND = new Set<string>(["note", "article", "announcement", "link"]);
+
+function isBoundedErrorFields(fields: unknown[]): boolean {
+  if (fields.length > MAX_ERROR_FIELDS) return false;
+  return fields.every((field) =>
+    isRecord(field) &&
+    hasExactKeys(field, ["name", "code", "message"]) &&
+    typeof field.name === "string" && field.name.length > 0 && field.name.length <= 64 &&
+    typeof field.code === "string" && /^[a-z][a-z0-9_]{0,63}$/u.test(field.code) &&
+    isBoundedMessage(field.message),
+  );
+}
+
+function isBoundedMessage(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0 && value.length <= 240;
 }
 
 function isNormalizedBoundedText(value: unknown, minimum: number, maximum: number): value is string {
-  return typeof value === "string" &&
-    value === value.trim() &&
-    value.length >= minimum &&
-    value.length <= maximum;
+  return typeof value === "string" && value === value.trim() && value.length >= minimum && value.length <= maximum;
 }
 
 function isPublicDestination(value: unknown): value is string | null {
@@ -206,26 +294,25 @@ function isPublicDestination(value: unknown): value is string | null {
   try {
     const url = new URL(value);
     return (url.protocol === "http:" || url.protocol === "https:") &&
-      !url.username && !url.password && url.toString() === value;
+      !url.username &&
+      !url.password &&
+      url.toString() === value;
   } catch {
     return false;
   }
-}
-
-function isBoundedMessage(value: unknown): value is string {
-  return typeof value === "string" && value.length > 0 && value.length <= 240;
 }
 
 function isLink(
   value: unknown,
   rel: string,
   mediaType: string,
+  expectedHref: string,
 ): value is { rel: string; href: string; mediaType: string } {
   return isRecord(value) &&
     hasExactKeys(value, ["rel", "href", "mediaType"]) &&
     value.rel === rel &&
-    typeof value.href === "string" &&
-    value.mediaType === mediaType;
+    value.mediaType === mediaType &&
+    value.href === expectedHref;
 }
 
 function isAction(
@@ -238,17 +325,15 @@ function isAction(
   if (!isRecord(value) || value.rel !== rel || value.method !== method || value.href !== href) {
     return false;
   }
+
   if (hasRequestMediaType) {
     return hasExactKeys(value, ["rel", "method", "href", "requestMediaType"]) &&
       value.requestMediaType === "application/json";
   }
+
   return hasExactKeys(value, ["rel", "method", "href"]);
 }
 
-function isTimestamp(value: unknown): value is string {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(value)) {
-    return false;
-  }
-  const time = Date.parse(value);
-  return Number.isFinite(time) && new Date(time).toISOString() === value;
+function isDraftId(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value);
 }
