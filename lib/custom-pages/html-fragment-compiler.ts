@@ -15,8 +15,14 @@ import {
   type PageLinkV1,
   type PagePreviewInputV1,
   type PageSectionV1,
+  pageInlineVisibleText,
 } from "./page-document";
 import { hasExactKeys, isRecord } from "../record-shape";
+import {
+  characterLength,
+  hasForbiddenTextControl,
+  hasUrlControl,
+} from "./page-text-boundaries";
 
 type HtmlNode = DefaultTreeAdapterTypes.ChildNode;
 type HtmlElement = DefaultTreeAdapterTypes.Element;
@@ -241,7 +247,7 @@ function compileInlineChildren(
       case "em": {
         requireOnlyAttributes(node, []);
         const nested = compileInlineChildren(node, depth + 1, false);
-        if (visibleInlineText(nested).trim().length === 0) rejectImport();
+        if (pageInlineVisibleText(nested).trim().length === 0) rejectImport();
         rawContent.push({
           type: node.tagName === "strong" ? "strong" as const : "emphasis" as const,
           content: nested,
@@ -271,7 +277,7 @@ function compileInlineChildren(
     }
   }
   const normalized = trimEdges ? trimInlineEdges(content) : content;
-  if (visibleInlineText(normalized).trim().length === 0) return [];
+  if (pageInlineVisibleText(normalized).trim().length === 0) return [];
   return normalized;
 }
 
@@ -517,14 +523,6 @@ function mergeAdjacentText(content: PageInlineV1[]): PageInlineV1[] {
   return merged;
 }
 
-function visibleInlineText(content: PageInlineV1[]): string {
-  return content.map((inline) => {
-    if (inline.type === "text" || inline.type === "code") return inline.text;
-    if (inline.type === "link") return inline.label;
-    return visibleInlineText(inline.content);
-  }).join("");
-}
-
 function normalizeHtmlText(value: string): string {
   return value.replace(HTML_WHITESPACE, " ");
 }
@@ -549,28 +547,9 @@ function isTextNode(node: DefaultTreeAdapterTypes.Node): node is DefaultTreeAdap
   return node.nodeName === "#text";
 }
 
-function characterLength(value: string): number {
-  return Array.from(value).length;
-}
-
 function byteLength(value: string): number {
   return new TextEncoder().encode(value).byteLength;
 }
-
-function hasForbiddenTextControl(value: string): boolean {
-  return Array.from(value).some((character) => {
-    const code = character.charCodeAt(0);
-    return code === 127 || (code < 32 && code !== 9 && code !== 10 && code !== 13);
-  });
-}
-
-function hasUrlControl(value: string): boolean {
-  return Array.from(value).some((character) => {
-    const code = character.charCodeAt(0);
-    return code <= 32 || code === 127;
-  });
-}
-
 
 function rejectImport(): never {
   throw new PageImportRejectedError();

@@ -60,6 +60,19 @@ const acceptMediaRangeRestrictions = declarationRestrictions(
   "lib/accept-media-ranges.ts",
   "parseAcceptMediaRanges",
 );
+const pageTextBoundaryRestrictions = declarationRestrictions(
+  ["characterLength", "hasForbiddenTextControl", "hasUrlControl"],
+  "lib/custom-pages/page-text-boundaries.ts",
+);
+const pageInlineVisibleTextRestrictions = declarationRestrictions(
+  ["pageInlineVisibleText"],
+  "lib/custom-pages/page-document.ts",
+);
+const legacyPageInlineVisibleTextRestrictions = declarationRestrictions(
+  ["visibleInlineText", "inlineVisibleText"],
+  "lib/custom-pages/page-document.ts",
+  "pageInlineVisibleText",
+);
 
 const declarationRestrictionSets = [
   recordShapeRestrictions,
@@ -69,6 +82,9 @@ const declarationRestrictionSets = [
   errorDocumentRestrictions,
   apiV1JsonResponseRestrictions,
   acceptMediaRangeRestrictions,
+  pageTextBoundaryRestrictions,
+  pageInlineVisibleTextRestrictions,
+  legacyPageInlineVisibleTextRestrictions,
 ];
 
 const canonicalDeclarationFiles = [
@@ -79,6 +95,8 @@ const canonicalDeclarationFiles = [
   ["tests/helpers/error-document-contract.mjs", errorDocumentRestrictions],
   ["tests/helpers/api-v1-json-response.mjs", apiV1JsonResponseRestrictions],
   ["lib/accept-media-ranges.ts", acceptMediaRangeRestrictions],
+  ["lib/custom-pages/page-text-boundaries.ts", pageTextBoundaryRestrictions],
+  ["lib/custom-pages/page-document.ts", pageInlineVisibleTextRestrictions],
 ];
 
 const eslintConfig = defineConfig([

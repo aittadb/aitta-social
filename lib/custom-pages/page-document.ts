@@ -1,4 +1,9 @@
 import { hasExactKeys, isRecord } from "../record-shape";
+import {
+  characterLength,
+  hasForbiddenTextControl,
+  hasUrlControl,
+} from "./page-text-boundaries";
 
 export const PAGE_PREVIEW_LIMITS = {
   requestBytes: 192 * 1024,
@@ -65,6 +70,14 @@ export type PagePreviewInputV1 = {
   description: string | null;
   htmlFragment: string;
 };
+
+export function pageInlineVisibleText(content: PageInlineV1[]): string {
+  return content.map((inline) => {
+    if (inline.type === "text" || inline.type === "code") return inline.text;
+    if (inline.type === "link") return inline.label;
+    return pageInlineVisibleText(inline.content);
+  }).join("");
+}
 
 export class PageImportRejectedError extends Error {
   constructor() {
@@ -207,7 +220,7 @@ function isSemanticallyBoundedPreviewDocument(document: PageDocumentV1): boolean
         visible += inline.label;
       } else {
         if (!visitInlines(inline.content, depth + 1)) return false;
-        visible += inlineVisibleText(inline.content);
+        visible += pageInlineVisibleText(inline.content);
       }
     }
     return visible.trim().length > 0;
@@ -311,32 +324,6 @@ function isSafeExternalUrl(value: string): boolean {
   } catch {
     return false;
   }
-}
-
-function inlineVisibleText(content: PageInlineV1[]): string {
-  return content.map((inline) => {
-    if (inline.type === "text" || inline.type === "code") return inline.text;
-    if (inline.type === "link") return inline.label;
-    return inlineVisibleText(inline.content);
-  }).join("");
-}
-
-function characterLength(value: string): number {
-  return Array.from(value).length;
-}
-
-function hasForbiddenTextControl(value: string): boolean {
-  return Array.from(value).some((character) => {
-    const code = character.charCodeAt(0);
-    return code === 127 || (code < 32 && code !== 9 && code !== 10 && code !== 13);
-  });
-}
-
-function hasUrlControl(value: string): boolean {
-  return Array.from(value).some((character) => {
-    const code = character.charCodeAt(0);
-    return code <= 32 || code === 127;
-  });
 }
 
 function isPageLinkTargetV1(value: unknown): value is PageContentLinkTargetV1 {
