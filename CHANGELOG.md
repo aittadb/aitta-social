@@ -1,5 +1,23 @@
 # Changelog
 
+- **TASK-210 — Centralized API v1 JSON response expectations in tests.** Added
+  the dependency-free `tests/helpers/api-v1-json-response.mjs` leaf as the
+  sole owner of `assertApiJson`; API v1 profile, root, and entry-detail tests
+  now import it. The helper preserves exact status, case-insensitive JSON
+  type, caller-selected cache control, absent Location, and case-insensitive
+  tokenized `Vary: Accept` checks. Its Vary parser remains private to this
+  narrow contract; stricter collection and public-entry expectations remain
+  local. Regression coverage proves positive and negative behavior, including
+  rejection of `Accept-Encoding` as an Accept substring. Validation:
+  independent review found and corrected one P2 token-boundary evidence gap;
+  final re-review found no P0/P1/P2 issues; integrated commit `7af2f57`;
+  focused checks passed 3/3; full `npm run validate` passed build, typecheck,
+  lint, repository checks, and 526/526 tests. No production, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted production
+  slice centralizes custom-page text boundary primitives without changing any
+  validation policy.
+
 - **TASK-209 — Centralized test error-document expectations.** Added the
   dependency-free `tests/helpers/error-document-contract.mjs` leaf as the
   sole owner of `errorDocument`; all six API v1, public-entry, and private
