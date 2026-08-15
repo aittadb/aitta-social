@@ -9,6 +9,7 @@ import {
   profileRow,
   responseJson,
 } from "./helpers/worker-harness.mjs";
+import { errorDocument } from "./helpers/error-document-contract.mjs";
 
 const canonicalUrl = "https://canonical.example/aitta";
 const canaries = [
@@ -283,10 +284,6 @@ function rfc6570PathSegment(id) {
   return encodeURIComponent(id).replace(/[!'()*]/g, (character) =>
     `%${character.charCodeAt(0).toString(16).toUpperCase()}`
   );
-}
-
-function errorDocument(code, message) {
-  return { data: null, error: { code, message }, links: [] };
 }
 
 function assertApiJson(response, status, cacheControl) {

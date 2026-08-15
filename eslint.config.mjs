@@ -47,6 +47,10 @@ const privateJsonResponseRestrictions = declarationRestrictions(
   ["assertPrivateJson"],
   "tests/helpers/private-json-response.mjs",
 );
+const errorDocumentRestrictions = declarationRestrictions(
+  ["errorDocument"],
+  "tests/helpers/error-document-contract.mjs",
+);
 const acceptMediaRangeRestrictions = declarationRestrictions(
   ["parseAcceptMediaRanges", "parseMediaRange", "validParameterValue", "splitOutsideQuotes"],
   "lib/accept-media-ranges.ts",
@@ -94,6 +98,7 @@ const eslintConfig = defineConfig([
         ...regularExpressionLiteralRestrictions,
         ...publicFooterRestrictions,
         ...privateJsonResponseRestrictions,
+        ...errorDocumentRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },
@@ -106,6 +111,7 @@ const eslintConfig = defineConfig([
         ...regularExpressionLiteralRestrictions,
         ...publicFooterRestrictions,
         ...privateJsonResponseRestrictions,
+        ...errorDocumentRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },
@@ -118,6 +124,7 @@ const eslintConfig = defineConfig([
         ...recordShapeRestrictions,
         ...publicFooterRestrictions,
         ...privateJsonResponseRestrictions,
+        ...errorDocumentRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },
@@ -130,6 +137,7 @@ const eslintConfig = defineConfig([
         ...recordShapeRestrictions,
         ...regularExpressionLiteralRestrictions,
         ...privateJsonResponseRestrictions,
+        ...errorDocumentRestrictions,
         ...publicFooterRestrictions,
       ],
     },
@@ -143,6 +151,7 @@ const eslintConfig = defineConfig([
         ...regularExpressionLiteralRestrictions,
         ...acceptMediaRangeRestrictions,
         ...privateJsonResponseRestrictions,
+        ...errorDocumentRestrictions,
       ],
     },
   },
@@ -154,6 +163,20 @@ const eslintConfig = defineConfig([
         ...recordShapeRestrictions,
         ...regularExpressionLiteralRestrictions,
         ...publicFooterRestrictions,
+        ...acceptMediaRangeRestrictions,
+        ...errorDocumentRestrictions,
+      ],
+    },
+  },
+  {
+    files: ["tests/helpers/error-document-contract.mjs"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...recordShapeRestrictions,
+        ...regularExpressionLiteralRestrictions,
+        ...publicFooterRestrictions,
+        ...privateJsonResponseRestrictions,
         ...acceptMediaRangeRestrictions,
       ],
     },

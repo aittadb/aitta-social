@@ -9,6 +9,7 @@ import {
   profileRow,
   responseJson,
 } from "./helpers/worker-harness.mjs";
+import { errorDocument } from "./helpers/error-document-contract.mjs";
 
 const canonicalUrl = "https://canonical.example/aitta";
 const privateCanaries = [
@@ -361,10 +362,6 @@ test("manifest and root discover the profile and published collection", async ()
   assert.equal(v2.status, 404);
   assert.doesNotMatch(v2.headers.get("content-type") ?? "", /^application\/json\b/iu);
 });
-
-function errorDocument(code, message) {
-  return { data: null, error: { code, message }, links: [] };
-}
 
 function assertApiJson(response, status, cacheControl) {
   assert.equal(response.status, status);

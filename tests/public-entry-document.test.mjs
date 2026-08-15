@@ -10,6 +10,7 @@ import {
   profileRow,
   responseJson,
 } from "./helpers/worker-harness.mjs";
+import { errorDocument } from "./helpers/error-document-contract.mjs";
 
 const canonicalUrl = "https://canonical.example/aitta";
 const privateCanaries = [
@@ -500,10 +501,6 @@ function hostileHeaders(overrides = {}) {
     "user-agent": "TASK193_HTML_USER_AGENT_PRIVATE_CANARY",
     ...overrides,
   };
-}
-
-function errorDocument(code, message) {
-  return { data: null, error: { code, message }, links: [] };
 }
 
 function rfc6570PathSegment(id) {

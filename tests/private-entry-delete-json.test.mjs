@@ -11,6 +11,7 @@ import {
   responseJson,
 } from "./helpers/worker-harness.mjs";
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
+import { errorDocument } from "./helpers/error-document-contract.mjs";
 
 const ownerEmail = "owner@example.com";
 const entryId = "19700000-0000-4000-8000-000000000001";
@@ -171,10 +172,6 @@ function acknowledgement(id) {
     ],
     actions: [],
   };
-}
-
-function errorDocument(code, message) {
-  return { data: null, error: { code, message }, links: [] };
 }
 
 function assertNoCanary(value) {

@@ -9,6 +9,7 @@ import {
   profileRow,
   responseJson,
 } from "./helpers/worker-harness.mjs";
+import { errorDocument } from "./helpers/error-document-contract.mjs";
 
 const canonicalUrl = "https://canonical.example/aitta";
 const canaries = [
@@ -351,10 +352,6 @@ function relations(document) {
 
 function link(document, relation) {
   return document.links.find(({ rel }) => rel === relation)?.href;
-}
-
-function errorDocument(code, message) {
-  return { data: null, error: { code, message }, links: [] };
 }
 
 function assertCollectionJson(response, status, cacheControl) {
