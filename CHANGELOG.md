@@ -1,5 +1,21 @@
 # Changelog
 
+- **TASK-217 — Centralized CSS clamp pixel calculations in tests.** Added the
+  dependency-free `tests/helpers/css-clamp-pixels.mjs` leaf as the sole owner
+  of `clampPixels`. Both visual-contract tests now import it, preserving the
+  exact nested min/max arithmetic and fixed 16-pixel rem assumption. Regression
+  coverage proves below-minimum, exact-minimum, fluid, exact-maximum, and
+  above-maximum results, canonical ownership, consumer imports, and the full
+  declaration-restriction matrix without weakening prior helper ownership.
+  Validation: independent review found and the implementation corrected one P1
+  arithmetic-test expectation error; final re-review found no P0/P1/P2 issues;
+  integrated commit `7778ed7`; focused checks passed 8/8; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  550/550 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task centralizes regular-expression
+  match counting while retaining every test's own patterns and counts.
+
 - **TASK-216 — Centralized ordered-text test assertions.** Added the
   dependency-free `tests/helpers/ordered-text-assertion.mjs` leaf as the sole
   owner of `assertOrdered`. Both hierarchy tests now import it, preserving the
