@@ -15,6 +15,7 @@ import {
   importRecordShapeAwareTypeScriptModule,
 } from "./helpers/record-shape-esm-compiler.mjs";
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
+import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
 
 const ownerEmail = "owner@example.com";
 const draftId = "16500000-0000-4000-8000-000000000001";
@@ -119,22 +120,22 @@ test("delete controls have an irreversible update-specific confirmation and isol
 
 test("deletion client accepts only the exact acknowledgement and exact structured 4xx errors", async () => {
   const readDeletionResponse = await compiledDeletionResponseReader();
-  const acknowledgement = deletionAcknowledgement(draftId);
+  const expectedAcknowledgement = deletionAcknowledgement(draftId);
   assert.deepEqual(
-    await readDeletionResponse(Response.json(acknowledgement), draftId),
+    await readDeletionResponse(Response.json(expectedAcknowledgement), draftId),
     { outcome: "success" },
   );
 
   for (const response of [
     new Response(null, { status: 204 }),
     new Response("not JSON", { status: 200 }),
-    new Response(JSON.stringify(acknowledgement), { status: 200, headers: { "content-type": "application/json-seq" } }),
-    Response.json({ ...acknowledgement, data: { ...acknowledgement.data, id: publishedId } }),
-    Response.json({ ...acknowledgement, data: { ...acknowledgement.data, type: "owner-entry" } }),
-    Response.json({ ...acknowledgement, data: { ...acknowledgement.data, attributes: { deleted: false } } }),
-    Response.json({ ...acknowledgement, links: [] }),
-    Response.json({ ...acknowledgement, links: [acknowledgement.links[0], { ...acknowledgement.links[1], href: "/attacker" }] }),
-    Response.json({ ...acknowledgement, actions: [{ rel: "create" }] }),
+    new Response(JSON.stringify(expectedAcknowledgement), { status: 200, headers: { "content-type": "application/json-seq" } }),
+    Response.json({ ...expectedAcknowledgement, data: { ...expectedAcknowledgement.data, id: publishedId } }),
+    Response.json({ ...expectedAcknowledgement, data: { ...expectedAcknowledgement.data, type: "owner-entry" } }),
+    Response.json({ ...expectedAcknowledgement, data: { ...expectedAcknowledgement.data, attributes: { deleted: false } } }),
+    Response.json({ ...expectedAcknowledgement, links: [] }),
+    Response.json({ ...expectedAcknowledgement, links: [expectedAcknowledgement.links[0], { ...expectedAcknowledgement.links[1], href: "/attacker" }] }),
+    Response.json({ ...expectedAcknowledgement, actions: [{ rel: "create" }] }),
     Response.json({ error: "DELETE_RESPONSE_PRIVATE_CANARY" }, { status: 500 }),
     Response.json({ data: null, error: { code: "bad", message: "No." }, links: [] }, { status: 302 }),
     new Response("not JSON", { status: 404, headers: { "content-type": "text/plain" } }),
@@ -166,17 +167,6 @@ test("deletion client accepts only the exact acknowledgement and exact structure
 
 function assertDeletionAcknowledgement(value, id) {
   assert.deepEqual(value, deletionAcknowledgement(id));
-}
-
-function deletionAcknowledgement(id) {
-  return {
-    data: { id, type: "owner-entry-deletion", attributes: { deleted: true } },
-    links: [
-      { rel: "collection", href: "/owner", mediaType: "text/html" },
-      { rel: "recovery", href: "/owner", mediaType: "text/html" },
-    ],
-    actions: [],
-  };
 }
 
 async function compiledDeletionResponseReader() {

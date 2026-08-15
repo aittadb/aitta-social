@@ -12,6 +12,7 @@ import {
 } from "./helpers/worker-harness.mjs";
 import { assertPrivateJson } from "./helpers/private-json-response.mjs";
 import { errorDocument } from "./helpers/error-document-contract.mjs";
+import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
 
 const ownerEmail = "owner@example.com";
 const entryId = "19700000-0000-4000-8000-000000000001";
@@ -26,7 +27,7 @@ test("DELETE returns the exact no-store deletion acknowledgement for draft and p
     const db = database(entryId, { state, published_at: state === "published" ? "2026-08-13T10:00:00.000Z" : null });
     const response = await deleteWith(entryId, { db });
     assertPrivateJson(response, 200);
-    assert.deepEqual(await responseJson(response), acknowledgement(entryId));
+    assert.deepEqual(await responseJson(response), deletionAcknowledgement(entryId));
     assert.equal(db.entries.length, 0);
 
     const env = makeEnv({ db, ownerEmail });
@@ -161,17 +162,6 @@ function database(id = entryId, values = {}) {
 
 function throwingD1() {
   return { prepare() { throw new Error(privateCanaries[1]); } };
-}
-
-function acknowledgement(id) {
-  return {
-    data: { id, type: "owner-entry-deletion", attributes: { deleted: true } },
-    links: [
-      { rel: "collection", href: "/owner", mediaType: "text/html" },
-      { rel: "recovery", href: "/owner", mediaType: "text/html" },
-    ],
-    actions: [],
-  };
 }
 
 function assertNoCanary(value) {

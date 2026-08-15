@@ -4,6 +4,7 @@ import test from "node:test";
 import ts from "typescript";
 
 import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
 
 import {
   FakeD1,
@@ -160,17 +161,6 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   assert.equal(db.entries.some((entry) => entry.id === created.id), false);
   await assertPubliclyUnknown(env, created.id, [draftCanary, publicBody]);
 });
-
-function deletionAcknowledgement(id) {
-  return {
-    data: { id, type: "owner-entry-deletion", attributes: { deleted: true } },
-    links: [
-      { rel: "collection", href: "/owner", mediaType: "text/html" },
-      { rel: "recovery", href: "/owner", mediaType: "text/html" },
-    ],
-    actions: [],
-  };
-}
 
 test("assisted write fixtures fail closed for non-owner, missing owner, CSRF, and invalid input", async (t) => {
   await t.test("a different signed-in user cannot save Identity", async () => {

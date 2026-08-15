@@ -39,6 +39,15 @@ const regularExpressionLiteralRestrictions = declarationRestrictions(
   "tests/helpers/regular-expression-literal.mjs",
   "escapeRegExp",
 );
+const deletionAcknowledgementRestrictions = declarationRestrictions(
+  ["deletionAcknowledgement"],
+  "tests/helpers/deletion-acknowledgement-contract.mjs",
+);
+const legacyDeletionAcknowledgementRestrictions = declarationRestrictions(
+  ["acknowledgement"],
+  "tests/helpers/deletion-acknowledgement-contract.mjs",
+  "deletionAcknowledgement",
+);
 const publicFooterRestrictions = declarationRestrictions(
   ["publicFooter"],
   "tests/helpers/public-footer-contract.mjs",
@@ -82,6 +91,8 @@ const rfc6570PathSegmentRestrictions = declarationRestrictions(
 const declarationRestrictionSets = [
   recordShapeRestrictions,
   regularExpressionLiteralRestrictions,
+  deletionAcknowledgementRestrictions,
+  legacyDeletionAcknowledgementRestrictions,
   publicFooterRestrictions,
   privateJsonResponseRestrictions,
   errorDocumentRestrictions,
@@ -96,6 +107,7 @@ const declarationRestrictionSets = [
 const canonicalDeclarationFiles = [
   ["lib/record-shape.ts", recordShapeRestrictions],
   ["tests/helpers/regular-expression-literal.mjs", regularExpressionLiteralRestrictions],
+  ["tests/helpers/deletion-acknowledgement-contract.mjs", deletionAcknowledgementRestrictions],
   ["tests/helpers/public-footer-contract.mjs", publicFooterRestrictions],
   ["tests/helpers/private-json-response.mjs", privateJsonResponseRestrictions],
   ["tests/helpers/error-document-contract.mjs", errorDocumentRestrictions],

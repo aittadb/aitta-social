@@ -12,6 +12,7 @@ import {
   validEntryInput,
   validProfileInput,
 } from "./helpers/worker-harness.mjs";
+import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
 
 const ownerEmail = "owner@example.com";
 
@@ -285,17 +286,6 @@ test("authorized draft lifecycle stays private until publish and supports every 
     }
   }
 });
-
-function deletionAcknowledgement(id) {
-  return {
-    data: { id, type: "owner-entry-deletion", attributes: { deleted: true } },
-    links: [
-      { rel: "collection", href: "/owner", mediaType: "text/html" },
-      { rel: "recovery", href: "/owner", mediaType: "text/html" },
-    ],
-    actions: [],
-  };
-}
 
 test("write boundaries require JSON, bound request size, and valid entry state", async (t) => {
   const db = new FakeD1({ entries: [entryRow({ state: "draft", published_at: null })] });
