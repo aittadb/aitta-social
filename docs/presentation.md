@@ -1,31 +1,55 @@
-# Public presence presentation
+# Public profile presentation
 
-The default is a presence rather than an editorial page. The configured public
-home and every published permalink now share one compact product frame:
+The default is an Aitta's profile rather than an editorial page. An Aitta is an
+independently controlled top-level place, of which one deployment currently
+runs one; its profile is only its optional outward identity presentation. Every
+human public route—configured and unconfigured home, published permalink,
+Privacy, Technical, temporary storage-unavailable, and not-found—uses one
+compact product frame:
 
-1. a 60-pixel single-line header containing the bounded presence name and one
-   quiet real action;
+1. a 60-pixel single-line header containing the bounded profile display name
+   and one
+   quiet `Manage` action for local sole-owner administration;
 2. the configured Identity, with a shallow accent field, initials tile,
    display name, short description, optional public details, and About content;
 3. one continuous, identity-linked, deterministic newest-first update stream;
    and
-4. a restrained shared footer containing optional AittaSocial/source
-   attribution and the existing discovery and JSON resources.
+4. a restrained shared footer containing the owner-hideable AittaSocial
+   attribution, a permanent GitHub source link, the public Privacy page, and
+   a real Technical destination followed by the concise Manifest, Profile, and
+   Updates resource links.
 
-The manifest and JSON resources remain directly usable, but they are secondary
-to the represented presence and never compete with Identity or updates. A
-permalink is the focused view of that same stream rather than a separate
-editorial page. These presentation changes do not alter a route, response,
-cache policy, metadata projection, query, schema, migration, or protocol 1.0
-field.
+The frame itself is pure presentation: routes pass it already-projected display
+values and profile attribution choice. It owns fixed `/` identity and `/owner`
+Manage destinations and does not read D1, runtime configuration, or
+authentication. Privacy and Technical therefore stay
+D1-independent; the safe not-found fallback neither reads nor infers profile
+attribution and keeps the normal attribution visible. A route that already has
+a configured public profile alone applies the owner-selected powered-by
+preference. The fixed header action is always the context-neutral `Manage`
+link to `/owner`; Sites owns any required sign-in redirect and the action is
+never substituted with a page-specific return or setup action.
+
+`/technical` is a fixed, D1-independent human index of the protocol 1.0
+discovery manifest, public profile, and published-update collection. It uses
+the same restrained public information-page composition as Privacy, carries
+neutral `noindex, nofollow` metadata, and links to the exact machine routes
+without copying their JSON into the page. The machine resources remain
+directly usable and secondary to the configured profile; their paths, payloads,
+errors, cache policies, and protocol fields are unchanged.
+
+A permalink is the focused view of the same update stream rather than a
+separate editorial page. These presentation changes do not alter a machine
+resource response, metadata projection, query, schema, or migration.
 
 ## Identity composition
 
 The public canvas uses warm cream `#f3f0e8`, off-white `#fffcf5`, near-black
-green `#181b17`, moss-grey `#667067`, and warm-stone `#d9d5c9`. These values are
-scoped to public shells, so the visually separate owner workspace keeps its
-existing palette and typography. Public identity and navigation use the one
-Geist-derived sans-serif family.
+green `#181b17`, moss-grey `#667067`, and warm-stone `#d9d5c9`. Public shells
+scope their exact surface variants. The composition remains visually separate
+from the private owner workspace, while both surfaces reuse the small semantic
+paper, raised-paper, ink, muted-text, separator, focus, and action vocabulary.
+Public identity and navigation use the one Geist-derived sans-serif family.
 
 The Identity begins with a solid configured accent field. Two clipped CSS
 forms—one light circular form and one darker softened rectangle—supply the
@@ -81,7 +105,7 @@ or inert social controls.
 
 Published permalinks repeat the 40-pixel source tile, source name, useful kind,
 and full publication time directly above the content. A native header action
-and a native footer action both return to the presence. Article titles remain
+and a native footer action both return to the public profile. Article titles remain
 moderate and article bodies use a comfortable 66-character reading measure.
 Notes remain at the same ordinary scale as the stream. Every note permalink has
 one visually hidden semantic h1, `Update from {display name}`, while its body
@@ -89,11 +113,21 @@ remains the visual lead; an optional stored title appears only once, quietly,
 after the body. An untitled non-note likewise receives a source-based hidden h1
 instead of an invented visible headline. Safe destination links remain beside
 the content, while View as JSON stays in the secondary permalink footer.
+That stable direct link continues to lead to the versioned integration detail
+resource. The same unversioned permalink also has a current hypermedia JSON
+representation for clients that send bounded JSON-preferred `Accept`; default,
+wildcard, and HTML/JSON ties preserve this exact HTML presentation. Negotiation
+changes no frame, native navigation, metadata, CSP, focus, touch, reflow, or
+published-only visibility behavior.
 
 Historical published rows can exist before a profile is configured. Their
-source is always the neutral `Independent presence`; public presentation never
-invents profile data from the setup product name, request host, runtime
-configuration, or update content.
+source uses the bounded compatibility fallback `Independent Aitta` without
+pretending that a profile exists. The same fallback is used only where a
+generic public or entry title needs an Aitta name and no usable
+configured display name exists. Configured display names, descriptions, and
+About content remain authoritative owner content and are never rewritten.
+Public presentation never invents profile data from the setup product name,
+request host, runtime configuration, or update content.
 
 ## Content states
 
@@ -104,19 +138,87 @@ any published updates still use the published-only query. A successful D1 read
 with no profile is the only condition that selects this state. D1 failure still
 renders the fixed temporary-unavailable state rather than setup guidance.
 
-A configured presence remains intentional with no published updates. Its
-Identity and About content stand on their own before the compact explicit empty
-state. One update uses the same continuous container as many updates, and all
+An Aitta with a configured profile remains intentional with no published
+updates. Its Identity and About content stand on their own before the compact
+explicit empty state, which names this Aitta. Configured
+public navigation and sole-owner management labels likewise use Aitta, while
+`profile` remains the term for outward presentation. One update uses the same
+continuous container as many updates, and all
 four supported kinds keep the same source-first structure. Drafts never affect
 public hierarchy, counts, links, or wording.
 Optional Hub availability never selects or modifies any public state.
+Current protocol 1.0 updates are publishing resources, not Aitta Network events
+or app roots. The future network direction in [strategy.md](strategy.md) adds
+no present route, member surface, identity claim, or presentation behavior.
+
+## Accepted owner-managed website composition
+
+TASK-187 defines a future bounded website replacement model without changing
+the current presentation. Until its follow-on implementation tasks land, the
+profile and update stream remain the homepage and there is no custom page,
+shell, design, CSS, or upload control.
+
+The accepted model separates three owner-published concerns:
+
+- `PageDocumentV1` is safe semantic content. It supplies one page title plus
+  bounded sections, headings, paragraphs, lists, link groups, inline emphasis,
+  code, and links. The first page slice deliberately excludes images, custom
+  shell content, homepage selection, and CSS.
+- `SiteShellV1` later adds bounded brand text, page-aware navigation, footer
+  groups, footer text, and a selected homepage around the common public frame.
+  It composes with fixed Manage, Privacy, Technical, GitHub, Manifest, Profile,
+  and Updates destinations rather than replacing them.
+- `SiteDesignV1` later adds validated palette, system typography, content
+  width, corner, and spacing. A still-later version may add compiled page-body
+  style rules. Neither becomes a runtime component registry, template engine,
+  global stylesheet, or owner-workspace theme.
+
+HTML and CSS are optional import formats only. The owner sees the normalized
+page or compiled style result before publication. Raw source is not rendered,
+retained as hidden executable content, or applied to the owner workspace.
+Custom JavaScript, forms, embeds, third-party resources, remote fonts, and
+remote assets are unsupported.
+
+Published custom pages use normalized direct paths such as `/about` or
+`/work/projects`. The system reserves authentication, owner, API, discovery,
+Privacy, Technical, entry, update, asset, framework, and static paths. Page
+navigation refers to stable page identity so a reviewed path publication can
+update destinations without accepting arbitrary internal URLs.
+
+The current profile/update root remains the default. A later explicit published
+homepage selection may render one published custom page at `/`; the established
+profile and update stream then remains at `/updates`. Clearing the selection
+restores the default. Draft editing never changes the published page, shell,
+design, homepage, metadata, or navigation. Unavailable or invalid customization
+falls back to fixed safe product presentation, never a partially rendered
+document.
+
+The representative replacement shape requires responsive section navigation,
+a hero, substantial grouped text, lists/cards, calls to action, contact links,
+custom shell/footer content, and eventually one same-origin raster asset. It is
+an abstract acceptance shape only; no reference-site identity, copy, stylesheet,
+or asset is copied. The PageDocument `flow`, `split`, and `cards` compositions
+must cover that shape while collapsing to one readable phone column.
+
+A later asset slice may add normalized JPEG, PNG, WebP, and AVIF content after
+an accepted R2 boundary and explicit hosted-binding approval. Images require a
+meaningful bounded alternative text. Remote URLs, SVG/scriptable assets,
+original upload passthrough, custom fonts, and a generic media manager remain
+outside the presentation model.
+
+The detailed types, bounds, threat controls, route behavior, metadata, asset
+ownership, migration approach, and the one exact first implementation row are
+recorded in
+`docs/acceptance/task-187-safe-owner-managed-website.md`. Later outcomes are
+promoted one independently useful slice at a time after current evidence is
+reviewed; they are not current capability.
 
 ## Accessibility and responsive behavior
 
 Source order matches reading and focus order: shared navigation, one Identity
 h1, optional detail and About regions, Updates, then the shared technical
 footer. All routes use native anchors. The header stays one unwrapped line at
-320 pixels; the presence name is the only flexible item and the short visible
+320 pixels; the profile display name is the only flexible item and the short visible
 management label retains the complete sole-owner-administration accessible
 name. It is not fixed or sticky and therefore cannot obscure focused content.
 
@@ -153,44 +255,237 @@ and the application never disables system color adjustment.
 
 ## Owner Identity journey
 
-The visually distinct owner workspace presents fresh, incomplete, and complete
-Identity readiness derived from saved server state. Its primary next action is
-Identity setup while fresh or incomplete, and public preview when complete;
-update creation remains in the existing update controls rather than being
-presented as Identity completion. The form pairs saved readiness with a clearly
-labeled transient preview and native progress elements. Saving reloads the
-server-derived state, while a reload before saving discards the preview.
-The saved and live accent preview uses the same derived `--accent` as public
-rendering, including its border, label, and native progress accent. The color
-input continues to represent the owner's stored preference rather than the
-derived rendering color.
+The visually distinct owner workspace reuses the maintained Aitta header,
+footer, link, focus, touch, and responsive vocabulary without reusing or
+exporting the fixed public-frame composition. Its 60-pixel application header
+names `Manage` and `Private owner workspace`, then offers a quiet `View Aitta`
+public-view link. A separate, horizontally scrollable, non-wrapping route bar
+contains exactly four destinations: Home, Identity, New update, and Pages. The
+current destination uses native `aria-current="page"` semantics. `Sign out`
+stays in the private-workspace footer rather than becoming a route destination
+or menu item. Authenticated ChatGPT display data is not accepted or rendered by
+the shell. Current Sites Sign in with ChatGPT remains local sole-owner
+administration, not Aitta Network sign-in or membership; future member identity
+requires an exact accepted Hub contract.
 
-The normalized effective public URL is shown with a safe runtime-override or
-stored-fallback explanation. Raw runtime configuration, request hosts, ChatGPT
-identity, drafts, and Hub state never become Identity defaults. The owner grids
-collapse to one column at the narrow breakpoint;
-native links, buttons, and fields retain keyboard focus behavior and at least
-44-pixel interactive height.
+One pure fixed resource navigation supplies Privacy, Technical, the official
+GitHub source, Manifest, Profile, and Updates to both public and private
+footers. It accepts no URL, content, identity, profile, authorization, D1, or
+runtime input. Public identity and attribution decisions remain private to the
+fixed public frame; the resource navigation is not a generic frame or footer
+bypass. Owner pages keep one main landmark, one global skip target, one owner
+navigation landmark, and one footer landmark.
 
-When a protected runtime canonical URL is effective, the editable field is
-named as the saved fallback and explains that saving it cannot change the
-protected setting. A malformed legacy stored value is never used as a form
-default or transient preview; a valid normalized runtime value becomes the safe
-fallback default instead. This lets an unrelated Identity or presentation save
-proceed without serializing the malformed value.
+Non-owner and missing-owner pages use the same clearly private header and
+resource footer but never render the authorized owner navigation.
+Their `Manage` label is plain text, while `View Aitta`, the fixed resource
+links, and the exact Sites sign-out destination remain available. Those safe
+states are selected before any D1 read and receive no profile, update, owner
+identity, protected setting, or authorization-result value. Signed-out owner
+requests retain the Sites-owned sign-in redirect instead of rendering this
+frame.
+
+Owner Home presents fresh, incomplete, and complete Identity readiness derived
+from saved server state. It renders exactly one state-derived primary action:
+Identity setup while fresh, Identity repair while incomplete, first-draft
+creation or resume while unpublished, and public preview after the first
+publication. Its `Your Aitta` heading and `Aitta summary` label describe the
+local application, while `Identity` and `profile` continue to name its outward
+presentation. One compact `owner-next-step` panel combines status, guidance,
+the existing two-step native progress semantics, and the effective public URL
+when present. It contains no competing action. Counts, update rows, update
+actions, and their unchanged update-state text remain available below in a compact sans-serif
+hierarchy; the empty state does not reserve a large blank panel.
+
+## Owner update composer
+
+The compact owner composer keeps required update text first. Its Kind control
+changes only plain-language guidance: Note is a short update; Article is a
+fuller update; Announcement is time-sensitive; and Link requires both text
+that explains the destination and a complete destination URL. Article and
+Announcement say that a title helps readers, while every kind makes optional
+fields explicit. Link uses the native required state for its destination; the
+server remains the authority for all existing validation.
+
+Changing Kind never removes, clears, or remounts entered text, title, or
+destination values. This lets an owner compare kinds before saving without
+losing work. The body remains the primary field and the guidance stays within
+the existing compact, bounded owner form at phone and desktop widths. The
+composer retains its private-draft, definitive-failure, and unknown-result
+recovery copy and behavior. Existing-update saves now request JSON explicitly
+and confirm only the exact bounded private update document for the stable
+identifier and Draft or Published state already being edited. A successful
+edit keeps all values in place, announces the saved private or public state,
+and does not publish or unpublish.
+
+The Identity route makes its four required values the first editing task:
+display name, short description, canonical URL fallback, and longer
+introduction. They sit in one bounded primary fieldset before optional public
+details and one compact secondary Appearance block. Location, website,
+external links, accent, density, and attribution retain their complete existing
+payload and remain secondary.
+
+Optional public details use one native `details` disclosure before Appearance.
+Its visible summary names the three public categories and shows the concise
+current count, such as “1 of 3 added.” The fields remain mounted while the
+section is closed, so values, native labels, browser validation, and save
+payloads do not change. Existing optional values open the section by default;
+an invalid optional URL or a field-specific server error reopens it before the
+owner is asked to correct that detail. The disclosure has a 44-pixel-or-larger
+summary target, wraps long text, becomes a one-column form at phone widths, and
+uses the shared focus, forced-colors, and reduced-motion behavior. Its native
+disclosure marker remains visible as the open/closed affordance.
+
+The Appearance block places the three restrained choices beside one transient
+appearance sample. For a valid stored accent, the color control continues to
+show its exact normalized six-digit preference while the sample uses the shared
+contrast-safe resolver. An invalid historical accent is never passed into the
+native color control: it shows the reviewed safe fallback and requires the owner
+to choose a replacement before any save. Loading, editing another field, or
+reloading therefore cannot rewrite that historical D1 value. Update spacing switches the two sample rows
+between the existing comfortable and compact choices. Hiding the optional
+attribution removes it from the sample while the explicit `Attribution · Hidden`
+summary keeps that choice understandable. No theme, free-form color/CSS input,
+or additional persisted presentation value is introduced.
+
+The sample says **Saved appearance** when it reflects an existing loaded
+profile, **Appearance not saved** before a profile exists, and **Unsaved
+preview** after any form value changes. The unsaved message says that the open
+choices remain temporary until Save Identity succeeds. Restoring every control
+to its exact loaded value returns the saved or not-saved label when no
+historical accent replacement has been selected. A deliberate replacement of
+a malformed historical accent remains unsaved even when it equals the displayed
+fallback. Both the sample and the form-wide save strip therefore identify
+persistence in text rather than through color alone.
+
+The readiness panel is explicitly server-saved. A separate saved/unsaved strip
+compares every current form value with its exact loaded baseline: all required
+fields, location, website, the complete external-links text, canonical URL,
+accent, density, and attribution checkbox. Changing any value marks the form
+unsaved; restoring every value exactly restores its loaded state unless the
+owner has selected a deliberate historical accent replacement. Input events
+update only transient in-memory preview values, the two appearance summaries,
+and the local four-field count; none is presented as readiness or durability. A
+successful save reloads `/owner/profile` so the server derives readiness again.
+Reloading before success discards the local edits. The saved and live accent
+preview continues to use the same derived `--accent` as public rendering,
+including its border, label, and native progress accent. For a valid stored
+accent, the color input represents the owner's stored preference rather than
+the derived rendering color. For a malformed historical value, it instead
+shows the safe fallback and remains replacement-required until the owner
+operates the control; that deliberate replacement remains unsaved even when it
+equals the fallback.
+
+The normalized effective public URL is shown as compact secondary text with a
+safe protected-setting or saved-Identity explanation. Raw runtime
+configuration, request hosts, ChatGPT identity, drafts, and Hub state never
+become Identity defaults. At 320 pixels the route bar remains one line and may
+scroll horizontally, the three-column summary remains compact, and bounded
+owner panels stack where necessary. Native links, buttons, and fields retain
+keyboard focus behavior and at least 44-pixel interactive height. The 60-pixel
+header also accounts for a device safe-area inset at its top edge.
+
+The canonical field is always named `Canonical URL fallback`. When a protected
+runtime canonical URL is effective, plain text says that it is currently public
+and cannot be changed in this form; saving writes only the D1 fallback. Without
+a valid protected value, the normalized saved fallback is effective. A
+malformed legacy stored value is never used as a form default or transient
+preview; a valid normalized runtime value becomes the safe fallback default
+instead. This lets an unrelated Identity or presentation save proceed without
+serializing the malformed value. In that substitution case, the form explicitly
+says the stored fallback is invalid, the effective protected runtime URL has
+been prefilled, and saving will replace the invalid D1 fallback. It does not
+describe the substituted value as already saved or claim that every form value
+came from D1. If neither the stored nor runtime value is valid, the canonical
+field is empty and the loaded-state strip explicitly says that the invalid,
+nonblank saved fallback was omitted; it does not claim the sanitized form
+exactly matches D1. An exactly empty saved fallback remains an exact empty
+baseline. The raw invalid value is never rendered. Raw protected values are
+never sent to the browser.
+
+Native required and URL constraints are checked before a request. A definitive
+4xx response keeps all values in place, associates recognized server details
+with their controls through `aria-invalid` and `aria-describedby`, moves focus
+to the first affected control, and states that no save occurred. A rejected
+fetch or 5xx response remains ambiguous: the submit control is disabled and a
+native `Reload saved Identity before retrying` link is exposed. This prevents a
+second request from the uncertain page while preserving the open inputs for
+comparison. There is no automatic retry, automatic save, timeout, beacon, or
+browser-storage recovery state.
+
+The body-first owner update composer makes the text the first and largest
+control, followed by the existing kind, optional title, and optional
+destination fields. One short saved-state explanation distinguishes a new or
+existing private draft from an already public update. The form has one save
+action and a native return path to the Aitta; publishing and deletion remain
+separate existing update actions. All four kinds and the exact accepted title,
+body, and destination values continue through the unchanged create and edit
+payloads. The bounded editor surface is 760 pixels at most, becomes a single
+column on a phone, wraps long text and errors, and retains native 48-pixel
+fields plus the shared 44-pixel buttons and focus treatment.
+
+For a new draft, the composer confirms success only after a `201` response
+contains the exact allowlisted private `owner-entry` document, its same-origin
+links, canonically bounded values, forced Draft state, and current actions. Only
+an exact bounded structured 4xx error document is definitive and can return
+allowlisted messages for the four visible fields. A redirect, a malformed or
+wrong-shaped error, an invalid 2xx document, any 5xx response, or a failed fetch is unconfirmed:
+the open form is retained, another submission is disabled, and the existing
+native saved-state recovery link is shown. The client never follows a response
+URL or accepts an arbitrary `{ data: Entry }` object as proof that creation
+succeeded. Existing-draft and published-update saves follow the same recovery
+rule but require an exact `200` owner-entry document whose ID, state, and
+normalized editable values match the current submission. Draft success exposes `publish`; Published success exposes
+`unpublish`; both retain `edit` and `delete`. The client does not infer success
+from status alone, follow a response URL, or change publication state.
+
+The composer performs native required, length, and URL checks before sending a
+request. A definitive 4xx response maps recognized `body`, `title`, `entryKind`,
+and `destinationUrl` details back to their controls, preserves every current
+value, focuses the first affected field, and permits a corrected retry. A
+rejected fetch or 5xx response is deliberately unconfirmed: the open values
+remain visible, another save is disabled, and the owner must reload the saved
+update or check the Aitta's saved updates before retrying. This is especially
+important for a new POST, whose first request may already have created a draft.
+No automatic or background retry, browser-storage recovery, or publication is
+added.
 
 Repeated update rows give each action a bounded owner-visible text label plus
 the complete collision-free stable entry identifier in its accessible name,
-while keeping concise visible labels. Publishing opens a native,
-update-specific confirmation. A
-supervising ChatGPT must pause for the human owner's explicit approval before
-accepting it. Save and state controls announce pending, safe response-error, and
-unknown result states. A rejected fetch or 5xx response exposes a native
-recovery link instead of retrying automatically; a 4xx response remains a
-definitive safe error without that link. Form inputs remain available until the
-owner chooses to reload the saved state. These additions use the existing button,
-focus, touch-target, wrapping, 320-pixel, effective 400-percent-zoom, and
-reduced-motion rules.
+while keeping concise visible labels. Their lifecycle statement makes **Draft**
+plainly owner-only and **Published** plainly readable on this Aitta; it also
+states that unpublishing returns the same update to a private draft. Publishing
+opens a native, update-specific confirmation that says the update will become
+publicly readable at its permalink. A supervising ChatGPT must pause for the
+human owner's explicit approval before accepting it. State controls announce
+their pending result. The browser accepts success only after an exact bounded
+JSON owner-entry document confirms the stable identifier and requested state;
+it does not trust an arbitrary successful status or raw entry object. A 4xx
+response gives a definitive rejected-request
+outcome without claiming the update's current state, and permits a corrected
+later choice. A rejected fetch or 5xx response is
+unknown: it locks further publication-state requests from that rendered state,
+exposes the native `Check this Aitta’s current saved state` link, and
+does not retry automatically. Editing and deletion remain separately available
+actions. These additions use the existing button, focus, touch-target, wrapping,
+320-pixel, effective 400-percent-zoom, and reduced-motion rules.
+
+Deletion is a separate irreversible action, never a lifecycle-state control.
+Its native confirmation names the bounded update label and complete stable
+identifier, says that deletion is permanent, and requires the human owner's
+explicit approval. Cancelling sends no request. The bodyless JSON `DELETE` API
+returns `200` only with the exact allowlisted deletion acknowledgement for the
+current stable identifier, `{ deleted: true }`, ordered `/owner` collection and
+recovery links, and no actions; only then does the client navigate to fixed
+`/owner`, never a response-provided URL; redirects are fetch errors rather than
+browser-followed DELETE requests. A 4xx response describes only the rejected
+deletion request and leaves **Delete** available to retry without claiming the
+update's current state. A rejected fetch, redirect, 5xx, malformed/non-JSON or
+oversized acknowledgement, or wrong acknowledgement identifier/link/actions is
+unconfirmed: only
+**Delete** is locked and the native **Check this Aitta’s saved state** link
+returns to `/owner`; Edit, Publish, and Unpublish remain available from the
+rendered row. There is no automatic retry or background deletion.
 
 ## Review checklist
 

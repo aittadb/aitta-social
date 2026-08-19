@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { clampPixels } from "./helpers/css-clamp-pixels.mjs";
 import {
   entryRow,
   FakeD1,
@@ -16,11 +17,14 @@ const LONG_NAME = "N".repeat(200);
 const LONG_TITLE = "T".repeat(200);
 
 test("primary headings use one restrained responsive scale", async () => {
-  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const [css, ownerShellCss] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8"),
+  ]);
 
   assert.match(
     css,
-    /\.state-page h1, \.owner-access-state h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)[^}]*line-height:\s*0\.92[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
+    /\.state-page h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)[^}]*line-height:\s*0\.92[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
   );
   assert.match(
     css,
@@ -39,16 +43,16 @@ test("primary headings use one restrained responsive scale", async () => {
     /\.state-page h1\s*\{[^}]*font-size:\s*clamp\(2\.25rem, 4vw, 3\.75rem\)/s,
   );
   assert.match(
-    css,
-    /\.owner-access-state h1\s*\{[^}]*font-size:\s*clamp\(2\.25rem, 4vw, 3\.75rem\)/s,
+    ownerShellCss,
+    /\.accessState h1\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*clamp\(1\.75rem, 3vw, 2\.25rem\)[^}]*font-weight:\s*700/s,
   );
   assert.match(
     css,
-    /\.owner-page-header h1\s*\{[^}]*font-size:\s*clamp\(2\.25rem, 3\.5vw, 3\.5rem\)[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
+    /\.owner-page-header h1\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*clamp\(1\.75rem, 3vw, 2\.25rem\)[^}]*font-weight:\s*700[^}]*text-wrap:\s*balance[^}]*overflow-wrap:\s*anywhere/s,
   );
   assert.match(
     css,
-    /\.owner-page-header > div:first-child\s*\{[^}]*min-width:\s*0[^}]*max-width:\s*760px/s,
+    /\.owner-page-header > div:first-child\s*\{[^}]*min-width:\s*0[^}]*max-width:\s*680px/s,
     "a maximum-length owner Identity must shrink and wrap inside the header",
   );
   assert.doesNotMatch(
@@ -76,16 +80,17 @@ test("primary headings use one restrained responsive scale", async () => {
   );
   assert.match(
     css,
-    /\.owner-section h2\s*\{[^}]*font-size:\s*clamp\(1\.75rem, 2\.5vw, 2\.5rem\)/s,
+    /\.owner-section h2\s*\{[^}]*font-family:\s*var\(--sans\)[^}]*font-size:\s*clamp\(1\.35rem, 2\.5vw, 1\.65rem\)[^}]*font-weight:\s*700/s,
   );
 
   for (const width of [320, 640, 900, 1024, 1280, 1600, 2560]) {
-    const ownerH1 = clampPixels(2.25, 3.5, 3.5, width);
-    const ownerH2 = clampPixels(1.75, 2.5, 2.5, width);
+    const ownerH1 = clampPixels(1.75, 3, 2.25, width);
+    const ownerH2 = clampPixels(1.35, 2.5, 1.65, width);
     const publicH1 = width < 768 ? 1.875 * 16 : 2.375 * 16;
     assert.ok(publicH1 >= 30 && publicH1 <= 40, `public Identity h1 must stay within its compact range at ${width}px`);
     assert.ok(ownerH1 > ownerH2, `owner h1 must exceed h2 at ${width}px`);
   }
+  assert.doesNotMatch(css, /\.owner-(?:page-header|section|entry-copy|empty|access-state)[^}]*font-family:\s*var\(--serif\)/s);
 });
 
 test("every primary headline surface keeps semantic text and private values out", async () => {
@@ -123,9 +128,9 @@ test("every primary headline surface keeps semantic text and private values out"
   assert.match(home, new RegExp(`<h1 id="account-name">${LONG_NAME}</h1>`));
   assert.match(permalink, new RegExp(`<h1>${LONG_TITLE}</h1>`));
   assert.match(owner, /<h1>Identity<\/h1>/);
-  assert.match(denied, /<h1>This presence is not yours to administer<\/h1>/);
+  assert.match(denied, /<h1>This Aitta is not yours to administer<\/h1>/);
   assert.match(missing, /<h1>This update is not public<\/h1>/);
-  assert.match(setup, /<h1 id="template-title">Create your own presence<\/h1>/);
+  assert.match(setup, /<h1 id="template-title">Set up your own Aitta<\/h1>/);
 
   for (const html of [home, permalink, owner, denied, missing, setup]) {
     assert.doesNotMatch(html, new RegExp(PRIVATE_CANARY));
@@ -138,8 +143,4 @@ async function html(path, env, headers = {}) {
     headers: { accept: "text/html", ...headers },
   });
   return response.text();
-}
-
-function clampPixels(minRem, preferredVw, maxRem, width) {
-  return Math.min(maxRem * 16, Math.max(minRem * 16, width * preferredVw / 100));
 }

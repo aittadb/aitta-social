@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+
 import {
   FakeD1,
   entryRow,
@@ -16,6 +18,11 @@ const otherEmail = "other@example.com";
 const ownerCanary = "TEMPLATE_OWNER_PRIVATE_CANARY@example.test";
 const draftTitle = "TEMPLATE_DRAFT_TITLE_PRIVATE_CANARY";
 const draftBody = "TEMPLATE_DRAFT_BODY_PRIVATE_CANARY";
+const approvedAittaExplanation = [
+  "An Aitta is your independently controlled AittaSocial application.",
+  "It remains authoritative for its identity, content, configuration, and locally stored data,",
+  "whether it is publicly reachable, private, or disconnected from the AittaSocial Hub.",
+].join(" ");
 const deploymentPrompt = JSON.parse(
   await readFile(new URL("../content/deployment-prompt.json", import.meta.url), "utf8"),
 ).prompt;
@@ -46,12 +53,15 @@ test("a truly unconfigured deployment leads with the exact prompt and published-
   const prompt = readPrompt(html);
   assert.equal(prompt, deploymentPrompt);
   assert.equal(html.match(/<textarea(?=[^>]+id="deployment-prompt")/gi)?.length, 1);
-  assert.ok(html.indexOf("Create your own presence") < html.indexOf("Visible public update"));
+  assert.ok(html.indexOf("Set up your own Aitta") < html.indexOf("Visible public update"));
   assert.ok(html.indexOf(deploymentPrompt) < html.indexOf("Visible public update"));
+  assert.match(normalizeVisibleText(html), new RegExp(escapeRegExp(approvedAittaExplanation), "i"));
+  assert.match(html, /A profile is an Aitta(?:&apos;|&#x27;|')s optional outward identity presentation/i);
+  assert.match(html, /This Aitta has no profile yet and no current Hub connection/i);
   assert.match(html, /<label[^>]+for="deployment-prompt"[^>]*>Prompt for ChatGPT<\/label>/i);
+  assert.match(html, /Select and copy this prompt into ChatGPT to set up your own Aitta/i);
   assert.match(html, /<textarea(?=[^>]+id="deployment-prompt")(?=[^>]+readonly)/i);
-  assert.match(html, /href="\/signin-with-chatgpt\?return_to=%2Fowner"/i);
-  assert.match(html, /aria-label="Set up this presence — sign in with ChatGPT for local sole-owner administration"[^>]*>Set up<\/a>/i);
+  assert.match(html, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
   assert.match(html, /Visible public update/i);
   assert.doesNotMatch(
     html,
@@ -70,7 +80,7 @@ test("the prompt reveals no owner authorization result", async (t) => {
     const html = await response.text();
     assert.equal(response.status, 200);
     assert.equal(readPrompt(html), deploymentPrompt);
-    assert.match(html, /href="\/owner"[^>]+aria-label="Set up this presence — open local sole-owner administration"[^>]*>Set up<\/a>/i);
+    assert.match(html, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(html, new RegExp(ownerEmail.replaceAll(".", "\\."), "i"));
   });
 
@@ -81,7 +91,7 @@ test("the prompt reveals no owner authorization result", async (t) => {
     });
     const publicHtml = await publicResponse.text();
     assert.equal(readPrompt(publicHtml), deploymentPrompt);
-    assert.match(publicHtml, /href="\/owner"[^>]+aria-label="Set up this presence — open local sole-owner administration"[^>]*>Set up<\/a>/i);
+    assert.match(publicHtml, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(publicHtml, /you are the owner|owner verified/i);
 
     const ownerResponse = await fetchApp("/owner", {
@@ -130,35 +140,50 @@ test("a configured deployment leads with its Identity and contains no setup prom
   const html = await response.text();
   assert.match(html, /<h1[^>]*>Configured Presence<\/h1>/i);
   assert.ok(html.indexOf("Configured Presence") < html.indexOf("Configured public update"));
-  assert.doesNotMatch(html, /@Sites|Create your own presence|Prompt for ChatGPT|Set up this presence/i);
+  assert.doesNotMatch(html, /@Sites|Set up your own Aitta|Prompt for ChatGPT|Set up this Aitta/i);
   assert.doesNotMatch(html, /CONFIGURED_PROFILE_PRIVATE_CANARY|TEMPLATE_OWNER_PRIVATE_CANARY/i);
 });
 
-test("a D1 failure is not presented as a new Site", async () => {
+test("a D1 failure is unavailable Aitta storage, never fresh setup or an owner claim", async (t) => {
   const failingDb = {
     prepare() {
       throw new Error("D1 unavailable private canary");
     },
   };
-  const response = await fetchApp("/", {
-    env: makeEnv({ db: failingDb, ownerEmail: ownerCanary }),
-    headers: { accept: "text/html" },
-  });
+  const cases = [
+    ["signed out", {}, /href="\/owner"[^>]*>Manage<\/a>/i],
+    ["signed-in owner", ownerHeaders(ownerEmail), /href="\/owner"[^>]*>Manage<\/a>/i],
+    ["signed-in non-owner", ownerHeaders(otherEmail), /href="\/owner"[^>]*>Manage<\/a>/i],
+  ];
 
-  assert.equal(response.status, 200);
-  const html = await response.text();
-  assert.match(html, /This presence cannot be loaded right now/i);
-  assert.match(html, /Try again/i);
-  assert.doesNotMatch(html, /@Sites|Create your own presence|Prompt for ChatGPT|D1 unavailable private canary/i);
-  assert.doesNotMatch(html, /TEMPLATE_OWNER_PRIVATE_CANARY/i);
+  for (const [name, headers, destination] of cases) {
+    await t.test(name, async () => {
+      const response = await fetchApp("/", {
+        env: makeEnv({ db: failingDb, ownerEmail: ownerCanary }),
+        headers: { accept: "text/html", ...headers },
+      });
+
+      assert.equal(response.status, 200);
+      const html = await response.text();
+      assert.match(html, /Aitta storage unavailable/i);
+      assert.match(html, /This Aitta cannot be loaded right now/i);
+      assert.match(html, /This Aitta cannot be loaded right now/i);
+      assert.match(html, /Try again/i);
+      assert.match(html, destination);
+      assert.doesNotMatch(html, /@Sites|Set up your own Aitta|Prompt for ChatGPT|D1 unavailable private canary/i);
+      assert.doesNotMatch(html, /TEMPLATE_OWNER_PRIVATE_CANARY|you are the owner|owner verified/i);
+    });
+  }
 });
 
 test("the prompt surface stays native, selectable, responsive, and accessible", async () => {
-  const [component, page, css] = await Promise.all([
+  const [component, page, templateCss, presenceCss] = await Promise.all([
     readFile(new URL("../app/_components/DeploymentPrompt.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/page.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/_components/PublicPresenceFrame.module.css", import.meta.url), "utf8"),
   ]);
+  const css = `${templateCss}\n${presenceCss}`;
 
   assert.match(component, /<label htmlFor="deployment-prompt">/);
   assert.match(component, /<textarea[\s\S]*readOnly[\s\S]*value=\{deploymentPromptContent\.prompt\}/);
@@ -183,4 +208,8 @@ function readPrompt(html) {
   const match = html.match(/<textarea(?=[^>]+id="deployment-prompt")[^>]*>([\s\S]*?)<\/textarea>/i);
   assert.ok(match, "unconfigured page must render the deployment prompt textarea");
   return match[1];
+}
+
+function normalizeVisibleText(html) {
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }

@@ -1,19 +1,28 @@
-# AittaSocial presence deployment and setup
+# AittaSocial Aitta setup and deployment operations
 
 Deploy AittaSocial private-first. Reuse the existing Site linked to this source
-when there is one, give the presence its own D1 database, configure its sole
+when there is one, give the Aitta its own D1 database, configure its sole
 owner through protected runtime settings, and verify a private checkpoint
 before considering public access.
 
-When the D1 profile read succeeds and no Identity exists, the public template
-leads with the same short prompt shown at the top of the README. The prompt is
-selectable in a labeled read-only field, so it can be copied without running a
-browser write or granting authority. A configured Site never shows that prompt:
-it leads with the represented Identity. A D1 read failure shows a temporary
-unavailable state and must never be described as a new or unconfigured Site.
+An Aitta is an independently controlled top-level place. One Aitta deployment
+currently runs one Aitta, which remains authoritative for its identity, content,
+configuration, and locally stored data whether it is publicly reachable,
+private, or disconnected from the AittaSocial Hub. A profile is an Aitta's
+optional outward identity presentation. The current POC has no Hub connection,
+and public reads work without one.
 
-Do not publish publicly or connect a custom domain without the deployment
-owner's explicit approval.
+When the Aitta-owned D1 profile read succeeds and no profile exists, the public
+template clearly identifies the Aitta as unconfigured and leads with the same
+short prompt shown at the top of the README. The prompt is selectable in a
+labeled read-only field, so it can be copied without running a browser write or
+granting authority. A configured Aitta never shows that prompt: it leads with
+the represented Identity. A D1 read failure instead identifies Aitta storage as
+temporarily unavailable and must never be described as a new or unconfigured
+Aitta.
+
+Do not publish publicly or connect a custom domain without the Aitta owner's
+explicit approval.
 
 ## 1. Resolve the Site before changing it
 
@@ -60,7 +69,7 @@ The ignored, checkout-local `.openai/hosting.json` carries the exact project
 identifier for the single reused Site with the same `DB`/null-R2 declarations.
 Resolve it through Sites and never stage, commit, print, or copy it into the
 example. Package that exact local binding only for the private Sites deployment.
-Sites provisions and wires the deployment-owned D1 resource. Do not add an
+Sites provisions and wires the Aitta-owned D1 resource. Do not add an
 external database, shared content storage, an object bucket, or media
 infrastructure.
 
@@ -69,7 +78,7 @@ migrations, and the resolved checkout-local binding. Keep source-write
 credentials, active hosting identity, temporary packages, and protected
 settings out of source control and user-visible output.
 
-For an existing presence, review the
+For an existing Aitta deployment, review the
 [local in-place upgrade proof](upgrade.md) before packaging. It verifies the
 reviewed historical-prefix-to-candidate-tail transition against persisted local
 D1 state, owner authorization, draft privacy, canonical metadata, public APIs,
@@ -105,11 +114,12 @@ If the selected hosting path cannot deploy privately, stop and ask the owner
 before using any shared or public access level. Do not choose a broader access
 level to complete a test.
 
-The first private checkpoint may show the public creation prompt because the
-profile does not yet exist. That is expected only after a successful empty D1
-read: it must not grant the first visitor write access, reveal whether a signed-
-in visitor matches the owner, or expose protected configuration. The owner path
-still performs its normal server-side authorization before displaying controls.
+The first private checkpoint may show the public Aitta setup prompt because the
+optional profile does not yet exist. That is expected only after a successful
+empty D1 read: it must not grant the first visitor write access, reveal whether
+a signed-in visitor matches the owner, or expose protected configuration. The
+owner path still performs its normal server-side authorization before displaying
+controls.
 
 ## 4. Configure protected runtime settings
 
@@ -120,7 +130,7 @@ source file, migration, screenshot, or chat response.
 | Setting | Setup action |
 | --- | --- |
 | `AITTA_SOCIAL_OWNER_EMAIL` | Owner enters their verified ChatGPT email directly in protected settings. Required for all writes. Do not infer it from the Site owner/access record; that hosting identity may differ. |
-| `AITTA_SOCIAL_CANONICAL_URL` | Set to the normalized canonical HTTPS deployment URL. Use the private Sites URL until the owner later approves and configures another canonical domain. |
+| `AITTA_SOCIAL_CANONICAL_URL` | Set to the normalized canonical HTTPS Aitta deployment URL. Use the private Sites URL until the owner later approves and configures another canonical domain. |
 | `AITTA_SOCIAL_HUB_CHALLENGE` | Optional current verification challenge. It becomes public in discovery after redeployment. |
 
 Redeploy privately after a runtime-setting change that must reach the deployed
@@ -130,10 +140,11 @@ checking that its key is configured.
 ## 5. Complete the initial Identity and first update
 
 1. Open the private Site and choose the local owner-management entry to use Sign
-   in with ChatGPT. This sign-in administers only this presence; it does not
-   join or sign in to the AittaSocial network.
+   in with ChatGPT. This sign-in administers only this Aitta; it does not
+   join or sign in to the Aitta Network. Future member identity requires
+   an exact accepted Hub contract; it is not a deployment setup step.
 2. Confirm that the authenticated email matches the protected owner setting by
-   reaching Your presence, not by displaying either email.
+   reaching the owner workspace, not by displaying either email.
 3. Open `/owner/profile` and configure Identity: display name, short
    description, longer introduction, optional location/website/external links,
    canonical URL, accent color, density, and attribution preference. Ordinary
@@ -142,25 +153,35 @@ checking that its key is configured.
    accent, and required-field progress. The preview is not saved progress:
    reload discards unsaved form changes, and only a successful **Save identity**
    write creates or updates the durable D1 profile.
-5. Return to **Your presence** after saving. The owner workspace derives one of
+5. Return to the owner workspace after saving. It derives one of
    three states on every request: fresh when no profile exists, incomplete when
    a stored profile has no valid effective canonical URL, and complete only
    when both the profile and effective canonical URL exist.
-6. Save and reopen the public presence. It should look intentional with no
+6. Save and reopen the public profile. It should look intentional with no
    updates and should describe the represented identity rather than AittaSocial.
    Inspect its document metadata: title and description come from the public
    Identity, and canonical/sharing URLs use the normalized configured canonical
    URL rather than the request host.
-7. With complete Identity and no updates, **Your presence** leads to **Create
-   first draft**. Save the draft, leave the editor, and return to **Your
-   presence**. It must offer to resume that same stable draft identifier and
-   state clearly that the draft remains private until publication.
-8. Publish the test update. **Your presence** then marks the first-update
-   journey complete and offers both the public preview and the stable
-   `/entries/{id}` permalink while retaining the normal edit, unpublish, and
-   delete controls. Unpublish it and confirm the same D1 record becomes the
-   resumable private draft again and disappears from every public HTML,
-   metadata, and JSON route.
+7. With complete Identity and no updates, the owner workspace leads to **Create
+   first draft**. In the body-first composer, enter the update text before the
+   secondary kind, optional title, and destination controls, then choose **Save
+   private draft**. Leave the editor and return to the Aitta. It must offer to
+   resume that same stable draft identifier and state clearly that the draft
+   remains private until publication.
+8. Confirm the test update is a **Draft**, meaning only the owner can read it.
+   Choose **Publish** and approve the update-specific native confirmation only
+   when the owner is ready to make it public. The owner workspace then shows
+   **Published**, marks the first-update journey complete, and offers both the
+   public preview and the stable `/entries/{id}` permalink while retaining the
+   normal edit, unpublish, and delete controls. Unpublish it and confirm the
+   same D1 record becomes the resumable private draft again and disappears from
+   every public HTML, metadata, and JSON route. Choose **Delete** only when the
+   owner is ready to permanently remove that particular update; its native
+   confirmation names the update and stable identifier. Cancelling makes no
+   request. The unchanged deletion API returns `204`; after that successful
+   response, the client navigates the owner to `/owner` and the
+   deleted update is indistinguishable from an unknown update on every public
+   route.
 
 The effective canonical URL follows one server-owned rule: a valid normalized
 `AITTA_SOCIAL_CANONICAL_URL` takes precedence, otherwise the normalized URL
@@ -171,7 +192,7 @@ There is no current owner Hub control or connection state, and Hub does not
 participate in Identity readiness or public preview.
 
 Identity and update writes use the stable profile and entry models in this
-deployment's D1 database and do not require another deployment after each edit.
+Aitta's D1 database and do not require another deployment after each edit.
 The signed-in owner can also change the supported accent, density, public links,
 and attribution visibility through those existing controls. These ordinary
 changes persist in D1 across reloads and do not require a repository fork,
@@ -189,7 +210,8 @@ fields, create or edit a private draft, and use preview or unpublish controls
 only while the owner supervises that signed-in browser.
 
 Publishing is the deliberate stop point. Choosing **Publish** opens a native
-confirmation that identifies the update and states that it will become public.
+confirmation that identifies the update and states that it will become publicly
+readable on this Aitta at its permalink.
 A browser-controlling ChatGPT must stop there, show the request to the human
 owner, and accept the confirmation only after the owner explicitly approves
 that publication. A deployment request, prior approval to make the Site public,
@@ -198,11 +220,42 @@ an earlier publication, or permission to edit a draft is not publish approval.
 If a browser request loses its response, or the server returns a 5xx response,
 the interface describes the result as unknown, keeps current form inputs in
 place, and offers a native link to reload the applicable saved Identity, update,
-or dashboard state. Reload before retrying: the server may have committed the
-first request, so an immediate retry could create a second draft or reverse the
-wrong state. A 4xx validation or authorization response re-enables the control
-and shows its safe server message without adding the ambiguous-result recovery
-link.
+or dashboard state. For a publish or unpublish request, it locks another
+publication-state change and offers **Check this Aitta’s current saved state** before
+any later choice: the first request may have committed. A 4xx validation or
+authorization response instead states the definitive lifecycle outcome,
+re-enables the control, and shows its safe server message without adding the
+ambiguous-result recovery link; it describes the rejected request without
+claiming the update's current state.
+
+The publication control requests and validates the normalized private JSON
+resource. A reload follows only an exact bounded response for the same stable
+update identifier and requested Draft or Published state. A redirect,
+non-JSON or malformed response, mismatched document, failed fetch, or 5xx never
+proves the transition and never triggers an automatic retry. This transport
+normalization does not change the separate Delete confirmation or response.
+
+Deletion is a different irreversible boundary. A browser-controlling ChatGPT
+must stop at the update-specific **Delete** confirmation and obtain the human
+owner's explicit approval; approval to edit, publish, or unpublish does not
+approve deletion. The bodyless request accepts only the private JSON
+acknowledgement matching the visible update identifier; its collection and
+recovery link values are not navigation authority, and success always goes to
+fixed `/owner`. A structured 4xx deletion result states the rejected deletion request,
+keeps **Delete** available for a deliberate retry, and does not assert the
+update's current state. A rejected fetch or 5xx result could have committed:
+so can a redirect, non-JSON, malformed, oversized, or wrong-shape `200`; each
+locks only **Delete**, preserves Edit and Publish or Unpublish, and provides
+**Check this Aitta’s saved state** at `/owner` before another deletion choice.
+The interface never automatically retries or deletes in the background.
+
+In the update composer specifically, an unknown result disables another save
+from the current page. For a new draft, use **Check saved updates before
+retrying**; for an existing update, use **Reload saved update before retrying**.
+Compare the freshly loaded D1-backed state before making another request. A
+definitive 4xx response instead keeps every entered value, highlights and
+focuses a recognized invalid field, and leaves **Save private draft** or **Save
+update** available after correction.
 
 Rollback stays within the existing product model. Reloading before a successful
 Identity save discards its transient preview. A saved Identity or presentation
@@ -212,7 +265,7 @@ state, and deleting remains a separate destructive confirmation. Saved draft
 edits likewise have no revision history, so preserve text separately before a
 destructive replacement when recovery matters.
 
-These controls modify only deployment-owned D1 content. They do not fork or
+These controls modify only Aitta-owned D1 content. They do not fork or
 edit GitHub source, redeploy the Site, change protected settings, change access,
 or connect a domain. Any source change, deployment, public-access change, or
 custom-domain action remains a separately reviewed and explicitly approved
@@ -251,9 +304,9 @@ asset exists in the build output and that removed or superseded assets do not.
 
 Before public release, verify:
 
-- signed-out public presence, published-update, manifest, and `/api/v1` behavior
+- signed-out public profile, published-update, manifest, and `/api/v1` behavior
   using automated production-equivalent request fixtures;
-- matching-owner access to Your presence and every write;
+- matching-owner access to the owner workspace and every write;
 - a different signed-in identity receiving no administrative access;
 - missing-owner behavior disabling every write;
 - draft and private-canary absence from HTML, JSON, headers, links, errors, and
@@ -261,7 +314,7 @@ Before public release, verify:
 - profile- and published-update-derived document metadata, neutral unconfigured
   `noindex, nofollow` metadata, hostile request-host rejection, and absence of
   image references when no direct checked-in identity asset exists; and
-- public presence reads without any Hub request or configuration.
+- public profile reads without any Hub request or configuration.
 
 A private Sites access policy may prevent anonymous traffic from reaching the
 application at all. Do not temporarily publish the Site to work around that
@@ -271,17 +324,21 @@ required during setup.
 
 ## 7. Optional public verification challenge
 
-The presence remains fully readable without this setting. The POC has no Hub
-registration, private Hub control, configured Hub destination, deployment
-credential, or outbound probe. Do not invent any of those behaviors without a
-separately accepted versioned contract.
+The Aitta remains fully readable without this setting. The POC has no Hub
+connection, Hub registration, private Hub control, configured Hub destination,
+deployment credential, or outbound probe. Do not invent any of those behaviors
+without a separately accepted versioned contract.
+
+Current protocol 1.0 entries are publishing resources, not Aitta Network events
+or app roots. The future network direction is recorded in
+[strategy.md](strategy.md); it does not authorize a deployment change here.
 
 Leave `AITTA_SOCIAL_HUB_CHALLENGE` empty unless a separately accepted
 verification process supplies an opaque current challenge. If one is supplied,
 save it in protected runtime settings, redeploy privately, and verify that
 `/.well-known/aitta-social.json` exposes exactly that value and no protected
-data. The public challenge proves only that someone could modify the deployment
-at verification time. It is not authentication, registration, network
+data. The public challenge proves only that someone could modify the Aitta
+deployment at verification time. It is not authentication, registration, network
 membership, a session, or a trusted connection. Remove it and redeploy when it
 is no longer current.
 
@@ -289,14 +346,14 @@ is no longer current.
 
 Start the Sites agent preview and inspect at least:
 
-- public presence with no updates;
-- public presence with representative published updates at wide and narrow
+- public profile with no updates;
+- public profile with representative published updates at wide and narrow
   widths;
 - each public update kind and a permalink;
 - keyboard navigation, visible focus, labels, errors, contrast, text zoom, touch
   targets, and reduced-motion behavior;
 - missing-owner guidance;
-- Your presence, Identity form, update editor, state transitions, delete
+- the owner workspace, Identity form, update editor, state transitions, delete
   confirmation, and native owner navigation; and
 - a signed-in non-owner and signed-out public response using the safe test
   boundary described above.
@@ -324,7 +381,7 @@ button has a target box at least 44 CSS pixels high. Repeat at a 1280-pixel
 desktop viewport enlarged to 400 percent, whose effective layout viewport is
 320 CSS pixels.
 
-Use the keyboard to move focus through the skip link, presence name, owner
+Use the keyboard to move focus through the skip link, profile display name, owner
 management action, update links, attribution, and technical links. Confirm the
 two-layer focus indicator is visible on both light and dark surfaces; with
 forced colors active it must use the system highlight. With reduced motion

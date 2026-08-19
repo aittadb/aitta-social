@@ -1,0 +1,197 @@
+/**
+ * Shared reusable controls and focus/accessibility helpers.
+ *
+ * Purpose:
+ * - buttons, status links, and repeated form primitives.
+ * - lightweight shared building blocks used across pages and owner surfaces.
+ *
+ * Do not include:
+ * - component-owned page composition.
+ * - layout or spacing rules tied to a single feature view.
+ * - domain-specific visual cards or banners.
+ */
+
+.button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.68rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #213e38;
+  border-color: #213e38;
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.button-quiet {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.button-quiet:hover {
+  background: var(--paper-raised);
+  border-color: var(--ink);
+}
+
+.button-danger {
+  background: transparent;
+  border-color: #d7aaaa;
+  color: var(--danger);
+}
+
+.button-danger:hover {
+  background: #fff4f2;
+  border-color: var(--danger);
+}
+
+.button-small {
+  min-height: 44px;
+  padding: 0.5rem 0.72rem;
+  font-size: 0.85rem;
+}
+
+.text-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 650;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: var(--z-footer);
+  left: max(1rem, env(safe-area-inset-left));
+  top: max(1rem, env(safe-area-inset-top));
+  padding: 0.7rem 1rem;
+  background: #fff;
+  color: #111;
+  border: 2px solid #111;
+  transform: translateY(-180%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+}
+
+.field > span {
+  font-size: 0.84rem;
+}
+
+.field small {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.72rem 0.8rem;
+  border: 1px solid var(--ink);
+  border-radius: 5px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"],
+.field select[aria-invalid="true"] {
+  border-color: var(--danger);
+  border-width: 2px;
+}
+
+.field textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.field-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.field-grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.check-field {
+  min-height: var(--control-min-height);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.check-field input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+}
+
+.color-field input {
+  max-width: 100px;
+  padding: 0.3rem;
+  cursor: pointer;
+}
+
+.form-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: var(--paper-outline);
+}
+
+.form-status {
+  min-height: 1.5rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+@media (max-width: 640px) {
+  .field-grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .form-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .form-footer .button {
+    width: 100%;
+  }
+}

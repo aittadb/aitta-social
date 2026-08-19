@@ -1,0 +1,553 @@
+/**
+ * Styles owned by the public home page (app/page.tsx).
+ *
+ * Keep component-level page composition and feature content here.
+ * Do not move unrelated global utilities or owner-only styles into this file.
+ */
+.public-presence-column {
+  max-width: 732px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none;
+    transition: none;
+  }
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.presence-identity {
+  margin-top: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper-raised);
+}
+
+.presence-identity-field {
+  position: relative;
+  height: 96px;
+  overflow: hidden;
+  background: var(--accent);
+}
+
+.presence-identity-field::before,
+.presence-identity-field::after {
+  position: absolute;
+  display: block;
+  content: "";
+}
+
+.presence-identity-field::before {
+  width: 180px;
+  height: 180px;
+  top: -112px;
+  right: -38px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 18%);
+}
+
+.presence-identity-field::after {
+  width: 190px;
+  height: 150px;
+  left: -86px;
+  bottom: -94px;
+  border-radius: 48px;
+  background: rgb(0 0 0 / 12%);
+  transform: rotate(18deg);
+}
+
+.presence-profile {
+  position: relative;
+  min-width: 0;
+  padding: 0 16px 8px;
+}
+
+.presence-identity-tile {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.presence-identity-tile-profile {
+  width: 80px;
+  height: 80px;
+  margin-top: -40px;
+  border: 4px solid var(--paper-raised);
+  border-radius: 16px;
+  font-size: 1.35rem;
+}
+
+.presence-identity-tile-update {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  border: 2px solid var(--paper-raised);
+  border-radius: 12px;
+  font-size: 0.78rem;
+}
+
+.presence-heading {
+  min-width: 0;
+  margin-top: 0.5rem;
+}
+
+.presence-heading h1 {
+  max-width: 100%;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 1.875rem;
+  font-weight: 760;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  overflow-wrap: anywhere;
+}
+
+.presence-summary {
+  max-width: 62ch;
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.presence-details {
+  margin-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.presence-detail {
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: minmax(72px, 0.55fr) minmax(0, 1.45fr);
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.presence-detail > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.presence-detail strong {
+  min-width: 0;
+  font-size: 0.86rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.presence-detail a {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+
+.presence-about {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.presence-about h2 {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.presence-about-copy {
+  max-width: 66ch;
+  margin: 0.35rem 0 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.presence-about details {
+  margin-top: 0.2rem;
+}
+
+.presence-about summary {
+  min-height: 44px;
+  width: fit-content;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.presence-about-full {
+  padding-bottom: 0.25rem;
+}
+
+.template-start {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper-raised);
+}
+
+.template-introduction {
+  min-width: 0;
+  margin-bottom: 4px;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  text-transform: none;
+}
+
+.template-introduction h1 {
+  max-width: 20ch;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: clamp(1.875rem, 4vw, 2.375rem);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  overflow-wrap: anywhere;
+}
+
+.identity-summary {
+  max-width: 760px;
+  margin: 8px 0 0;
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.updates-section {
+  padding: 0.5rem 0 1rem;
+  max-width: 700px;
+  margin-inline: auto;
+}
+
+.updates-section > h2 {
+  margin: 0 0 0.5rem;
+  font-family: var(--sans);
+  font-size: 1.5rem;
+  font-weight: 760;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.update-stream {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper-raised);
+  list-style: none;
+}
+
+.update-stream > li + li {
+  border-top: 1px solid var(--line);
+}
+
+.update-item {
+  min-width: 0;
+  padding: 12px;
+}
+
+.update-item.update-kind-compact {
+  padding-block: 0.75rem;
+}
+
+.update-source-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+}
+
+:global(.update-source-identity) {
+  min-width: 0;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+  font-weight: 750;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+:global(.update-source-identity > span:last-child) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.update-context {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  flex-wrap: wrap;
+  gap: 0 0.6rem;
+  color: var(--muted);
+}
+
+.update-kind {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.update-time {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.deployment-prompt {
+  min-width: 0;
+  align-self: end;
+}
+
+.deployment-prompt > label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--ink);
+  font-weight: 750;
+}
+
+.deployment-prompt > p {
+  margin: 0 0 0.8rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.deployment-prompt textarea {
+  width: 100%;
+  min-height: 12rem;
+  padding: 1rem;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  resize: vertical;
+}
+
+.update-title {
+  max-width: 32ch;
+  margin: 0.65rem 0 0;
+  font-family: var(--sans);
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 760;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.update-title a {
+  min-width: 44px;
+  min-height: 44px;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.update-title a:hover,
+.update-note-title:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+}
+
+.update-body {
+  max-width: 66ch;
+  margin: 0.6rem 0 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.update-note-body {
+  margin-top: 0.7rem;
+}
+
+.update-excerpt {
+  color: #3f4945;
+}
+
+.update-note-title {
+  min-height: 44px;
+  min-width: 44px;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.empty-public {
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper-raised);
+}
+
+.empty-public h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 750;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.empty-public p {
+  max-width: 600px;
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+.entry-list-per-kind {
+  gap: 0.15rem;
+}
+
+.density-compact .update-item {
+  padding-block: 0.75rem;
+}
+
+.density-compact .update-item .update-context {
+  max-width: 112px;
+  text-align: right;
+}
+
+.density-compact .update-time {
+  white-space: normal;
+  text-align: right;
+}
+
+.density-compact .update-kind-article .update-source-row,
+.density-compact .update-kind-announcement .update-source-row,
+.density-compact .update-kind-link .update-source-row {
+  grid-template-columns: 1fr;
+  gap: 0.15rem;
+}
+
+.density-compact .update-kind-article .update-context,
+.density-compact .update-kind-announcement .update-context,
+.density-compact .update-kind-link .update-context {
+  max-width: none;
+  justify-content: start;
+  padding-left: 3.25rem;
+  text-align: left;
+}
+
+.density-compact .update-kind-article .update-time,
+.density-compact .update-kind-announcement .update-time,
+.density-compact .update-kind-link .update-time {
+  text-align: left;
+}
+
+.density-compact .update-source-identity {
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .presence-identity {
+    margin-top: 2rem;
+  }
+
+  .presence-identity-field {
+    height: 120px;
+  }
+
+  .presence-profile {
+    padding: 0 1.5rem 1.5rem;
+  }
+
+  .presence-identity-tile-profile {
+    width: 96px;
+    height: 96px;
+    margin-top: -48px;
+    font-size: 1.6rem;
+  }
+
+  .presence-heading {
+    margin-top: 1rem;
+  }
+
+  .presence-heading h1 {
+    font-size: 2.375rem;
+  }
+
+  .presence-summary {
+    margin-top: 0.65rem;
+    line-height: 1.5;
+  }
+
+  .presence-about {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+
+  .presence-about-copy {
+    margin-top: 0.55rem;
+    line-height: 1.5;
+  }
+
+  .updates-section {
+    padding-top: 1.5rem;
+  }
+
+  .updates-section > h2 {
+    margin-bottom: 0.75rem;
+  }
+
+  .update-item {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .update-context {
+    max-width: 112px;
+    text-align: right;
+  }
+
+  .update-time {
+    white-space: normal;
+    text-align: left;
+  }
+}

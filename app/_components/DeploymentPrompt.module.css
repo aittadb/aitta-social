@@ -1,0 +1,39 @@
+/**
+ * Component styles owned by DeploymentPrompt.
+ *
+ * Keep this deployment prompt presentation local to the component and consume
+ * shared design tokens from the global layer.
+ */
+
+.deployment-prompt {
+  min-width: 0;
+  align-self: end;
+}
+
+.deployment-prompt :global(label) {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--ink);
+  font-weight: 750;
+}
+
+.deployment-prompt :global(p) {
+  margin: 0 0 0.8rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.deployment-prompt :global(textarea) {
+  width: 100%;
+  min-height: 12rem;
+  padding: 1rem;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  resize: vertical;
+}

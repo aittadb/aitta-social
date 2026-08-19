@@ -40,5 +40,6 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+/HANDOFF.md
 /.openai/hosting.json
 !/.openai/hosting.example.json

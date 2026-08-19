@@ -1,5 +1,9 @@
 /** Cloudflare Worker entry point for AittaSocial. */
 import handler from "vinext/server/app-router-entry";
+import {
+  addAcceptVary,
+  dispatchPublicEntryDocument,
+} from "../lib/public-entry-document/dispatch";
 
 const CONTENT_SECURITY_POLICY = [
   "default-src 'none'",
@@ -27,20 +31,37 @@ interface ExecutionContext {
 
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const response = await handler.fetch(request, env, ctx);
+    const dispatch = dispatchPublicEntryDocument(request);
+    let response = dispatch.response ?? await handler.fetch(dispatch.request, env, ctx);
+    if (dispatch.negotiated) response = addAcceptVary(response);
     if (!/^text\/html\b/i.test(response.headers.get("content-type") ?? "")) {
+      if (dispatch.negotiated && request.method === "HEAD") {
+        response = withoutBody(response);
+      }
       return response;
     }
 
     const headers = new Headers(response.headers);
     headers.set("Cache-Control", "no-store, must-revalidate");
     headers.set("Content-Security-Policy", CONTENT_SECURITY_POLICY);
-    return new Response(response.body, {
+    response = new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
       headers,
     });
+    if (dispatch.negotiated && request.method === "HEAD") {
+      return withoutBody(response);
+    }
+    return response;
   },
 };
+
+function withoutBody(response: Response): Response {
+  return new Response(null, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
 
 export default worker;

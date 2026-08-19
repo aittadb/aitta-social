@@ -1,10 +1,1021 @@
 # Changelog
 
+- **TASK-231 — Centralized throwing D1 test fixtures.** Added the
+  dependency-free Node-test-only `tests/helpers/throwing-d1.mjs` leaf as the
+  sole owner of `throwingD1`. All 60 existing calls across six response and
+  preview suites now retain their own storage canary while the fixture supplies
+  a fresh minimal D1-shaped object and fresh native error for every call.
+  Authorization, negotiation, method, body, storage-failure, and privacy
+  assertions remain suite-owned. Regression coverage pins object/error
+  freshness, exact messages, ownership, six imports, and the full lint matrix.
+  Validation: independent review found no P0/P1/P2 issues; integrated commit
+  `eb60778`; focused checks passed 222/222; full `npm run validate` passed
+  build, typecheck, lint, repository checks, and 606/606 tests. No dependency,
+  observable production behavior, route, API, schema, migration, persistence,
+  hosting, deployment, data, access, or external state changed. Residual
+  uncertainty: the next accepted task shares only the public-entry-document
+  unavailable response while retaining route and dispatch boundaries.
+
+- **TASK-230 — Centralized JSON response-body parsing in tests.** Added the
+  Node-test-only `tests/helpers/json-response-body.mjs` leaf as the sole owner
+  of `responseJson`. The functional matrix and upgrade suite import it
+  directly; the worker harness re-exports it so its existing consumers retain
+  their API without test-environment coupling. Status, cache, Vary, privacy,
+  and allowlist assertions remain suite-owned. Regression coverage pins exact
+  values, case/suffix media recognition, fail-before-read non-JSON behavior,
+  malformed JSON, one accepted body read, ownership, and the full lint matrix.
+  Independent review confirmed the harness's former assertion/read ordering
+  was unobservable for existing callers. Validation: review found no P0/P1/P2
+  issues; integrated commit `1c19186`; focused checks passed 7/7; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  603/603 tests. No dependency, observable production behavior, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted task shares
+  only throwing-D1 test fixtures while retaining every suite's storage-failure
+  assertions.
+
+- **TASK-229 — Centralized private-entry error field-name recognition.** Added
+  the runtime-dependency-free
+  `app/owner/entries/private-entry-error-field-name.ts` leaf as the sole owner
+  of the response-field allowlist and `entryKind` alias normalization. Create
+  and edit response readers now share it while retaining unknown-field
+  omission, first-message-wins, structured 4xx, status/fallback, bounded-read,
+  and recovery behavior. The stricter form-control recognizer is now clearly
+  named `entryFormFieldName` and remains independent. Four direct isolated
+  TypeScript test-module import maps were updated only to resolve the new
+  static dependency. Validation: independent review found no P0/P1/P2 issues;
+  integrated commit `5df82a1`; focused checks passed 93/93; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  596/596 tests. No dependency, observable production behavior, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted task shares
+  only test JSON response-body parsing while retaining all suite-level response
+  contracts.
+
+- **TASK-228 — Centralized owner-entry JSON response media-type recognition.**
+  Added the dependency-free `app/owner/entries/json-response-media-type.ts`
+  leaf as the sole owner of the narrow owner-entry JSON media-type predicate.
+  Publication-state and deletion response readers now share it while preserving
+  their status/redirect gates, exact document validation, bounded reads,
+  structured-error handling, and unconfirmed fallbacks. Literal consumer
+  expectations still independently cover accepted and rejected media types.
+  Regression coverage also pins the TypeScript test-module import boundary and
+  complete declaration-ownership matrix. Validation: independent review found
+  no P0/P1/P2 issues; integrated commit `3e22518`; focused checks passed;
+  full `npm run validate` passed build, typecheck, lint, repository checks, and
+  592/592 tests. No dependency, observable production behavior, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted task shares
+  only private-entry response field-name recognition while retaining consumer
+  response expectations.
+
+- **TASK-227 — Centralized repository migration inventory in tests.** Added the
+  Node-test-only `tests/helpers/migration-inventory.mjs` leaf as the sole owner
+  of `migrationInventory`. Both migration matrices now pass their repository
+  root to it while their provenance, fresh-install, upgrade, and
+  migration-application assertions remain local. The helper preserves the
+  precise regular-file name filter, `drizzle/` paths, lexical ordering, and
+  filesystem failure propagation; regression coverage also rejects matching
+  directories and symlinks. Validation: independent review found and the
+  implementation corrected one P2 symlink-exclusion evidence gap; final
+  re-review found no P0/P1/P2 issues; integrated commit `62f0d4a`; focused
+  checks passed 4/4; full `npm run validate` passed build, typecheck, lint,
+  repository checks, and 588/588 tests. No dependency, production behavior,
+  route, API, schema, migration, persistence, hosting, deployment, data,
+  access, or external state changed. Residual uncertainty: the next accepted
+  task shares only owner-entry JSON response media-type recognition while
+  retaining consumer response expectations.
+
+- **TASK-226 — Centralized public entry-kind display labels.** Added the
+  dependency-free `lib/entry-kind-label.ts` leaf as the sole owner of
+  `entryKindLabel`. The home page, permalink page, and metadata fallback now
+  share it while preserving every fixed kind label, note-label suppression,
+  titleless permalink heading, and titleless metadata text. The independent
+  literal public-contract oracle remains local. Regression coverage pins all
+  four labels, titleless metadata, consumer ownership, and the complete lint
+  matrix; the legacy `kindLabel` remains prohibited even inside the canonical
+  leaf. Validation: an ownership-edge correction was made before integration;
+  final independent re-review found no P0/P1/P2 issues; integrated commit
+  `1dcda7e`; focused checks passed 40/40; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 584/584 tests. No dependency,
+  observable production behavior, route, API, schema, migration, persistence,
+  hosting, deployment, data, access, or external state changed. Residual
+  uncertainty: the next accepted task shares only test migration inventory and
+  retains each matrix's own migration assertions.
+
+- **TASK-225 — Centralized owner-form ARIA description composition.** Added the
+  dependency-free `app/owner/form-field-description.ts` leaf as the sole owner
+  of `describedBy`. Both owner forms now import it while all eight existing
+  calls, labels, validation states, identifiers, and rendered ARIA semantics
+  remain unchanged. The helper preserves truthy filtering, order, repeats,
+  whitespace, single-space joining, and `undefined` with no description. Its
+  tests also pin help-before-error description order in both forms. Validation:
+  independent review found no P0/P1/P2 issues; integrated commit `1a078c7`;
+  focused checks passed 3/3; full `npm run validate` passed build, typecheck,
+  lint, repository checks, and 580/580 tests. No dependency, observable
+  production behavior, route, API, schema, migration, persistence, hosting,
+  deployment, data, access, or external state changed. Residual uncertainty:
+  the next accepted task shares only entry-kind presentation labels, while
+  retaining independent public contract expectations.
+
+- **TASK-224 — Centralized discarded response-body consumption in tests.**
+  Added the dependency-free `tests/helpers/response-body-consumption.mjs` leaf
+  as the sole owner of `consumeResponse`. The helper awaits exactly one
+  `response.text()` call, discards its fulfilled body, resolves to `undefined`,
+  and propagates its original rejection. Both consumers import it while all
+  seven surrounding lifecycle/status/authorization/persistence/privacy
+  assertions remain local. Regression coverage proves async completion,
+  exactly-once behavior, discarded output, rejection identity, ownership, and
+  the complete lint matrix. Validation: independent review found no P0/P1/P2
+  issues; integrated commit `b4f04ed`; focused checks passed 9/9; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  577/577 tests. No dependency, production behavior, route, API, schema,
+  migration, persistence, hosting, deployment, data, access, or external state
+  changed. Residual uncertainty: the next accepted task shares only the exact
+  owner-form ARIA description composition while preserving rendered semantics.
+
+- **TASK-223 — Centralized Vary-header tokenization in tests.** Added the
+  dependency-free `tests/helpers/vary-header-tokens.mjs` leaf as the sole owner
+  of Vary token splitting, trimming, lowercase normalization, ordering,
+  repetitions, empty segments, and the existing missing-header `[""]` result.
+  Three consumers now import it while retaining their status, content-type,
+  cache, location, CSP, membership, exact-once, and privacy assertions.
+  Regression coverage proves token behavior, ownership, legacy removal, and
+  full declaration ownership. Validation: independent review found and the
+  implementation corrected one P2 missing cross-family lint regression; final
+  re-review found no P0/P1/P2 issues; integrated commit `f0952b1`; focused
+  checks passed 21/21; full `npm run validate` passed build, typecheck, lint,
+  repository checks, and 573/573 tests. No dependency, production behavior,
+  route, API, schema, migration, persistence, hosting, deployment, data,
+  access, or external state changed. Residual uncertainty: the next accepted
+  task shares only discarded response-body consumption and preserves every
+  surrounding lifecycle assertion.
+
+- **TASK-222 — Centralized published-entry detail query assertions in tests.**
+  Added the dependency-free
+  `tests/helpers/published-entry-detail-query-contract.mjs` leaf as the sole
+  owner of exact recorded published-entry detail query assertions. Both
+  consumers now import it while their identifiers, response/document oracles,
+  and private canaries remain local. Regression coverage proves correct,
+  unrelated, empty, repeated, wrong-count, missing-predicate, wrong-order,
+  wrong-identifier binding, and non-published-state behavior, plus ownership
+  and the full lint matrix. Validation: independent review found and the
+  implementation corrected one P2 test gap so wrong-ID bindings and wrong-state
+  bindings are independently exercised; final re-review found no P0/P1/P2
+  issues; integrated commit `93972a8`; focused checks passed 19/19; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  570/570 tests. No dependency, production behavior, route, API, schema,
+  migration, persistence, hosting, deployment, data, access, or external state
+  changed. Residual uncertainty: the next accepted task shares only Vary-header
+  tokenization while preserving each response contract's own assertions.
+
+- **TASK-221 — Centralized API v1 JSON-link expectations in tests.** Added the
+  dependency-free `tests/helpers/api-v1-json-link.mjs` leaf as the sole owner
+  of a fresh literal `expectedApiV1JsonLink(rel, href)` expectation. The three
+  API v1 test consumers now import it while retaining their fixtures, ordering,
+  pagination/resource expectations, private canaries, and assertion ownership.
+  The production `jsonLink` builder remains private, byte-for-byte unchanged,
+  and independent. Regression coverage proves exact, empty/Unicode, fresh
+  expectations, consumer ownership, and full lint behavior. Validation:
+  independent review found and the implementation corrected one P2 lint
+  diagnostic that could have suggested importing private production code; final
+  re-review found no P0/P1/P2 issues; integrated commit `02a01ef`; focused
+  checks passed 22/22; full `npm run validate` passed build, typecheck, lint,
+  repository checks, and 565/565 tests. No dependency, production behavior,
+  route, API, schema, migration, persistence, hosting, deployment, data,
+  access, or external state changed. Residual uncertainty: the next accepted
+  task shares only identical query assertions, not test harnesses or response
+  oracles.
+
+- **TASK-220 — Centralized inline-style attribute extraction in tests.** Added
+  the dependency-free `tests/helpers/inline-style-attribute-values.mjs` leaf as
+  the sole owner of the existing whitespace-prefixed, case-insensitive,
+  double-quoted `style` attribute extraction. Both security-sensitive appearance
+  tests now import it while retaining their HTML fixtures, accent-resolution and
+  persistence assertions, and private canaries. Regression coverage proves
+  absent, ordered, repeated, uppercase, empty-value, `data-style`, and
+  single-quoted behavior plus ownership, imports, and the full
+  declaration-restriction matrix. Validation: independent review found no
+  P0/P1/P2 issues; integrated commit `16cec08`; focused checks passed 17/17;
+  full `npm run validate` passed build, typecheck, lint, repository checks, and
+  561/561 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task shares API v1 JSON-link
+  expectations without coupling them to the independent production builder.
+
+- **TASK-219 — Centralized repository-source reads in tests.** Added the
+  dependency-free Node-test `tests/helpers/repository-source.mjs` leaf as the
+  sole owner of `readRepositorySource(path)`. It preserves the existing
+  repository-root URL resolution and UTF-8 `readFile` behavior; all three
+  consumers now import it, including the assisted-runtime CSS read, while their
+  paths, transpilation, fixtures, assertions, and expected results remain
+  local. Regression coverage proves root, nested, UTF-8, dot-segment, and
+  missing-file behavior plus canonical ownership, imports, scoped legacy
+  `source` protection, and the full declaration-restriction matrix. Validation:
+  independent review found and the implementation corrected one P1 legacy-name
+  exception hole; final re-review found no P0/P1/P2 issues; integrated commit
+  `266140e`; focused checks passed 26/26; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 558/558 tests. No dependency,
+  production, route, API, schema, migration, persistence, hosting, deployment,
+  data, access, or external state changed. Residual uncertainty: the next
+  accepted task shares only inline-style attribute extraction while retaining
+  each security test's own HTML and canary assertions.
+
+- **TASK-218 — Centralized regular-expression match counting in tests.** Added
+  the dependency-free `tests/helpers/regular-expression-match-count.mjs` leaf
+  as the sole owner of `countMatches`. Two identical `matchAll` declarations
+  and one behaviorally equivalent `match` declaration now import it; all 21
+  existing call sites use fresh global regular-expression literals, preserving
+  their counts while the helper deliberately retains `matchAll` rejection for
+  non-global patterns. Regression coverage proves zero, single, multiple,
+  case-insensitive, zero-width, and rejection behavior, canonical ownership,
+  three consumer imports, and the full declaration-restriction matrix.
+  Validation: independent review found and the implementation corrected one P1
+  cross-family lint-test expectation; final re-review found no P0/P1/P2 issues;
+  integrated commit `897b085`; focused checks passed 34/34; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  554/554 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task shares only exact repository
+  source reads and retains each consumer's path and assertion ownership.
+
+- **TASK-217 — Centralized CSS clamp pixel calculations in tests.** Added the
+  dependency-free `tests/helpers/css-clamp-pixels.mjs` leaf as the sole owner
+  of `clampPixels`. Both visual-contract tests now import it, preserving the
+  exact nested min/max arithmetic and fixed 16-pixel rem assumption. Regression
+  coverage proves below-minimum, exact-minimum, fluid, exact-maximum, and
+  above-maximum results, canonical ownership, consumer imports, and the full
+  declaration-restriction matrix without weakening prior helper ownership.
+  Validation: independent review found and the implementation corrected one P1
+  arithmetic-test expectation error; final re-review found no P0/P1/P2 issues;
+  integrated commit `7778ed7`; focused checks passed 8/8; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  550/550 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task centralizes regular-expression
+  match counting while retaining every test's own patterns and counts.
+
+- **TASK-216 — Centralized ordered-text test assertions.** Added the
+  dependency-free `tests/helpers/ordered-text-assertion.mjs` leaf as the sole
+  owner of `assertOrdered`. Both hierarchy tests now import it, preserving the
+  exact sequential `indexOf` behavior, repeated-marker handling, empty-marker
+  handling, and assertion message. Regression coverage proves ordered, missing,
+  reversed, repeated, and empty markers, canonical ownership, consumer imports,
+  and the complete declaration-restriction matrix without weakening earlier
+  helper ownership. Validation: independent review found no P0/P1/P2 issues;
+  integrated commit `bc4d426`; focused checks passed 13/13; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  546/546 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task shares only two exact CSS clamp
+  calculations and retains the tests' separate visual contracts.
+
+- **TASK-215 — Centralized ESLint restricted-syntax diagnostic counting in
+  tests.** Added the dependency-free
+  `tests/helpers/eslint-restricted-syntax.mjs` leaf as the sole owner of
+  `restrictedSyntaxErrorCount(...results)`, which counts only messages whose
+  rule ID is `no-restricted-syntax`. Nine local `restrictedSyntaxErrors`
+  declarations and five equivalent inline counters across eleven existing test
+  modules now import and call it, while each module retains its own lint
+  fixtures, canonical allowances, cross-family restrictions, and expected
+  counts. Regression coverage proves zero, mixed, and batched diagnostics,
+  canonical ownership, consumer imports, legacy-name removal, and the complete
+  lint declaration matrix. Validation: independent review found no P0/P1/P2
+  issues; integrated commit `310546c`; focused checks passed 39/39; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  542/542 tests. No dependency, production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted task shares only the two exact
+  ordered-text assertions while retaining each consumer's page-specific
+  contract.
+
+- **TASK-214 — Centralized API v1 HEAD response-header assertions.** Added the
+  dependency-free `tests/helpers/api-v1-head-response.mjs` leaf as the sole
+  owner of exact five-header GET↔HEAD parity checks: content type, cache
+  control, Vary, Allow, and Location. The four API v1 consumers now import it.
+  The broader public-entry document comparison was deliberately renamed rather
+  than generalized, retaining its CSP check and all callers. Validation:
+  independent review found and corrected one P2 legacy-name exception gap;
+  final re-review found no P0/P1/P2 issues; integrated commit `2020a50`; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  539/539 tests. No production, route, API, schema, migration, persistence,
+  hosting, deployment, data, access, or external state changed. Residual
+  uncertainty: the next accepted task centralizes only the repeated ESLint
+  diagnostic counter while preserving each test's own fixtures and expected
+  results.
+
+- **TASK-213 — Centralized deletion acknowledgement fixtures.** Added the
+  dependency-free `tests/helpers/deletion-acknowledgement-contract.mjs` leaf
+  as the sole owner of the owner-entry-deletion receipt fixture; all four
+  consumers now import it while their test-specific assertion wrappers remain
+  local. The helper produces fresh root, data, attributes, arrays, and link
+  objects with the exact original collection/recovery HTML links and empty
+  actions. Validation: independent review found and corrected one P1 legacy
+  lint-exception hole and one P2 nested-freshness evidence gap; final
+  re-review found no P0/P1/P2 issues; integrated commit `e9f51c2`; focused
+  deletion checks passed 52/52; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 536/536 tests. No production, route,
+  API, schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted task shares
+  only exact API v1 HEAD parity headers; the broader public-entry document
+  assertion remains intentionally local.
+
+- **TASK-212 — Centralized RFC 6570 path-segment expansion.** Added the
+  dependency-free `lib/rfc6570-path-segment.ts` leaf as the sole owner of the
+  opaque identifier encoder. Four production consumers and three existing test
+  consumers now import it. The implementation retains RFC 6570 level-1 output:
+  unreserved ASCII only, uppercase UTF-8 percent triplets, slash and percent
+  double encoding, empty input, and the existing `URIError` for unpaired
+  surrogates. Regression coverage pins fixed reserved/Unicode/control output,
+  direct ownership/imports, and lint restrictions. Validation: independent
+  review found no P0/P1/P2 issues; integrated commit `92f3320`; focused
+  affected suites passed 113/113; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 533/533 tests. No metadata, route,
+  API, schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: unrelated metadata and direct
+  ID interpolation are not duplicate helper bodies and remain outside this
+  behavior-preserving slice.
+
+- **TASK-211 — Centralized custom-page text boundary primitives.** Added the
+  dependency-free `lib/custom-pages/page-text-boundaries.ts` leaf as the sole
+  owner of Unicode code-point length and the text/URL control-character
+  predicates. The HTML-fragment compiler and PageDocument validator now import
+  it; their control boundaries, limits, errors, rejection behavior, and URL
+  normalization are unchanged. The byte-identical inline visible-text
+  recursion is now the canonical `pageInlineVisibleText` export in the
+  existing PageDocument module, keeping the import graph acyclic. Regression
+  coverage includes Unicode scalars and lone surrogates, controls, nested
+  inline text, consumer behavior, and lint ownership. Validation: strict
+  independent review found and corrected one P1 legacy-name exemption hole;
+  final re-review found no P0/P1/P2 issues; integrated commit `9e7f45c`;
+  cumulative focused restriction checks passed 27/27; full `npm run validate`
+  passed build, typecheck, lint, repository checks, and 530/530 tests. No
+  route, API, schema, migration, persistence, hosting, deployment, data,
+  access, or external state changed. Residual uncertainty: the next accepted
+  slice centralizes only the exact RFC 6570 opaque path encoder; unrelated
+  metadata/link encoding behavior remains intentionally out of scope.
+
+- **TASK-210 — Centralized API v1 JSON response expectations in tests.** Added
+  the dependency-free `tests/helpers/api-v1-json-response.mjs` leaf as the
+  sole owner of `assertApiJson`; API v1 profile, root, and entry-detail tests
+  now import it. The helper preserves exact status, case-insensitive JSON
+  type, caller-selected cache control, absent Location, and case-insensitive
+  tokenized `Vary: Accept` checks. Its Vary parser remains private to this
+  narrow contract; stricter collection and public-entry expectations remain
+  local. Regression coverage proves positive and negative behavior, including
+  rejection of `Accept-Encoding` as an Accept substring. Validation:
+  independent review found and corrected one P2 token-boundary evidence gap;
+  final re-review found no P0/P1/P2 issues; integrated commit `7af2f57`;
+  focused checks passed 3/3; full `npm run validate` passed build, typecheck,
+  lint, repository checks, and 526/526 tests. No production, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: the next accepted production
+  slice centralizes custom-page text boundary primitives without changing any
+  validation policy.
+
+- **TASK-209 — Centralized test error-document expectations.** Added the
+  dependency-free `tests/helpers/error-document-contract.mjs` leaf as the
+  sole owner of `errorDocument`; all six API v1, public-entry, and private
+  deletion consumers now import it. The helper returns a fresh exact
+  `{ data: null, error: { code, message }, links: [] }` envelope without
+  changing codes or messages. Regression coverage proves envelope shape,
+  nested freshness, canonical ownership, imports, and the expanded cumulative
+  lint matrix. Validation: independent review found no P0/P1/P2 issues;
+  integrated commit `7a15615`; focused checks passed 44/44; cumulative helper
+  checks passed 20/20; full `npm run validate` passed build, typecheck, lint,
+  repository checks, and 523/523 tests. No production, route, API, schema,
+  migration, persistence, hosting, deployment, data, access, or external
+  state changed. Residual uncertainty: the next accepted slice centralizes
+  only the three exact API v1 JSON response assertions; stricter collection
+  and public-document variants remain intentionally local.
+
+- **TASK-208 — Centralized private JSON response contract assertions in
+  tests.** Added the dependency-free
+  `tests/helpers/private-json-response.mjs` leaf as the sole owner of
+  `assertPrivateJson`; all seven private response consumers now import it.
+  It retains exact status equality, the `application/json` boundary,
+  `cache-control: no-store`, and the case-sensitive `Accept` Vary token. Six
+  former case-insensitive content-type checks use the default; custom-page
+  preview explicitly uses the narrow strict option to retain its existing
+  case-sensitive behavior. Regression coverage proves both modes, ownership,
+  lint enforcement, and negative cache/Vary cases. Validation: independent
+  review found and corrected one P2 evidence gap; final re-review found no
+  P0/P1/P2 issues; integrated commit `596fe8a`; focused checks passed 3/3;
+  full `npm run validate` passed build, typecheck, lint, repository checks,
+  and 520/520 tests. No production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted slice centralizes only six
+  byte-identical error-document test constructors.
+
+- **TASK-207 — Centralized public-footer contract extraction in tests.** Added
+  the dependency-free `tests/helpers/public-footer-contract.mjs` leaf as the
+  sole owner of `publicFooter`; the four Technical, Privacy, accessibility,
+  and public-frame consumers now import it. Its deliberately narrow extractor
+  retains the first case-insensitive exact public-footer match and the empty
+  result for absent or nonmatching markup. Regression coverage proves output,
+  canonical ownership, consumer imports, and lint enforcement. The reusable
+  lint restriction now also rejects module-scope class declarations and named
+  class expressions for every protected helper name, closing the same-name
+  class gap rather than guarding only functions. Validation: independent
+  review found and corrected that P2 gap; final re-review found no P0/P1/P2
+  issues; integrated commit `2017202`; cumulative focused checks passed
+  14/14; full `npm run validate` passed build, typecheck, lint, repository
+  checks, and 517/517 tests. No production, route, API, schema, migration,
+  persistence, hosting, deployment, data, access, or external state changed.
+  Residual uncertainty: the next accepted slice shares only the existing
+  private JSON response test contract, preserving its deliberate
+  case-sensitive preview variant.
+
+- **TASK-206 — Centralized bounded Accept media-range parsing.** Added the
+  dependency-free `lib/accept-media-ranges.ts` leaf as the sole owner of the
+  `AcceptMediaRange` shape and bounded syntax parser: UTF-8 byte/range limits,
+  token and q-value grammar, quoted parameters, and quote-aware splitting.
+  The JSON-only v1 policy and unversioned public-entry HTML/JSON negotiation
+  now import it while preserving their deliberately distinct missing-header
+  defaults, specificity, exclusion, ordering, tie, malformed-header, `406`,
+  and pre-D1 behavior. Regression coverage proves the parser boundary,
+  canonical consumer ownership, and the composed lint restrictions for all
+  canonical helper families. Validation: independent review found no
+  P0/P1/P2 issues; integrated commit `bdbc83d`; focused checks passed 29/29;
+  full `npm run validate` passed build, typecheck, lint, repository checks,
+  and 514/514 tests. No API-contract, route, schema, migration, persistence,
+  hosting, deployment, data, access, or external state changed. Residual
+  uncertainty: the next accepted slice centralizes only the identical public
+  footer test extractor; it does not change public frame behavior or begin a
+  generic test utility framework.
+
+- **TASK-205 — Centralized test regular-expression literal escaping.** Added
+  the dependency-free, narrowly named
+  `tests/helpers/regular-expression-literal.mjs` as the canonical owner of
+  `escapeRegExp`; all four former `escapeRegExp` and four legacy
+  `escapeRegex` declarations now import it. The helper retains literal
+  matching for metacharacters, ordinary text, slashes, Unicode, hyphens, and
+  newlines. ESLint now rejects all plain, named-export, and default-export
+  top-level function, function-expression, and arrow redefinitions of either
+  spelling outside its canonical helper, without weakening the independent
+  record-shape restrictions. Regression coverage proves helper behavior,
+  canonical consumer imports, canonical allowances, cross-family rejection,
+  and every protected declaration form. Validation: independent review found
+  and corrected two P1 enforcement gaps and one P2 regression-evidence gap;
+  final re-review found no P0/P1/P2 issues; integrated commit `a75afa8`;
+  focused checks passed 3/3; full `npm run validate` passed build, typecheck,
+  lint, repository checks, and 510/510 tests. No production, route, API,
+  schema, migration, persistence, hosting, deployment, data, access, or
+  external state changed. Residual uncertainty: other duplicate helper
+  families remain separate bounded consolidation work; the next accepted
+  slice centralizes only shared Accept media-range parsing, not its distinct
+  response-negotiation policies.
+
+- **TASK-204 — Centralized exact record-shape boundary predicates.** Added the
+  dependency-free `lib/record-shape.ts` leaf as the sole owner of `isRecord`
+  and `hasExactKeys`; all eight and seven former declarations now import it.
+  The predicates retain their original type narrowing and own-enumerable key
+  semantics across owner response readers, custom-page parsing, and private
+  entry validation. A narrow data-URL test compiler resolves only parsed
+  `record-shape` imports, and ESLint rejects plain, named-export, and
+  default-export top-level redefinitions outside the canonical module.
+  Regression coverage proves behavior, consumer ownership, lint enforcement,
+  and import rewriting without changing comments or ordinary strings.
+  Validation: independent review found no P0/P1/P2 issues; integrated commit
+  `95d6460`; focused checks passed 4/4; full `npm run validate` passed build,
+  typecheck, lint, repository checks, and 507/507 tests. No route, API,
+  schema, migration, persistence, hosting, deployment, access, data, or
+  external state changed. Residual uncertainty: other audited duplicate helper
+  families require separate bounded consolidation tasks; framework route
+  exports are not generic helpers.
+
+- **TASK-203 — Co-located owner-shell CSS and established stylesheet
+  ownership.** `OwnerShell` and `OwnerAccessState` now use the adjacent
+  `OwnerShell.module.css`; its scoped rules own their shell, header,
+  navigation, frame, footer, access-state, and narrow-layout presentation.
+  `globals.css` retains theme tokens, resets, accessibility foundations, and
+  genuinely shared primitives. `AGENTS.md` now requires component-specific
+  CSS modules while reserving global or theme files for color/typography
+  tokens and cross-component foundations. Rendered and source regressions
+  preserve owner states, navigation, links, active state, 44-pixel controls,
+  safe areas, responsive layout, focus, reduced motion, and forced colors;
+  they also prove migrated selectors are absent from the global stylesheet.
+  Validation: independent review found no P0/P1/P2 issues; integrated commit
+  `b2bd90b`; direct checks passed 55 tests; full `npm run validate` passed
+  build, typecheck, lint, repository checks, and 503/503 tests. No route, API,
+  schema, migration, persistence, hosting, deployment, access, data, or
+  external state changed. Residual uncertainty: other feature CSS remains
+  global until separately migrated through focused tasks.
+
+- **TASK-202 — Extracted Technical page information sections into a focused
+  component.** Added the feature-local `TechnicalInformationSection`, which
+  owns the existing semantic section class plus its exact
+  `aria-labelledby`/`h2` relationship. `TechnicalPage` retains the four
+  explicit section IDs, headings, prose, order, native resource links, and
+  link classes. Rendered regression coverage locks the ordered sections, exact
+  content, accessibility associations, links, and link-free usage section;
+  source coverage confirms the narrow component composition. Validation:
+  independent review found no P0/P1/P2 issues; integrated commit `ad898e9`;
+  focused checks passed 4/4; full `npm run validate` passed build, typecheck,
+  lint, repository checks, and 503/503 tests. No route, API, CSS, schema,
+  migration, persistence, hosting, deployment, access, data, or external
+  state changed. Residual uncertainty: this remains a Technical-page boundary,
+  not a general information-page component.
+
+- **TASK-201 — Split page import controls into focused feature-owned
+  components.** Extracted narrow `PageImportTextField` and
+  `PageImportTextareaField` components within the page-import feature. They
+  own the existing labels, optional marker, help/error rendering, exact ARIA
+  associations, and busy handling, while `PageImportForm` retains submission,
+  strict response handling, local error clearing, focus ordering, status,
+  preview, and normalized JSON orchestration. The three source controls retain
+  their exact names, limits, required/optional state, rows, spell-check,
+  source styling, fragment help/error IDs, and help-before-error description
+  order. Focused regression coverage now pins those configurations and the
+  component boundary. Validation: independently reviewed with no P0/P1/P2
+  findings; integrated commit `bae6bf9`; focused checks passed 111/111; full
+  `npm run validate` passed build, typecheck, lint, repository checks, and
+  502/502 tests. No route, API, schema, migration, persistence, hosting,
+  deployment, access, data, or external state changed. Residual uncertainty:
+  future page-import fields should remain feature-local unless a distinct,
+  accepted shared-control need emerges.
+
+- **TASK-200 — Isolated owner browser requests from React components.** Added a
+  narrow shared browser transport plus feature-owned, transport-injectable
+  request functions for entry create/edit/publication/deletion, Identity save,
+  and page preview. All current owner React components now retain UI state,
+  strict response parsing, recovery, focus, and navigation while request
+  construction lives outside `.tsx` files. `AGENTS.md` now prohibits direct
+  component `fetch` calls, preferring small feature-owned request functions and
+  reserving classes for real state or lifecycle. The runtime boundary check
+  enforces the rule for every application `.tsx` file. New unit coverage proves
+  exact request shape, injected transport, DELETE redirect policy, response
+  identity, rejection propagation, and no retry; coupled journey assertions
+  remain intact. Validation: independent review found no P0/P1/P2 issues;
+  integrated `npm run validate` passed build, typecheck, lint, repository
+  checks, and 502/502 tests. No route, API, schema, migration, hosting,
+  deployment, access, data, or external state changed. Residual uncertainty:
+  future browser request work must follow the new feature-owned boundary.
+
+- **TASK-199 — Published contribution and feedback guidance.** Added root
+  `CONTRIBUTING.md` and a README discovery link. The guide asks exactly which
+  feedback is most useful, prioritizes vision clarity, landing-page messaging,
+  and potential contributors for ideas, and directs desired outcomes to GitHub
+  Issues. It makes clear that the maintainer is not soliciting third-party
+  source-code contributions or pull requests in this agentic coding workflow,
+  while welcoming concrete problem, constraint, evidence, and risk reports.
+  It also states that a future Aitta is planned for discussing ideas without
+  claiming that capability exists today. Independent review found and corrected
+  that future-Aitta wording. Validation: focused instruction, plan, license,
+  instance, runtime, migration, exact-text/link, and diff checks passed before
+  integration; integrated `npm run validate` passed build, strict typecheck,
+  lint, and 499/499 tests. No runtime, schema, migration, hosting, deployment,
+  external state, or sibling repository changed.
+
+- **TASK-197 — Made private update deletion a truthful JSON-first browser
+  API.** `DELETE /api/private/entries/{id}` remains bodyless and now performs
+  same-origin-before-owner authorization before bounded JSON `Accept`
+  negotiation. It returns an allowlisted, no-store `200` deletion
+  acknowledgement, structured no-store `401`/`403`/`404`/`406`/`500` errors,
+  and JSON `405 + Allow: PUT, DELETE` for unsupported methods. The owner client
+  sends `Accept: application/json`, refuses redirects, trusts only the exact
+  stable-ID acknowledgement, and navigates only to its fixed `/owner`
+  destination. Structured 4xx failures remain retryable; malformed, redirect,
+  network, and 5xx outcomes disable only Delete and expose saved-state recovery
+  without retrying. Public unknown parity now covers the current HTML and JSON
+  document, v1 detail, and v1 collection. Validation: integrated commit
+  `71f4b68`; feature candidate `ae0ec8eb919acc9cf01c366f36226b4da7c7756e`;
+  full validation passed 499/499, migration generation found no schema change,
+  production audit found zero vulnerabilities, and diff checks passed. An
+  independent Sol review found no P0/P1/P2 issue and independently passed 75
+  adjacent focused checks. Disposable browser evidence covers draft/published
+  cancellation and success, structured 422, 500/malformed/network recovery,
+  safe non-owner/missing-owner states, 320/390/1440, DPR-4, forced colors,
+  reduced motion, coarse touch, 44-pixel controls, visible focus, and a clean
+  console. No hosted Site, configuration, schema, migration, deployment, or
+  external state changed.
+
+- **TASK-183 — Restored reviewed engineering-policy publication.** An ordinary
+  authenticated fast-forward advanced `origin/develop` from `17d2878` to
+  `5612b6d8a1228230a2182bc8103a5c4b49e51716`. Read-back confirmed local
+  `develop` and `origin/develop` match at that SHA, both the reviewed
+  multi-agent-policy commit `ec96d4d8ce511f83913ecc7b7da219f2e40ac643` and
+  the completed TASK-184 guidance are ancestors, and the policy bytes match
+  (`AGENTS.md` SHA-256 `14f9ce…798dbf4`). No application, schema, migration,
+  Site, deployment, data, setting, access, DNS, domain, Hub, sibling, or
+  runtime state changed.
+
+- **TASK-196 — Made private publication-state mutation a truthful JSON-first
+  browser API.** `PUT /api/private/entries/{id}/state` now preserves
+  same-origin-before-owner authorization, then accepts only bounded JSON and
+  returns an allowlisted, no-store `owner-entry` resource on exact `200`, or
+  structured JSON for `400`, `404`, `406`, `415`, `422`, and unexpected `500`
+  outcomes. Unsupported methods always return JSON `405 + Allow: PUT`
+  independently of `Accept`. The publication client sends `Accept`, confirms
+  only the requested stable ID/state/action document, reloads after confirmed
+  transitions, keeps structured 4xx results correctable, and locks only the
+  lifecycle action for malformed, network, or unconfirmed results. Existing
+  delete bytes and recovery remain unchanged. Validation: integrated commits
+  `dd00477` and `d196f19`; full validation passed 493/493, migration generation
+  found no schema change, production audit found zero vulnerabilities, and
+  diff checks passed. Independent Sol review found no P0/P1/P2 issue and
+  independently passed 45 focused checks. Disposable compiled-Worker evidence
+  covers draft/published transition and public projection, cancellation,
+  422/500/malformed recovery, non-owner privacy, 320/390/1440, DPR-4,
+  forced colors, reduced motion, coarse touch, 44-pixel controls, no document
+  overflow, and a clean console. Safari's maximum zoom had no numeric reading,
+  and a sequential-Tab traversal was not claimed. No hosted, data,
+  configuration, schema, migration, deployment, or external state changed.
+
+- **TASK-165 — Made update deletion an explicit, recoverable owner action.** A
+  native confirmation now names the bounded update label and stable identifier;
+  cancellation sends no request. The retained owner-only `DELETE` operation
+  still returns its existing `204` and navigates to `/owner` on success. A safe
+  4xx leaves Delete available without asserting current state, while a 5xx or
+  network result disables only Delete and offers the fixed saved-state recovery
+  link. Edit and publication controls remain independently usable; there is no
+  retry, timer, background deletion, schema, protocol, or machine change.
+  Focused compiled-worker coverage proves draft/published deletion, denial,
+  public unknown parity, and private-canary exclusion. Validation: integrated
+  commit `26c204f0ac4a8c78f42c672af90ca12dde38ca4a`; full validation passed
+  475/475, migration generation found no schema change, production audit found
+  zero vulnerabilities, and diff checks passed. An independent Sol review
+  found no P0/P1/P2 issue and reran 35 focused checks. Disposable loopback
+  browser evidence covers draft/published cancellation and success, 400/500/
+  network recovery, non-owner privacy, 320/390/1440, literal Chrome 400% zoom
+  followed by reset to 100%, DPR-4, forced colors, reduced motion, coarse
+  touch, 44-pixel controls, visible focus, and a clean console. Residual
+  uncertainty: a complete sequential hardware-Tab traversal was not
+  enumerated. No hosted, data, configuration, schema, migration, deployment,
+  or external state changed.
+
+- **TASK-188 — Added a safe custom-page import preview.** The sole owner can
+  now use `/owner/pages/import` to submit one bounded page-body HTML fragment,
+  inspect its closed normalized `PageDocumentV1` JSON, and review the same
+  escaped React-rendered result before anything is stored or published. The
+  owner-only JSON endpoint checks same origin and authorization before
+  negotiation, media, body, parsing, or any dependency; it has fixed
+  non-reflective request, validation, compiler, authorization, and 405 errors.
+  The `parse5@8.0.1` compiler rejects full documents, malformed or foreign
+  trees, unsafe elements/attributes/URLs, unresolved or reserved fragments,
+  heading skips, and all bounded document overflows. It neither accesses D1
+  nor fetches or persists. The private workspace now includes the bounded
+  Pages destination while retaining the existing scrollable owner navigation.
+  Validation: integrated commit
+  `687419df35e742226372e9fa0af814d7dcfb9bec`; full validation passed
+  472/472, focused checks passed 143/143, migration generation found no schema
+  change, production audit found zero vulnerabilities, and diff checks passed.
+  Independent Sol security and accessibility reviews found no P0/P1/P2 issue.
+  Disposable local production-build evidence covers accepted and hostile
+  fragments, 422/500/malformed-response recovery, owner/non-owner/missing-owner
+  states, 320/390/1440, actual Chrome 400% zoom followed by reset to 100%,
+  DPR-4, forced colors, reduced motion, touch, 44-pixel controls, bounded
+  internal scrolling, and a clean console. Residual uncertainty: a complete
+  sequential hardware-Tab traversal was not enumerated. No hosting, data,
+  configuration, schema, migration, deployment, or external state changed.
+
+- **TASK-195 — Made private update editing a truthful JSON-first browser API.**
+  `PUT /api/private/entries/{id}` now retains same-origin-before-owner denial,
+  then accepts bounded JSON and returns an allowlisted, no-store `owner-entry`
+  document on exact `200`, or structured JSON for `400`, `404`, `406`, `415`,
+  `422`, and unexpected `500` outcomes. Every unsupported method now returns
+  JSON `405 + Allow: PUT, DELETE` independently of `Accept`; the existing
+  DELETE handler remains byte-compatible. The edit client confirms a success
+  only when the bounded response matches the submitted normalized kind, title,
+  body, destination, identifier, and publication state. Malformed success,
+  redirects, transport failure, and 5xx results lock retry as unconfirmed;
+  exact structured 4xx errors remain correctable and field-focused. Validation:
+  integrated commit `0dc14217db9ddcb970ecb7f108fa45ba2cddd27c`; full validation
+  passed 364/364, migration generation found no schema change, production audit
+  found zero vulnerabilities, and diff checks passed. An independent Sol
+  security/correctness review found no P0/P1/P2 issue and independently passed
+  111 focused checks. Disposable compiled-Worker evidence covers draft and
+  published edits, `422` retry, `500` and malformed-200 recovery locks,
+  non-owner/missing-owner safe states, 320/390/1440, forced colors, reduced
+  motion, coarse touch, 44-pixel targets, no overflow/private canaries, and a
+  clean console. Residual uncertainty: the Sites identity-header ingress
+  boundary remains separately blocked under TASK-190; no hosted, data,
+  configuration, schema, migration, deployment, or external state changed.
+
+- **TASK-194 — Made private draft creation a truthful JSON-first browser API.**
+  `POST /api/private/entries` now preserves same-origin-before-owner denial and
+  then accepts bounded JSON only, returning allowlisted, no-store JSON for
+  `201`, `400`, `406`, `415`, `422`, and every unsupported method's exact
+  `405 + Allow: POST`. Its private `owner-entry` resource uses safe relative
+  API/editor links and state-derived owner actions, forces the server-owned
+  draft/id/timestamp facts, needs neither profile nor canonical setup, and
+  exposes no request authority, owner, runtime, Hub, or public data. The new
+  draft client accepts only the exact bounded/domain-valid `201` document;
+  malformed success, redirect, malformed error, 5xx, or fetch failure locks
+  retry as unconfirmed, while an exact structured 4xx remains correctable.
+  Validation: integrated commit
+  `f8e9e32a35e0e4500c2312dc75f88ca04445c105`; full validation passed 341/341,
+  migration generation found no schema change, production audit found zero
+  vulnerabilities, and diff checks passed. Two independent Sol reviews found
+  no P0/P1/P2 issue after stream-bound, error-shape, and URL-parity corrections.
+  Disposable compiled-Worker evidence covers create/reload, 422 recovery, 500
+  and malformed-201 retry locks, 320/390/1440, DPR-4, forced colors, reduced
+  motion, coarse touch, 44-pixel targets, no overflow, and clean console.
+  Residual uncertainty: true 400% browser zoom, a complete native keyboard
+  sequence, and rendered private-canary cells remain unobserved; automated
+  canary/privacy coverage passes. No hosted, data, configuration, schema,
+  migration, deployment, or external state changed.
+
+- **TASK-193 — Negotiated current hypermedia JSON for published update documents.**
+  `GET` and `HEAD /entries/{id}` now retain their HTML default while returning a
+  current, allowlisted JSON document at the same unversioned canonical URI when
+  bounded `Accept` strictly prefers JSON. The product-specific Worker dispatch
+  has a bounded 4 KiB/16-range media parser, HTML tie/default behavior,
+  feature-local JSON/error types, JSON `406` for rejected GET requests,
+  empty-body matching HEAD responses, and `Vary: Accept`. It reserves and
+  marker-gates one internal route, strips every caller marker, rejects direct
+  internal access before Vinext/D1, clears only JSON-dispatch queries, and
+  leaves other routes/methods untouched. The existing `/api/v1` detail resource
+  is unchanged. Validation: integrated commit
+  `1c1ba1bc1f5c424d3d887ae1df11a10221b8e4c4`; focused compiled-worker/v1/CSP
+  checks passed 29/29, full validation passed 297/297, migration generation
+  found no schema change, production audit found zero vulnerabilities, and
+  diff checks passed. Independent security/integration review found no
+  P0/P1/P2 issue. Disposable compiled-Worker evidence covers HTML/JSON,
+  320/390/1440, DPR-4, forced colors, reduced motion, coarse touch, native
+  focus/navigation, no overflow/private canaries, and clean console. No hosted,
+  data, configuration, schema, migration, deployment, or external state
+  changed.
+
+- **TASK-182 — Reused common Aitta chrome in the private owner workspace.**
+  Authorized Home, Identity, new-update, and update-edit documents now share a
+  clear private owner header, exactly three native owner destinations with one
+  current-page state, one content frame, and a shared footer. Safe non-owner
+  and missing-owner states receive the same private context and fixed resource
+  links without an owner navigation, forms, private data, or D1 read;
+  signed-out requests retain their exact Sites redirect. The only extracted
+  primitive is the fixed, effect-free `AittaFooterResources` navigation for
+  Privacy, Technical, GitHub, Manifest, Profile, and Updates; fixed public
+  header/footer composition remains private to the public frame. Validation:
+  integrated commits `cff764a175acb3c0978699fc884dd429ba8d3152` and
+  evidence-only `e44721a25e6fb2d741ec31942a0328959f1fdcc2`; independent
+  integration review and 61 focused checks passed, while task validation passed
+  288/288, migration generation found no schema change, production audit found
+  zero vulnerabilities, and diff checks passed. Disposable compiled-Worker/D1
+  evidence covers owner/non-owner/missing-owner states across four owner paths
+  at 320/390/1440, DPR-4, forced colors, reduced motion, coarse touch, native
+  focus and navigation, signed-out redirect, 44-pixel controls, no overflow or
+  private canaries, and clean console logs. Residual uncertainty: a complete
+  sequential hardware-Tab traversal was not enumerated. No hosted, data,
+  configuration, schema, migration, deployment, or external state changed.
+
+- **TASK-177 — Unified the human-public Aitta frame.** Every configured and
+  unconfigured home, published update, Privacy, Technical, storage-unavailable,
+  and global/draft/unknown not-found document now uses one pure
+  `PublicPageFrame`: a fixed Aitta-home wordmark, `/owner` Manage destination
+  whose accessible name explicitly identifies local sole-owner administration,
+  and a shared footer with Privacy, Technical, GitHub, Manifest, Profile, and
+  Updates links. The owner-hideable Powered by attribution remains hidden only
+  when an already-loaded public profile selects it; profile-null static and
+  error states remain D1-independent and visibly attributed. Permalink-local
+  actions are a labelled navigation region, leaving one document footer. Public
+  routes no longer consult ChatGPT identity to construct header navigation.
+  Validation: integrated commits `91f4d9f`, `ae40b4d`, and evidence-only
+  `93b284d`; focused checks passed 85/85, full validation 282/282, migration
+  generation found no schema change, production audit found zero
+  vulnerabilities, and diff/instruction/plan checks passed. Independent Sol
+  review found no P0/P1/P2 issue. Disposable compiled-Worker/D1 evidence covers
+  12 public states at 320/390/1440, long unbroken content, attribution hiding,
+  DPR-4 reflow, forced colors, reduced motion, coarse touch, native header and
+  footer focus, 44-pixel targets, no overflow/canary leak, and clean console.
+  Residual uncertainty: a complete sequential hardware-Tab traversal was not
+  enumerated. No hosted, data, configuration, schema, migration, deployment,
+  or external state changed.
+
+- **TASK-192 — Made the private Identity mutation a truthful JSON-first browser API.** Normalized only `PUT /api/private/profile` and its authorized Identity client around an allowlisted `owner-profile` success resource, canonical navigation links, a verified-owner `edit` action, and structured no-store JSON errors. The route preserves same-origin-before-owner authorization, bounded JSON/media/Accept handling, `415`/`400`/`422`/`406`/`405` semantics, protected-setting secrecy, D1/public projection behavior, and browser dirty/recovery behavior; it is neither public discovery nor machine authority. Validation: independent Sol security/API re-review passed with no P0/P1/P2; focused compiled Worker tests passed 21/21; full validation passed 270/270; migration generation found no schema change; production dependency audit found zero vulnerabilities; exact compiled-browser evidence covered persisted save/two reloads, field-focused `422` retry, safe `500` recovery lock/reload, 320/390/1440 layout, and a clean console. Residual uncertainty: Sites ingress provenance remains separately blocked under TASK-190; the remaining private entry operations are intentionally deferred to TASK-194 through TASK-197.
+
+- **TASK-163 — Make each update kind self-explanatory while composing.**
+  Added concise kind-specific requirements to the existing body-first private
+  composer without unmounting or discarding body, title, or destination values
+  when the kind changes. Link now expresses and uses its native destination
+  requirement; leaving Link clears only stale Link-specific server feedback.
+  The selector derives its choices and guidance exhaustiveness from the
+  canonical entry-kind list. Existing create/edit payloads, authorization, D1,
+  draft privacy, public contracts, and navigation remain unchanged. Validation:
+  integrated commit `d88eccb`; full validation (249/249), focused composer
+  coverage, migration generation, production audit (zero vulnerabilities), and
+  diff checks pass. An independent Sol review found no P0/P1/P2 issue.
+  Disposable compiled-Worker evidence covers all kinds/value retention, native
+  empty-Link validation, long content, synthetic-500 recovery with one request
+  and retry lock, denial/canary states, 320/390/1440, DPR-4 reflow, forced
+  colors, reduced motion, coarse touch, visible focus, 44-pixel targets, no
+  overflow, and clean console logs. Residual uncertainty: the controller did
+  not complete a sequential hardware-Tab traversal. No schema, Site, hosted
+  data, setting, access, DNS, domain, Hub, sibling, `main`, deployment, or
+  external state changed.
+
+- **TASK-162 — Clarify restrained Identity appearance controls and preview.**
+  Reframed the existing constrained accent, update-spacing, and attribution
+  choices as compact secondary Appearance controls beside a transient owner
+  preview. The preview now makes saved, unsaved, and new state explicit while
+  showing both density choices and the optional attribution without creating a
+  theme system or new persisted field. Malformed historical accent preferences
+  never enter the native color control or an unrelated save: a safe fallback is
+  rendered, a deliberate replacement is required, and choosing that fallback
+  still remains visibly unsaved until it succeeds. Identity payloads, public
+  rendering, authorization, D1, API, and protocol contracts are unchanged.
+  Validation: integrated commit
+  `dc36059d6ef6420e58245c288120856c0491e8da`; full validation (249/249),
+  focused appearance coverage, migration generation, production audit (zero
+  vulnerabilities), and agent/plan/diff checks pass. Independent Sol review
+  found no remaining P0/P1/P2 issue. Disposable compiled-Worker browser
+  evidence covers saved, fresh, invalid-history, failure, denial, density,
+  attribution, 320/390/1440, DPR-4 reflow, forced colors, reduced motion,
+  coarse touch, focus, 44-pixel targets, no overflow/canary leakage, and clean
+  console logs. No schema, Site, hosted data, setting, access, DNS, domain,
+  Hub, sibling, `main`, deployment, or external state changed.
+
+- **TASK-181 — Reshape the prerelease v1 published-update detail resource.**
+  Replaced the unshipped `GET /api/v1/entries/{id}` grammar with the typed v1
+  entry document: explicit public attributes; ordered canonical JSON `self`,
+  collection, and schema-profile links; a human `text/html` alternate; and
+  empty anonymous actions. Root and manifest discovery now expose the same
+  RFC 6570 level-1 `{id}` template; concrete collection, self, and alternate
+  paths percent-encode every non-unreserved opaque-ID character. The JSON-only
+  route negotiates before D1, uses its single published-only query, preserves
+  draft/unpublished/deleted/malformed/unknown `404` parity, and retains safe
+  canonical authority, all four kinds, optional omissions, 60-second public
+  success caching, `Vary: Accept`, `HEAD`, JSON `405`, and canary exclusion.
+  Validation: integrated commit
+  `f61e0f645bceb1847a6a777daf2fe8e543b4e170`; full validation (240/240),
+  focused compiled-Worker/API/privacy/upgrade matrices, migration generation,
+  production audit (zero vulnerabilities), and diff checks pass. Two
+  independent Sol API/security reviews found no remaining P0/P1/P2 issue after
+  correcting URI-template encoding. No human route was added, so rendered
+  browser evidence is not applicable. No schema, Site, hosted data, setting,
+  access, DNS, domain, Hub, sibling, `main`, deployment, or external state
+  changed.
+
+- **TASK-180 — Reshape the prerelease v1 published-updates collection.**
+  Replaced the unshipped `GET /api/v1/entries` grammar with the public v1
+  collection document: explicit published-entry resources, bounded
+  `page`/`pageSize`, ordered canonical self/first/last/previous/next and item
+  links, empty anonymous actions, and `Vary: Accept, Authorization`. A single
+  `state = 'published'` count now derives `last` without scanning or exposing
+  drafts; an empty collection reports page 1. The route retains JSON-only
+  negotiation before D1, `HEAD`, JSON method/error responses, public 30-second
+  anonymous caching, canonical authority, deterministic order, all four update
+  kinds, and private/draft exclusion. Validation: integrated commit
+  `fa647eae5682f293ac6f213834d3a3062de66942`; focused compiled-Worker/API
+  matrices, full validation (235/235), migration generation, production audit
+  (zero vulnerabilities), and diff checks pass. An independent Sol API/security
+  review found no P0/P1/P2 issue. No human route was added, so rendered-browser
+  evidence is not applicable. No schema, Site, hosted data, setting, access,
+  DNS, domain, Hub, sibling, `main`, deployment, or external state changed.
+
+- **TASK-179 — Reshape the prerelease v1 public Aitta profile resource.**
+  Replaced the unshipped `GET /api/v1/site` grammar with the first public v1
+  profile document: explicit `data.id/type/attributes`, stable JSON `self` and
+  API-schema `profile` links, a truthful `text/html`
+  `social.aitta.profile` link to the canonical human Aitta document, and empty
+  anonymous actions. The v1 root and schema now advertise the profile resource;
+  the existing manifest profile endpoint remains unchanged. The route retains
+  public-without-Hub access, runtime-first then already-public stored canonical
+  fallback, optional-field omissions, account-type compatibility, bounded
+  JSON-only media negotiation before D1, `HEAD`, JSON `405`, no-store safe
+  failures, and exclusion of owner, identity, Hub, draft, and private canary
+  values. Validation: integrated commit `781228f33bea98d65e52d5245f5208e84babf173`;
+  focused compiled-Worker/API/public matrices, full validation (229/229),
+  migration generation, production audit (zero vulnerabilities), and diff
+  checks pass. An independent Sol API/security review found no P0/P1/P2 issue.
+  No schema, Site, hosted data, setting, access, DNS, domain, Hub, sibling,
+  `main`, deployment, or external state changed.
+
+- **TASK-161 — Make optional public Identity details compact and
+  discoverable.** Replaced the competing optional-detail fieldset with a native
+  `Optional public details` disclosure whose live 0–3 category count is closed
+  when empty and opens for saved details or validation errors. Location, website,
+  and up to eight labelled external links remain mounted while closed, preserving
+ their exact payload, API, authorization, D1, validation, and public projection
+ contracts. A closed invalid website now opens before native validity reporting
+ focuses it, and the native disclosure marker remains visible. Validation:
+ integrated commit `7c7dbcada18e7954432227a39cda7e41d1489e1d`; focused checks,
+ full validation (211/211), migration generation, production audit (zero
+ vulnerabilities), instruction/plan/diff gates, and independent final review
+ pass. The disposable compiled-Worker matrix covers absent, one-detail,
+ eight-link, long/unbroken, closed-invalid, non-owner, and missing-owner states
+ at 320/390/1440 pixels; actual save/reload at 390 preserves all three detail
+ categories; DPR-4 reflow, coarse touch, reduced motion, forced colors, focus,
+ no-overflow, 44-pixel targets, canary exclusion, and clean console are
+ recorded. Residual uncertainty: the in-app controller did not prove a
+ sequential hardware-Tab journey; native controls and focused keyboard/source
+ contracts cover that boundary. No Site, hosted data, setting, access, DNS,
+ domain, Hub, sibling, `main`, or deployment state changed.
+
+- **TASK-187 — Refine safe owner-managed website replacement.** Defined the
+  Aitta-specific, no-fork customization contract for eventually replacing an
+  owner's conventional website: closed versioned `PageDocument`, `SiteShell`,
+  and `SiteDesign` records; safe HTML/CSS import rather than raw rendering;
+  mandatory system destinations; bounded routes, metadata, accessibility,
+  publication, canonical, and privacy rules; and a separately approved
+  same-origin normalized-raster asset boundary. Arbitrary JavaScript, remote
+  fetch, generic plugins/templates, global unsafe styles, public uploads, and
+  a generic media framework remain excluded. The one immediately useful next
+  increment is TASK-188's owner-only HTML-fragment compilation and escaped
+  preview; persistence, publication/routing, shell/home, design/CSS, and asset
+  work remain deliberately unqueued until that evidence exists. Validation:
+  rebased and integrated commit `ac8d612`; production build and 86 focused
+  security, metadata, public, owner, and workflow tests pass; instruction
+  check passes at 31,400 bytes; plan and diff checks pass; and independent Sol
+  High architecture/security review found no P0/P1/P2 issue. No product code,
+  schema, migration, Site, deployment, data, setting, access, DNS, domain,
+  Hub, sibling, or hosted state changed.
+
+- **TASK-186 — Refine the next parallel-safe server-source boundary
+  improvement.** Mapped the current `app/api`, `lib`, and `db` module, import,
+  and test seams outside active feature ownership. The reviewed conclusion is
+  that no parallel-safe refactor is presently justified: generic private-write
+  handlers, public-resource helpers, repository abstractions, and parser splits
+  would either overlap active vertical slices or add framework without an
+  independently useful behavior. Validation: rebased and integrated commit
+  `86c98a8`, instruction and plan checks pass (15 active/79 completed at the
+  task gate), diff checks pass, and independent Sol High review found no
+  P0/P1/P2 issue. Residual uncertainty: reconsider only when a future accepted
+  slice demonstrates repeated behavior with exclusive ownership. No production
+  code, tests, contract, schema, migration, Worker/runtime, Site, deployment,
+  data, setting, access, DNS, domain, Hub, or sibling state changed.
+
+- **TASK-185 — Make compiled-Worker response-lifetime tests deterministic.**
+  Repaired the existing Miniflare acceptance harnesses so every dispatched
+  response is consumed, parsed, or explicitly cancelled before another request
+  can invalidate its stream. Existing upgrade-preservation, presentation-accent,
+  and public functional-matrix assertions and all product behavior remain
+  unchanged. Validation: integrated commit `f4c2e9a69cfb296b9c9f1b5be2ce70da8d46c670`;
+  the guarded affected suite passes 10/10, repeated guarded upgrade coverage
+  passes, and `MINIFLARE_ASSERT_BODIES_CONSUMED=true npm run validate` passes
+  211/211. Migration generation reports no schema change, `npm audit --omit=dev`
+  reports zero vulnerabilities, and diff checks pass. No application, API,
+  protocol, schema, migration, Worker/runtime, Site, deployment, data, setting,
+  access, DNS, domain, Hub, sibling, or hosted state changed.
+
+- **TASK-160 — Simplify basic private-draft composition and editing.** Made the
+  sole-owner new/edit update journey compact and body-first, with clear private
+  draft versus published context, one save action, native field-associated
+  validation, and a reload-before-retry lock for 5xx or interrupted saves.
+  Create/edit routes, all four stored kinds and values, API payloads, owner and
+  same-origin enforcement, D1 behavior, draft privacy, and public contracts are
+  unchanged. Validation: integrated commit `6c3a703`; focused composer,
+  accessibility, assisted-runtime, owner-security, and public-regression
+  coverage passes; the final guarded full repository validation passes 211/211,
+  migration generation reports no schema change, `npm audit --omit=dev` reports
+  zero vulnerabilities, and diff checks pass. Local preview evidence covers
+  new, draft, published, long/unbroken, validation, definitive and unconfirmed
+  failure/recovery, denial, private-canary, touch/focus, forced-colors,
+  reduced-motion, and reflow cases. Residual uncertainty: the browser
+  controller did not reproduce a sequential hardware-Tab journey, and rendered
+  evidence used a local development preview rather than a hosted checkpoint.
+  No Site, hosted data, setting, access, DNS, domain, Hub, sibling, `main`, or
+  deployment state changed.
+
+- **TASK-184 — Add maintainable TypeScript and React design guidance.** Added
+  a compact `Maintainable TypeScript and React design` section to the root
+  instructions, requiring small semantic units, feature-owned boundaries,
+  narrow explicit typed dependencies, proportionate handler/strategy use,
+  accessible focused React components, local effect isolation and tests, clear
+  naming, and small existing-platform-first changes. The guidance explicitly
+  preserves AittaSocial's direct Sites/D1 architecture and prohibition on
+  generic frameworks, plugin systems, DI containers, and premature extension
+  points. Validation: reviewed source commit `f064325`, independent Sol High
+  review reports no P0/P1/P2 findings, `npm run agents:check` passes at 31,039
+  bytes, plan and diff checks pass. Residual uncertainty: authenticated remote
+  publication of this and the earlier multi-agent-policy commit remains
+  TASK-183 after GitHub SSH authentication rejected the current key. No
+  application, schema, migration, Site, deployment, data, setting, access,
+  DNS, domain, Hub, sibling, or runtime state changed.
+
+- **TASK-175 — Publish a truthful public Privacy page.** Added a D1-independent `/privacy` page with neutral noindex metadata and factual coverage of public projections, private drafts, sole-owner authorization, protected settings, ChatGPT Sites processing boundaries, the absence of a current Hub connection or app-owned analytics, and bounded retention limits. The shared public footer now always exposes Privacy and the official GitHub source while the existing owner preference hides only the optional `Powered by AittaSocial` attribution; its owner-facing label now states that exact effect. Validation: focused commit `8db92b0582a7a4e741dce7314080df2a2a49f279`, integrated as `33ae47c`; focused suites pass 33/33, full validation passes 204/204, migration generation reports no schema change, production audit reports zero vulnerabilities, diff checks pass, and independent Sol High review reports no P0–P2 findings. Rendered local Worker evidence passes 320×568, 390×844, and 1440×900 with semantic hierarchy, no horizontal overflow, and at least 44-pixel footer targets. Residual uncertainty: a browser-controller 400-percent page-scale attempt was interrupted, so the record claims only the equivalent 320-pixel rendered reflow and source contracts, not literal browser zoom. No API, schema, authorization, Site, hosted data, setting, access, domain, Hub, sibling, `main`, or deployment state changed.
+
 Completed work moves here from [PLAN.md](PLAN.md). Each entry records decisive
 validation evidence and residual uncertainty. Unscheduled possibilities remain
 in [BACKLOG.md](BACKLOG.md) and are not capability claims.
 
 ## Unreleased
+
+- **TASK-178 — Establish the prerelease v1 integration root and JSON boundary.** Added the first versioned integration discovery surface: D1-independent `GET /api/v1`, `GET /api/v1/schema`, and a JSON-only unknown-v1 boundary. Root and schema return the exact ordered hypermedia documents, `HEAD` mirrors headers without a body, non-GET methods return structured JSON `405` with `Allow: GET, HEAD`, and unsupported/malformed/excessive `Accept` returns bounded no-store JSON `406`. The root reads and normalizes only the protected canonical URL—throwing owner or Hub getters cannot affect it or trigger D1—and never derives links from request hosts. The configured manifest now additively advertises `endpoints.api` while its existing profile and entry resource shapes remain unchanged for TASK-179–181. `/api/v2` remains absent. Validation: independently reviewed candidate `3c6b8bf3a57cd0dcf124489dd0f9738ba7c02810` integrated directly; focused compiled-Worker coverage passed, full validation passed 222/222, migration generation reported no schema change, production audit reported zero vulnerabilities, and agent/plan/diff gates passed. No schema, Site, deployment, data, setting, access, DNS, domain, Hub, sibling, `main`, or external state changed.
+
+- **TASK-170 — Finish Aitta terminology in the owner shell and home.** Replaced the remaining application-level `presence` wording in the owner shell, safe owner-access states, owner-home heading, readiness summary, and public preview action with concise `Aitta` language, including `Your Aitta`, `Aitta summary`, and `View Aitta`. Identity/profile wording, update-state and lifecycle actions, routes, internal identifiers, sole-owner authorization-before-D1 behavior, protected-setting secrecy, and public/private boundaries remain unchanged. Validation: integrated commit `74cff66` from independently reviewed candidate `27bfeeca983a27f4ce64496b7154008674e81e30`; focused owner coverage passed 67/67, full validation passed 213/213, migration generation reported no schema change, and production audit reported zero vulnerabilities. Disposable compiled-Worker/D1 browser evidence covered fresh, incomplete, zero/draft/published/many-update, unconfigured, non-owner, and missing-owner states at 320/390/1440 pixels plus DPR-4 320-CSS reflow equivalence, forced colors, reduced motion, focus, coarse-pointer navigation, 44-pixel targets, no overflow/private-canary leakage, and clean console logs. Residual uncertainty: no complete sequential-hardware-Tab traversal is claimed. No Site, hosted data, setting, access, domain, Hub, sibling, `main`, or deployment state changed.
+
+- **TASK-164 — Clarify per-update publish lifecycle.** Made Draft and Published explicit in the shared per-update action group on the owner dashboard and edit page, added update-specific native publish confirmation, and kept publish/unpublish recovery honest: definitive failures remain retryable while an ambiguous result locks only publication-state actions and offers a fresh saved-state check. Edit and Delete intentionally remain available because they are separate owner operations. Publishing exposes the existing public permalink; unpublishing restores a private draft, whose public result is indistinguishable from an unknown update. Existing API/state endpoint, authorization-before-D1, same-origin, D1 transitions, cache, metadata, protocol, and draft privacy contracts remain unchanged. Validation: integrated commit `39d35fa` from independently reviewed candidate `3bf56bbbfaa584a8e3f583ea2346fd6ea083fa9d`; focused lifecycle coverage passed 17/17, full validation passed 213/213, migration generation reported no schema change, production audit reported zero vulnerabilities, and diff/agent/plan checks passed. Disposable compiled-Worker/D1 browser evidence covered dashboard and edit rows at 320/390/1440, native confirmation cancellation/acceptance, normal publish/unpublish, 400 and 500 recovery, non-owner/missing-owner states, private canaries, DPR-4 320-CSS reflow equivalence, forced colors, reduced motion, keyboard focus, a coarse-pointer navigation, 44-pixel targets, no overflow, and clean console logs. Residual uncertainty: no complete sequential-hardware-Tab traversal is claimed. No Site, hosted data, setting, access, domain, Hub, sibling, `main`, or deployment state changed.
+
+- **TASK-189 — Refine JSON-first API, Sites trust, and machine access.** Recorded the complete endpoint inventory and protocol-1.0 compatibility boundary, selected a new JSON-only `/api/v2` successor rather than changing or HTML-negotiating `/api/v1`, and documented the closed hypermedia, error, media, pagination, cache, and relation conventions. Replaced the incompatible API-HTML rows with bounded v2 root/schema, profile, collection, and detail tasks; added a separately owner-approved Sites-ingress verification task; and scheduled one restricted, deployment-bound machine actor that can create only a private draft after its dependencies are complete. The machine path remains distinct from ChatGPT Sites browser identity, owner administration, and the Hub; no credential, migration, API route, secret, or hosted configuration was implemented. The recorded Sites boundary is intentionally unresolved pending explicit owner approval, authoritative origin inventory, and separate owner/non-owner sessions. Validation: integrated refinement commit `e796412` from reviewed candidate `295babab21ec9b5bdf59520622a1f7d0038bb978`; full validation passed 211/211, agent and plan checks passed (`AGENTS.md` 31,970 bytes), and diff checks passed. No external, hosted, deployment, data, setting, access, domain, Hub, sibling, or `main` mutation occurred.
+
+- **TASK-176 — Add a human technical-information path and concise resource navigation.** Added a D1-independent `/technical` HTML guide to the existing protocol 1.0 manifest, public profile, and published-update resources; made Technical a real public-footer destination; and replaced the visible `Profile JSON` and `Updates JSON` labels with the concise Manifest, Profile, and Updates links while retaining permanent Privacy and GitHub access. The neutral page uses the shared public information composition, native links, noindex metadata, fixed CSP, and no runtime, profile, owner, request-host, D1, or private value. Every machine URL, JSON projection, status, error, cache, canonical, published-only, draft-unknown, API, authorization, schema, and migration contract remains unchanged. Validation: focused commit and integrated `develop` commit `b20511106674fd1e52d05be643878617421b4a49`; focused suites pass 32/32, full validation passes 207/207, migration generation reports no schema change, production audit reports zero vulnerabilities, diff checks pass, and independent Sol High review reports no P0–P2 findings. Rendered local Worker evidence passes 320×568, 390×844, and 1440×900 plus a 1280-physical/320-CSS DPR4 reflow-equivalent row with no horizontal overflow or offscreen control, at least 44-by-44 CSS-pixel targets, a one-line compact header, logical landmarks/headings, and zero warning/error console entries. Residual uncertainty: this is explicit reflow equivalence rather than literal browser zoom, and the controller did not synthesize sequential Tab traversal; native focus/source contracts remain covered without overclaim. No Site, hosted data, setting, access, domain, Hub, sibling repository, `main`, or deployment state changed.
+
+- **TASK-159 — Simplify the core Identity save journey.** Reordered the authorized Identity editor around the four required profile fields and one server-derived readiness panel, added exact all-control saved-versus-unsaved comparison, truthful protected-runtime and saved-fallback explanations, field-associated definitive validation errors, and a locked reload-before-retry path for unconfirmed mutation results. Optional details, presentation controls, preview, exact payload, account-type compatibility, sole-owner and same-origin enforcement, D1 values, public projection, routes, schema, and APIs remain intact. Invalid stored canonical values—including whitespace-only legacy values—are omitted without being called saved, while only an exactly empty stored fallback is an exact empty baseline. Validation: focused commit `6351d54ee97bc7055b717e37fac2e2f591bb5805`, integrated as `e9ce492`; focused coverage passes 49/49, every repository gate passes with 201/201 tests, `npm run db:generate` reports no schema change, `npm audit --omit=dev` reports zero production vulnerabilities, and independent Sol High review reports PASS after reproducing the invalid/empty boundary. The compiled-Worker browser evidence covers 21 configured and six denial rows at 320/390/1440 pixels plus six final-source invalid-versus-empty rows, DPR-4 reflow equivalence, coarse touch, reduced motion, forced colors, focus, 44-pixel effective targets, definitive and unconfirmed failures, zero overflow/off-screen controls/private canaries, and clean console logs. Residual uncertainty: the in-app controller did not advance sequential Tab focus, so native controls, focus styling, source order, and automated keyboard contracts are recorded without claiming a hardware-Tab journey. No Site, hosted data, setting, access, DNS, domain, Hub, sibling repository, `main`, or deployment state changed.
+
+- **TASK-169 — Use Aitta consistently in configured public browsing and metadata.** Replaced application-level `presence` wording across the configured public frame, empty update stream, published permalink, generic not-found route, and public metadata fallbacks with the accepted `Aitta` vocabulary while retaining owner-authored profile and update content unchanged. Signed-out and signed-in management links now identify local sole-owner Aitta administration without claiming authorization; profile-absent historical updates use only the bounded `Independent Aitta` fallback. Routes, protocol 1.0 envelopes and identifiers, API allowlists, canonical construction, robots, CSP/cache policy, draft/unknown parity, internal names, schema, migrations, and runtime bindings remain unchanged. Validation: focused commit `fa711ab9770f66fdfe7ce423de13c545a1a924ce`, integrated as `1a9afe2`; focused coverage passes 58/58, every repository gate passes with 198/198 tests, `npm run db:generate` reports no schema change, `npm audit --omit=dev` reports zero production vulnerabilities, and independent Sol High review found no P0/P1/P2 issue. The exact-source rendered matrix covered configured signed-out/signed-in, empty, profile-absent, canonical-absent, published, draft, unknown, and global not-found states at 320 CSS pixels plus a physical-1280/DPR-4 reflow-equivalent row: all had zero overflow, off-screen controls, private-canary leakage, or console warnings/errors, and effective targets were at least 44 CSS pixels high. Residual uncertainty: the in-app controller focused native anchors with the reviewed visible focus ring but did not dispatch Enter navigation, so pointer navigation and native-href/accessibility contracts are recorded without claiming controller-observed keyboard activation. No Site, hosted data, setting, access, DNS, domain, Hub, sibling repository, `main`, or deployment state changed.
+
+- **TASK-168 — Introduce Aitta in the unconfigured setup and unavailable public journeys.** Replaced the fresh setup and storage-unavailable application copy with the accepted Aitta vocabulary while keeping `profile` as the optional outward presentation, retaining the exact owner/sign-in destinations, and making no Hub-connection claim. The 110-word reusable prompt preserves every private-first, reuse, sole-owner, D1, validation, review, and explicit publishing/access/domain approval boundary. Fresh and unavailable metadata are now distinct neutral `noindex, nofollow` projections with no canonical, sharing URL, image, request-host, runtime-canonical, error, or private-canary leak; a selective regression proves an entries-only D1 failure cannot combine an unavailable body with configured/indexable metadata. Validation: focused commit `e2197b4814698a05d290c128dc50f68366c4890b`, integrated as `ced4d3c`; focused metadata/privacy/prompt/CSP coverage passes 42/42, every repository gate passes with 197/197 tests, `npm run db:generate` reports no schema change, `npm audit --omit=dev` reports zero production vulnerabilities, and independent review reports no P0/P1/P2 finding. A disposable compiled-Worker browser row at 320 CSS pixels and a physical-1280/DPR-4 320-CSS-pixel reflow-equivalent row have zero horizontal overflow, contained selectable prompt content, at least 44-pixel effective controls, visible focus, and zero warning/error logs. Residual uncertainty: the in-app controller did not advance sequential Tab focus, so native focusability and source contracts are recorded without claiming a hardware-Tab journey; configured public terminology remains TASK-169. No Site, hosted data, setting, access, DNS, domain, schema, migration, protocol, API, Hub, sibling repository, `main`, or deployment state changed.
+
+- **TASK-171 — Refine the additive Aitta Network event model into versioned contract work.** A read-only inventory of exact AittaSocial `12aa6ca9a0c31abafc175936428e7a966a99107a`, AittaSocial Hub `438a9e8d075bb1a34296a9f3cb37d7039a1e7784`, and AittaDB `581fcd3074696b615756aab25b73c53b48998d09` established the immutable event foundation: each Aitta is authoritative for events it creates, while a remote reader treats the claimed authoring Aitta as untrusted until verified; type defines meaning and root/parent eligibility; an optional parent defines structure only; permitted parentless events identify derived threads whose structurally valid descendants may span Aittas; feeds are access-controlled projections; visibility and delivery remain independent of parent structure; unknown types stay safe without inferred type semantics; remote ancestry and descendant traversal are untrusted and bounded; and Hub may authorize, discover, and route without storing authoritative participant content. Authoring-Aitta and creation-time values remain untrusted remote assertions, and identifiers, namespaces, types, and timestamps never prove authorship. Existing protocol 1.0 entries remain unchanged and are not automatically projected. The Hub repository now owns the shared source-only foundation through its active TASK-170 envelope, TASK-171 types, TASK-172 thread, TASK-173 feed, and TASK-174 compatibility contracts. This refinement adds durable local governance, `ROADMAP-009`, one acceptance record, and exact reserved AittaSocial TASK-172 through TASK-174 conformance, local-note, and public-projection rows behind Hub TASK-174 rather than activating a duplicate local contract. Validation: agent-size, plan-graph, migration-drift, full repository, production-audit, and diff gates pass with 10 active and 71 completed local tasks. Residual uncertainty: the Hub contracts, event authenticity/key rotation, private audiences/revocation, delivery, feed ordering, retention, entry projection, safe remote egress, and AittaDB conditional writes remain unfinished; no product source, protocol, API, schema, migration, Site, deployment, data, setting, access, DNS, domain, Hub, AittaDB, or sibling repository changed.
+
+- **TASK-167 — Establish the canonical Aitta vocabulary in living repository guidance.** Defined `Aitta` as the branded owner-controlled AittaSocial application/local authority, distinguished an `Aitta deployment`, retained `profile` for optional outward presentation, and reserved `Hub connection` and `AittaSocial Hub` for their exact future network meanings. Living governance, setup, protocol explanation, security, privacy, deployment, development, presentation, reproducibility, upgrade, roadmap, and backlog guidance now share one exact first-use explanation, use bare deployment only for packaging/release/hosting operations, and explicitly state that the current POC has no Hub connection and public profile/published-update reads remain Hub-independent. Runtime labels are deliberately unchanged for TASK-168–170. Protocol 1.0 fields, values, envelopes, errors, routes, schema/migrations, internal identifiers, CHANGELOG, checkpoint, and all older acceptance records remain intact. Validation: focused commit `1d6e9a3aff2eb1f0d8ddea52a8f994059631d5aa`, integrated as `6a3559f`; post-rebase `npm run validate` passes 191/191, focused documentation/protocol coverage passes 33/33, `npm audit --omit=dev` reports zero vulnerabilities, the reviewed protocol digest is `4304e7e4551675d5c9e11d54814cbf4b83f7dc559970fa2a01b84964aa5889c0`, diff checks pass, and independent review found no P0/P1/P2 issue. Residual uncertainty: TASK-168, TASK-169, and TASK-170 own the setup/unavailable, configured public/metadata, and residual owner runtime terminology respectively; no product, protocol, schema, migration, Site, data, setting, access, DNS, domain, Hub, sibling repository, `main`, or deployment state changed.
+
+- **TASK-166 — Refine canonical Aitta terminology into bounded implementation work.** Accepted `Aitta` as the branded noun for the owner-controlled AittaSocial application and local authority, with `Aitta deployment`, `profile`, `Hub connection`, and `AittaSocial Hub` as distinct terms. A read-only inventory of exact `develop` base `14692334bbc0605a83bff82432bfe249ff6d30db` classified 445 current `presence` occurrences across runtime/content, tests, living guidance, compatibility surfaces, and historical evidence. The result preserves protocol 1.0 fields and values, routes, API envelopes and errors, schema/migrations, internal identifiers, and past evidence; it corrects the proposed first-use wording so the current POC does not claim a Hub connection. TASK-167 through TASK-170 now own living guidance, unconfigured/setup journeys, configured public browsing/metadata, and residual owner shell/home language, while TASK-159, TASK-160, TASK-164, and TASK-165 own terminology only in the UI slices they already change. Validation: agent-size, plan-graph, and diff checks pass with 11 active and 69 completed tasks; no product source, protocol, schema, migration, Site, data, setting, access, DNS, domain, Hub, or sibling repository changed. Residual uncertainty: the four implementation slices remain active and must supply their own rendered, privacy, metadata, and full-validation evidence.
+
+- **TASK-158 — Establish the shared AittaSocial visual vocabulary and compact owner home.** Replaced the authenticated owner's dark software-brand bar, desktop sidebar, wrapped phone grid, oversized serif hierarchy, and duplicated readiness panels with a neutral 60-pixel mobile-first frame, one non-wrapping three-destination route bar, one state-derived primary action, one concise next-step panel, compact status/count information, and the complete existing update list and lifecycle controls. Owner surfaces now reuse the bounded semantic surface, ink, line, focus, field, action, status, and 44-pixel-control vocabulary without introducing a generic component framework, runtime theme, setting, public/owner frame coupling, or authenticated ChatGPT-name display. Authorization still completes before D1 reads; public rendering, metadata, APIs, mutations, schema, configuration, routes, private-canary boundaries, and hosted state are unchanged. Validation: focused implementation commit `25104c030f9d2445209617c86c4fbdb5e05439e5`, integrated as `8fa9025`; the complete four-state by four-width browser matrix covers fresh/incomplete/complete, zero/one/many/long updates at 320/390/768/1440 pixels with equal client/scroll widths, one CTA, restrained headings, 44-pixel targets, focus, reduced motion, forced colors, DPR4 reflow equivalence, CSP/assets, clean console, and private-canary exclusion. A final 320/390 rerun proves the phone-footer safe-area correction; `npm run validate` passes 191/191, `npm run db:generate` reports no schema change, `npm audit --omit=dev` reports zero vulnerabilities, diff checks pass, and independent final review found no P0/P1/P2 issue. Residual uncertainty: the in-app controller could not reproduce hardware Tab/Enter or literal page zoom, and nonzero bottom-cutout emulation was unavailable; native-anchor/focus contracts, 320-CSS-pixel reflow, and the source-pinned safe-area rule remain decisive. No Site, hosted data, protected setting, access, DNS, domain, Hub, sibling repository, `main`, or deployment state changed.
+
+- **TASK-157 — Deploy and verify the mobile-first presence redesign.** Reused the one existing public Site, synchronized its configured source branch to exact owner-reviewed `main` commit `18fa16dc967d8502c17afb2bd3cc28518039a172`, saved exactly one new version, and deployed Site version 8 successfully at `https://aittasocial.jaakko-heusala.chatgpt.site` while keeping `https://jhh.aitta.social` canonical. Both roots now show the compact one-line frame, graphical Identity field and initials tile, concise About area, and identity-linked chronological stream; old editorial labels, numbering, and generic `Read update` treatment are absent. Protocol 1.0 manifest and APIs, published-only privacy, canonical metadata, no-store HTML, fixed CSP, same-origin assets, signed-out owner dispatch, read-only owner views, retired Hub 404s, native public click navigation, 320/390/1440 layout, first-viewport content, 44-pixel targets, focus, reduced motion, forced colors, and a clean app console pass. Public access revision 4, the one owner grant, protected-environment revision 5 and value-safe metadata, `DB`/null-R2 binding, active custom hostname, public semantic projections, and provider-visible status were unchanged; no content, D1, access, setting, DNS, domain, or Hub mutation was made. Validation: exact deployed source passes every gate with 191/191 tests, `npm run db:generate` reports no schema change, `npm audit --omit=dev` reports zero production vulnerabilities, the reviewed migration matches the 105-file package, and terminal deployment status is `succeeded`. Residual uncertainty: Sites exposes no byte-level hosted-D1 or DNS checksum, a separate hosted non-owner session was unavailable, and the in-app controller did not reproduce native Enter or coarse-pointer activation; exact-source authorization and TASK-156 Chrome coverage remain decisive for those boundaries. The later evidence/tracker commit was not deployed and reaches `main` only through owner review.
 
 - **TASK-156 — Prove the mobile-first public redesign across content and accessibility boundaries.** Completed the public-only responsive correction and rendered acceptance for the compact shared frame, graphical Identity/About area, identity-linked newest-first stream, and focused permalink. The complete 52-row local packaged-Worker matrix covered the representative home and permalink at seven requested viewports plus profileless, empty, one/many-update, maximum-content, missing-detail, eight-link, all-kind, attribution, published, draft, unknown, and not-found boundaries at 320×568 and 1440×900; an exact-final nine-row regression rerun covered the late compact setup and minimum-target corrections. Phone evidence shows the first source row and meaningful body content in the normal viewport, while wide streams remain bounded to 700 pixels; native keyboard/focus, 44-by-44-pixel targets, contrast, safe areas, 200-percent text, 400-percent reflow equivalence, reduced motion, forced colors, coarse touch, CSP/assets, APIs, metadata, cache, privacy canaries, and clean browser logs pass. Validation: focused rendered candidate `a3b5bcba319c24a7f924e9973af1a1a0a9187008`, integrated as `b835788eeed12b7947b6d3886deff831b4928e8a`; focused coverage passes 19/19, every repository gate passes with 191/191 tests, `npm run db:generate` reports no schema change, `npm audit --omit=dev` reports zero production vulnerabilities, and independent final review reports no remaining P0/P1/P2 finding. Residual uncertainty: deployment was prohibited, so the local fixture proves the exact Sites owner-dispatcher href/GET rather than a hosted authenticated lifecycle; literal browser page zoom was unavailable, so actual-320 and physical-1280/DPR-4 rows prove the required reflow equivalence; the exact-size phone comparison artifact comes from the source-equivalent focused candidate because the exact-final in-app capture excluded browser chrome, while exact-final geometry, selector reachability, a supplemental raster, and the exact-final desktop artifact are recorded explicitly. No public API, metadata, canonical, cache, CSP, schema, migration, runtime, owner-workspace, Site, hosted data, protected setting, access, DNS, domain, Hub, sibling repository, `main`, or deployment state changed.
 

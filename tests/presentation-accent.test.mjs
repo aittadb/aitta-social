@@ -5,6 +5,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { resolvePresentationAccent } from "../lib/presentation-accent.ts";
+import { inlineStyleAttributeValues } from "./helpers/inline-style-attribute-values.mjs";
 import {
   entryRow,
   FakeD1,
@@ -109,7 +110,7 @@ test("an accepted accent stays exact in D1 and protocol while every rendered sur
     headers: mutationHeaders("owner@example.test"),
     body: JSON.stringify(validProfileInput({ accentColor: "#FFFFFF" })),
   });
-  assert.equal(save.status, 204);
+  assert.equal(save.status, 200);
   assert.equal(db.profile.accent_color, "#ffffff");
   assert.equal(db.profile.account_type, "person");
   assert.equal(db.mutations.length, 1);
@@ -136,7 +137,7 @@ test("an accepted accent stays exact in D1 and protocol while every rendered sur
   assertRenderedAccent(permalink, "permalink-shell", expectedRendered);
   assertRenderedAccent(owner, "identity-draft-preview", expectedRendered);
   assert.match(owner, /name="accentColor"[^>]*value="#ffffff"/i);
-  assert.equal(site.data.presentation.accentColor, "#ffffff");
+  assert.equal(site.data.attributes.presentation.accentColor, "#ffffff");
   assert.deepEqual(db.profile, beforeReads);
   assert.equal(db.mutations.length, 1, "read, preview, and reload paths must not clobber D1");
 
@@ -187,40 +188,39 @@ test("a malformed persisted legacy accent survives reopen without reaching publi
   worker = await createCompiledWorker({ persistPath });
 
   const homeResponse = await worker.fetch("/", { headers: { accept: "text/html" } });
+  const home = await homeResponse.text();
   const permalinkResponse = await worker.fetch("/entries/poc-v0-published-update", {
     headers: { accept: "text/html" },
   });
+  const permalink = await permalinkResponse.text();
   const ownerResponse = await worker.fetch("/owner/profile", {
     headers: { accept: "text/html", ...ownerHeaders(OWNER_EMAIL) },
   });
+  const owner = await ownerResponse.text();
   const siteResponse = await worker.fetch("/api/v1/site");
-  const [home, permalink, owner, site] = await Promise.all([
-    homeResponse.text(),
-    permalinkResponse.text(),
-    ownerResponse.text(),
-    responseJson(siteResponse),
-  ]);
+  const site = await responseJson(siteResponse);
 
   assertRenderedAccent(home, "public-shell", DEFAULT_ACCENT);
   assertRenderedAccent(permalink, "permalink-shell", DEFAULT_ACCENT);
   assertRenderedAccent(owner, "identity-draft-preview", DEFAULT_ACCENT);
   assert.doesNotMatch(home, /accent-private-marker|attacker\.example/i);
   assert.doesNotMatch(permalink, /accent-private-marker|attacker\.example/i);
-  for (const style of styleAttributes(owner)) {
+  for (const style of inlineStyleAttributeValues(owner)) {
     assert.doesNotMatch(style, /accent-private-marker|attacker\.example/i);
   }
   assert.doesNotMatch(home, /POC_V0_DRAFT_(?:TITLE|BODY)_PRIVATE_CANARY/);
   assert.doesNotMatch(permalink, /POC_V0_DRAFT_(?:TITLE|BODY)_PRIVATE_CANARY/);
-  assert.equal(site.data.presentation.accentColor, legacyAccent);
+  assert.equal(site.data.attributes.presentation.accentColor, legacyAccent);
   assert.deepEqual(await storedAccent(worker.db), [{ accent_color: legacyAccent }]);
 });
 
 test("the owner preview uses the shared rule and forced colors stay browser-owned", async () => {
-  const [profileForm, publicPage, permalinkPage, css] = await Promise.all([
+  const [profileForm, publicPage, permalinkPage, css, ownerShellCss] = await Promise.all([
     readFile(new URL("../app/owner/profile/ProfileForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/entries/[id]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8"),
   ]);
 
   for (const source of [profileForm, publicPage, permalinkPage]) {
@@ -230,11 +230,14 @@ test("the owner preview uses the shared rule and forced colors stay browser-owne
   assert.doesNotMatch(`${profileForm}\n${css}`, /preview-accent|safePreviewAccent/);
   assert.match(css, /@media\s*\(forced-colors:\s*active\)/);
   assert.doesNotMatch(css, /forced-color-adjust:\s*none/i);
-  assert.equal(cssCustomProperty(css, "owner-panel"), LIGHT_SURFACES[0]);
+  assert.doesNotMatch(css, /--owner-(?:ink|panel)\s*:/);
   assert.equal(cssCustomProperty(css, "paper"), LIGHT_SURFACES[1]);
-  assert.match(css, /\.owner-shell\s*\{[^}]*background:\s*#f7f7f3/s);
+  assert.match(ownerShellCss, /\.shell\s*\{[^}]*background:\s*var\(--paper\)[^}]*color:\s*var\(--ink\)/s);
   assert.equal(cssCustomProperty(css, "paper-raised"), LIGHT_SURFACES[3]);
-  assert.match(css, /\.identity-draft-preview\s*\{[^}]*background:\s*#fff(?:;|\s|\})/s);
+  assert.match(css, /\.identity-draft-preview\s*\{[^}]*background:\s*var\(--paper-raised\)/s);
+  assert.match(css, /\.owner-next-step\s*\{[^}]*border:\s*1px solid var\(--line\)[^}]*border-radius:\s*6px[^}]*background:\s*var\(--paper-raised\)/s);
+  assert.match(css, /\.owner-summary\s*\{[^}]*border:\s*1px solid var\(--line\)[^}]*border-radius:\s*6px[^}]*background:\s*var\(--paper-raised\)/s);
+  assert.match(css, /\.owner-empty\s*\{[^}]*border:\s*1px solid var\(--line\)[^}]*border-radius:\s*6px[^}]*background:\s*var\(--paper-raised\)/s);
   assert.equal(cssCustomProperty(css, "accent-contrast"), LIGHT_SURFACES[4]);
   assert.match(css, /\.button\s*\{[^}]*color:\s*var\(--accent-contrast\)/s);
   assert.match(css, /\.public-shell, \.permalink-shell\s*\{[^}]*--paper:\s*#f3f0e8[^}]*--paper-raised:\s*#fffcf5/s);
@@ -250,10 +253,6 @@ function assertRenderedAccent(html, className, expected) {
     html,
     new RegExp(`class="[^"]*${className}[^"]*"[^>]*style="--accent:${expected}"`, "i"),
   );
-}
-
-function styleAttributes(html) {
-  return [...html.matchAll(/\sstyle="([^"]*)"/gi)].map((match) => match[1]);
 }
 
 function cssCustomProperty(css, name) {

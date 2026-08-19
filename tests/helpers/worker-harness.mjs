@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { register } from "node:module";
 
+export { responseJson } from "./json-response-body.mjs";
+
 const APP_ORIGIN = "https://account.example";
 const TEST_ENV_KEY = Symbol.for("aitta-social.test.cloudflare-env");
 const cloudflareWorkersStub = `data:text/javascript,${encodeURIComponent(`
@@ -107,6 +109,15 @@ class FakeStatement {
         candidate.id === id && (state === undefined || candidate.state === state),
       );
       return clone(entry ?? null);
+    }
+    if (
+      this.normalized.includes("select count(*) as count from entries") &&
+      this.normalized.includes("where state = ?")
+    ) {
+      const [state] = this.values;
+      return {
+        count: this.database.entries.filter((candidate) => candidate.state === state).length,
+      };
     }
     if (
       this.normalized.includes(" from entries") &&
@@ -300,12 +311,6 @@ export async function fetchApp(path, {
     waitUntil() {},
     passThroughOnException() {},
   });
-}
-
-export async function responseJson(response) {
-  const source = await response.text();
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/i);
-  return JSON.parse(source);
 }
 
 export function validProfileInput(overrides = {}) {

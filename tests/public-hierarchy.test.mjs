@@ -9,6 +9,7 @@ import {
   makeEnv,
   profileRow,
 } from "./helpers/worker-harness.mjs";
+import { assertOrdered } from "./helpers/ordered-text-assertion.mjs";
 
 const ownerCanary = "HIERARCHY_OWNER_PRIVATE_CANARY@example.test";
 const longVisibleHost = `${"public-presence-segment.".repeat(8)}example.test`;
@@ -92,7 +93,7 @@ test("the public presence leads with its compact graphical identity and About co
   const identityField = html.indexOf('class="presence-identity-field"', identity);
   const identityTile = html.indexOf('class="presence-identity-tile presence-identity-tile-profile"', identityField);
   const identityHeading = html.indexOf('id="account-name"', identity);
-  const details = html.indexOf('aria-label="Presence details"', identityHeading);
+  const details = html.indexOf('aria-label="Profile details"', identityHeading);
   const about = html.indexOf('id="about-title"', details);
   const updates = html.indexOf('id="entries-title"', about);
   const firstUpdate = html.indexOf(longUnbrokenCopy, updates);
@@ -113,9 +114,9 @@ test("the public presence leads with its compact graphical identity and About co
   assert.ok(firstUpdate < firstNoteTitle, "a note body must lead its optional quiet title");
   assert.ok(firstUpdate < technical);
 
-  assert.match(html, /<header[^>]+class="public-nav"[^>]+aria-label="Presence navigation"/i);
-  assert.match(html, /<nav[^>]+class="public-nav-actions"[^>]+aria-label="Presence actions"/i);
-  assert.match(html, /<aside[^>]+aria-label="Presence details"/i);
+  assert.match(html, /<header[^>]+class="public-nav"[^>]+aria-label="Aitta navigation"/i);
+  assert.match(html, /<nav[^>]+class="public-nav-actions"[^>]+aria-label="Aitta actions"/i);
+  assert.match(html, /<aside[^>]+aria-label="Profile details"/i);
   const detailRegion = html.slice(html.indexOf('<aside class="presence-details"'), html.indexOf("</aside>") + 8);
   assert.equal(detailRegion.match(/<p class="presence-detail">/g)?.length, 10);
   assert.equal(detailRegion.match(/rel="me noopener noreferrer"/g)?.length, 9);
@@ -223,7 +224,7 @@ test("the homepage and permalink use the same compact public frame and quiet res
     permalinkHtml,
     '<div class="permalink-body permalink-note-body">A useful public message.</div>',
     '<p class="permalink-note-title">First public note</p>',
-    '<footer class="permalink-footer">',
+    '<nav class="permalink-footer" aria-label="Update actions">',
   );
   assert.doesNotMatch(permalinkHtml, /<h1[^>]*>First public note<\/h1>/i);
 });
@@ -251,12 +252,12 @@ test("historical updates without a configured profile use a neutral source ident
   const permalinkHtml = await permalinkResponse.text();
   const update = homeHtml.match(/<article class="update-item update-kind-note">[\s\S]*?<\/article>/)?.[0];
   assert.ok(update);
-  assert.match(update, />Independent presence<\/span>/i);
+  assert.match(update, />Independent Aitta<\/span>/i);
   assert.doesNotMatch(update, />AittaSocial<\/span>|>Presence<\/span>/i);
-  assert.match(permalinkHtml, /<h1 class="visually-hidden">Update from Independent presence<\/h1>/i);
-  assert.match(permalinkHtml, /<span>Independent presence<\/span>/i);
+  assert.match(permalinkHtml, /<h1 class="visually-hidden">Update from Independent Aitta<\/h1>/i);
+  assert.match(permalinkHtml, /<span>Independent Aitta<\/span>/i);
   assert.doesNotMatch(permalinkHtml, /<h1[^>]*>Note<\/h1>|permalink-note-title/i);
-  assert.match(permalinkHtml, />Return to presence<\/a>/i);
+  assert.match(permalinkHtml, />Return to Aitta<\/a>/i);
   assert.match(permalinkHtml, />View as JSON<\/a>/i);
 });
 
@@ -276,7 +277,7 @@ test("an empty presence stays intentional without Hub", async () => {
   assert.match(html, />Updates<\/h2>/);
   assert.doesNotMatch(html, />Recent</);
   assert.match(html, /No published updates yet/);
-  assert.match(html, /presence already stands on its own/i);
+  assert.match(html, /This Aitta already stands on its own/i);
   assert.match(html, /aria-label="Technical resources"/);
   assert.doesNotMatch(html, /HIERARCHY_OWNER_PRIVATE_CANARY/i);
 });
@@ -290,7 +291,7 @@ test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom
   const focusDark = customProperty(css, "focus-dark");
   const focusLight = customProperty(css, "focus-light");
   const paper = customProperty(css, "paper");
-  const ownerInk = customProperty(css, "owner-ink");
+  const ownerInk = customProperty(css, "ink");
   assert.ok(contrastRatio(focusDark, paper) >= 3, "dark focus ring must contrast with the light public canvas");
   assert.ok(contrastRatio(focusLight, ownerInk) >= 3, "light focus halo must contrast with dark owner surfaces");
   assert.ok(contrastRatio(focusDark, focusLight) >= 3, "the two focus layers must remain distinguishable");
@@ -303,7 +304,10 @@ test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom
   assert.match(css, /\.presence-heading h1\s*\{[^}]*font-size:\s*1\.875rem[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.presence-summary\s*\{[^}]*white-space:\s*pre-wrap[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.presence-about-copy\s*\{[^}]*white-space:\s*pre-wrap[^}]*overflow-wrap:\s*anywhere/s);
-  assert.match(css, /\.public-nav-inner\s*\{[^}]*min-height:\s*60px[^}]*flex-wrap:\s*nowrap/s);
+  assert.match(
+    css,
+    /\.public-nav-inner,\s*:global\(\.public-nav-inner\)\s*\{[^}]*min-height:\s*60px[^}]*flex-wrap:\s*nowrap/s,
+  );
   assert.match(css, /\.public-frame, \.public-presence-column, \.public-wide-content, \.permalink-content\s*\{[^}]*max\(16px, env\(safe-area-inset-left\)\)[^}]*max\(16px, env\(safe-area-inset-right\)\)/s);
   assert.match(css, /\.presence-identity\s*\{[^}]*margin-top:\s*0\.5rem/s);
   assert.match(css, /\.presence-identity-field\s*\{[^}]*height:\s*96px[^}]*background:\s*var\(--accent\)/s);
@@ -332,21 +336,25 @@ test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom
 });
 
 test("normal form-control boundaries preserve non-text contrast", async () => {
-  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const [css, ownerShellCss] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8"),
+  ]);
   const sharedControls = css.match(
-    /\.field input, \.field textarea, \.field select\s*\{[^}]*border:\s*1px solid (#[0-9a-f]{6})[^}]*background:\s*(#[0-9a-f]{6}|#[0-9a-f]{3})[^}]*\}/is,
+    /\.field input, \.field textarea, \.field select\s*\{[^}]*border:\s*1px solid var\(--ink\)[^}]*background:\s*var\(--paper-raised\)[^}]*\}/is,
   );
-  const ownerCanvas = css.match(/\.owner-shell\s*\{[^}]*background:\s*(#[0-9a-f]{6})/i);
+  const ownerCanvas = ownerShellCss.match(/\.owner-shell\s*\{[^}]*background:\s*var\(--paper\)/i);
   assert.ok(sharedControls, "missing the shared input, textarea, and select colors");
   assert.ok(ownerCanvas, "missing the adjacent owner canvas color");
-  const controlBorder = sharedControls[1];
-  const controlFill = expandHex(sharedControls[2]);
+  const controlBorder = customProperty(css, "ink");
+  const controlFill = customProperty(css, "paper-raised");
+  const ownerFill = customProperty(css, "paper");
   assert.ok(
     contrastRatio(controlBorder, controlFill) >= 3,
     "shared control border must contrast with its fill",
   );
   assert.ok(
-    contrastRatio(controlBorder, ownerCanvas[1]) >= 3,
+    contrastRatio(controlBorder, ownerFill) >= 3,
     "shared control border must contrast with the owner canvas",
   );
   assert.doesNotMatch(sharedControls[0], /\b(?:filter|opacity|forced-color-adjust)\s*:/i);
@@ -373,25 +381,10 @@ test("normal form-control boundaries preserve non-text contrast", async () => {
   );
 });
 
-function assertOrdered(source, ...needles) {
-  let position = -1;
-  for (const needle of needles) {
-    const nextPosition = source.indexOf(needle, position + 1);
-    assert.ok(nextPosition > position, `${needle} must follow the preceding semantic element`);
-    position = nextPosition;
-  }
-}
-
 function customProperty(css, name) {
   const match = css.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, "i"));
   assert.ok(match, `missing --${name} color token`);
   return match[1];
-}
-
-function expandHex(value) {
-  return value.length === 4
-    ? `#${value.slice(1).split("").map((channel) => channel.repeat(2)).join("")}`
-    : value;
 }
 
 function contrastRatio(first, second) {

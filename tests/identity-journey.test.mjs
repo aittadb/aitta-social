@@ -25,9 +25,10 @@ test("authorized owner sees truthful fresh, incomplete, and complete Identity st
     assert.equal(response.status, 200);
     const html = await response.text();
     assert.match(html, /Complete your identity/i);
-    assert.match(html, /Start with the public Identity/i);
+    assert.match(html, /Set up your public Identity/i);
     assert.match(html, /Identity readiness:[\s\S]{0,40}0[\s\S]{0,40}of 2 requirements complete/i);
     assert.match(html, /href="\/owner\/profile"[^>]*>Set up identity</i);
+    assert.equal((html.match(/<a class="button"/gi) ?? []).length, 1);
     assert.doesNotMatch(html, /Identity is saved|Ready for public review/i);
   });
 
@@ -43,11 +44,11 @@ test("authorized owner sees truthful fresh, incomplete, and complete Identity st
     assert.equal(response.status, 200);
     const html = await response.text();
     assert.match(html, /Complete your identity/i);
-    assert.match(html, /A protected canonical URL is ready/i);
+    assert.match(html, /A protected public URL is ready/i);
     assert.match(html, /Identity readiness:[\s\S]{0,40}1[\s\S]{0,40}of 2 requirements complete/i);
     assert.match(html, /https:\/\/runtime\.example\/presence/i);
     assert.doesNotMatch(html, /https:\/\/RUNTIME\.example\/presence\/\/\//);
-    assert.doesNotMatch(html, /identity-readiness-complete|Ready for public review/i);
+    assert.doesNotMatch(html, /owner-next-step-complete|Ready for public review/i);
   });
 
   await t.test("stored profile without an effective canonical URL is incomplete", async () => {
@@ -63,8 +64,9 @@ test("authorized owner sees truthful fresh, incomplete, and complete Identity st
     assert.equal(response.status, 200);
     const html = await response.text();
     assert.match(html, /Finish your identity/i);
-    assert.match(html, /Canonical URL needed/i);
+    assert.match(html, /Add a canonical URL/i);
     assert.match(html, /Identity readiness:[\s\S]{0,40}1[\s\S]{0,40}of 2 requirements complete/i);
+    assert.equal((html.match(/<a class="button"/gi) ?? []).length, 1);
     assert.doesNotMatch(html, /hostile\.example|hostile-request\.example|also-not-valid|Effective public URL/i);
   });
 
@@ -75,12 +77,12 @@ test("authorized owner sees truthful fresh, incomplete, and complete Identity st
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /Ready for public review/i);
+    assert.match(html, /Create your first update/i);
     assert.match(html, /Identity readiness:[\s\S]{0,40}2[\s\S]{0,40}of 2 requirements complete/i);
-    assert.match(html, /Effective public URL/i);
+    assert.match(html, /Public URL/i);
     assert.match(html, /https:\/\/account\.example/i);
-    assert.match(html, /href="\/"[^>]*>Preview public presence</i);
-    assert.equal((html.match(/>Preview public presence<\/a>/gi) ?? []).length, 1);
+    assert.match(html, /href="\/owner\/entries\/new"[^>]*>Create first draft</i);
+    assert.equal((html.match(/<a class="button"/gi) ?? []).length, 1);
   });
 });
 
@@ -96,8 +98,8 @@ test("Identity form shows normalized effective canonical precedence without expo
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /Identity is complete/i);
-    assert.match(html, /normalized canonical URL from protected runtime settings/i);
+    assert.match(html, /Identity is ready/i);
+    assert.match(html, /protected runtime URL is currently public for this Aitta/i);
     assert.match(html, /Effective public URL/i);
     assert.match(html, /https:\/\/runtime\.example\/public/i);
     assert.doesNotMatch(html, /RUNTIME\.example|public\/\/\//);
@@ -116,7 +118,7 @@ test("Identity form shows normalized effective canonical precedence without expo
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /canonical URL saved with this Identity/i);
+    assert.match(html, /uses the saved canonical fallback shown below/i);
     assert.match(html, /https:\/\/stored\.example\/presence/i);
     assert.doesNotMatch(html, new RegExp(protectedCanary, "i"));
     assert.doesNotMatch(html, /user:|token=/i);
@@ -159,8 +161,11 @@ test("Identity authorization and validation fail closed without mutation or priv
       headers: mutationHeaders(ownerEmail),
       body: JSON.stringify(validProfileInput({ canonicalUrl: "https://user:secret@example.com/?private=yes" })),
     });
-    assert.equal(response.status, 400);
-    assert.deepEqual(Object.keys((await responseJson(response)).details), ["canonicalUrl"]);
+    assert.equal(response.status, 422);
+    assert.deepEqual(
+      (await responseJson(response)).error.fields.map(({ name }) => name),
+      ["canonicalUrl"],
+    );
     assert.equal(db.profile, null);
     assert.equal(db.mutations.length, 0);
   });
@@ -186,7 +191,7 @@ test("successful save resumes from D1 and never derives public Identity from Cha
     headers: mutationHeaders(ownerEmail),
     body: JSON.stringify(input),
   });
-  assert.equal(save.status, 204);
+  assert.equal(save.status, 200);
 
   const profileResponse = await fetchApp("/owner/profile", {
     env,
@@ -223,15 +228,59 @@ test("Identity journey remains semantic, touch-friendly, responsive, and motion-
   assert.match(formSource, /<aside[\s\S]*aria-labelledby="identity-draft-preview-title"/);
   assert.match(formSource, /<progress[^>]+max="4"[^>]+value=\{requiredCount\(preview\)\}/);
   assert.match(formSource, /onInput=\{updatePreview\}/);
-  assert.match(formSource, /temporary until Save identity succeeds/i);
+  assert.match(formSource, /This local count is not server readiness/);
+  assert.match(formSource, /temporary until Save Identity succeeds/i);
+  assert.match(formSource, /Server-saved readiness/);
+  assert.match(formSource, /Unsaved changes/);
+  assert.match(formSource, /server-saved readiness above has not changed/i);
+  assert.match(formSource, /setDirty\(!sameFormValues\(formValues\(form\), loadedValues\) \|\| replacementSelected\)/);
+  assert.match(formSource, /function initialFormValues\([\s\S]*displayName:[\s\S]*shortDescription:[\s\S]*introduction:[\s\S]*location:[\s\S]*website:[\s\S]*externalLinks:[\s\S]*canonicalUrl:[\s\S]*accentColor:[\s\S]*density:[\s\S]*hidePoweredBy:/);
+  assert.match(formSource, /function sameFormValues\([\s\S]*Object\.keys\(left\)\.every/);
+  assert.match(formSource, /function saveStateClass\([\s\S]*defaultSource === "stored" \|\| defaultSource === "empty"[\s\S]*\? "identity-save-state-saved"[\s\S]*: "identity-save-state-loaded"/);
+  assert.match(formSource, /Saved profile loaded without its invalid URL/);
+  assert.match(formSource, /saved canonical fallback is invalid and was omitted from this form/i);
+  assert.doesNotMatch(formSource, /setDirty\(true\)/);
+  assert.match(formSource, /<fieldset className="identity-primary-fields">[\s\S]*Display name[\s\S]*Short description[\s\S]*Canonical URL fallback[\s\S]*Longer introduction[\s\S]*<\/fieldset>/);
+  assert.match(formSource, /<details[\s\S]*className="identity-optional-details"[\s\S]*open=\{optionalDetailsOpen\}[\s\S]*onToggle=\{\(event\) => setOptionalDetailsOpen\(event\.currentTarget\.open\)\}/);
+  assert.match(formSource, /<summary>[\s\S]*Optional public details[\s\S]*\{optionalDetailsCount\} of 3 added[\s\S]*<\/summary>/);
+  assert.match(formSource, /function hasOptionalPublicDetails\([\s\S]*optionalPublicDetailsCount\(values\) > 0/);
+  assert.match(formSource, /useState\(\(\) => hasOptionalPublicDetails\(loadedValues\)\)/);
+  assert.match(formSource, /const optionalDetailsRef = useRef<HTMLDetailsElement>\(null\)/);
+  assert.match(formSource, /function openOptionalDetails\(\)[\s\S]*details && !details\.open\) details\.open = true[\s\S]*setOptionalDetailsOpen\(true\)/);
+  assert.match(formSource, /onInvalidCapture=\{revealInvalidOptionalDetails\}/);
+  assert.match(formSource, /function revealInvalidOptionalDetails\([\s\S]*optionalPublicDetailFieldNames\.has\(fieldName\)[\s\S]*openOptionalDetails\(\)/);
+  assert.match(formSource, /hasInvalidOptionalPublicDetails\(formElement\)[\s\S]*openOptionalDetails\(\)[\s\S]*formElement\.reportValidity\(\)/);
+  assert.match(formSource, /hasOptionalPublicDetailErrors\(result\.fieldErrors\)[\s\S]*openOptionalDetails\(\)/);
+  assert.match(formSource, /<details[\s\S]*<Field label="Location \(optional\)"[\s\S]*<Field label="Website \(optional\)"[\s\S]*name="externalLinks"/);
+  assert.match(formSource, /formElement\.checkValidity\(\)[\s\S]*formElement\.reportValidity\(\)/);
+  assert.match(formSource, /aria-invalid=\{Boolean\(error\) \|\| undefined\}/);
+  assert.match(formSource, /<FieldError name=\{name\} error=\{error\} \/>/);
+  assert.match(formSource, /disabled=\{busy \|\| recoveryRequired\}/);
+  assert.match(formSource, /Reload saved Identity before retrying/);
+  assert.doesNotMatch(formSource, /setTimeout|setInterval|navigator\.sendBeacon/);
   assert.doesNotMatch(formSource, /localStorage|sessionStorage|accountType|next\/link/i);
-  assert.match(shellSource, />Your presence<\/OwnerNavLink>[\s\S]*>Identity<\/OwnerNavLink>[\s\S]*>New update<\/OwnerNavLink>[\s\S]*>View public presence ↗<\/a>/);
+  assert.match(shellSource, /import styles from "\.\/OwnerShell\.module\.css"/);
+  assert.match(shellSource, /<a className=\{styles\.wordmark\} href="\/owner" aria-label="Manage this Aitta’s local sole-owner administration">Manage<\/a>/);
+  assert.match(shellSource, /<a className=\{styles\.publicLink\} href="\/">View Aitta<\/a>/);
+  assert.match(shellSource, /<OwnerNavLink href="\/owner"[^>]*>Home<\/OwnerNavLink>[\s\S]*<OwnerNavLink href="\/owner\/profile"[^>]*>Identity<\/OwnerNavLink>[\s\S]*<OwnerNavLink href="\/owner\/entries\/new"[^>]*>New update<\/OwnerNavLink>/);
+  assert.match(shellSource, /<footer className=\{styles\.footer\}>[\s\S]*Private owner workspace[\s\S]*<AittaFooterResources \/>[\s\S]*Sign out/);
+  assert.doesNotMatch(shellSource, /\{displayName\}|owner-user|owner-session|Owner workspace/);
   assert.doesNotMatch(shellSource, /Advanced|owner\/hub|Provisional Hub setup|current:\s*[^;]*"hub"/);
   assert.match(css, /\.field input, \.field textarea, \.field select\s*\{[^}]*min-height:\s*48px/s);
   assert.match(css, /\.text-link\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(css, /\.owner-wordmark, \.owner-session a\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-readiness[^}]*grid-template-columns:\s*1fr/);
-  assert.match(css, /\.owner-content\s*\{\s*width:\s*calc\(100% - 28px\)/);
+  assert.match(css, /\.identity-save-state\s*\{[^}]*grid-template-columns:[^}]*border:\s*1px solid var\(--line\)/s);
+  assert.match(css, /\.field input\[aria-invalid="true"\][^}]*border-color:\s*var\(--danger\)/s);
+  assert.match(css, /\.identity-draft-preview > \*\s*\{[^}]*min-width:\s*0/s);
+  assert.match(css, /\.identity-draft-preview p:not\(\.eyebrow\)\s*\{[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.identity-optional-details summary\s*\{[^}]*min-height:\s*var\(--control-min-height\)/s);
+  assert.match(css, /\.identity-optional-details summary::marker\s*\{[^}]*color:\s*var\(--accent\)/s);
+  assert.match(css, /\.identity-optional-details-content > p\s*\{[^}]*overflow-wrap:\s*anywhere/s);
+  const ownerShellCss = await readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8");
+  assert.match(ownerShellCss, /\.wordmark, \.publicLink, \.footer a\s*\{[^}]*min-height:\s*var\(--control-min-height\)/s);
+  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-readiness[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.content\s*\{[^}]*width:\s*calc\(100% - 28px\)/);
+  assert.match(ownerShellCss, /\.navigation\s*\{[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
+  assert.doesNotMatch(ownerShellCss, /\.navigation[^}]*flex-wrap:\s*wrap|grid-template-columns:\s*220px/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /:focus-visible\s*\{[^}]*outline:/s);
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);

@@ -12,6 +12,7 @@ import {
   validEntryInput,
   validProfileInput,
 } from "./helpers/worker-harness.mjs";
+import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
 
 const ownerEmail = "owner@example.com";
 
@@ -28,7 +29,7 @@ test("owner matching is normalized and remains a sole-owner server decision", as
       },
       body: JSON.stringify(validProfileInput()),
     });
-    assert.equal(response.status, 204);
+    assert.equal(response.status, 200);
     assert.equal(db.mutations.length, 1);
   });
 
@@ -44,9 +45,7 @@ test("owner matching is normalized and remains a sole-owner server decision", as
       body: JSON.stringify(validProfileInput()),
     });
     assert.equal(response.status, 403);
-    assert.deepEqual(await responseJson(response), {
-      error: "Administrative access denied.",
-    });
+    assert.equal((await responseJson(response)).error.code, "authorization_denied");
   });
 
   await t.test("a signed-out visitor is challenged without leaking the owner", async () => {
@@ -112,7 +111,9 @@ test("the same-origin gate runs before identity and database mutation", async (t
       });
       assert.equal(response.status, 403);
       assert.deepEqual(await responseJson(response), {
-        error: "Same-origin request required.",
+        data: null,
+        error: { code: "authorization_denied", message: "The request is not allowed." },
+        links: [],
       });
       assert.equal(db.mutations.length, 0);
     });
@@ -130,7 +131,7 @@ test("the same-origin gate runs before identity and database mutation", async (t
       },
       body: JSON.stringify(validProfileInput()),
     });
-    assert.equal(response.status, 204);
+    assert.equal(response.status, 200);
     assert.equal(db.mutations.length, 1);
   });
 });
@@ -154,9 +155,11 @@ test("every private mutation route independently rejects a non-owner before touc
         ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
       });
       assert.equal(response.status, 403);
-      assert.deepEqual(await responseJson(response), {
-        error: "Administrative access denied.",
-      });
+      if (path === "/api/private/profile" || path === "/api/private/entries" || method === "DELETE") {
+        assert.equal((await responseJson(response)).error.code, "authorization_denied");
+      } else if (method === "PUT") {
+        assert.equal((await responseJson(response)).error.code, "authorization_denied");
+      }
       assert.equal(db.mutations.length, 0);
     });
   }
@@ -174,9 +177,7 @@ test("category-neutral profile writes still require configured sole-owner author
       body: JSON.stringify(input),
     });
     assert.equal(response.status, 403);
-    assert.deepEqual(await responseJson(response), {
-      error: "Administrative access denied.",
-    });
+    assert.equal((await responseJson(response)).error.code, "authorization_denied");
     assert.equal(db.mutations.length, 0);
   });
 
@@ -206,7 +207,7 @@ test("authorized draft lifecycle stays private until publish and supports every 
   });
   assert.equal(createdResponse.status, 201);
   const created = (await responseJson(createdResponse)).data;
-  assert.equal(created.state, "draft");
+  assert.equal(created.attributes.state, "draft");
   assert.match(created.id, /^[0-9a-f-]{36}$/i);
 
   const hiddenDetail = await fetchApp(`/api/v1/entries/${created.id}`, { env });
@@ -225,7 +226,7 @@ test("authorized draft lifecycle stays private until publish and supports every 
     })),
   });
   assert.equal(editedResponse.status, 200);
-  assert.equal((await responseJson(editedResponse)).data.title, "Ready to publish");
+  assert.equal((await responseJson(editedResponse)).data.attributes.title, "Ready to publish");
 
   const publishedResponse = await fetchApp(`/api/private/entries/${created.id}/state`, {
     env,
@@ -235,14 +236,14 @@ test("authorized draft lifecycle stays private until publish and supports every 
   });
   assert.equal(publishedResponse.status, 200);
   const published = (await responseJson(publishedResponse)).data;
-  assert.equal(published.state, "published");
-  assert.ok(published.publishedAt);
+  assert.equal(published.attributes.state, "published");
+  assert.ok(published.attributes.publishedAt);
 
   const visibleDetail = await fetchApp(`/api/v1/entries/${created.id}`, { env });
   assert.equal(visibleDetail.status, 200);
   const visibleResource = (await responseJson(visibleDetail)).data;
-  assert.equal(visibleResource.title, "Ready to publish");
-  assert.equal("state" in visibleResource, false);
+  assert.equal(visibleResource.attributes.title, "Ready to publish");
+  assert.equal("state" in visibleResource.attributes, false);
 
   const unpublishResponse = await fetchApp(`/api/private/entries/${created.id}/state`, {
     env,
@@ -251,7 +252,7 @@ test("authorized draft lifecycle stays private until publish and supports every 
     body: JSON.stringify({ state: "draft" }),
   });
   assert.equal(unpublishResponse.status, 200);
-  assert.equal((await responseJson(unpublishResponse)).data.state, "draft");
+  assert.equal((await responseJson(unpublishResponse)).data.attributes.state, "draft");
   assert.equal((await fetchApp(`/api/v1/entries/${created.id}`, { env })).status, 404);
 
   const deleteResponse = await fetchApp(`/api/private/entries/${created.id}`, {
@@ -259,8 +260,8 @@ test("authorized draft lifecycle stays private until publish and supports every 
     method: "DELETE",
     headers: mutationHeaders(ownerEmail),
   });
-  assert.equal(deleteResponse.status, 204);
-  assert.equal(await deleteResponse.text(), "");
+  assert.equal(deleteResponse.status, 200);
+  assert.deepEqual(await responseJson(deleteResponse), deletionAcknowledgement(created.id));
   assert.equal(db.entries.length, 0);
 
   for (const [method, path, body] of [
@@ -275,7 +276,14 @@ test("authorized draft lifecycle stays private until publish and supports every 
       ...(body === undefined ? {} : { body }),
     });
     assert.equal(missingResponse.status, 404);
-    assert.deepEqual(await responseJson(missingResponse), { error: "Update not found." });
+    const missingDocument = await responseJson(missingResponse);
+    if (method === "PUT" || method === "DELETE") {
+      assert.deepEqual(missingDocument, {
+        data: null,
+        error: { code: "entry_not_found", message: "Update not found." },
+        links: [],
+      });
+    }
   }
 });
 
@@ -290,8 +298,8 @@ test("write boundaries require JSON, bound request size, and valid entry state",
       headers: { ...ownerHeaders(ownerEmail), origin: "https://account.example", "content-type": "text/plain" },
       body: JSON.stringify(validEntryInput()),
     });
-    assert.equal(response.status, 400);
-    assert.match(JSON.stringify(await responseJson(response)), /Content-Type must be application\/json/);
+    assert.equal(response.status, 415);
+    assert.equal((await responseJson(response)).error.code, "unsupported_media_type");
   });
 
   await t.test("oversized request", async () => {
@@ -312,7 +320,7 @@ test("write boundaries require JSON, bound request size, and valid entry state",
       headers: mutationHeaders(ownerEmail),
       body: JSON.stringify({ state: "scheduled" }),
     });
-    assert.equal(response.status, 400);
+    assert.equal(response.status, 422);
     assert.match(JSON.stringify(await responseJson(response)), /draft or published/);
   });
 });

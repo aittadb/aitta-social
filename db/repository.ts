@@ -107,6 +107,15 @@ export async function listPublishedEntries(
   };
 }
 
+/** Counts only rows selected by the public published-entry predicate. */
+export async function countPublishedEntries(): Promise<number> {
+  const row = await getD1()
+    .prepare("SELECT COUNT(*) AS count FROM entries WHERE state = ?")
+    .bind("published")
+    .first<{ count: number }>();
+  return row?.count ?? 0;
+}
+
 export async function listAllEntries(limit = 200): Promise<Entry[]> {
   const result = await getD1()
     .prepare(`${ENTRY_SELECT} ORDER BY updated_at DESC, id DESC LIMIT ?`)

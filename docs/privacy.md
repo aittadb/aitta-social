@@ -1,22 +1,31 @@
 # Privacy and data handling
 
-One AittaSocial deployment controls and stores one presence's data. It uses its
-own ChatGPT Sites D1 database. It does not send Identity or update content to a
-shared content store and does not require another database or external
-infrastructure.
+One independently controlled top-level Aitta controls and stores its own data
+in its Aitta deployment's ChatGPT Sites D1 database. One deployment currently
+runs one Aitta; a profile is only its optional outward identity presentation.
+It does not send Identity or update content to a shared content store and does
+not require another database or external infrastructure.
 
-This document describes the POC's application-level behavior. A deployment
-owner remains responsible for the content they publish, their public privacy
+This document describes the POC's application-level behavior. The Aitta owner
+remains responsible for the content they publish, their public privacy
 notice where one is required, and any hosting-level retention or access-policy
 choices.
 
+The application publishes a concise, D1-independent human summary at
+`/privacy`. It describes only these current application facts, uses neutral
+`noindex, nofollow` metadata without a canonical or image URL, and does not
+invent an operator identity, contact address, consent system, or legal promise.
+The shared public footer links to it. That footer's GitHub source link remains
+available when the owner hides only the restrained `Powered by AittaSocial`
+attribution.
+
 ## Data inventory
 
-### Stored in the deployment's D1 database
+### Stored in the Aitta-owned D1 database
 
 - one profile: display name, the protocol 1.0 `accountType` compatibility
   value, short description, longer introduction, optional location, optional
-  website, optional external links, canonical deployment URL, constrained
+  website, optional external links, canonical Aitta deployment URL, constrained
   visual preferences, and the choice to show the restrained AittaSocial
   attribution and official project links;
 - entries: stable identifier, kind, optional title, body, optional destination
@@ -25,7 +34,7 @@ choices.
 - only minimal local configuration that genuinely needs durable storage.
 
 Drafts and unpublished entries are private owner content. D1 is authoritative;
-browser storage and Hub are not content stores for this deployment.
+browser storage and Hub are not content stores for this Aitta.
 
 ### Processed from protected runtime settings
 
@@ -52,7 +61,12 @@ The ChatGPT Sites dispatcher may provide an authenticated user identifier,
 email, and optional name to server code. The POC needs only the authenticated
 email to decide whether the current request belongs to the configured local
 owner. It does not store that identity in D1, publish it, use it as the public
-Identity, or present it as AittaSocial network authentication or membership.
+Identity, or present it as Aitta Network authentication or membership.
+
+Current Sites Sign in with ChatGPT is therefore only local sole-owner
+administration. Future member identity or Aitta Network membership requires an
+exact accepted Hub contract and is not a current data flow; see
+[strategy.md](strategy.md) for the future direction.
 
 The POC does not implement its own OAuth/OIDC provider, identity database,
 passwords, or authentication cookies. Dispatch-owned sign-in behavior and
@@ -100,9 +114,11 @@ identity, authorization, capability, or network membership. It remains in
 exact public allowlists; no other private profile or storage field becomes
 public with it.
 
-Publishing makes content retrievable without sign-in through HTML and JSON.
-Unpublishing removes it from this deployment's public surfaces but cannot
-recall copies already cached, indexed, quoted, or saved elsewhere.
+An update is a **Draft** while only its owner can read it. Publishing makes it
+**Published** and retrievable without sign-in through HTML and JSON.
+Unpublishing returns the same update to a private draft and removes it from this
+Aitta's public surfaces, but cannot recall copies already cached, indexed,
+quoted, or saved elsewhere.
 
 The same limit applies to public document metadata. Handler-produced HTML is
 served with `no-store` and `must-revalidate`, but a search, sharing, or preview
@@ -128,13 +144,28 @@ Owner-only surfaces may display profile drafts, draft entries, and local editing
 state retrieved from D1. A signed-in
 visitor who is not the configured owner receives none of that data.
 
-The Identity form's live preview and required-field count are transient
-in-memory browser state. They are not written to D1, browser storage, Hub, a
+The Identity form's dirty marker, live preview, required-field count, and
+field-error presentation are transient in-memory browser state. They are not
+authoritative readiness and are not written to D1, browser storage, Hub, a
 runtime setting, or a new onboarding record. Reloading before a successful save
 discards them. Fresh, incomplete, and complete readiness is recalculated on the
 server after authorization from the current profile and effective canonical
 URL; it reveals no owner email, ChatGPT identity, credential, draft, Hub
 response, or request-host value.
+
+The saved/unsaved marker compares the current required, optional,
+presentation, and attribution controls with their exact initially rendered
+values. Returning every control to that baseline clears the marker; the first
+input event is not treated as permanent evidence of a change. When an invalid
+stored canonical fallback is replaced in the form by the normalized effective
+runtime URL, the authorized view identifies that substitution and the
+consequence of saving rather than calling it saved profile data. When no valid
+runtime substitution exists, the authorized view leaves the canonical field
+empty, identifies the invalid saved fallback as omitted, and treats the form as
+loaded with an omission rather than an exact saved-state match. It never sends
+the raw invalid stored or runtime value. Only an exactly empty saved fallback
+remains an exact empty form baseline; whitespace-only stored input is omitted
+and identified as invalid.
 
 The owner dashboard's first-update state is likewise a server-rendered view of
 the existing D1 profile and entries after authorization. Bounded prepared
@@ -157,12 +188,14 @@ confirmation is shown to the owner before public visibility changes, and the
 assistant must wait for explicit owner approval before accepting it.
 
 An interrupted response or 5xx response does not establish whether the D1 write
-committed. The interface retains current inputs and provides a saved-state
-reload link; the owner checks the server-rendered state before retrying. This
-recovery behavior stores no extra history. Identity saves replace the current
-profile, draft edits replace the current draft text, unpublishing retains the
-same entry privately, and deletion remains subject to hosting-provider backup
-limitations.
+committed. The Identity interface retains current inputs, disables another save
+from that uncertain page, and provides a saved-state reload link; the owner
+checks the server-rendered state before retrying. A definitive 4xx instead
+associates recognized safe validation details with the relevant fields and
+does not expose a recovery link. This recovery behavior stores no extra
+history. Identity saves replace the current profile, draft edits replace the
+current draft text, unpublishing retains the same entry privately, and deletion
+remains subject to hosting-provider backup limitations.
 
 Missing owner configuration disables all writes. It does not cause the
 application to reveal expected configuration values or treat the first visitor
@@ -170,20 +203,22 @@ as an owner.
 
 ## Optional Hub verification data
 
-Public presence reads do not contact Hub. The POC has no configured Hub
-destination, deployment credential, outbound probe, registration, or connection
-data flow.
+Public profile reads do not contact Hub. The POC has no Hub connection,
+configured Hub destination, deployment credential, outbound probe,
+registration, or connection data flow.
 
 The public verification manifest exposes the configured challenge when present.
-That challenge is intentionally public, proves only control of this deployment
-at verification time, and is not personal identity, authentication, a network
-session, or a trusted connection. Hub's own future registration, directory,
-credentials, and sessions require a separately accepted contract and are not
-this deployment's current data handling.
+That challenge is intentionally public, proves only control of this Aitta
+deployment at verification time, and is not personal identity, authentication,
+a network session, or a trusted connection. Hub's own future registration,
+directory, credentials, and sessions require a separately accepted contract and
+are not this Aitta's current data handling. Current protocol 1.0 entries remain
+publishing resources rather than Network events or app roots; no event or
+member data is stored or sent by this POC.
 
 ## Retention and control
 
-- Profile changes replace the stored profile values used by this deployment.
+- Profile changes replace the stored profile values used by this Aitta.
 - Drafts remain in D1 until published or deleted by the owner.
 - Unpublishing retains an entry privately in D1 while removing it from all
   public queries.
@@ -207,7 +242,7 @@ followers, messages, comments, reactions, notifications, payments, advertising,
 analytics subsystem, or media store in this POC.
 
 Supported Identity, link, update, accent, density, and attribution changes are
-stored through explicit owner-authorized controls in deployment-owned D1. They
+stored through explicit owner-authorized controls in Aitta-owned D1. They
 survive reload without a repository fork or Hub connection. The template prompt
 adds no generic settings record, browser storage, remote asset, or new outbound
 data flow.

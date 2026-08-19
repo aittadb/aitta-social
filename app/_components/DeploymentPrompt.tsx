@@ -1,11 +1,18 @@
 import deploymentPromptContent from "@/content/deployment-prompt.json";
+import styles from "./DeploymentPrompt.module.css";
 
-export function DeploymentPrompt() {
+export function DeploymentPrompt({
+  label,
+  help,
+}: {
+  label: string;
+  help: string;
+}) {
   return (
-    <div className="deployment-prompt">
-      <label htmlFor="deployment-prompt">Prompt for ChatGPT</label>
+    <div className={styles['deployment-prompt']}>
+      <label htmlFor="deployment-prompt">{label}</label>
       <p id="deployment-prompt-help">
-        Select and copy this prompt into ChatGPT to create your own presence.
+        {help}
       </p>
       <textarea
         id="deployment-prompt"

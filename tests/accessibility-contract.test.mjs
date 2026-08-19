@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { publicFooter } from "./helpers/public-footer-contract.mjs";
+
 import {
   FakeD1,
   entryRow,
@@ -25,14 +27,14 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     assert.match(html, /class="skip-link"[^>]+href="#main-content"/i);
     assert.match(html, /id="main-content"/i);
     assert.match(html, /<main[^>]+class="public-shell/i);
-    assert.match(html, /<header[^>]+aria-label="Presence navigation"/i);
+    assert.match(html, /<header[^>]+aria-label="Aitta navigation"/i);
     assert.match(html, /<section[^>]+aria-labelledby="account-name"/i);
-    assert.match(html, /<aside[^>]+aria-label="Presence details"/i);
+    assert.match(html, /<aside[^>]+aria-label="Profile details"/i);
     assert.match(html, /<section[^>]+aria-labelledby="entries-title"/i);
     assert.match(html, /<time[^>]+datetime=/i);
     assert.match(
       html,
-      /href="\/signin-with-chatgpt\?return_to=%2Fowner"[^>]+aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i,
+      /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i,
     );
     assert.doesNotMatch(html, />Sign in<\/a>|Owner access/i);
     assert.match(html, /<strong>\s*<a[^>]+href="https:\/\/aitta\.social"[^>]*>AittaSocial<\/a>\s*<\/strong>/i);
@@ -49,9 +51,14 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.doesNotMatch(html, /Powered by/i);
-    assert.doesNotMatch(html, /https:\/\/aitta\.social/i);
-    assert.doesNotMatch(html, /https:\/\/github\.com\/aittadb\/aitta-social/i);
+    const footer = publicFooter(html);
+    assert.doesNotMatch(footer, /Powered by/i);
+    assert.doesNotMatch(footer, /https:\/\/aitta\.social/i);
+    assert.match(
+      footer,
+      /href="https:\/\/github\.com\/aittadb\/aitta-social"[^>]*rel="noopener noreferrer"[^>]*aria-label="AittaSocial source on GitHub"/i,
+    );
+    assert.match(footer, /href="\/privacy"[^>]*>Privacy<\/a>/i);
   });
 
   await t.test("a signed-in visitor gets a management destination, not an authorization claim", async () => {
@@ -61,7 +68,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /href="\/owner"[^>]+aria-label="Manage presence as owner — open local sole-owner administration"[^>]*>Manage<\/a>/i);
+    assert.match(html, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(html, /Owner access|>Sign in<\/a>/i);
   });
 
@@ -72,12 +79,16 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /<main[^>]+class="owner-shell/i);
+    assert.match(html, /<main[^>]+class=/i);
     assert.match(html, /<nav[^>]+aria-label="Owner navigation"/i);
     assert.match(html, /aria-current="page"[^>]*>Identity</i);
+    assert.match(html, /<header[^>]+aria-label="Private owner workspace"[\s\S]*href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>[\s\S]*href="\/"[^>]*>View Aitta<\/a>[\s\S]*<\/header>/i);
+    assert.match(html, /<nav[^>]+aria-label="Owner navigation"[^>]*><a href="\/owner"[^>]*>Home<\/a><a href="\/owner\/profile"[^>]*>Identity<\/a><a href="\/owner\/entries\/new"[^>]*>New update<\/a><a href="\/owner\/pages\/import"[^>]*>Pages<\/a><\/nav>/i);
+    assert.match(html, /<footer[^>]*>[\s\S]*Private owner workspace[\s\S]*aria-label="Technical resources"[\s\S]*>Privacy<\/a>[\s\S]*>Technical<\/a>[\s\S]*>GitHub<\/a>[\s\S]*Sign out/i);
+    assert.doesNotMatch(html, /Test Owner|owner-session|owner-user/i);
     assert.match(html, /<form[^>]+class="owner-form"/i);
-    assert.match(html, /<fieldset>/i);
-    assert.match(html, /<legend>Identity<\/legend>/i);
+    assert.match(html, /<fieldset class="identity-primary-fields">/i);
+    assert.match(html, /<legend>Required Identity<\/legend>/i);
     assert.match(html, /<label[^>]*>.*Display name.*<input[^>]+name="displayName"/is);
     assert.doesNotMatch(html, /name="accountType"|>Presence type</i);
     assert.doesNotMatch(html, /(?:&quot;|\\?")accountType(?:&quot;|\\?")/i);
@@ -86,6 +97,7 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
       html,
       /<input(?=[^>]*name="canonicalUrl")(?=[^>]*type="url")(?=[^>]*required)[^>]*>/i,
     );
+    assert.match(html, /class="identity-save-state identity-save-state-saved"[^>]+aria-live="polite"/i);
     assert.match(html, /role="status"[^>]+aria-live="polite"/i);
   });
 
@@ -96,16 +108,18 @@ test("public and owner HTML expose useful landmarks, labels, and keyboard paths"
     });
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /<legend>Update<\/legend>/i);
-    assert.match(html, /<select[^>]+name="kind"/i);
+    assert.match(html, /<legend>Update content<\/legend>/i);
     assert.match(html, /<textarea[^>]+name="body"[^>]+required[^>]+maxlength="50000"/i);
+    assert.match(html, /<select[^>]+name="kind"/i);
+    assert.ok(html.indexOf('name="body"') < html.indexOf('name="kind"'), "update text is first");
     assert.match(html, /<form[^>]+aria-label="Create private draft"[^>]+aria-busy="false"/i);
-    assert.match(html, /<button[^>]+type="submit"[^>]*>Create private draft<\/button>/i);
+    assert.match(html, /<button[^>]+type="submit"[^>]*>Save private draft<\/button>/i);
+    assert.match(html, /Nothing becomes public from this form/i);
   });
 });
 
-test("presence and update language stays clear without obsolete Hub controls", async (t) => {
-  await t.test("public and owner surfaces use presence and update language", async () => {
+test("Aitta and update language stays clear without obsolete Hub controls", async (t) => {
+  await t.test("public and owner surfaces use Aitta and update language", async () => {
     const env = makeEnv({
       db: new FakeD1({ entries: [entryRow()] }),
       ownerEmail,
@@ -118,8 +132,11 @@ test("presence and update language stays clear without obsolete Hub controls", a
     const publicHtml = await publicResponse.text();
     assert.match(publicHtml, />Updates<\/h2>/i);
     assert.match(publicHtml, /href="\/entries\/entry-1"[^>]+aria-label="Open update published [^"]+"/i);
-    assert.match(publicHtml, /<a class="update-source-identity" href="#account">/i);
-    assert.match(publicHtml, /aria-label="Manage presence as owner — sign in with ChatGPT for local sole-owner administration"[^>]*>Manage<\/a>/i);
+    assert.match(
+      publicHtml,
+      /<a[^>]*class="(?:[^"]*\s)?update-source-identity(?:\s[^"]*)?"[^>]*href="#account"/i,
+    );
+    assert.match(publicHtml, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(publicHtml, />Entries<\/h2>|>Read (?:entry|update)<\/a>|>Sign in<\/a>/i);
 
     const ownerResponse = await fetchApp("/owner", {
@@ -128,10 +145,8 @@ test("presence and update language stays clear without obsolete Hub controls", a
     });
     assert.equal(ownerResponse.status, 200);
     const ownerHtml = await ownerResponse.text();
-    assert.match(ownerHtml, />Your presence<\/p>/i);
-    assert.match(ownerHtml, />Updates<\/h2>/i);
-    assert.match(ownerHtml, />Create update<\/a>/i);
-    assert.match(ownerHtml, /aria-label="Presence summary"/i);
+    assert.match(ownerHtml, />Your Aitta<\/p>/i);
+    assert.match(ownerHtml, /aria-label="Aitta summary"/i);
     assert.doesNotMatch(ownerHtml, /Deployment overview|Account summary|>Entries<\/h2>|>Create entry<\/a>/i);
     assert.doesNotMatch(ownerHtml, /owner\/hub|Advanced|Provisional Hub setup|Hub probe/i);
   });
@@ -178,18 +193,41 @@ test("owner-only pages redirect signed-out visitors and explain denied/configura
 });
 
 test("CSS preserves responsive, reduced-motion, focus, touch-target, and no-gradient constraints", async () => {
-  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const [globalCss, ownerShellCss, controlsCss, tokensCss, layoutCss, themesCss, profileCss, entryFormCss, ownerPageCss, ownerFormSharedCss] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/styles/controls.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/styles/tokens.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/styles/layout.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/styles/themes.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/profile/ProfileForm.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/entries/EntryForm.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/page.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/owner-form-shared.module.css", import.meta.url), "utf8"),
+  ]);
+  const css = `${globalCss}\n${controlsCss}\n${tokensCss}\n${layoutCss}\n${themesCss}`;
+  const sharedCss = `${ownerShellCss}\n${profileCss}\n${entryFormCss}\n${ownerPageCss}\n${ownerFormSharedCss}`;
 
   assert.match(css, /:focus-visible\s*\{[^}]*outline:/s);
-  assert.match(css, /\.skip-link:focus\s*\{[^}]*transform:\s*translateY\(0\)/s);
-  assert.match(css, /\.button\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(css, /\.owner-nav\s*>\s*a\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(css, /@media\s*\(max-width:\s*900px\)/);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)/);
-  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
-  assert.match(css, /\.field-grid-two\s*\{\s*grid-template-columns:\s*1fr/s);
-  assert.match(css, /\.owner-page-header\s*\{[^}]*flex-direction:\s*column/s);
-  assert.doesNotMatch(css, /owner-nav-label|runtime-grid|runtime-status|setup-steps|hub-test|setting-(?:ready|needed)|safe-note/);
+  assert.match(controlsCss, /\.skip-link:focus\s*\{[^}]*transform:\s*translateY\(0\)/s);
+  assert.match(controlsCss, /\.button\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(tokensCss, /--control-min-height:\s*44px/);
+  assert.match(ownerShellCss, /\.owner-navigation\s*>\s*a\s*\{[^}]*min-height:\s*var\(--control-min-height\)/s);
+  assert.match(ownerPageCss, /@media\s*\(max-width:\s*900px\)/);
+  assert.match(controlsCss, /@media\s*\(max-width:\s*640px\)/);
+  assert.match(themesCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+  assert.match(controlsCss, /\.field-grid-two\s*\{\s*grid-template-columns:\s*1fr/s);
+  assert.match(profileCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-appearance-layout,\s*\.identity-draft-preview\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s);
+  assert.match(profileCss, /\.identity-draft-preview > \*\s*\{[^}]*min-width:\s*0/s);
+  assert.match(ownerPageCss, /\.owner-page-header\s*\{[^}]*flex-direction:\s*column/s);
+  assert.match(ownerShellCss, /\.owner-topbar\s*\{[^}]*min-height:\s*calc\(60px \+ env\(safe-area-inset-top\)\)[^}]*padding-top:\s*env\(safe-area-inset-top\)/s);
+  assert.match(ownerShellCss, /\.owner-navigation\s*\{[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
+  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-navigation\s*\{[^}]*flex-wrap:\s*nowrap[^}]*overflow-x:\s*auto/s);
+  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-footer-inner\s*\{[^}]*padding-bottom:\s*max\(0\.75rem,\s*env\(safe-area-inset-bottom\)\)/s);
+  assert.match(ownerPageCss, /\.owner-summary\s*\{[^}]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/s);
+  assert.match(ownerPageCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-summary > div\s*\{[^}]*padding-inline:\s*0\.65rem[^}]*\}[\s\S]*\.owner-summary strong\s*\{[^}]*font-size:\s*0\.95rem/s);
+  assert.doesNotMatch(ownerShellCss, /\.owner-navigation[^}]*flex-wrap:\s*wrap|grid-template-columns:\s*220px/);
+  assert.doesNotMatch(css + sharedCss, /owner-nav-label|runtime-grid|runtime-status|setup-steps|hub-test|setting-(?:ready|needed)|safe-note/);
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 });
 
@@ -205,14 +243,16 @@ test("client mutation controls announce status and use semantic form controls", 
     assert.match(source, /aria-live="polite"/);
   }
   assert.match(actions, /<button[^>]+type="button"/);
-  assert.match(actions, /disabled=\{busy\}/);
+  assert.match(actions, /disabled=\{busy \|\| deletionRecoveryRequired\}/);
   assert.match(entryForm, /<form[^>]+onSubmit=\{submit\}/);
-  assert.match(entryForm, /<fieldset>/);
-  assert.match(entryForm, /<legend>Update<\/legend>/);
-  assert.match(profileForm, /<fieldset>/);
-  assert.match(profileForm, /<legend>Identity<\/legend>/);
-  assert.match(profileForm, /<legend>Public details<\/legend>/);
-  assert.match(profileForm, /<legend>Presentation<\/legend>/);
+    assert.match(entryForm, /<fieldset[^>]*className="entry-editor-fields"/);
+    assert.match(entryForm, /<legend>\{copy\.fieldsLegend\}<\/legend>/);
+  assert.match(entryForm, /disabled=\{busy \|\| recoveryRequired\}/);
+  assert.match(entryForm, /aria-invalid=\{Boolean\(fieldErrors\.body\) \|\| undefined\}/);
+  assert.match(profileForm, /<fieldset className="identity-primary-fields">/);
+  assert.match(profileForm, /<legend>\{copy\.requiredIdentity\}<\/legend>/);
+    assert.match(profileForm, /<details[\s\S]*className=\{styles\[['"]optional-details['"]\][\s\S]*<summary>[\s\S]*\{copy\.optionalPublicDetails\}/);
+  assert.match(profileForm, /<legend>\{copy\.appearance\}<\/legend>/);
   assert.doesNotMatch(profileForm, /accountType|name="accountType"|>Presence type/);
 });
 

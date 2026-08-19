@@ -1,0 +1,28 @@
+/**
+ * Styles owned by AittaFooterResources.
+ *
+ * Keep resource navigation styles local to this shared footer utility.
+ * Do not place unrelated component styles in this file.
+ */
+.footer-resources {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  flex-wrap: wrap;
+  gap: 0 0.7rem;
+  font-size: 0.78rem;
+}
+
+.footer-resources a {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .footer-resources {
+    justify-content: start;
+  }
+}

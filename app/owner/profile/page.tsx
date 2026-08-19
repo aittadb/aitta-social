@@ -5,16 +5,30 @@ import { normalizeCanonicalUrl } from "@/lib/validation";
 import { OwnerAccessState, OwnerShell } from "../_components/OwnerShell";
 import { requireOwnerPage } from "../owner-access";
 import { ProfileForm } from "./ProfileForm";
+import styles from "@/app/owner/page.module.css";
+import { getLocale, getMessages } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProfileSettings() {
   const access = await requireOwnerPage("/owner/profile");
   if (access.status !== "owner") return <OwnerAccessState status={access.status} />;
+  const locale = await getLocale();
+  const messages = await getMessages(locale);
+  const copy = messages.ui.owner.profile;
+
   const profile = await getProfile();
   const readiness = deriveIdentityReadiness(profile);
-  const storedCanonical = normalizedCanonicalOrNull(profile?.canonicalUrl ?? null);
+  const storedCanonicalValue = profile?.canonicalUrl ?? "";
+  const storedCanonical = normalizedCanonicalOrNull(storedCanonicalValue);
   const canonicalDefault = storedCanonical ?? readiness.canonicalUrl ?? "";
+  const canonicalDefaultSource = storedCanonical
+    ? "stored"
+    : readiness.canonicalSource === "runtime"
+        ? "runtime-substitution"
+        : storedCanonicalValue.length > 0
+          ? "invalid-stored-omitted"
+          : "empty";
   const formProfile: ProfileInput | null = profile ? {
     displayName: profile.displayName,
     shortDescription: profile.shortDescription,
@@ -27,15 +41,22 @@ export default async function ProfileSettings() {
     density: profile.density,
     hidePoweredBy: profile.hidePoweredBy,
   } : null;
+
   return (
-    <OwnerShell displayName={access.user.displayName} current="profile">
-      <header className="owner-page-header compact-header">
-        <div><p className="eyebrow">Public presence</p><h1>Identity</h1><p>Keep the public presentation specific, concise, and recognizably yours. Saved Identity is the only durable setup progress.</p></div>
+    <OwnerShell current="profile">
+      <header className={`${styles.ownerPageHeader} ${styles.compactHeader}`}>
+        <div>
+          <p className="eyebrow">{copy.headerProfile}</p>
+          <h1>{copy.identity}</h1>
+          <p>{copy.identitySetupDescription}</p>
+        </div>
       </header>
       <ProfileForm
         profile={formProfile}
-        canonicalDefault={canonicalDefault}
+          canonicalDefault={canonicalDefault}
+        canonicalDefaultSource={canonicalDefaultSource}
         readiness={readiness}
+        copy={copy}
       />
     </OwnerShell>
   );

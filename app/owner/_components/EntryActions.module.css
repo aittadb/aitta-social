@@ -1,0 +1,46 @@
+/**
+ * Styles owned by EntryActions component.
+ */
+.entry-actions {
+  min-width: 0;
+  justify-content: end;
+}
+
+.entry-actions-status {
+  flex: 1 0 100%;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.entry-actions-status:empty {
+  display: none;
+}
+
+.entry-list-action {
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .entry-actions {
+    justify-content: start;
+  }
+
+  .entry-actions-status {
+    text-align: left;
+  }
+}
+
+.entry-actions-confirm {
+  margin-top: 0.75rem;
+  border: 1px solid var(--color-border-subtle, #a0a0a0);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.entry-actions-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import { Miniflare } from "miniflare";
+
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { consumeResponse } from "./helpers/response-body-consumption.mjs";
+import { migrationInventory } from "./helpers/migration-inventory.mjs";
+import { responseJson } from "./helpers/json-response-body.mjs";
 
 import {
   APP_ORIGIN,
@@ -40,7 +45,7 @@ const reviewedDigests = {
   [historicalFixture]:
     "bde6241fd75d84b729a0b84401ffe671df2e505fc7f42c6e23e7d4fbd5755ac9",
   "package-lock.json":
-    "1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9",
+    "822d92df7b5b294a7095c396ca2b1214ee0fb62161f3388720ab495dcf5bd5b5",
 };
 
 test("TASK-060 provenance remains bound to the reviewed functional candidate", async () => {
@@ -49,7 +54,7 @@ test("TASK-060 provenance remains bound to the reviewed functional candidate", a
     assert.equal(await sha256(relativePath), digest, `${relativePath} changed after review`);
   }
 
-  const migrations = await migrationInventory();
+  const migrations = await migrationInventory(REPOSITORY_ROOT);
   assert.equal(migrations[0], historicalMigration);
   assert(migrations.length > 0);
 });
@@ -108,7 +113,8 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     headers: mutationHeaders(OWNER_EMAIL),
     body: JSON.stringify(identity),
   });
-  assert.equal(saveIdentity.status, 204);
+  assert.equal(saveIdentity.status, 200);
+  await consumeResponse(saveIdentity);
   assert.deepEqual(await rows(
     worker.db,
     `SELECT display_name, account_type, short_description, introduction,
@@ -135,7 +141,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
   assertConfiguredPresence(configuredHome);
   assertNoLeadingPrompt(configuredHome);
   const configuredOwner = await html(worker, "/owner", identityHeaders(OWNER_EMAIL));
-  assert.match(configuredOwner, /Create a private first draft/i);
+  assert.match(configuredOwner, /Create your first update/i);
   assert.match(configuredOwner, /href="\/owner\/entries\/new"[^>]*>Create first draft/i);
 
   const createDraft = await worker.fetch("/api/private/entries", {
@@ -150,7 +156,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
   });
   assert.equal(createDraft.status, 201);
   const created = (await responseJson(createDraft)).data;
-  assert.equal(created.state, "draft");
+  assert.equal(created.attributes.state, "draft");
   assert.match(created.id, /^[0-9a-f-]{36}$/u);
   await assertEntryRow(worker.db, created.id, {
     kind: "note",
@@ -181,7 +187,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     }),
   });
   assert.equal(editDraft.status, 200);
-  assert.equal((await responseJson(editDraft)).data.state, "draft");
+  assert.equal((await responseJson(editDraft)).data.attributes.state, "draft");
   await assertEntryRow(worker.db, created.id, {
     kind: "announcement",
     title: "A durable edited update",
@@ -197,7 +203,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     body: JSON.stringify({ state: "published" }),
   });
   assert.equal(publish.status, 200);
-  assert.equal((await responseJson(publish)).data.state, "published");
+  assert.equal((await responseJson(publish)).data.attributes.state, "published");
   const publicHome = await html(worker, "/");
   assert.match(publicHome, /A durable edited update/i);
   assert.match(publicHome, new RegExp(escapeRegExp(editedBody)));
@@ -225,7 +231,7 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     body: JSON.stringify({ state: "draft" }),
   });
   assert.equal(unpublish.status, 200);
-  assert.equal((await responseJson(unpublish)).data.state, "draft");
+  assert.equal((await responseJson(unpublish)).data.attributes.state, "draft");
   await assertPubliclyAbsent(worker, created.id, [freshDraftCanary, editedBody]);
 
   await closeWorker(worker);
@@ -242,7 +248,8 @@ test("a fresh migrated presence completes the fork-free D1 functional journey", 
     method: "DELETE",
     headers: mutationHeaders(OWNER_EMAIL),
   });
-  assert.equal(remove.status, 204);
+  assert.equal(remove.status, 200);
+  await consumeResponse(remove);
   assert.deepEqual(await rows(worker.db, "SELECT id FROM entries WHERE id = ?", created.id), []);
 
   await closeWorker(worker);
@@ -278,7 +285,7 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
   }));
   await applyMigrationSql(worker.db, await readRepositoryFile(historicalMigration));
   await applyFixtureSql(worker.db, await readRepositoryFile(historicalFixture));
-  for (const migration of (await migrationInventory()).slice(1)) {
+  for (const migration of (await migrationInventory(REPOSITORY_ROOT)).slice(1)) {
     await applyMigrationSql(worker.db, await readRepositoryFile(migration));
   }
 
@@ -316,6 +323,7 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
     body: JSON.stringify(replacementIdentity()),
   });
   assert.equal(nonOwnerWrite.status, 403);
+  await consumeResponse(nonOwnerWrite);
   assert.deepEqual(await contentSnapshot(worker.db), baseline);
   await close(worker);
 
@@ -333,6 +341,7 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
     body: JSON.stringify(replacementIdentity()),
   });
   assert.equal(missingOwnerWrite.status, 503);
+  await consumeResponse(missingOwnerWrite);
   assert.deepEqual(await contentSnapshot(worker.db), baseline);
   assert.match(await html(worker, "/"), /A preserved public update/i);
   await close(worker);
@@ -342,20 +351,20 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
     canonicalUrl: candidateCanonical,
   }));
   const beforeOutage = await contentSnapshot(worker.db);
-  const [publicDuringOutage, siteDuringOutage, manifestDuringOutage, ownerDuringOutage] = await Promise.all([
-    html(worker, "/"),
-    worker.fetch("/api/v1/site"),
-    worker.fetch("/.well-known/aitta-social.json"),
-    html(worker, "/owner", identityHeaders(OWNER_EMAIL)),
-  ]);
+  const publicDuringOutage = await html(worker, "/");
+  const siteDuringOutage = await worker.fetch("/api/v1/site");
+  const siteDuringOutageBody = await siteDuringOutage.text();
+  const manifestDuringOutage = await worker.fetch("/.well-known/aitta-social.json");
+  const manifestDuringOutageBody = await responseJson(manifestDuringOutage);
+  const ownerDuringOutage = await html(worker, "/owner", identityHeaders(OWNER_EMAIL));
   assert.match(publicDuringOutage, /Legacy Person Presence/i);
   assert.equal(siteDuringOutage.status, 200);
   assert.equal(manifestDuringOutage.status, 200);
   assert.match(ownerDuringOutage, /Legacy Person Presence/i);
   assertNoProtectedHubValues(`${publicDuringOutage}\n${ownerDuringOutage}`);
-  assert.doesNotMatch(await siteDuringOutage.text(), new RegExp(publicHubChallenge));
+  assert.doesNotMatch(siteDuringOutageBody, new RegExp(publicHubChallenge));
   assert.equal(
-    (await responseJson(manifestDuringOutage)).hubVerificationChallenge,
+    manifestDuringOutageBody.hubVerificationChallenge,
     publicHubChallenge,
   );
 
@@ -386,11 +395,13 @@ test("the hydrated upgrade stays populated, owner-confined, and independent of r
   assert.deepEqual(retiredResponses[1], retiredResponses[2]);
   assert.equal(worker.outboundRequests.length, 0);
   assert.match(await html(worker, "/"), /A preserved public update/i);
-  assert.equal((await worker.fetch("/api/v1/entries")).status, 200);
+  const collectionResponse = await worker.fetch("/api/v1/entries");
+  assert.equal(collectionResponse.status, 200);
+  await consumeResponse(collectionResponse);
   assert.deepEqual(await contentSnapshot(worker.db), beforeOutage);
 });
 
-test("the setup prompt distinguishes an unconfigured presence from unavailable storage", {
+test("the setup prompt distinguishes an unconfigured Aitta from unavailable storage", {
   timeout: 120_000,
 }, async (t) => {
   const temporaryRoot = await mkdtemp(path.join(tmpdir(), "aitta-social-task060-prompt-"));
@@ -416,7 +427,8 @@ test("the setup prompt distinguishes an unconfigured presence from unavailable s
   });
   liveWorkers.add(unavailable);
   const unavailableHtml = await html(unavailable, "/");
-  assert.match(unavailableHtml, /Presence unavailable|cannot be loaded right now/i);
+  assert.match(unavailableHtml, /Aitta storage unavailable/i);
+  assert.match(unavailableHtml, /This Aitta cannot be loaded right now/i);
   assertNoLeadingPrompt(unavailableHtml);
 });
 
@@ -464,15 +476,8 @@ async function createFunctionalWorker({
   };
 }
 
-async function migrationInventory() {
-  return (await readdir(path.join(REPOSITORY_ROOT, "drizzle"), { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && /^\d+_.+\.sql$/u.test(entry.name))
-    .map((entry) => `drizzle/${entry.name}`)
-    .sort();
-}
-
 async function applyCandidateMigrations(db) {
-  for (const migration of await migrationInventory()) {
+  for (const migration of await migrationInventory(REPOSITORY_ROOT)) {
     await applyMigrationSql(db, await readRepositoryFile(migration));
   }
 }
@@ -524,20 +529,22 @@ async function assertEntryRow(db, id, expected) {
 }
 
 async function assertPubliclyAbsent(worker, id, canaries) {
-  const [home, permalink, detail, collection] = await Promise.all([
-    worker.fetch("/", { headers: { accept: "text/html" } }),
-    worker.fetch(`/entries/${id}`, { headers: { accept: "text/html" } }),
-    worker.fetch(`/api/v1/entries/${id}`),
-    worker.fetch("/api/v1/entries"),
-  ]);
+  const home = await worker.fetch("/", { headers: { accept: "text/html" } });
   assert.equal(home.status, 200);
+  const homeSource = await home.text();
+  const permalink = await worker.fetch(`/entries/${id}`, { headers: { accept: "text/html" } });
   assert.equal(permalink.status, 404);
+  const permalinkSource = await permalink.text();
+  const detail = await worker.fetch(`/api/v1/entries/${id}`);
   assert.equal(detail.status, 404);
+  const detailSource = JSON.stringify(await responseJson(detail));
+  const collection = await worker.fetch("/api/v1/entries");
+  const collectionSource = JSON.stringify(await responseJson(collection));
   const source = [
-    await home.text(),
-    await permalink.text(),
-    JSON.stringify(await responseJson(detail)),
-    JSON.stringify(await responseJson(collection)),
+    homeSource,
+    permalinkSource,
+    detailSource,
+    collectionSource,
   ].join("\n");
   for (const canary of canaries) {
     assert.doesNotMatch(source, new RegExp(escapeRegExp(canary), "iu"));
@@ -553,20 +560,19 @@ async function html(worker, pathname, headers = {}) {
   return response.text();
 }
 
-async function responseJson(response) {
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
-  return JSON.parse(await response.text());
-}
 
 function assertLeadingPrompt(source) {
   assert.match(source, /Start with one prompt/i);
-  assert.match(source, /Create your own presence/i);
+  assert.match(source, /Set up your own Aitta/i);
+  assert.match(source, /An Aitta is your independently controlled AittaSocial application/i);
+  assert.match(source, /optional outward identity presentation/i);
+  assert.match(source, /no current Hub connection/i);
   assert.match(source, /Deploy AittaSocial from/i);
   assert.match(source, /@Sites/i);
 }
 
 function assertNoLeadingPrompt(source) {
-  assert.doesNotMatch(source, /Start with one prompt|Create your own presence|Deploy AittaSocial from|@Sites/i);
+  assert.doesNotMatch(source, /Start with one prompt|Set up your own Aitta|Deploy AittaSocial from|@Sites/i);
 }
 
 function assertConfiguredPresence(source) {
@@ -632,8 +638,5 @@ function replacementIdentity() {
   };
 }
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-}
 
 assert.equal(D1_DATABASE_NAME, "site-creator-d1");

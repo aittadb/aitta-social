@@ -1,0 +1,106 @@
+/**
+ * Shared owner form and control primitives.
+ */
+.owner-form {
+  padding-top: 1rem;
+}
+
+.owner-form-field-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.owner-form-field-grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.owner-form-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.owner-form-status {
+  min-height: 1.5rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
+}
+
+.check-field {
+  min-height: var(--control-min-height);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.owner-form-check-field {
+  min-height: var(--control-min-height);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.owner-form-check-field input,
+.check-field input {
+  accent-color: var(--action);
+  transform: translateY(0.08rem);
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.owner-form-color-field input {
+  max-width: 100px;
+  padding: 0.3rem;
+  cursor: pointer;
+}
+
+.owner-form-field-error {
+  color: var(--danger);
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.owner-form-field {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+}
+
+.owner-form-field input,
+.owner-form-field textarea,
+.owner-form-field select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.72rem 0.8rem;
+  border: 1px solid var(--ink);
+  border-radius: 5px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.owner-form-field input[aria-invalid="true"],
+.owner-form-field textarea[aria-invalid="true"],
+.owner-form-field select[aria-invalid="true"] {
+  border-color: var(--danger);
+  border-width: 2px;
+}
+
+.owner-form-field textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .owner-form-field-grid-two {
+    grid-template-columns: 1fr;
+  }
+}

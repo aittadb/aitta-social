@@ -5,6 +5,10 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { consumeResponse } from "./helpers/response-body-consumption.mjs";
+import { responseJson } from "./helpers/json-response-body.mjs";
+
 import {
   APP_ORIGIN,
   OWNER_EMAIL,
@@ -313,7 +317,7 @@ async function captureConfiguredBehavior(worker, canonicalUrl) {
   assert.equal(publishedResponse.headers.get("cache-control"), "public, max-age=60");
   assertPublicHeadersHaveNoPrivateCanary(publishedResponse);
   const published = await responseJson(publishedResponse);
-  assert.deepEqual(published, { data: expectedPublicEntry(canonicalUrl) });
+  assert.deepEqual(published, expectedEntryDetail(canonicalUrl));
   assertNoPrivatePublicCanary(JSON.stringify(published));
 
   const publishedHtmlResponse = await worker.fetch(
@@ -336,12 +340,12 @@ async function captureConfiguredBehavior(worker, canonicalUrl) {
   assertNoPrivatePublicCanary(publishedHtml);
 
   const draftApiResponse = await worker.fetch("/api/v1/entries/poc-v0-draft-private");
-  const missingApiResponse = await worker.fetch("/api/v1/entries/not-present");
   assert.equal(draftApiResponse.status, 404);
-  assert.equal(missingApiResponse.status, 404);
   assertPublicHeadersHaveNoPrivateCanary(draftApiResponse);
-  assertPublicHeadersHaveNoPrivateCanary(missingApiResponse);
   const draftApi = await responseJson(draftApiResponse);
+  const missingApiResponse = await worker.fetch("/api/v1/entries/not-present");
+  assert.equal(missingApiResponse.status, 404);
+  assertPublicHeadersHaveNoPrivateCanary(missingApiResponse);
   const missingApi = await responseJson(missingApiResponse);
   assert.deepEqual(draftApi, missingApi);
   assert.doesNotMatch(JSON.stringify(draftApi), new RegExp(`${draftTitleCanary}|${draftBodyCanary}`));
@@ -349,14 +353,14 @@ async function captureConfiguredBehavior(worker, canonicalUrl) {
   const draftHtmlResponse = await worker.fetch("/entries/poc-v0-draft-private", {
     headers: { accept: "text/html" },
   });
+  assert.equal(draftHtmlResponse.status, 404);
+  assertPublicHeadersHaveNoPrivateCanary(draftHtmlResponse);
+  const draftHtml = await draftHtmlResponse.text();
   const missingHtmlResponse = await worker.fetch("/entries/not-present", {
     headers: { accept: "text/html" },
   });
-  assert.equal(draftHtmlResponse.status, 404);
   assert.equal(missingHtmlResponse.status, 404);
-  assertPublicHeadersHaveNoPrivateCanary(draftHtmlResponse);
   assertPublicHeadersHaveNoPrivateCanary(missingHtmlResponse);
-  const draftHtml = await draftHtmlResponse.text();
   const missingHtml = await missingHtmlResponse.text();
   for (const html of [draftHtml, missingHtml]) {
     assert.match(html, /This update is not public/);
@@ -410,30 +414,34 @@ async function captureConfiguredBehavior(worker, canonicalUrl) {
 function expectedSiteResource(canonicalUrl) {
   return {
     data: {
-      displayName: "Legacy Person Presence",
-      accountType: "person",
-      shortDescription: "A preserved deployment-owned profile.",
-      introduction:
-        "This introduction, presentation, and content must survive an in-place upgrade.",
-      location: "Helsinki",
-      website: "https://legacy-person.example/about",
-      externalLinks: [
-        { label: "Work", url: "https://legacy-person.example/work" },
-        { label: "Contact", url: "https://legacy-person.example/contact" },
-      ],
-      canonicalUrl,
-      presentation: {
-        accentColor: "#6a4b35",
-        density: "compact",
-        showPoweredBy: false,
+      id: "profile",
+      type: "profile",
+      attributes: {
+        displayName: "Legacy Person Presence",
+        accountType: "person",
+        shortDescription: "A preserved deployment-owned profile.",
+        introduction:
+          "This introduction, presentation, and content must survive an in-place upgrade.",
+        location: "Helsinki",
+        website: "https://legacy-person.example/about",
+        externalLinks: [
+          { label: "Work", url: "https://legacy-person.example/work" },
+          { label: "Contact", url: "https://legacy-person.example/contact" },
+        ],
+        canonicalUrl,
+        presentation: {
+          accentColor: "#6a4b35",
+          density: "compact",
+          showPoweredBy: false,
+        },
       },
     },
-    links: {
-      self: `${canonicalUrl}/api/v1/site`,
-      html: canonicalUrl,
-      entries: `${canonicalUrl}/api/v1/entries`,
-      manifest: `${canonicalUrl}/.well-known/aitta-social.json`,
-    },
+    links: [
+      { rel: "self", href: `${canonicalUrl}/api/v1/site`, mediaType: "application/json" },
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "social.aitta.profile", href: canonicalUrl, mediaType: "text/html" },
+    ],
+    actions: [],
   };
 }
 
@@ -444,8 +452,10 @@ function expectedManifest(canonicalUrl) {
     software: { name: "AittaSocial", version: "0.1.0" },
     canonicalUrl,
     endpoints: {
+      api: `${canonicalUrl}/api/v1`,
       profile: `${canonicalUrl}/api/v1/site`,
       entries: `${canonicalUrl}/api/v1/entries`,
+      entryTemplate: `${canonicalUrl}/api/v1/entries/{id}`,
     },
     accountType: "person",
   };
@@ -468,14 +478,58 @@ function expectedPublicEntry(canonicalUrl) {
   };
 }
 
-function expectedCollection(canonicalUrl) {
+function expectedEntryDetail(canonicalUrl) {
+  const entry = expectedPublicEntry(canonicalUrl);
   return {
-    data: [expectedPublicEntry(canonicalUrl)],
-    pagination: { page: 1, pageSize: 20, hasMore: false },
-    links: {
-      self: `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`,
-      site: `${canonicalUrl}/api/v1/site`,
+    data: {
+      id: entry.id,
+      type: "entry",
+      attributes: {
+        kind: entry.kind,
+        title: entry.title,
+        body: entry.body,
+        destinationUrl: entry.destinationUrl,
+        publishedAt: entry.publishedAt,
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+      },
     },
+    links: [
+      { rel: "self", href: entry.links.self, mediaType: "application/json" },
+      { rel: "collection", href: `${canonicalUrl}/api/v1/entries`, mediaType: "application/json" },
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "alternate", href: entry.links.html, mediaType: "text/html" },
+    ],
+    actions: [],
+  };
+}
+
+function expectedCollection(canonicalUrl) {
+  const entry = expectedPublicEntry(canonicalUrl);
+  return {
+    data: [{
+      id: entry.id,
+      type: "entry",
+      attributes: {
+        kind: entry.kind,
+        title: entry.title,
+        body: entry.body,
+        destinationUrl: entry.destinationUrl,
+        publishedAt: entry.publishedAt,
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+      },
+    }],
+    pagination: { page: 1, pageSize: 20 },
+    links: [
+      { rel: "self", href: `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`, mediaType: "application/json" },
+      { rel: "first", href: `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`, mediaType: "application/json" },
+      { rel: "last", href: `${canonicalUrl}/api/v1/entries?page=1&pageSize=20`, mediaType: "application/json" },
+      { rel: "item", href: `${canonicalUrl}/api/v1/entries/poc-v0-published-update`, mediaType: "application/json" },
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "social.aitta.profile", href: `${canonicalUrl}/api/v1/site`, mediaType: "application/json" },
+    ],
+    actions: [],
   };
 }
 
@@ -572,6 +626,7 @@ async function captureAuthorizationMatrix(
     body: JSON.stringify(profileInput({ shortDescription: "Must not be saved." })),
   });
   assert.equal(nonOwner.status, 403);
+  await consumeResponse(nonOwner);
   assert.deepEqual(await captureDatabase(worker.db), initial);
 
   const owner = await worker.fetch("/api/private/profile", {
@@ -579,7 +634,8 @@ async function captureAuthorizationMatrix(
     headers: mutationHeaders(OWNER_EMAIL),
     body: JSON.stringify(profileInput({ shortDescription: "Saved by the upgrade matrix." })),
   });
-  assert.equal(owner.status, 204);
+  assert.equal(owner.status, 200);
+  await consumeResponse(owner);
   const profile = await rows(
     worker.db,
     "SELECT account_type, short_description FROM profiles WHERE id = 1",
@@ -643,8 +699,11 @@ async function proveStoredCanonicalFallback(persistPath, openWorker, closeWorker
   const siteResponse = await worker.fetch("https://hostile-fallback.example/api/v1/site");
   assert.equal(siteResponse.status, 200);
   const site = await responseJson(siteResponse);
-  assert.equal(site.data.canonicalUrl, storedCanonical);
-  assert.equal(site.links.html, storedCanonical);
+  assert.equal(site.data.attributes.canonicalUrl, storedCanonical);
+  assert.equal(
+    site.links.find(({ rel }) => rel === "social.aitta.profile")?.href,
+    storedCanonical,
+  );
   assert.doesNotMatch(JSON.stringify(site), /hostile-fallback/);
 
   const home = await worker.fetch("https://hostile-fallback.example/", {
@@ -668,7 +727,12 @@ async function proveUnconfiguredAndUnavailableStates(temporaryRoot, openWorker, 
   const setupHtml = await setupResponse.text();
   assert.match(setupHtml, /@Sites/);
   assert.match(setupHtml, /Deploy AittaSocial from/);
+  assert.match(setupHtml, /Set up your own Aitta/i);
+  assert.match(setupHtml, /An Aitta is your independently controlled AittaSocial application/i);
+  assert.match(setupHtml, /optional outward identity presentation/i);
+  assert.match(setupHtml, /no current Hub connection/i);
   assert.match(setupHtml, /<meta name="robots" content="noindex, nofollow"/i);
+  assert.doesNotMatch(setupHtml, /<link rel="canonical"|<meta property="og:url"/i);
   await closeWorker(migrated);
 
   const unavailable = await openWorker({
@@ -679,8 +743,12 @@ async function proveUnconfiguredAndUnavailableStates(temporaryRoot, openWorker, 
   });
   assert.equal(unavailableResponse.status, 200);
   const unavailableHtml = await unavailableResponse.text();
-  assert.match(unavailableHtml, /Presence unavailable|cannot be loaded right now/i);
+  assert.match(unavailableHtml, /Aitta storage unavailable/i);
+  assert.match(unavailableHtml, /This Aitta cannot be loaded right now/i);
+  assert.match(unavailableHtml, /<title>Aitta unavailable<\/title>/i);
+  assert.match(unavailableHtml, /<meta name="robots" content="noindex, nofollow"/i);
   assert.doesNotMatch(unavailableHtml, /Deploy AittaSocial from|@Sites/);
+  assert.doesNotMatch(unavailableHtml, /<link rel="canonical"|<meta property="og:url"/i);
   await closeWorker(unavailable);
 }
 
@@ -719,13 +787,4 @@ function profileInput(overrides = {}) {
     hidePoweredBy: true,
     ...overrides,
   };
-}
-
-async function responseJson(response) {
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/iu);
-  return JSON.parse(await response.text());
-}
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }

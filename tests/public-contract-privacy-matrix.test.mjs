@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import { Miniflare } from "miniflare";
+
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { migrationInventory } from "./helpers/migration-inventory.mjs";
 
 import {
   APP_ORIGIN,
@@ -24,9 +27,9 @@ const historicalMigration = "drizzle/0000_closed_talos.sql";
 
 const sourceDigests = {
   "db/schema.ts": "8917fdac637f7a5ae4c96df0ecbed770ca881c218136e6067196fc3216bc1b67",
-  "docs/protocol.md": "39eec7f9f28a24519e59ae68b87098dbc3208b44e188a3336f18bbb02477dc46",
+  "docs/protocol.md": "810aeefedf93c0740a2a0a6e254794b90f6f38b813b2b2107e793339e7f20488",
   [historicalMigration]: "95455a11b0795cfbfeb4ad0edfa07c2e75d076b14b142c9dfb1feb1c849e3c8a",
-  "package-lock.json": "1fd75c48473016371545d02ae8599379031111e46fc960976fdc7e3cc18f3eb9",
+  "package-lock.json": "822d92df7b5b294a7095c396ca2b1214ee0fb62161f3388720ab495dcf5bd5b5",
   "tests/fixtures/poc-upgrade-v0.sql":
     "bde6241fd75d84b729a0b84401ffe671df2e505fc7f42c6e23e7d4fbd5755ac9",
   "tests/helpers/local-d1-upgrade.mjs":
@@ -235,15 +238,8 @@ async function assertSourceProvenance() {
     assert.equal(await sha256(relativePath), digest, `${relativePath} must remain reviewed`);
   }
 
-  const migrations = await migrationInventory();
+  const migrations = await migrationInventory(REPOSITORY_ROOT);
   assert.deepEqual(migrations, [historicalMigration]);
-}
-
-async function migrationInventory() {
-  return (await readdir(path.join(REPOSITORY_ROOT, "drizzle"), { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && /^\d+_.+\.sql$/u.test(entry.name))
-    .map((entry) => `drizzle/${entry.name}`)
-    .sort();
 }
 
 async function createMatrixWorker({ persistPath, canonicalUrl }) {
@@ -288,7 +284,7 @@ async function createMatrixWorker({ persistPath, canonicalUrl }) {
 }
 
 async function prepareFixture(db, matrixCase) {
-  const migrations = await migrationInventory();
+  const migrations = await migrationInventory(REPOSITORY_ROOT);
   if (matrixCase.lineage === "fresh") {
     for (const migration of migrations) {
       await applyMigrationSql(db, await readRepositoryFile(migration));
@@ -403,7 +399,7 @@ async function assertPublicMatrix(worker, matrixCase) {
 
   if (setupError) {
     assertJson(manifest, setupError);
-    assertJson(site, setupError);
+    assertJson(site, profileSetupError(setupError));
   } else {
     assertJson(manifest, {
       status: 200,
@@ -436,7 +432,7 @@ async function assertCollectionPages(worker, matrixCase, setupError) {
 
   if (setupError) {
     for (const observation of [...observations, repeatedFirst]) {
-      assertJson(observation, setupError);
+      assertJson(observation, profileSetupError(setupError));
     }
   } else {
     for (const [index, observation] of observations.entries()) {
@@ -454,10 +450,12 @@ async function assertCollectionPages(worker, matrixCase, setupError) {
     status: 400,
     cacheControl: "no-store",
     body: {
+      data: null,
       error: {
         code: "invalid_pagination",
         message: "page must be at least 1 and pageSize must be between 1 and 50.",
       },
+      links: [],
     },
   });
 }
@@ -469,22 +467,24 @@ async function assertEntryDetails(worker, matrixCase, setupError) {
 
   if (setupError) {
     for (const observation of [published, draft, unknown]) {
-      assertJson(observation, setupError);
+      assertJson(observation, profileSetupError(setupError));
     }
   } else {
     assertJson(published, {
       status: 200,
       cacheControl: "public, max-age=60",
-      body: { data: expectedPublicEntry(entryById(publishedId), matrixCase.canonical) },
+      body: expectedEntryDetail(entryById(publishedId), matrixCase.canonical),
     });
     const notFound = {
       status: 404,
       cacheControl: "no-store",
       body: {
+        data: null,
         error: {
           code: "entry_not_found",
           message: "Published entry not found.",
         },
+        links: [],
       },
     };
     assertJson(draft, notFound);
@@ -499,13 +499,16 @@ function assertHomeHtml(html, matrixCase, profile) {
   assert.doesNotMatch(html, new RegExp(`${draftTitleCanary}|${draftBodyCanary}`, "u"));
 
   if (matrixCase.readiness === "profile-absent") {
-    assert.match(html, /<title>Presence setup in progress<\/title>/iu);
+    assert.match(html, /<title>Aitta setup in progress<\/title>/iu);
     assert.match(
       html,
-      /<meta name="description" content="This independent presence is being prepared by its owner\."\s*\/?>/iu,
+      /<meta name="description" content="This Aitta(?:&#x27;|&apos;|')s optional outward profile is not configured yet\."\s*\/?>/iu,
     );
     assert.match(html, /<meta name="robots" content="noindex, nofollow"\s*\/?>/iu);
-    assert.match(html, /Create your own presence/iu);
+    assert.match(html, /Set up your own Aitta/iu);
+    assert.match(html, /An Aitta is your independently controlled AittaSocial application/iu);
+    assert.match(html, /optional outward identity presentation/iu);
+    assert.match(html, /no current Hub connection/iu);
     assertNoCanonicalMetadata(html);
     return;
   }
@@ -530,7 +533,7 @@ function assertHomeHtml(html, matrixCase, profile) {
 
 function assertPublishedPermalink(html, matrixCase, profile) {
   const presenceTitle = matrixCase.readiness === "profile-absent"
-    ? "Independent presence"
+    ? "Independent Aitta"
     : profile.displayName;
   assert.match(
     html,
@@ -559,13 +562,14 @@ function assertUnavailablePermalinks(draft, unknown) {
   assertHtmlHeaders(draft, 404);
   assertHtmlHeaders(unknown, 404);
   for (const observation of [draft, unknown]) {
-    assert.match(observation.body, /<title>Independent presence<\/title>/iu);
+    assert.match(observation.body, /<title>Independent Aitta<\/title>/iu);
     assert.match(
       observation.body,
-      /<meta name="description" content="An independently controlled presence\."\s*\/?>/iu,
+      /<meta name="description" content="An independently controlled AittaSocial app\."\s*\/?>/iu,
     );
     assert.match(observation.body, /<meta name="robots" content="noindex, nofollow"\s*\/?>/iu);
     assert.match(observation.body, /This update is not public/iu);
+    assert.match(observation.body, />Return to Aitta<\/a>/iu);
     assertNoCanonicalMetadata(observation.body);
   }
   assert.deepEqual(draft.headers, unknown.headers);
@@ -655,8 +659,10 @@ function expectedManifest(canonicalUrl, accountType) {
     software: { name: "AittaSocial", version: "0.1.0" },
     canonicalUrl,
     endpoints: {
+      api: `${canonicalUrl}/api/v1`,
       profile: `${canonicalUrl}/api/v1/site`,
       entries: `${canonicalUrl}/api/v1/entries`,
+      entryTemplate: `${canonicalUrl}/api/v1/entries/{id}`,
     },
     accountType,
   };
@@ -665,58 +671,104 @@ function expectedManifest(canonicalUrl, accountType) {
 function expectedSite(canonicalUrl, profile) {
   return {
     data: {
-      displayName: profile.displayName,
-      accountType: profile.accountType,
-      shortDescription: profile.shortDescription,
-      introduction: profile.introduction,
-      location: profile.location,
-      website: profile.website,
-      externalLinks: profile.externalLinks,
-      canonicalUrl,
-      presentation: profile.presentation,
+      id: "profile",
+      type: "profile",
+      attributes: {
+        displayName: profile.displayName,
+        accountType: profile.accountType,
+        shortDescription: profile.shortDescription,
+        introduction: profile.introduction,
+        location: profile.location,
+        website: profile.website,
+        externalLinks: profile.externalLinks,
+        canonicalUrl,
+        presentation: profile.presentation,
+      },
     },
-    links: {
-      self: `${canonicalUrl}/api/v1/site`,
-      html: canonicalUrl,
-      entries: `${canonicalUrl}/api/v1/entries`,
-      manifest: `${canonicalUrl}/.well-known/aitta-social.json`,
-    },
+    links: [
+      { rel: "self", href: `${canonicalUrl}/api/v1/site`, mediaType: "application/json" },
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "social.aitta.profile", href: canonicalUrl, mediaType: "text/html" },
+    ],
+    actions: [],
   };
 }
 
 function expectedCollectionPage(canonicalUrl, page, pageSize) {
   const offset = (page - 1) * pageSize;
   const pageIds = publishedOrder.slice(offset, offset + pageSize);
-  const hasMore = publishedOrder.length > offset + pageSize;
+  const lastPage = Math.max(1, Math.ceil(publishedOrder.length / pageSize));
   const collection = `${canonicalUrl}/api/v1/entries`;
   const pageUrl = (targetPage) =>
     `${collection}?page=${targetPage}&pageSize=${pageSize}`;
   return {
-    data: pageIds.map((id) => expectedPublicEntry(entryById(id), canonicalUrl)),
-    pagination: { page, pageSize, hasMore },
-    links: {
-      self: pageUrl(page),
-      ...(page > 1 ? { previous: pageUrl(page - 1) } : {}),
-      ...(hasMore ? { next: pageUrl(page + 1) } : {}),
-      site: `${canonicalUrl}/api/v1/site`,
+    data: pageIds.map((id) => expectedV1EntryResource(entryById(id))),
+    pagination: { page, pageSize },
+    links: [
+      { rel: "self", href: pageUrl(page), mediaType: "application/json" },
+      { rel: "first", href: pageUrl(1), mediaType: "application/json" },
+      ...(page > 1
+        ? [{ rel: "previous", href: pageUrl(page - 1), mediaType: "application/json" }]
+        : []),
+      ...(page < lastPage
+        ? [{ rel: "next", href: pageUrl(page + 1), mediaType: "application/json" }]
+        : []),
+      { rel: "last", href: pageUrl(lastPage), mediaType: "application/json" },
+      ...pageIds.map((id) => ({
+        rel: "item",
+        href: `${collection}/${encodeURIComponent(id)}`,
+        mediaType: "application/json",
+      })),
+      { rel: "profile", href: `${canonicalUrl}/api/v1/schema`, mediaType: "application/json" },
+      { rel: "social.aitta.profile", href: `${canonicalUrl}/api/v1/site`, mediaType: "application/json" },
+    ],
+    actions: [],
+  };
+}
+
+function expectedV1EntryResource(entry) {
+  return {
+    id: entry.id,
+    type: "entry",
+    attributes: {
+      kind: entry.kind,
+      ...(entry.title ? { title: entry.title } : {}),
+      body: entry.body,
+      ...(entry.destinationUrl ? { destinationUrl: entry.destinationUrl } : {}),
+      ...(entry.publishedAt ? { publishedAt: entry.publishedAt } : {}),
+      createdAt: entry.createdAt,
+      updatedAt: entry.updatedAt,
     },
   };
 }
 
-function expectedPublicEntry(entry, canonicalUrl) {
+function expectedEntryDetail(entry, canonicalUrl) {
+  const encodedId = encodeURIComponent(entry.id);
   return {
-    id: entry.id,
-    kind: entry.kind,
-    ...(entry.title ? { title: entry.title } : {}),
-    body: entry.body,
-    ...(entry.destinationUrl ? { destinationUrl: entry.destinationUrl } : {}),
-    ...(entry.publishedAt ? { publishedAt: entry.publishedAt } : {}),
-    createdAt: entry.createdAt,
-    updatedAt: entry.updatedAt,
-    links: {
-      self: `${canonicalUrl}/api/v1/entries/${encodeURIComponent(entry.id)}`,
-      html: `${canonicalUrl}/entries/${encodeURIComponent(entry.id)}`,
-    },
+    data: expectedV1EntryResource(entry),
+    links: [
+      {
+        rel: "self",
+        href: `${canonicalUrl}/api/v1/entries/${encodedId}`,
+        mediaType: "application/json",
+      },
+      {
+        rel: "collection",
+        href: `${canonicalUrl}/api/v1/entries`,
+        mediaType: "application/json",
+      },
+      {
+        rel: "profile",
+        href: `${canonicalUrl}/api/v1/schema`,
+        mediaType: "application/json",
+      },
+      {
+        rel: "alternate",
+        href: `${canonicalUrl}/entries/${encodedId}`,
+        mediaType: "text/html",
+      },
+    ],
+    actions: [],
   };
 }
 
@@ -752,6 +804,23 @@ function setupErrorFor(readiness) {
     };
   }
   return null;
+}
+
+function profileSetupError(setupError) {
+  const { code, message } = setupError.body.error;
+  return {
+    ...setupError,
+    body: {
+      data: null,
+      error: {
+        code,
+        message: code === "profile_not_configured"
+          ? "The Aitta profile has not been configured."
+          : message,
+      },
+      links: [],
+    },
+  };
 }
 
 async function observeHtml(worker, pathname) {
@@ -853,8 +922,4 @@ function assertNoPrivateCanary(value) {
     value,
     /FRESH-RUNTIME\.example|LEGACY-PERSON\.example|\/presence\/\/\//u,
   );
-}
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }

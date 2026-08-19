@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 import ts from "typescript";
+
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+import { deletionAcknowledgement } from "./helpers/deletion-acknowledgement-contract.mjs";
+import { countMatches } from "./helpers/regular-expression-match-count.mjs";
+import { readRepositorySource } from "./helpers/repository-source.mjs";
 
 import {
   FakeD1,
@@ -47,22 +51,29 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     headers: mutationHeaders(ownerEmail),
     body: JSON.stringify(identity),
   });
-  assert.equal(identitySave.status, 204);
+  assert.equal(identitySave.status, 200);
   assert.equal(db.profile.display_name, identity.displayName);
+  assert.equal(db.profile.short_description, identity.shortDescription);
+  assert.equal(db.profile.introduction, identity.introduction);
+  assert.equal(db.profile.location, identity.location);
+  assert.equal(db.profile.website, identity.website);
+  assert.deepEqual(JSON.parse(db.profile.external_links_json), identity.externalLinks);
   assert.equal(db.profile.canonical_url, "https://stored.example/fallback");
   assert.equal(db.profile.accent_color, identity.accentColor);
   assert.equal(db.profile.density, "compact");
   assert.equal(db.profile.hide_powered_by, 1);
+  assert.equal(db.profile.account_type, "other");
 
   const reloadedIdentity = await ownerHtml("/owner/profile", env, {
     "oai-authenticated-user-full-name": encodeURIComponent(ownerIdentityCanary),
   });
-  assert.match(reloadedIdentity, /Identity is complete/i);
-  assert.match(reloadedIdentity, /Effective public URL · (?:<!-- -->)?protected Site setting/i);
+  assert.match(reloadedIdentity, /Identity is ready/i);
+  assert.match(reloadedIdentity, /Effective public URL · (?:<!-- -->)?protected runtime URL/i);
   assert.match(reloadedIdentity, /https:\/\/runtime\.example\/presence/i);
-  assert.match(reloadedIdentity, /Fallback canonical presence URL/i);
+  assert.match(reloadedIdentity, /Canonical URL fallback/i);
   assert.match(reloadedIdentity, /value="https:\/\/stored\.example\/fallback"/i);
-  assert.match(reloadedIdentity, new RegExp(ownerIdentityCanary, "i"));
+  assert.doesNotMatch(reloadedIdentity, new RegExp(ownerIdentityCanary, "i"));
+  assert.match(reloadedIdentity, /<a[^>]+href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
 
   const create = await fetchApp("/api/private/entries", {
     env,
@@ -72,7 +83,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   });
   assert.equal(create.status, 201);
   const created = (await responseJson(create)).data;
-  assert.equal(created.state, "draft");
+  assert.equal(created.attributes.state, "draft");
 
   const edit = await fetchApp(`/api/private/entries/${created.id}`, {
     env,
@@ -85,11 +96,11 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     })),
   });
   assert.equal(edit.status, 200);
-  assert.equal((await responseJson(edit)).data.state, "draft");
+  assert.equal((await responseJson(edit)).data.attributes.state, "draft");
 
   const reloadedDraft = await ownerHtml(`/owner/entries/${created.id}`, env);
   assert.match(reloadedDraft, /First assisted update/i);
-  assert.match(reloadedDraft, new RegExp(escapeRegex(publicBody), "i"));
+  assert.match(reloadedDraft, new RegExp(escapeRegExp(publicBody), "i"));
   assert.match(reloadedDraft, /Save private draft/i);
   await assertPubliclyUnknown(env, created.id, [draftCanary, publicBody]);
 
@@ -100,7 +111,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     body: JSON.stringify({ state: "published" }),
   });
   assert.equal(publish.status, 200);
-  assert.equal((await responseJson(publish)).data.state, "published");
+  assert.equal((await responseJson(publish)).data.attributes.state, "published");
 
   const [signedOutHome, signedOutPermalink, siteApi, entryApi] = await Promise.all([
     fetchApp("/", { env, headers: { accept: "text/html" } }),
@@ -113,13 +124,13 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
   const publicHtml = `${await signedOutHome.text()}\n${await signedOutPermalink.text()}`;
   assert.match(publicHtml, /Assisted Field Notes/i);
   assert.match(publicHtml, /First assisted update/i);
-  assert.match(publicHtml, new RegExp(escapeRegex(publicBody), "i"));
+  assert.match(publicHtml, new RegExp(escapeRegExp(publicBody), "i"));
   assert.match(publicHtml, /density-compact/i);
   assert.match(publicHtml, /--accent:#6a4b35/i);
   assert.doesNotMatch(publicHtml, /Powered by AittaSocial/i);
   assert.doesNotMatch(publicHtml, new RegExp(`${draftCanary}|${ownerIdentityCanary}|owner@example\\.com`, "i"));
 
-  const publicSite = (await responseJson(siteApi)).data;
+  const publicSite = (await responseJson(siteApi)).data.attributes;
   assert.equal(publicSite.canonicalUrl, "https://runtime.example/presence");
   assert.deepEqual(publicSite.presentation, {
     accentColor: "#6a4b35",
@@ -127,7 +138,7 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     showPoweredBy: false,
   });
   assert.deepEqual(publicSite.externalLinks, identity.externalLinks);
-  assert.equal((await responseJson(entryApi)).data.body, publicBody);
+  assert.equal((await responseJson(entryApi)).data.attributes.body, publicBody);
 
   const unpublish = await fetchApp(`/api/private/entries/${created.id}/state`, {
     env,
@@ -136,9 +147,19 @@ test("one authorized browser journey customizes D1, reviews a draft, publishes, 
     body: JSON.stringify({ state: "draft" }),
   });
   assert.equal(unpublish.status, 200);
-  assert.equal((await responseJson(unpublish)).data.state, "draft");
+  assert.equal((await responseJson(unpublish)).data.attributes.state, "draft");
   const resumed = await ownerHtml("/owner", env);
   assert.match(resumed, new RegExp(`href="/owner/entries/${created.id}"[^>]*>Resume first draft`, "i"));
+  await assertPubliclyUnknown(env, created.id, [draftCanary, publicBody]);
+
+  const deletion = await fetchApp(`/api/private/entries/${created.id}`, {
+    env,
+    method: "DELETE",
+    headers: mutationHeaders(ownerEmail),
+  });
+  assert.equal(deletion.status, 200);
+  assert.deepEqual(await responseJson(deletion), deletionAcknowledgement(created.id));
+  assert.equal(db.entries.some((entry) => entry.id === created.id), false);
   await assertPubliclyUnknown(env, created.id, [draftCanary, publicBody]);
 });
 
@@ -198,8 +219,8 @@ test("assisted write fixtures fail closed for non-owner, missing owner, CSRF, an
       headers: mutationHeaders(ownerEmail),
       body: JSON.stringify(validEntryInput({ kind: "link", destinationUrl: null })),
     });
-    assert.equal(invalidIdentity.status, 400);
-    assert.equal(invalidUpdate.status, 400);
+    assert.equal(invalidIdentity.status, 422);
+    assert.equal(invalidUpdate.status, 422);
     assert.equal(db.mutations.length, 0);
   });
 });
@@ -216,15 +237,87 @@ test("effective canonical defaults never serialize an invalid stored fallback", 
   });
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /Effective public URL · (?:<!-- -->)?protected Site setting/i);
-  assert.match(html, /Fallback canonical presence URL/i);
+  assert.match(html, /Effective public URL · (?:<!-- -->)?protected runtime URL/i);
+  assert.match(html, /Canonical URL fallback/i);
+  assert.match(html, /Saved profile loaded/i);
+  assert.match(html, /class="identity-save-state identity-save-state-loaded"/i);
+  assert.match(html, /canonical fallback is invalid/i);
+  assert.match(html, /effective protected runtime URL is available below/i);
+  assert.match(html, /saving updates the runtime fallback/i);
+  assert.match(html, /prefilled from the protected runtime URL/i);
   assert.match(html, /name="canonicalUrl"[^>]+value="https:\/\/runtime\.example\/normalized"/i);
   assert.doesNotMatch(html, new RegExp(storedCanary, "i"));
   assert.doesNotMatch(html, /not-a-url/i);
 });
 
+test("an invalid stored fallback without a valid runtime URL is explicitly omitted", async () => {
+  const storedCanary = "INVALID_STORED_OMITTED_PRIVATE_CANARY";
+  const runtimeCanary = "INVALID_RUNTIME_OMITTED_PRIVATE_CANARY";
+  const response = await fetchApp("/owner/profile", {
+    env: makeEnv({
+      db: new FakeD1({ profile: profileRow({ canonical_url: `not-a-url-${storedCanary}` }) }),
+      ownerEmail,
+      canonicalUrl: `not-a-url-${runtimeCanary}`,
+    }),
+    headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Identity needs a valid public URL/i);
+  assert.match(html, /Saved profile loaded without an invalid canonical URL/i);
+  assert.match(html, /class="identity-save-state identity-save-state-loaded"/i);
+  assert.match(html, /canonical fallback is invalid and was omitted from this form/i);
+  assert.match(html, /profile values were loaded from this Aitta/i);
+  assert.match(html, /No URL is prefilled because the saved fallback is invalid/i);
+  assert.match(html, /name="canonicalUrl"[^>]+value=""/i);
+  assert.doesNotMatch(html, /identity-save-state-saved|Saved values loaded|form matches the profile values loaded/i);
+  assert.doesNotMatch(html, new RegExp(`${storedCanary}|${runtimeCanary}|not-a-url`, "i"));
+});
+
+test("an empty stored fallback remains an exact empty saved baseline", async () => {
+  const response = await fetchApp("/owner/profile", {
+    env: makeEnv({
+      db: new FakeD1({ profile: profileRow({ canonical_url: "" }) }),
+      ownerEmail,
+      canonicalUrl: "also-not-valid",
+    }),
+    headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Identity needs a valid public URL/i);
+  assert.match(html, /class="identity-save-state identity-save-state-saved"/i);
+  assert.match(html, /Saved values loaded/i);
+  assert.match(html, /form matches the profile values loaded/i);
+  assert.match(html, /name="canonicalUrl"[^>]+value=""/i);
+  assert.doesNotMatch(html, /invalid URL|invalid saved fallback was omitted|invalid-stored-omitted/i);
+});
+
+test("a whitespace-only stored fallback is omitted rather than called an exact saved baseline", async () => {
+  const privateCanary = "WHITESPACE_STORED_PRIVATE_CANARY";
+  const response = await fetchApp("/owner/profile", {
+    env: makeEnv({
+      db: new FakeD1({
+        profile: profileRow({ canonical_url: " \t\n ", private_canary: privateCanary }),
+      }),
+      ownerEmail,
+      canonicalUrl: "also-not-valid",
+    }),
+    headers: { accept: "text/html", ...ownerHeaders(ownerEmail) },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Identity needs a valid public URL/i);
+  assert.match(html, /class="identity-save-state identity-save-state-loaded"/i);
+  assert.match(html, /Saved profile loaded without an invalid canonical URL/i);
+  assert.match(html, /canonical fallback is invalid and was omitted from this form/i);
+  assert.match(html, /name="canonicalUrl"[^>]+value=""/i);
+  assert.doesNotMatch(html, /identity-save-state-saved|Saved values loaded|form matches the profile values loaded/i);
+  assert.doesNotMatch(html, new RegExp(privateCanary, "i"));
+});
+
 test("owner mutation response policy treats 4xx as definitive and 5xx as unconfirmed", async () => {
-  const moduleSource = await source("app/owner/_components/owner-mutation-outcome.ts");
+  const moduleSource = await readRepositorySource("app/owner/_components/owner-mutation-outcome.ts");
   const compiled = ts.transpileModule(moduleSource, {
     compilerOptions: {
       module: ts.ModuleKind.ES2022,
@@ -261,54 +354,69 @@ test("owner controls expose semantic, per-update actions, explicit publication c
     presentationDoc,
     outcomePolicy,
   ] = await Promise.all([
-    source("app/owner/_components/EntryActions.tsx"),
-    source("app/owner/entries/EntryForm.tsx"),
-    source("app/owner/profile/ProfileForm.tsx"),
-    source("app/owner/profile/page.tsx"),
-    source("app/owner/page.tsx"),
-    source("app/owner/entries/[id]/page.tsx"),
-    source("app/globals.css"),
-    source("docs/deployment.md"),
-    source("docs/security.md"),
-    source("docs/privacy.md"),
-    source("docs/presentation.md"),
-    source("app/owner/_components/owner-mutation-outcome.ts"),
+    readRepositorySource("app/owner/_components/EntryActions.tsx"),
+    readRepositorySource("app/owner/entries/EntryForm.tsx"),
+    readRepositorySource("app/owner/profile/ProfileForm.tsx"),
+    readRepositorySource("app/owner/profile/page.tsx"),
+    readRepositorySource("app/owner/page.tsx"),
+    readRepositorySource("app/owner/entries/[id]/page.tsx"),
+    readRepositorySource("app/globals.css"),
+    readRepositorySource("docs/deployment.md"),
+    readRepositorySource("docs/security.md"),
+    readRepositorySource("docs/privacy.md"),
+    readRepositorySource("docs/presentation.md"),
+    readRepositorySource("app/owner/_components/owner-mutation-outcome.ts"),
   ]);
 
-  assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*visible on the public presence and its permalink[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
+  assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*copy\.confirmPublish[\s\S]*copy\.confirmUnpublish[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
   assert.match(actions, /role="group"[^>]+aria-label=\{`Actions for \$\{updateLabel\}, update \$\{actionReference\}`\}/);
   for (const action of ["Edit", "Publish", "Open public permalink for", "Unpublish", "Delete"]) {
-    assert.match(actions, new RegExp(`aria-label=\\{\\\`${escapeRegex(action)}[^\\\`]+update \\$\\{actionReference\\}`));
+    assert.match(actions, new RegExp(`aria-label=\\{\\\`${escapeRegExp(action)}[^\\\`]+update \\$\\{actionReference\\}`));
   }
-  assert.match(actions, /The update visibility result could not be confirmed\. Reload Your presence before retrying\./);
-  assert.match(actions, /The deletion result could not be confirmed\. Reload Your presence before retrying\./);
+  assert.match(actions, /copy\.publicationFailureDraft/);
+  assert.match(actions, /copy\.publicationFailureUnpublish/);
+  assert.match(actions, /copy\.deletionFailure/);
   assert.match(actions, /href="\/owner"[^>]+aria-label=\{`Check current state/);
+  assert.match(actions, /href="\/owner"[^>]+aria-label=\{`Check saved state/);
   assert.match(actions, /const actionReference = id;/);
   assert.doesNotMatch(actions, /boundedActionReference|slice\(-8\)/);
-  assert.equal(countMatches(actions, /const outcome = classifyOwnerMutationResponse\(response\);/g), 2);
-  assert.equal(countMatches(actions, /setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 2);
-  assert.equal(countMatches(actions, /if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\("The (?:update visibility|deletion) result could not be confirmed\.[^\n]+\);\s*return;\s*\}\s*setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 2);
-  assert.equal(countMatches(actions, /catch \{\s*showUnconfirmedResult\("The (?:update visibility|deletion) result could not be confirmed\.[^\n]+\);\s*\}/g), 2);
-  assert.match(actions, /function showUnconfirmedResult\(message: string\) \{\s*setMessage\(message\);\s*setShowRecovery\(true\);\s*setBusy\(false\);\s*\}/);
-  assert.match(actions, /setBusy\(true\);\s*setShowRecovery\(false\);/);
+  assert.equal(countMatches(actions, /const outcome = classifyOwnerMutationResponse\(response\);/g), 0);
+  assert.equal(countMatches(actions, /setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 0);
+  assert.match(actions, /readPublicationStateResponse\(response, \{ id, state: nextState \}\)[\s\S]*if \(result\.outcome === "unconfirmed"\) \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*return;\s*\}\s*setMessage\(lifecycleFailureMessage\(nextState, result\.message, copy\)\);\s*setBusy\(false\);/);
+  assert.match(actions, /const outcome = await readDeletionResponse\(response, id\);[\s\S]*if \(outcome\.outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\(copy\.deletionFailure\);\s*return;\s*\}\s*setMessage\(`The server rejected this deletion request\. \$\{outcome\.message\}`\);\s*setBusy\(false\);/);
+  assert.match(actions, /catch \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*\}/);
+  assert.match(actions, /catch \{\s*showUnconfirmedResult\(copy\.deletionFailure\);\s*\}/);
+  assert.match(actions, /function showUnconfirmedResult\(message: string\) \{\s*setMessage\(message\);\s*setDeletionRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);
+  assert.match(actions, /setBusy\(true\);\s*setMessage\(copy\.saveStateSaving\)/);
+  assert.match(actions, /if \(lifecycleRecoveryRequired\) return;/);
+  assert.equal(countMatches(actions, /disabled=\{busy \|\| lifecycleRecoveryRequired\}/g), 2);
   assert.match(dashboard, /<EntryActions id=\{entry\.id\} state=\{entry\.state\} label=\{entry\.title \?\? entry\.body\.slice\(0, 90\)\}/);
   assert.match(editPage, /<EntryActions id=\{entry\.id\} state=\{entry\.state\} label=\{entry\.title \?\? entry\.body\.slice\(0, 90\)\}/);
 
   assert.match(entryForm, /<form[^>]+aria-label=\{entry \? "Edit update" : "Create private draft"\}[^>]+aria-busy=\{busy\}/);
-  assert.match(entryForm, /Save public update[\s\S]*Save private draft[\s\S]*Create private draft/);
-  assert.match(entryForm, /The save result could not be confirmed\. Reload Your presence before retrying\./);
-  assert.match(entryForm, /href=\{entry \? `\/owner\/entries\/\$\{entry\.id\}` : "\/owner"\}/);
-  assert.match(entryForm, /const outcome = classifyOwnerMutationResponse\(response\);[\s\S]*if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setStatus\(await errorMessage\(response\)\);\s*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
-  assert.match(entryForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The save result could not be confirmed\.[^\n]+\);\s*setShowRecovery\(true\);\s*setBusy\(false\);\s*\}/);
-  assert.match(profileForm, /<form[^>]+aria-label="Identity and presentation settings"[^>]+aria-busy=\{busy\}/);
-  assert.match(profileForm, /Fallback canonical presence URL/);
-  assert.match(profileForm, /Saving this field updates only the durable D1 fallback and cannot change that protected setting/);
-  assert.match(profileForm, /The Identity save result could not be confirmed\. Reload this page before retrying\./);
-  assert.match(profileForm, /href="\/owner\/profile">Reload saved Identity/);
-  assert.match(profileForm, /const outcome = classifyOwnerMutationResponse\(response\);[\s\S]*if \(outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setStatus\(await errorMessage\(response\)\);\s*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
-  assert.match(profileForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The Identity save result could not be confirmed\.[^\n]+\);\s*setShowRecovery\(true\);\s*setBusy\(false\);\s*\}/);
-  assert.match(profilePage, /normalizedCanonicalOrNull\(profile\?\.canonicalUrl \?\? null\)/);
+  assert.match(entryForm, /Save update[\s\S]*Save private draft/);
+  assert.match(entryForm, /The save result is unknown\. Do not submit again from this page; the first request may have succeeded/);
+  assert.match(entryForm, /href=\{entry \? `\/owner\/entries\/\$\{encodeURIComponent\(entry\.id\)\}` : "\/owner"\}/);
+  assert.match(entryForm, /const result = await readEntryEditResponse\(response,[\s\S]*if \(result\.outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}[\s\S]*setFieldErrors\(result\.fieldErrors\);[\s\S]*focusFirstInvalidField\(formElement, result\.fieldErrors\);[\s\S]*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
+  assert.match(entryForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The save result is unknown\.[^\n]+\);\s*setRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);
+  assert.match(entryForm, /if \(recoveryRequired\) return;/);
+  assert.match(entryForm, /disabled=\{busy \|\| recoveryRequired\}/);
+  assert.match(entryForm, /if \(!formElement\.checkValidity\(\)\)[\s\S]*formElement\.reportValidity\(\)/);
+  assert.match(entryForm, /readEntryEditResponse\(response/);
+  assert.match(profileForm, /<form[^>]+aria-label="Identity and profile settings"[^>]+aria-busy=\{busy\}/);
+  assert.match(profileForm, /Canonical URL fallback/);
+  assert.match(profileForm, /protected runtime URL remains effective and cannot be changed here/);
+  assert.match(profileForm, /The Identity save result could not be confirmed\. Reload the saved Identity before retrying\./);
+  assert.match(profileForm, /href="\/owner\/profile">Reload saved Identity before retrying/);
+  assert.match(profileForm, /const result = await readProfileSaveResponse\(response\);[\s\S]*if \(result\.outcome === "unconfirmed"\) \{\s*showUnconfirmedSave\(\);\s*return;\s*\}[\s\S]*setFieldErrors\(result\.fieldErrors\);[\s\S]*setStatus\(result\.message\);[\s\S]*focusFirstInvalidField\(formElement, result\.fieldErrors\);[\s\S]*\} catch \{\s*showUnconfirmedSave\(\);\s*return;\s*\}\s*setBusy\(false\);/);
+  assert.match(profileForm, /function showUnconfirmedSave\(\) \{\s*setStatus\("The Identity save result could not be confirmed\.[^\n]+\);\s*setRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);
+  assert.match(profileForm, /if \(recoveryRequired\) return;/);
+  assert.match(profileForm, /disabled=\{busy \|\| recoveryRequired\}/);
+  assert.match(profileForm, /readProfileSaveResponse\(response\)/);
+  assert.match(profilePage, /storedCanonicalValue = profile\?\.canonicalUrl \?\? ""/);
+  assert.match(profilePage, /normalizedCanonicalOrNull\(storedCanonicalValue\)/);
   assert.match(profilePage, /storedCanonical \?\? readiness\.canonicalUrl \?\? ""/);
+  assert.match(profilePage, /storedCanonical[\s\S]*\? "stored"[\s\S]*readiness\.canonicalSource === "runtime"[\s\S]*\? "runtime-substitution"[\s\S]*storedCanonicalValue\.length > 0[\s\S]*\? "invalid-stored-omitted"[\s\S]*: "empty"/);
   assert.match(profileForm, /canonicalUrl: canonicalDefault/);
   assert.match(outcomePolicy, /if \(response\.ok\) return "success";/);
   assert.match(outcomePolicy, /response\.status >= 500 \? "unconfirmed" : "definitive-error"/);
@@ -319,19 +427,20 @@ test("owner controls expose semantic, per-update actions, explicit publication c
   assert.match(css, /\.button\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.field input, \.field textarea, \.field select\s*\{[^}]*min-height:\s*48px/s);
   assert.match(css, /:focus-visible\s*\{[^}]*outline:\s*3px/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-content\s*\{\s*width:\s*calc\(100% - 28px\)/);
+  const ownerShellCss = await readRepositorySource("app/owner/_components/OwnerShell.module.css");
+  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.content\s*\{\s*width:\s*calc\(100% - 28px\)/);
   assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.form-footer\s*\{[^}]*flex-direction:\s*column/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 
   assert.match(deploymentDoc, /browser-controlling ChatGPT must stop there[\s\S]*owner explicitly approves/i);
-  assert.match(deploymentDoc, /Reload before\s+retrying:[\s\S]*may have committed the\s+first request/i);
-  assert.match(deploymentDoc, /server returns a 5xx response[\s\S]*A 4xx validation or authorization response/i);
+  assert.match(deploymentDoc, /For a publish or unpublish request, it locks another\s+publication-state change[\s\S]*Check this Aitta’s current saved state/i);
+  assert.match(deploymentDoc, /server returns a 5xx response[\s\S]*A 4xx validation or\s+authorization response/i);
   assert.match(deploymentDoc, /do not fork or[\s\S]*edit GitHub source, redeploy the Site, change protected settings, change access,[\s\S]*or connect a domain/i);
   assert.match(securityDoc, /there is no agent[\s\S]*credential, agent route, prompt-derived permission/i);
   assert.match(securityDoc, /rejected fetch or 5xx response is ambiguous[\s\S]*reloads[\s\S]*before any retry[\s\S]*A 4xx validation or[\s\S]*authorization response/i);
   assert.match(privacyDoc, /application adds no agent identity, agent token, browser-storage record,[\s\S]*database field, log field, or outbound content request/i);
   assert.match(presentationDoc, /native,\s+update-specific confirmation[\s\S]*human owner's explicit approval/i);
-  assert.match(presentationDoc, /complete collision-free stable entry identifier[\s\S]*rejected fetch or 5xx response[\s\S]*4xx response remains a\s+definitive safe error/i);
+  assert.match(presentationDoc, /complete collision-free stable entry identifier[\s\S]*exact bounded\s+JSON owner-entry document confirms the stable identifier and requested state[\s\S]*A 4xx\s+response gives a definitive rejected-request\s+outcome without claiming the update's current state[\s\S]*rejected fetch or 5xx response is\s+unknown/i);
 });
 
 test("repeated dashboard controls have distinct accessible names without leaking private configuration", async () => {
@@ -367,7 +476,7 @@ test("a maximum-length unbroken owner title and the full action set retain shrin
       }),
       ownerEmail,
     })),
-    source("app/globals.css"),
+    readRepositorySource("app/globals.css"),
   ]);
   const row = html.match(/<article class="owner-entry-row"[\s\S]*?<\/article>/)?.[0];
   assert.ok(row, "the populated owner route must render its update row");
@@ -379,7 +488,7 @@ test("a maximum-length unbroken owner title and the full action set retain shrin
   assert.equal(countMatches(row, /class="button button-small/g), 4);
 
   assert.match(css, /\.owner-entry-copy\s*\{[^}]*min-width:\s*0/s);
-  assert.match(css, /\.owner-entry-copy h3 a\s*\{[^}]*min-height:\s*44px[^}]*display:\s*inline-block[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.owner-entry-copy h3 a\s*\{[^}]*min-height:\s*var\(--control-min-height\)[^}]*display:\s*inline-flex[^}]*align-items:\s*center[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.entry-actions\s*\{[^}]*min-width:\s*0/s);
   assert.match(css, /\.public-nav-actions, \.button-row, \.entry-actions, \.form-footer\s*\{[^}]*flex-wrap:\s*wrap/s);
 });
@@ -387,16 +496,16 @@ test("a maximum-length unbroken owner title and the full action set retain shrin
 test("the complete native checkbox label retains its owner touch-target source contract", async () => {
   const [html, css] = await Promise.all([
     ownerHtml("/owner/profile", makeEnv({ db: new FakeD1(), ownerEmail })),
-    source("app/globals.css"),
+    readRepositorySource("app/globals.css"),
   ]);
   assert.match(
     html,
-    /<label class="check-field">\s*<input(?=[^>]*name="hidePoweredBy")(?=[^>]*type="checkbox")[^>]*>\s*<span>Hide the restrained “Powered by AittaSocial” and source links<\/span>\s*<\/label>/is,
+    /<label class="check-field">\s*<input(?=[^>]*name="hidePoweredBy")(?=[^>]*type="checkbox")[^>]*>\s*<span>Hide the restrained “Powered by AittaSocial” attribution<\/span>\s*<\/label>/is,
   );
 
   const labelRule = css.match(/\.check-field\s*\{([^}]*)\}/s);
   assert.ok(labelRule, "the enclosing checkbox label needs a shared source rule");
-  assert.match(labelRule[1], /min-height:\s*44px/);
+  assert.match(labelRule[1], /min-height:\s*var\(--control-min-height\)/);
   assert.match(labelRule[1], /display:\s*flex/);
   assert.match(labelRule[1], /align-items:\s*flex-start/);
 
@@ -424,17 +533,5 @@ async function assertPubliclyUnknown(env, id, canaries) {
   assert.equal(permalink.status, 404);
   assert.equal(detail.status, 404);
   const publicSource = `${await home.text()}\n${await permalink.text()}\n${JSON.stringify(await responseJson(detail))}\n${JSON.stringify(await responseJson(collection))}`;
-  for (const canary of canaries) assert.doesNotMatch(publicSource, new RegExp(escapeRegex(canary), "i"));
-}
-
-async function source(path) {
-  return readFile(new URL(`../${path}`, import.meta.url), "utf8");
-}
-
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function countMatches(value, pattern) {
-  return [...value.matchAll(pattern)].length;
+  for (const canary of canaries) assert.doesNotMatch(publicSource, new RegExp(escapeRegExp(canary), "i"));
 }

@@ -1,0 +1,153 @@
+/**
+ * Styles owned by the permalink entry page.
+ *
+ * Keep these selector rules local to this route.
+ */
+.permalink-content {
+  max-width: 732px;
+}
+
+.permalink-entry {
+  padding: 1.5rem 0 1.75rem;
+}
+
+.permalink-entry h1:not(.visually-hidden) {
+  max-width: 32ch;
+  margin: 1rem 0 0;
+  font-family: var(--sans);
+  font-size: clamp(1.35rem, 3vw, 1.5rem);
+  font-weight: 760;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.permalink-header {
+  min-width: 0;
+}
+
+.permalink-source-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.75rem;
+}
+
+.permalink-context {
+  max-width: 20rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.permalink-body {
+  max-width: 66ch;
+  margin-top: 1rem;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.permalink-note-body {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.permalink-note-title {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.permalink-destination {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  text-decoration: none;
+}
+
+.permalink-destination span {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.permalink-destination strong {
+  min-width: 0;
+  flex: 1 1 220px;
+  font-size: 0.82rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.permalink-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 0 2rem;
+  border-top: 1px solid var(--line);
+}
+
+.permalink-time {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.permalink-time :global(.update-kind) {
+  display: inline;
+}
+
+.permalink-source-identity {
+  min-width: 0;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+  font-weight: 750;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+.permalink-source-identity > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .permalink-source-row {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .permalink-context {
+    justify-content: start;
+    padding-left: 3.25rem;
+    text-align: left;
+  }
+
+  .permalink-footer {
+    padding-top: 1rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}

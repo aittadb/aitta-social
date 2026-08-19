@@ -1,33 +1,20 @@
-import type { Metadata } from "next";
-import type { CSSProperties } from "react";
-import { notFound } from "next/navigation";
-import { getEntry, getProfile } from "@/db/repository";
-import {
-  publicEntryMetadata,
-  unavailableEntryMetadata,
-} from "@/lib/public-metadata";
-import { resolvePresentationAccent } from "@/lib/presentation-accent";
-import type { Entry } from "@/lib/types";
-import {
-  PresenceIdentityTile,
-  PublicFooter,
-  PublicPresenceHeader,
-} from "@/app/_components/PublicPresenceFrame";
+import type { Metadata } from 'next';
+import type { CSSProperties } from 'react';
+import { notFound } from 'next/navigation';
+import { getEntry, getProfile } from '@/db/repository';
+import { publicEntryMetadata, unavailableEntryMetadata } from '@/lib/public-metadata';
+import { entryKindLabel } from '@/lib/entry-kind-label';
+import { resolvePresentationAccent } from '@/lib/presentation-accent';
+import { getLocale, getMessages } from '@/lib/i18n';
+import { PresenceIdentityTile, PublicPageFrame } from '@/app/_components/PublicPresenceFrame';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
-export async function generateMetadata(
-  { params }: { params: Promise<{ id: string }> },
-): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   try {
-    const [entry, profile] = await Promise.all([
-      getEntry(id, true),
-      getProfile(),
-    ]);
-    return entry
-      ? publicEntryMetadata(entry, profile)
-      : unavailableEntryMetadata();
+    const [entry, profile] = await Promise.all([getEntry(id, true), getProfile()]);
+    return entry ? publicEntryMetadata(entry, profile) : unavailableEntryMetadata();
   } catch {
     return unavailableEntryMetadata();
   }
@@ -35,40 +22,47 @@ export async function generateMetadata(
 
 export default async function EntryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const messages = await getMessages(locale);
   const [entry, profile] = await Promise.all([getEntry(id, true), getProfile()]);
   if (!entry) notFound();
-  const displayName = profile?.displayName ?? "Independent presence";
+  const displayName = profile?.displayName ?? 'Independent Aitta';
   const publishedAt = entry.publishedAt ?? entry.createdAt;
-  const isNote = entry.kind === "note";
+  const isNote = entry.kind === 'note';
+  const copy = {
+    destination: messages.ui.entryPage.destination,
+    published: messages.ui.entryPage.published,
+    updateActions: messages.ui.entryPage.updateActions,
+    returnToAitta: messages.ui.entryPage.returnToAitta,
+    viewAsJson: messages.ui.entryPage.viewAsJson,
+    updateFrom: messages.ui.entryPage.updateFrom,
+  };
 
   return (
-    <main
+    <PublicPageFrame
       className="permalink-shell"
-      style={{ "--accent": resolvePresentationAccent(profile?.accentColor) } as CSSProperties}
+      style={{ '--accent': resolvePresentationAccent(profile?.accentColor) } as CSSProperties}
+      profile={profile}
+      displayName={displayName}
     >
-      <PublicPresenceHeader
-        displayName={displayName}
-        identityHref="/"
-        label="Update navigation"
-        actionsLabel="Update actions"
-        action={{
-          href: "/",
-          label: "All updates",
-          accessibleName: "Return to the presence and all public updates",
-        }}
-      />
       <div className="permalink-content">
-        <article className={`permalink-entry permalink-kind-${entry.kind}`}>
+        <article className="permalink-entry">
           <header className="permalink-header">
             <div className="permalink-source-row">
-              <a className="permalink-source-identity" href="/">
-                <PresenceIdentityTile displayName={displayName} size="update" />
-                <span>{displayName}</span>
+              <a
+                className="permalink-source-identity"
+                href="/"
+              >
+                <PresenceIdentityTile
+                  displayName={displayName}
+                  size="update"
+                />
+              <span>{displayName}</span>
               </a>
               <div className="permalink-context">
-                {!isNote && <span className="update-kind">{kindLabel(entry.kind)}</span>}
+                {!isNote && <span className="update-kind">{entryKindLabel(entry.kind)}</span>}
                 <span className="permalink-time">
-                  Published <time dateTime={publishedAt}>{formatLongDate(publishedAt)}</time>
+                  {copy.published} <time dateTime={publishedAt}>{formatLongDate(publishedAt)}</time>
                 </span>
               </div>
             </div>
@@ -77,12 +71,10 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             ) : entry.title ? (
               <h1>{entry.title}</h1>
             ) : (
-              <h1 className="visually-hidden">{`${kindLabel(entry.kind)} update from ${displayName}`}</h1>
+              <h1 className="visually-hidden">{`${entryKindLabel(entry.kind)} update from ${displayName}`}</h1>
             )}
           </header>
-          <div className={`permalink-body${isNote ? " permalink-note-body" : ""}`}>
-            {entry.body}
-          </div>
+          <div className={`permalink-body ${isNote ? "permalink-note-body" : ""}`}>{entry.body}</div>
           {isNote && entry.title && <p className="permalink-note-title">{entry.title}</p>}
           {entry.destinationUrl && (
             <a
@@ -90,18 +82,27 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
               href={entry.destinationUrl}
               rel="noopener noreferrer"
             >
-              <span>Destination</span>
+              <span>{copy.destination}</span>
               <strong>{entry.destinationUrl}</strong>
             </a>
           )}
         </article>
-        <footer className="permalink-footer">
-          <a className="button" href="/">Return to presence</a>
-          <a className="text-link" href={`/api/v1/entries/${entry.id}`}>View as JSON</a>
-        </footer>
+        <nav className="permalink-footer" aria-label={copy.updateActions}>
+          <a
+            className="button"
+            href="/"
+          >
+            {copy.returnToAitta}
+          </a>
+          <a
+            className="text-link"
+            href={`/api/v1/entries/${entry.id}`}
+          >
+            {copy.viewAsJson}
+          </a>
+        </nav>
       </div>
-      <PublicFooter profile={profile} />
-    </main>
+    </PublicPageFrame>
   );
 }
 
@@ -109,9 +110,5 @@ function formatLongDate(value: string): string {
   const date = new Date(value);
   return Number.isNaN(date.valueOf())
     ? value
-    : new Intl.DateTimeFormat("en", { dateStyle: "long", timeStyle: "short" }).format(date);
-}
-
-function kindLabel(kind: Entry["kind"]): string {
-  return `${kind.charAt(0).toUpperCase()}${kind.slice(1)}`;
+    : new Intl.DateTimeFormat('en', { dateStyle: 'long', timeStyle: 'short' }).format(date);
 }

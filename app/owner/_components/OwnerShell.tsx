@@ -1,55 +1,115 @@
 import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
+import { AittaFooterResources } from "@/app/_components/AittaFooterResources";
+import { en } from "@/lib/i18n/messages/en";
+import styles from "./OwnerShell.module.css";
 
-export function OwnerShell({
-  displayName,
-  current,
-  children,
-}: {
-  displayName: string;
-  current: "overview" | "profile" | "entries";
+export function OwnerShell(props: {
+  current: "overview" | "profile" | "entries" | "pages";
   children: React.ReactNode;
+  copy?: {
+    navigationAria: string;
+    home: string;
+    identity: string;
+    newUpdate: string;
+    pages: string;
+    yourWorkspace: string;
+    footerWorkspace: string;
+  };
 }) {
+  const { current, children } = props;
+  const copy = props.copy ?? {
+    navigationAria: en.ui.owner.shell.navigationAria,
+    home: en.ui.owner.shell.home,
+    identity: en.ui.owner.shell.identity,
+    newUpdate: en.ui.owner.shell.newUpdate,
+    pages: en.ui.owner.shell.pages,
+    yourWorkspace: en.ui.owner.shell.privateWorkspace,
+    footerWorkspace: en.ui.owner.shell.privateWorkspace,
+  };
   return (
-    <main className="owner-shell">
-      <header className="owner-topbar">
-        <div>
-          <a className="owner-wordmark" href="/owner">AittaSocial</a>
-          <span className="owner-badge">Owner workspace</span>
-        </div>
-        <div className="owner-session">
-          <span className="owner-user">{displayName}</span>
-          <a href={chatGPTSignOutPath("/")}>Sign out</a>
-        </div>
-      </header>
-      <div className="owner-frame">
-        <nav className="owner-nav" aria-label="Owner navigation">
-          <OwnerNavLink href="/owner" active={current === "overview"}>Your presence</OwnerNavLink>
-          <OwnerNavLink href="/owner/profile" active={current === "profile"}>Identity</OwnerNavLink>
-          <OwnerNavLink href="/owner/entries/new" active={current === "entries"}>New update</OwnerNavLink>
-          <a className="owner-public-link" href="/">View public presence ↗</a>
-        </nav>
-        <div className="owner-content">{children}</div>
+    <main className={styles['owner-shell']}>
+      <OwnerHeader authorized />
+      <nav className={styles['owner-navigation']} aria-label={copy.navigationAria}>
+        <OwnerNavLink href="/owner" active={current === "overview"}>{copy.home}</OwnerNavLink>
+        <OwnerNavLink href="/owner/profile" active={current === "profile"}>{copy.identity}</OwnerNavLink>
+        <OwnerNavLink href="/owner/entries/new" active={current === "entries"}>{copy.newUpdate}</OwnerNavLink>
+        <OwnerNavLink href="/owner/pages/import" active={current === "pages"}>{copy.pages}</OwnerNavLink>
+      </nav>
+      <div className={styles['owner-frame']}>
+        <div className={styles['owner-content']}>{children}</div>
       </div>
+      <OwnerFooter />
     </main>
   );
 }
 
 export function OwnerAccessState({ status }: { status: "not-owner" | "unconfigured" }) {
+  const copy = {
+    administration: en.ui.owner.access.administration,
+    disabled: en.ui.owner.access.adminSafeDisabled,
+    notOwner: en.ui.owner.access.adminNotYours,
+    unconfigured: en.ui.owner.access.unconfiguredMessage,
+    signedOut: en.ui.owner.access.signedOutMessage,
+    returnToAitta: en.ui.publicPresenceFrame.returnToAitta,
+  };
   return (
-    <main className="owner-access-state">
-      <div className="owner-state-mark" aria-hidden="true">A</div>
-      <p className="eyebrow">Owner administration</p>
-      <h1>{status === "unconfigured" ? "Administration is safely disabled" : "This presence is not yours to administer"}</h1>
-      <p>
-        {status === "unconfigured"
-          ? "Configure AITTA_SOCIAL_OWNER_EMAIL in this Site’s protected runtime settings, then redeploy. Do not add the address to source files. Until then, every write operation remains disabled."
-          : "You are signed in, but this ChatGPT identity does not match the sole owner configured for this presence."}
-      </p>
-      <div className="button-row">
-        <a className="button" href="/">Return to public presence</a>
-        <a className="button button-quiet" href={chatGPTSignOutPath("/")}>Sign out</a>
+    <main className={styles['owner-shell']}>
+      <OwnerHeader authorized={false} />
+      <div className={`${styles['owner-frame']} ${styles['owner-access-frame']}`}>
+        <div className={styles['owner-access-state']}>
+          <div className={styles['owner-state-mark']} aria-hidden="true">A</div>
+          <p className="eyebrow">{copy.administration}</p>
+          <h1>{status === "unconfigured" ? copy.disabled : copy.notOwner}</h1>
+          <p>
+            {status === "unconfigured" ? copy.unconfigured : copy.signedOut}
+          </p>
+          <div className="button-row">
+            <a className="button" href="/">{copy.returnToAitta}</a>
+          </div>
+        </div>
       </div>
+      <OwnerFooter />
     </main>
+  );
+}
+
+function OwnerHeader({ authorized }: { authorized: boolean }) {
+  const copy = {
+    manage: en.ui.publicPresenceFrame.headerManage,
+    workspace: en.ui.publicPresenceFrame.privateWorkspace,
+    publicWorkspaceLabel: en.ui.publicPresenceFrame.viewAitta,
+    workspaceAriaLabel: en.ui.publicPresenceFrame.privateWorkspace,
+  };
+  return (
+    <header className={styles['owner-topbar']} aria-label={copy.workspaceAriaLabel}>
+      <div className={styles['owner-topbar-inner']}>
+        <div className={styles['owner-brand']}>
+          {authorized ? (
+            <a className={styles['owner-wordmark']} href="/owner" aria-label={en.ui.publicPresenceFrame.manageWorkspaceAria}>{copy.manage}</a>
+          ) : (
+            <span className={styles['owner-wordmark']}>{copy.manage}</span>
+          )}
+          <span className={styles['owner-context-label']}>{copy.workspace}</span>
+        </div>
+        <a className={styles['owner-public-link']} href="/">{copy.publicWorkspaceLabel}</a>
+      </div>
+    </header>
+  );
+}
+
+function OwnerFooter() {
+  const copy = {
+    workspace: en.ui.owner.shell.privateWorkspace,
+    signOut: en.footer.signOut,
+  };
+  return (
+    <footer className={styles['owner-footer']}>
+      <div className={styles['owner-footer-inner']}>
+        <span className={styles['owner-footer-label']}>{copy.workspace}</span>
+        <AittaFooterResources />
+        <a className={styles['owner-sign-out']} href={chatGPTSignOutPath("/")}>{copy.signOut}</a>
+      </div>
+    </footer>
   );
 }
 

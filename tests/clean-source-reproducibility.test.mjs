@@ -4,6 +4,8 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import { escapeRegExp } from "./helpers/regular-expression-literal.mjs";
+
 import {
   FakeD1,
   fetchApp,
@@ -32,7 +34,12 @@ test("a fresh D1 moves from safe setup to configured empty and published-only wi
     headers: { accept: "text/html" },
   });
   assert.equal(initialPublic.status, 200);
-  assert.match(await initialPublic.text(), new RegExp(escapeRegex(deploymentPrompt)));
+  const initialPublicHtml = await initialPublic.text();
+  assert.match(initialPublicHtml, new RegExp(escapeRegExp(deploymentPrompt)));
+  assert.match(initialPublicHtml, /Set up your own Aitta/i);
+  assert.match(initialPublicHtml, /An Aitta is your independently controlled AittaSocial application/i);
+  assert.match(initialPublicHtml, /optional outward identity presentation/i);
+  assert.match(initialPublicHtml, /no current Hub connection/i);
 
   const disabledOwner = await fetchApp("/owner", {
     env: missingOwnerEnv,
@@ -58,8 +65,9 @@ test("a fresh D1 moves from safe setup to configured empty and published-only wi
   });
   assert.equal(unavailable.status, 200);
   const unavailableHtml = await unavailable.text();
-  assert.match(unavailableHtml, /This presence cannot be loaded right now/i);
-  assert.doesNotMatch(unavailableHtml, /@Sites|CLEAN_SOURCE_D1_FAILURE_VALUE_CANARY/i);
+  assert.match(unavailableHtml, /Aitta storage unavailable/i);
+  assert.match(unavailableHtml, /This Aitta cannot be loaded right now/i);
+  assert.doesNotMatch(unavailableHtml, /@Sites|Set up your own Aitta|CLEAN_SOURCE_D1_FAILURE_VALUE_CANARY/i);
 
   const configuredEnv = makeEnv({ db, ownerEmail });
   const identitySave = await fetchApp("/api/private/profile", {
@@ -75,7 +83,7 @@ test("a fresh D1 moves from safe setup to configured empty and published-only wi
       hidePoweredBy: true,
     })),
   });
-  assert.equal(identitySave.status, 204);
+  assert.equal(identitySave.status, 200);
   assert.equal(db.profile.display_name, "Clean Source Presence");
   assert.equal(db.profile.canonical_url, "https://clean-source.example/presence");
 
@@ -144,7 +152,7 @@ test("a fresh D1 moves from safe setup to configured empty and published-only wi
     JSON.stringify(await responseJson(collection)),
   ].join("\n");
   assert.match(publicProjection, /Reviewed public update/);
-  assert.match(publicProjection, new RegExp(escapeRegex(publicBody)));
+  assert.match(publicProjection, new RegExp(escapeRegExp(publicBody)));
   assert.doesNotMatch(publicProjection, new RegExp(draftCanary));
   assert.equal(await trackedSourceFingerprint(), sourceBefore);
 });
@@ -198,8 +206,4 @@ async function trackedSourceFingerprint() {
     hash.update("\0");
   }
   return hash.digest("hex");
-}
-
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

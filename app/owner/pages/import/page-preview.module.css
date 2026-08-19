@@ -1,0 +1,233 @@
+.page-import-workspace {
+  display: grid;
+  gap: 2rem;
+  min-width: 0;
+}
+
+.page-import-form,
+.page-import-normalized,
+.page-import-preview {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper-raised);
+}
+
+.page-import-form {
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.page-import-form-intro h2,
+.page-import-normalized-header h2,
+.page-import-preview-header h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.page-import-form-intro p,
+.page-import-normalized-header p,
+.page-import-preview-header p {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+}
+
+.page-import-field {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.page-import-field input,
+.page-import-field textarea,
+.page-import-input input,
+.page-import-input textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.7rem 0.8rem;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.page-import-source,
+.page-import-normalized-json,
+.page-import-code,
+.page-import-preview-code {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.page-import-source,
+.page-import-preview-code {
+  resize: vertical;
+  overflow-wrap: normal;
+  white-space: pre;
+  overflow: auto;
+}
+
+.page-import-optional,
+.page-import-help,
+.page-import-status,
+.page-import-extra,
+.page-import-note,
+.page-import-hint {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.page-import-help,
+.page-import-error,
+.page-import-status,
+.page-import-hint {
+  font-size: 0.88rem;
+}
+
+.page-import-error {
+  color: var(--danger);
+}
+
+.page-import-form-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+}
+
+.page-import-status {
+  flex: 1 1 18rem;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.page-import-result {
+  display: grid;
+  gap: 2rem;
+  min-width: 0;
+}
+
+.page-import-preview {
+  color: #18201e;
+}
+
+.page-import-preview-header,
+.page-import-normalized-header {
+  padding: clamp(1rem, 4vw, 2rem);
+  border-bottom: 1px solid var(--line);
+}
+
+.page-import-preview-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.page-import-sections {
+  display: grid;
+  gap: clamp(1.5rem, 5vw, 3rem);
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.page-import-section,
+.page-import-group,
+.page-import-group-item {
+  min-width: 0;
+}
+
+.page-import-section h2,
+.page-import-section h3,
+.page-import-section h4,
+.page-import-section p,
+.page-import-section ol,
+.page-import-section ul,
+.page-import-group-item > :first-child {
+  overflow-wrap: anywhere;
+}
+
+.page-import-section a {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+
+.page-import-flow {
+  display: grid;
+  gap: 1rem;
+}
+
+.page-import-split,
+.page-import-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.page-import-cards > .page-import-group-item,
+.page-import-section.page-import-cards > :not(h2):not(h3):not(h4) {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.page-import-link-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.page-import-normalized-json {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: 34rem;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: auto;
+  padding: clamp(1rem, 4vw, 2rem);
+  background: #18201e;
+  color: #fff;
+  white-space: pre;
+}
+
+@media (max-width: 640px) {
+  .page-import-split,
+  .page-import-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (forced-colors: active) {
+  .page-import-form,
+  .page-import-normalized,
+  .page-import-preview,
+  .page-import-cards > .page-import-group-item,
+  .page-import-section.page-import-cards > :not(h2):not(h3):not(h4),
+  .page-import-field input,
+  .page-import-field textarea,
+  .page-import-input input,
+  .page-import-input textarea {
+    border-color: CanvasText;
+  }
+
+  .page-import-normalized-json {
+    background: Canvas;
+    color: CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-import-workspace * {
+    scroll-behavior: auto;
+  }
+}

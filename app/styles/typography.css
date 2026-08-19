@@ -1,0 +1,40 @@
+/**
+ * Shared typography primitives.
+ *
+ * Purpose:
+ * - Declare global typographic defaults and shared text primitives.
+ * - Keep text rhythm and display helpers reusable across layers.
+ *
+ * Do not include:
+ * - component-specific visual structure.
+ * - page-specific copy systems.
+ * - behavior that belongs to layout containers.
+ */
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+code {
+  padding: 0.12rem 0.3rem;
+  overflow-wrap: anywhere;
+  border-radius: 4px;
+  background: #e7e9e4;
+  font-family: var(--mono);
+  font-size: 0.85em;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@media (forced-colors: active) {
+  .eyebrow {
+    forced-color-adjust: auto;
+  }
+}
