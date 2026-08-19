@@ -5,6 +5,7 @@ type PageImportFieldProps = {
   name: string;
   label: string;
   optional?: boolean;
+  optionalSuffix?: string;
   error?: string;
   errorId?: string;
   disabled: boolean;
@@ -36,12 +37,13 @@ export function PageImportTextField({
   maxLength,
   onInput,
   required,
+  optionalSuffix,
 }: PageImportTextFieldProps) {
   const errorId = suppliedErrorId ?? `page-preview-${name}-error`;
 
   return (
     <label className={styles['page-import-field']}>
-      <span>{label}{optional ? <span className={styles['page-import-optional']}> (optional)</span> : null}</span>
+      <span>{label}{optional ? <span className={styles['page-import-optional']}>{optionalSuffix}</span> : null}</span>
       <input
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? true : undefined}
@@ -71,6 +73,7 @@ export function PageImportTextareaField({
   help,
   helpId: suppliedHelpId,
   variant = "plain",
+  optionalSuffix,
 }: PageImportTextareaFieldProps) {
   const helpId = help ? suppliedHelpId ?? `page-preview-${name}-help` : undefined;
   const errorId = suppliedErrorId ?? `page-preview-${name}-error`;
@@ -78,7 +81,7 @@ export function PageImportTextareaField({
 
   return (
     <label className={styles['page-import-field']}>
-      <span>{label}{optional ? <span className={styles['page-import-optional']}> (optional)</span> : null}</span>
+      <span>{label}{optional ? <span className={styles['page-import-optional']}>{optionalSuffix}</span> : null}</span>
       <textarea
         aria-describedby={describedBy}
         aria-invalid={error ? true : undefined}

@@ -70,6 +70,8 @@ export async function createCompiledWorker({
   const miniflare = new Miniflare({
     modules: await compiledWorkerModules(),
     modulesRoot: DIST_SERVER_ROOT,
+    // Let Miniflare choose a compatible loopback listener in restricted
+    // environments so test execution remains stable across hosts.
     compatibilityDate: packagedConfig.compatibility_date,
     compatibilityFlags: packagedConfig.compatibility_flags,
     bindings,

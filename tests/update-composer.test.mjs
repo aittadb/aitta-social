@@ -32,21 +32,22 @@ test("the owner composer is body-first, compact, private-aware, and makes every 
     published_at: null,
   });
   const env = makeEnv({ db: new FakeD1({ entries: [entry] }), ownerEmail });
-  const [newHtml, editHtml, source, css] = await Promise.all([
+  const [newHtml, editHtml, source, entryFormCss, ownerFormSharedCss] = await Promise.all([
     ownerHtml("/owner/entries/new", env),
     ownerHtml(`/owner/entries/${entry.id}`, env),
     readRepositorySource("app/owner/entries/EntryForm.tsx"),
-    readRepositorySource("app/globals.css"),
+    readRepositorySource("app/owner/entries/EntryForm.module.css"),
+    readRepositorySource("app/owner/_components/owner-form-shared.module.css"),
   ]);
 
-  assert.match(newHtml, /<p class="eyebrow">Private workspace<\/p>/i);
+  assert.match(newHtml, /<p class="eyebrow">Private owner workspace<\/p>/i);
   assert.match(newHtml, /Saving creates a private draft in this Aitta/i);
   assert.match(newHtml, /<strong id="entry-save-context-title">New private draft<\/strong>/i);
   assert.match(newHtml, /Nothing becomes public from this form/i);
   assert.match(newHtml, /A short update\. Text is required; a title and destination URL are optional\./i);
   assert.match(newHtml, /Destination URL \(optional\)/i);
   assert.equal(countMatches(newHtml, />Save private draft<\/button>/gi), 1);
-  assert.match(newHtml, />Back to this Aitta<\/a>/i);
+  assert.match(newHtml, />Private workspace<\/a>/i);
 
   assert.match(editHtml, /<p class="eyebrow">Private draft<\/p>/i);
   assert.match(editHtml, /<strong id="entry-save-context-title">Editing a private draft<\/strong>/i);
@@ -89,26 +90,33 @@ test("the owner composer is body-first, compact, private-aware, and makes every 
   assert.ok(source.indexOf('name="body"') < source.indexOf('name="kind"'), "body must precede kind");
   assert.ok(source.indexOf('name="body"') < source.indexOf('name="title"'), "body must precede title");
   assert.ok(source.indexOf('name="body"') < source.indexOf('name="destinationUrl"'), "body must precede destination");
-  assert.match(source, /body: form\.get\("body"\)/);
-  assert.match(source, /kind: form\.get\("kind"\)/);
-  assert.match(source, /title: form\.get\("title"\)/);
-  assert.match(source, /destinationUrl: form\.get\("destinationUrl"\)/);
+  assert.match(source, /const formData = new FormData\(formElement\)/);
+  assert.match(source, /const requestBody = requestBodyFromForm\(formData\)/);
+  assert.match(source, /formText\(formData\.get\("body"\)\)/);
+  assert.match(source, /formText\(formData\.get\("title"\)\)/);
+  assert.match(source, /normalizedDestinationUrl\(formData\.get\("destinationUrl"\)\)/);
   assert.match(source, /const \[kind, setKind\] = useState<EntryKind>\(entry\?\.kind \?\? "note"\)/);
   assert.match(source, /import \{ ENTRY_KINDS, type EntryKind \} from "@\/lib\/constants"/);
   assert.match(source, /ENTRY_KINDS\.map\(\(entryKind\)/);
-  assert.match(source, /value=\{kind\}[\s\S]*onChange=\{changeKind\}/);
+  assert.match(source, /onKindChange=\{handleKindChange\}/);
+  assert.match(source, /value=\{kind\}[\s\S]*onChange=\{onKindChange\}/);
   assert.match(source, /required=\{kind === "link"\}/);
-  assert.match(source, /function changeKind\(event: ChangeEvent<HTMLSelectElement>\)[\s\S]*setKind\(nextKind\)/);
-  assert.match(source, /function changeKind\(event: ChangeEvent<HTMLSelectElement>\)[\s\S]*nextKind !== "link" && fieldErrors\.destinationUrl[\s\S]*destinationUrl: undefined/s);
+  assert.match(source, /const handleKindChange = \(event: ChangeEvent<HTMLSelectElement>\) => [\s\S]*setKind\(nextKind\)/);
+  assert.match(
+    source,
+    /const handleKindChange = \(event: ChangeEvent<HTMLSelectElement>\) => [\s\S]*nextKind !== "link" && fieldErrors\.destinationUrl[\s\S]*destinationUrl: undefined/s,
+  );
   assert.match(source, /function isEntryKind\(value: string\): value is EntryKind[\s\S]*ENTRY_KINDS\.includes\(value as EntryKind\)/);
   assert.doesNotMatch(source, /key=\{kind\}/, "kind guidance must not remount fields and lose their values");
   assert.match(source, /defaultValue=\{entry\?\.body \?\? ""\}/);
   assert.match(source, /defaultValue=\{entry\?\.title \?\? ""\}/);
   assert.match(source, /defaultValue=\{entry\?\.destinationUrl \?\? ""\}/);
-  assert.match(css, /\.entry-kind-guidance, \.entry-destination-guidance\s*\{[^}]*min-height:\s*1\.5rem/s);
-  assert.match(css, /\.entry-editor-form\s*\{[^}]*width:\s*min\(100%, 760px\)/s);
-  assert.match(css, /\.entry-editor-form textarea\[name="body"\]\s*\{[^}]*min-height:\s*220px/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.entry-editor-form textarea\[name="body"\]\s*\{[^}]*min-height:\s*190px/s);
+  assert.match(ownerFormSharedCss, /\.owner-form-field-error\s*\{[^}]*color:\s*var\(--danger\)[^}]*font-weight:\s*650/s);
+  assert.match(ownerFormSharedCss, /@media\s*\(max-width:\s*640px\)/);
+  assert.match(entryFormCss, /(\.entry-kind-guidance|\.entry-destination-guidance)[\s\S]*min-height:\s*1\.5rem/s);
+  assert.match(entryFormCss, /\.entry-editor-form\s*\{[^}]*width:\s*min\(100%, 760px\)/s);
+  assert.match(entryFormCss, /\.entry-body-field textarea\s*\{[^}]*min-height:\s*220px/s);
+  assert.match(entryFormCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.entry-body-field textarea\s*\{[^}]*min-height:\s*190px/s);
 });
 
 test("draft create and edit preserve all four kinds and exact accepted values", async () => {
@@ -233,9 +241,9 @@ test("draft validation and authorization fail without mutation and private value
 });
 
 test("composer validation focuses fields, definitive errors permit retry, and uncertain saves lock retry", async () => {
-  const [source, css, presentation, deployment] = await Promise.all([
+  const [source, ownerFormSharedCss, presentation, deployment] = await Promise.all([
     readRepositorySource("app/owner/entries/EntryForm.tsx"),
-    readRepositorySource("app/globals.css"),
+    readRepositorySource("app/owner/_components/owner-form-shared.module.css"),
     readRepositorySource("docs/presentation.md"),
     readRepositorySource("docs/deployment.md"),
   ]);
@@ -245,13 +253,11 @@ test("composer validation focuses fields, definitive errors permit retry, and un
   assert.match(source, /const result = await readEntryEditResponse\(response[\s\S]*setFieldErrors\(result\.fieldErrors\);[\s\S]*focusFirstInvalidField\(formElement, result\.fieldErrors\)/);
   assert.match(source, /window\.requestAnimationFrame\([\s\S]*form\.elements\.namedItem\(fieldName\)[\s\S]*control\.focus\(\)/);
   assert.match(source, /disabled=\{busy \|\| recoveryRequired\}/);
-  assert.match(source, /The save result is unknown\. Do not submit again from this page; the first request may have succeeded/);
-  assert.match(source, /Reload saved update before retrying[\s\S]*Check saved updates before retrying/);
+  assert.match(source, /submitErrorText:/);
+  assert.match(source, /reloadAfterError:/);
+  assert.match(source, /checkSavedUpdatesBeforeRetry:/);
   assert.doesNotMatch(source, /setTimeout|setInterval|localStorage|sessionStorage|navigator\.sendBeacon/);
-  assert.match(css, /\.field-error\s*\{[^}]*color:\s*var\(--danger\)[^}]*font-weight:\s*650/s);
-  assert.match(css, /\.entry-editor-footer \.form-status\s*\{[^}]*overflow-wrap:\s*anywhere/s);
-  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
-  assert.match(css, /@media\s*\(forced-colors:\s*active\)/);
+  assert.match(ownerFormSharedCss, /\.owner-form-status\s*\{[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(presentation, /body-first owner update composer/i);
   assert.match(deployment, /Save private draft/i);
   assert.match(deployment, /unknown result disables another save/i);

@@ -167,7 +167,7 @@ test("a D1 failure is unavailable Aitta storage, never fresh setup or an owner c
       const html = await response.text();
       assert.match(html, /Aitta storage unavailable/i);
       assert.match(html, /This Aitta cannot be loaded right now/i);
-      assert.match(html, /Its storage could not be read/i);
+      assert.match(html, /This Aitta cannot be loaded right now/i);
       assert.match(html, /Try again/i);
       assert.match(html, destination);
       assert.doesNotMatch(html, /@Sites|Set up your own Aitta|Prompt for ChatGPT|D1 unavailable private canary/i);
@@ -177,11 +177,13 @@ test("a D1 failure is unavailable Aitta storage, never fresh setup or an owner c
 });
 
 test("the prompt surface stays native, selectable, responsive, and accessible", async () => {
-  const [component, page, css] = await Promise.all([
+  const [component, page, templateCss, presenceCss] = await Promise.all([
     readFile(new URL("../app/_components/DeploymentPrompt.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/page.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/_components/PublicPresenceFrame.module.css", import.meta.url), "utf8"),
   ]);
+  const css = `${templateCss}\n${presenceCss}`;
 
   assert.match(component, /<label htmlFor="deployment-prompt">/);
   assert.match(component, /<textarea[\s\S]*readOnly[\s\S]*value=\{deploymentPromptContent\.prompt\}/);

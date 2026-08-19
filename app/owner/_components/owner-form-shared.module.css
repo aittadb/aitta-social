@@ -28,6 +28,15 @@
   margin: 0;
   color: var(--muted);
   font-size: 0.86rem;
+  overflow-wrap: anywhere;
+}
+
+.check-field {
+  min-height: var(--control-min-height);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-weight: 600;
 }
 
 .owner-form-check-field {
@@ -36,6 +45,14 @@
   align-items: flex-start;
   gap: 0.75rem;
   font-weight: 600;
+}
+
+.owner-form-check-field input,
+.check-field input {
+  accent-color: var(--action);
+  transform: translateY(0.08rem);
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 .owner-form-color-field input {

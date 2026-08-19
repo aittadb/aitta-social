@@ -1,17 +1,27 @@
 import { PublicPageFrame } from "./_components/PublicPresenceFrame";
+import { getLocale, getMessages } from "@/lib/i18n";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const locale = await getLocale();
+  const messages = await getMessages(locale);
+  const copy = {
+    ariaLabel: messages.ui.notFound.ariaLabel,
+    headline: messages.ui.notFound.title,
+    body: messages.ui.notFound.body,
+    returnToAitta: messages.ui.notFound.returnToAitta,
+    ownerName: messages.ui.shared.aittaName,
+  };
   return (
     <PublicPageFrame
       className="public-state-shell"
       profile={null}
-      displayName="Independent Aitta"
+      displayName={copy.ownerName}
     >
-      <section className="public-state-page" aria-label="Not found">
+      <section className="public-state-page" aria-label={copy.ariaLabel}>
         <p className="eyebrow">404</p>
-        <h1>This update is not public</h1>
-        <p>It may be a draft, unpublished, deleted, or the address may be incorrect.</p>
-        <a className="button" href="/">Return to Aitta</a>
+        <h1>{copy.headline}</h1>
+        <p>{copy.body}</p>
+        <a className="button" href="/">{copy.returnToAitta}</a>
       </section>
     </PublicPageFrame>
   );

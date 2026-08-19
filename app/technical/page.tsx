@@ -1,9 +1,22 @@
 import type { Metadata } from "next";
-import styles from "./information-page.module.css";
-import {
-  PublicPageFrame,
-} from "@/app/_components/PublicPresenceFrame";
+import { PublicPageFrame } from "@/app/_components/PublicPresenceFrame";
 import { TechnicalInformationSection } from "./TechnicalInformationSection";
+import { getLocale, getMessages } from "@/lib/i18n";
+import { en } from "@/lib/i18n/messages/en";
+
+type TechnicalSectionContent = {
+  id: string;
+  title: string;
+  body: readonly string[];
+  linkLabel?: string;
+};
+
+type TechnicalCopy = {
+  readonly title: string;
+  readonly heading: string;
+  readonly intro: string;
+  readonly sections: readonly TechnicalSectionContent[];
+};
 
 export const metadata: Metadata = {
   title: { absolute: "Technical · Independent Aitta" },
@@ -12,74 +25,124 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function TechnicalPage() {
+export default async function TechnicalPage() {
+  const locale = await getLocale();
+  const messages = await getMessages(locale);
+  const ui = messages.ui;
+
+  const displayName =
+    typeof ui.shared.aittaName === "string"
+      ? ui.shared.aittaName
+      : en.ui.shared.aittaName;
+
+  const copy = normalizeTechnicalCopy(ui.owner.technical);
+  const safeSections = Array.isArray(copy.sections) ? copy.sections : en.ui.owner.technical.sections;
+
   return (
     <PublicPageFrame
       className="technical-shell"
       profile={null}
-      displayName="Independent Aitta"
+      displayName={displayName}
     >
-      <article className={styles.publicInformationPage} aria-labelledby="technical-title">
+      <article className="public-information-page" aria-labelledby="technical-title">
         <header>
-          <p className="eyebrow">Technical</p>
-          <h1 id="technical-title">Public resources for this Aitta</h1>
-          <p className={styles.publicInformationLead}>
-            AittaSocial protocol 1.0 provides a small set of public,
-            machine-readable resources. They expose public protocol,
-            configured profile, and published-update information; owner details
-            and drafts stay out of these responses.
-          </p>
+          <p className="eyebrow">{copy.title}</p>
+          <h1 id="technical-title">{copy.heading}</h1>
+          <p className="public-information-lead">{copy.intro}</p>
         </header>
 
-        <TechnicalInformationSection headingId="technical-manifest" title="Manifest">
+        <TechnicalInformationSection headingId={safeSections[0]?.id ?? "technical-manifest"} title={safeSections[0]?.title ?? "Manifest"}>
+          <p>{safeSections[0]?.body[0] ?? ""}</p>
           <p>
-            The discovery manifest identifies the protocol version, this
-            Aitta&apos;s canonical address, and the public profile and updates
-            endpoints when the Aitta is configured.
-          </p>
-          <p>
-            <a className={styles.publicInformationLink} href="/.well-known/aitta-social.json">
-              Open the discovery manifest
+            <a className="public-information-link" href="/.well-known/aitta-social.json">
+              {safeSections[0]?.linkLabel ?? "Open the discovery manifest"}
             </a>
           </p>
         </TechnicalInformationSection>
 
-        <TechnicalInformationSection headingId="technical-profile" title="Profile">
+        <TechnicalInformationSection headingId={safeSections[1]?.id ?? "technical-profile"} title={safeSections[1]?.title ?? "Profile"}>
+          <p>{safeSections[1]?.body[0] ?? ""}</p>
           <p>
-            The profile resource contains the configured outward identity and
-            restrained presentation choices through an explicit public field
-            list.
-          </p>
-          <p>
-            <a className={styles.publicInformationLink} href="/api/v1/site">
-              Open the public profile resource
+            <a className="public-information-link" href="/api/v1/site">
+              {safeSections[1]?.linkLabel ?? "Open the public profile resource"}
             </a>
           </p>
         </TechnicalInformationSection>
 
-        <TechnicalInformationSection headingId="technical-updates" title="Updates">
+        <TechnicalInformationSection headingId={safeSections[2]?.id ?? "technical-updates"} title={safeSections[2]?.title ?? "Updates"}>
+          <p>{safeSections[2]?.body[0] ?? ""}</p>
           <p>
-            The updates resource lists published updates in deterministic
-            newest-first pages. Drafts and unpublished updates are never part of
-            the public collection.
-          </p>
-          <p>
-            <a className={styles.publicInformationLink} href="/api/v1/entries">
-              Open the published updates resource
+            <a className="public-information-link" href="/api/v1/entries">
+              {safeSections[2]?.linkLabel ?? "Open the published updates resource"}
             </a>
           </p>
         </TechnicalInformationSection>
 
-        <TechnicalInformationSection headingId="technical-usage" title="Using the resources">
-          <p>
-            These routes currently return JSON with the protocol 1.0 response
-            shapes and cache behavior documented by this application. Resource
-            links use the configured canonical Aitta URL, not the incoming
-            request host.
-          </p>
+        <TechnicalInformationSection headingId={safeSections[3]?.id ?? "technical-usage"} title={safeSections[3]?.title ?? "Using the resources"}>
+          <p>{safeSections[3]?.body[0] ?? ""}</p>
+          {safeSections[3]?.body[1] ? <p>{safeSections[3].body[1]}</p> : null}
         </TechnicalInformationSection>
       </article>
-
     </PublicPageFrame>
   );
+}
+
+function normalizeTechnicalCopy(value: unknown): TechnicalCopy {
+  if (!value || typeof value !== "object") {
+    return en.ui.owner.technical;
+  }
+
+  const candidate = value as {
+    title?: unknown;
+    heading?: unknown;
+    intro?: unknown;
+    sections?: unknown;
+  };
+
+  const normalizedSections = Array.isArray(candidate.sections)
+    ? candidate.sections
+      .map((entry): TechnicalSectionContent | null => {
+        if (!entry || typeof entry !== "object") return null;
+        const section = entry as {
+          id?: unknown;
+          title?: unknown;
+          body?: unknown;
+          linkLabel?: unknown;
+        };
+
+        if (typeof section.id !== "string" || section.id.length === 0) return null;
+        if (typeof section.title !== "string" || section.title.length === 0) return null;
+
+        const body = Array.isArray(section.body)
+          ? section.body
+            .filter((line): line is string => typeof line === "string" && line.length > 0)
+          : [];
+        const normalizedBody: readonly string[] = body.length > 0 ? body : [""];
+
+        return {
+          id: section.id,
+          title: section.title,
+          body: normalizedBody,
+          linkLabel: typeof section.linkLabel === "string" && section.linkLabel.length > 0
+            ? section.linkLabel
+            : undefined,
+        };
+      })
+      .filter((entry): entry is TechnicalSectionContent => entry !== null)
+    : [];
+
+  return {
+    title: typeof candidate.title === "string" && candidate.title.length > 0
+      ? candidate.title
+      : en.ui.owner.technical.title,
+    heading: typeof candidate.heading === "string" && candidate.heading.length > 0
+      ? candidate.heading
+      : en.ui.owner.technical.heading,
+    intro: typeof candidate.intro === "string" && candidate.intro.length > 0
+      ? candidate.intro
+      : en.ui.owner.technical.intro,
+    sections: normalizedSections.length > 0
+      ? normalizedSections
+      : en.ui.owner.technical.sections,
+  };
 }

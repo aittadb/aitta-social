@@ -8,7 +8,7 @@ import { restrictedSyntaxErrorCount } from "./helpers/eslint-restricted-syntax.m
 import { FakeD1, entryRow, fetchApp, makeEnv } from "./helpers/worker-harness.mjs";
 
 const consumers = [
-  "app/page.tsx",
+  "app/page-content.tsx",
   "app/entries/[id]/page.tsx",
   "lib/public-metadata.ts",
 ];
@@ -38,7 +38,7 @@ test("titleless entry metadata retains its kind label fallback", async () => {
 test("entry-kind labels have one canonical declaration and three production consumers", async () => {
   const [canonical, page, entryPage, metadata] = await Promise.all([
     readFile(new URL("../lib/entry-kind-label.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/page-content.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/entries/[id]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/public-metadata.ts", import.meta.url), "utf8"),
   ]);

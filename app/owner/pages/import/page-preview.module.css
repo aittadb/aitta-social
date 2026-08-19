@@ -42,7 +42,9 @@
 }
 
 .page-import-field input,
-.page-import-field textarea {
+.page-import-field textarea,
+.page-import-input input,
+.page-import-input textarea {
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--line);
@@ -54,13 +56,16 @@
 }
 
 .page-import-source,
-.page-import-normalized-json {
+.page-import-normalized-json,
+.page-import-code,
+.page-import-preview-code {
   font-family: var(--mono);
   font-size: 0.86rem;
   line-height: 1.5;
 }
 
-.page-import-source {
+.page-import-source,
+.page-import-preview-code {
   resize: vertical;
   overflow-wrap: normal;
   white-space: pre;
@@ -69,14 +74,18 @@
 
 .page-import-optional,
 .page-import-help,
-.page-import-status {
+.page-import-status,
+.page-import-extra,
+.page-import-note,
+.page-import-hint {
   color: var(--muted);
   font-weight: 400;
 }
 
 .page-import-help,
 .page-import-error,
-.page-import-status {
+.page-import-status,
+.page-import-hint {
   font-size: 0.88rem;
 }
 
@@ -113,7 +122,7 @@
   border-bottom: 1px solid var(--line);
 }
 
-.preview-label {
+.page-import-preview-label {
   font-family: var(--mono);
   font-size: 0.75rem;
   font-weight: 750;
@@ -170,13 +179,13 @@
   border-radius: 8px;
 }
 
-.link-group {
+.page-import-link-group {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1rem;
 }
 
-.normalized-json {
+.page-import-normalized-json {
   display: block;
   width: 100%;
   max-width: 100%;
@@ -205,7 +214,9 @@
   .page-import-cards > .page-import-group-item,
   .page-import-section.page-import-cards > :not(h2):not(h3):not(h4),
   .page-import-field input,
-  .page-import-field textarea {
+  .page-import-field textarea,
+  .page-import-input input,
+  .page-import-input textarea {
     border-color: CanvasText;
   }
 

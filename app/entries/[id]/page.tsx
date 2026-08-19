@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import type { CSSProperties } from 'react';
-import styles from "./page.module.css";
 import { notFound } from 'next/navigation';
 import { getEntry, getProfile } from '@/db/repository';
 import { publicEntryMetadata, unavailableEntryMetadata } from '@/lib/public-metadata';
 import { entryKindLabel } from '@/lib/entry-kind-label';
 import { resolvePresentationAccent } from '@/lib/presentation-accent';
+import { getLocale, getMessages } from '@/lib/i18n';
 import { PresenceIdentityTile, PublicPageFrame } from '@/app/_components/PublicPresenceFrame';
 
 export const dynamic = 'force-dynamic';
@@ -22,11 +22,21 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function EntryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const messages = await getMessages(locale);
   const [entry, profile] = await Promise.all([getEntry(id, true), getProfile()]);
   if (!entry) notFound();
   const displayName = profile?.displayName ?? 'Independent Aitta';
   const publishedAt = entry.publishedAt ?? entry.createdAt;
   const isNote = entry.kind === 'note';
+  const copy = {
+    destination: messages.ui.entryPage.destination,
+    published: messages.ui.entryPage.published,
+    updateActions: messages.ui.entryPage.updateActions,
+    returnToAitta: messages.ui.entryPage.returnToAitta,
+    viewAsJson: messages.ui.entryPage.viewAsJson,
+    updateFrom: messages.ui.entryPage.updateFrom,
+  };
 
   return (
     <PublicPageFrame
@@ -35,24 +45,24 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
       profile={profile}
       displayName={displayName}
     >
-      <div className={styles['permalink-content']}>
-        <article className={styles['permalink-entry']}>
-          <header className={styles['permalink-header']}>
-            <div className={styles['permalink-source-row']}>
+      <div className="permalink-content">
+        <article className="permalink-entry">
+          <header className="permalink-header">
+            <div className="permalink-source-row">
               <a
-                className={styles['permalink-source-identity']}
+                className="permalink-source-identity"
                 href="/"
               >
                 <PresenceIdentityTile
                   displayName={displayName}
                   size="update"
                 />
-                <span>{displayName}</span>
+              <span>{displayName}</span>
               </a>
-              <div className={styles['permalink-context']}>
+              <div className="permalink-context">
                 {!isNote && <span className="update-kind">{entryKindLabel(entry.kind)}</span>}
-                <span className={styles['permalink-time']}>
-                  Published <time dateTime={publishedAt}>{formatLongDate(publishedAt)}</time>
+                <span className="permalink-time">
+                  {copy.published} <time dateTime={publishedAt}>{formatLongDate(publishedAt)}</time>
                 </span>
               </div>
             </div>
@@ -64,31 +74,31 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
               <h1 className="visually-hidden">{`${entryKindLabel(entry.kind)} update from ${displayName}`}</h1>
             )}
           </header>
-          <div className={`${styles['permalink-body']}${isNote ? ` ${styles['permalink-note-body']}` : ""}`}>{entry.body}</div>
-          {isNote && entry.title && <p className={styles['permalink-note-title']}>{entry.title}</p>}
+          <div className={`permalink-body ${isNote ? "permalink-note-body" : ""}`}>{entry.body}</div>
+          {isNote && entry.title && <p className="permalink-note-title">{entry.title}</p>}
           {entry.destinationUrl && (
             <a
-              className={styles['permalink-destination']}
+              className="permalink-destination"
               href={entry.destinationUrl}
               rel="noopener noreferrer"
             >
-              <span>Destination</span>
+              <span>{copy.destination}</span>
               <strong>{entry.destinationUrl}</strong>
             </a>
           )}
         </article>
-        <nav className={styles['permalink-footer']} aria-label="Update actions">
+        <nav className="permalink-footer" aria-label={copy.updateActions}>
           <a
             className="button"
             href="/"
           >
-            Return to Aitta
+            {copy.returnToAitta}
           </a>
           <a
             className="text-link"
             href={`/api/v1/entries/${entry.id}`}
           >
-            View as JSON
+            {copy.viewAsJson}
           </a>
         </nav>
       </div>

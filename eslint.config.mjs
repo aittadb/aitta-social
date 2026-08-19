@@ -302,6 +302,7 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "@next/next/no-html-link-for-pages": "off",
+      "no-alert": "error",
     },
     languageOptions: {
       globals: {

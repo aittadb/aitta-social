@@ -185,9 +185,16 @@ test("JSON and other non-HTML responses keep their own contracts without CSP", a
 });
 
 test("the Worker owns one literal policy and preserves native navigation boundaries", async () => {
-  const [workerSource, publicSource, publicFrameSource, ownerShellSource] = await Promise.all([
+  const [
+    workerSource,
+    publicSource,
+    pageContentSource,
+    publicFrameSource,
+    ownerShellSource,
+  ] = await Promise.all([
     readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/page-content.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/_components/PublicPresenceFrame.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/_components/OwnerShell.tsx", import.meta.url), "utf8"),
   ]);
@@ -196,7 +203,7 @@ test("the Worker owns one literal policy and preserves native navigation boundar
   assert.match(workerSource, /if \(!\/\^text\\\/html\\b\/i\.test[\s\S]+return response;/);
   assert.match(workerSource, /headers\.set\("Content-Security-Policy", CONTENT_SECURITY_POLICY\)/);
   assert.doesNotMatch(`${publicSource}\n${publicFrameSource}\n${ownerShellSource}`, /next\/link|onKeyDown|tabIndex=\{-?\d+\}/);
-  assert.match(publicSource, /<a[\s\S]+href=/);
+  assert.match(`${publicSource}\n${pageContentSource}`, /<a[\s\S]+href=/);
   assert.match(publicFrameSource, /<a[\s\S]+href=/);
   assert.match(ownerShellSource, /<a[\s\S]+href=/);
 });

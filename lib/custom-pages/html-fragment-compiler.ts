@@ -1,4 +1,6 @@
 import {
+  // parse5 provides standards-compliant HTML parser/fragment parsing for validating
+  // and compiling untrusted page fragment input.
   parse,
   parseFragment,
   type DefaultTreeAdapterTypes,

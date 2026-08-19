@@ -239,12 +239,12 @@ test("effective canonical defaults never serialize an invalid stored fallback", 
   const html = await response.text();
   assert.match(html, /Effective public URL · (?:<!-- -->)?protected runtime URL/i);
   assert.match(html, /Canonical URL fallback/i);
-  assert.match(html, /Saved profile loaded with a safe URL substitution/i);
+  assert.match(html, /Saved profile loaded/i);
   assert.match(html, /class="identity-save-state identity-save-state-loaded"/i);
-  assert.match(html, /saved canonical fallback is invalid/i);
-  assert.match(html, /effective protected runtime URL is prefilled below/i);
-  assert.match(html, /Saving will replace the invalid D1 fallback/i);
-  assert.match(html, /Prefilled from the effective protected runtime URL because no valid saved fallback is available/i);
+  assert.match(html, /canonical fallback is invalid/i);
+  assert.match(html, /effective protected runtime URL is available below/i);
+  assert.match(html, /saving updates the runtime fallback/i);
+  assert.match(html, /prefilled from the protected runtime URL/i);
   assert.match(html, /name="canonicalUrl"[^>]+value="https:\/\/runtime\.example\/normalized"/i);
   assert.doesNotMatch(html, new RegExp(storedCanary, "i"));
   assert.doesNotMatch(html, /not-a-url/i);
@@ -264,10 +264,10 @@ test("an invalid stored fallback without a valid runtime URL is explicitly omitt
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /Identity needs a valid public URL/i);
-  assert.match(html, /Saved profile loaded without its invalid URL/i);
+  assert.match(html, /Saved profile loaded without an invalid canonical URL/i);
   assert.match(html, /class="identity-save-state identity-save-state-loaded"/i);
-  assert.match(html, /saved canonical fallback is invalid and was omitted from this form/i);
-  assert.match(html, /Other profile values were loaded from this Aitta/i);
+  assert.match(html, /canonical fallback is invalid and was omitted from this form/i);
+  assert.match(html, /profile values were loaded from this Aitta/i);
   assert.match(html, /No URL is prefilled because the saved fallback is invalid/i);
   assert.match(html, /name="canonicalUrl"[^>]+value=""/i);
   assert.doesNotMatch(html, /identity-save-state-saved|Saved values loaded|form matches the profile values loaded/i);
@@ -288,7 +288,7 @@ test("an empty stored fallback remains an exact empty saved baseline", async () 
   assert.match(html, /Identity needs a valid public URL/i);
   assert.match(html, /class="identity-save-state identity-save-state-saved"/i);
   assert.match(html, /Saved values loaded/i);
-  assert.match(html, /form matches the profile values loaded from this Aitta/i);
+  assert.match(html, /form matches the profile values loaded/i);
   assert.match(html, /name="canonicalUrl"[^>]+value=""/i);
   assert.doesNotMatch(html, /invalid URL|invalid saved fallback was omitted|invalid-stored-omitted/i);
 });
@@ -309,8 +309,8 @@ test("a whitespace-only stored fallback is omitted rather than called an exact s
   const html = await response.text();
   assert.match(html, /Identity needs a valid public URL/i);
   assert.match(html, /class="identity-save-state identity-save-state-loaded"/i);
-  assert.match(html, /Saved profile loaded without its invalid URL/i);
-  assert.match(html, /saved canonical fallback is invalid and was omitted from this form/i);
+  assert.match(html, /Saved profile loaded without an invalid canonical URL/i);
+  assert.match(html, /canonical fallback is invalid and was omitted from this form/i);
   assert.match(html, /name="canonicalUrl"[^>]+value=""/i);
   assert.doesNotMatch(html, /identity-save-state-saved|Saved values loaded|form matches the profile values loaded/i);
   assert.doesNotMatch(html, new RegExp(privateCanary, "i"));
@@ -368,26 +368,26 @@ test("owner controls expose semantic, per-update actions, explicit publication c
     readRepositorySource("app/owner/_components/owner-mutation-outcome.ts"),
   ]);
 
-  assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*publicly readable on this Aitta at its permalink[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
+  assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*copy\.confirmPublish[\s\S]*copy\.confirmUnpublish[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
   assert.match(actions, /role="group"[^>]+aria-label=\{`Actions for \$\{updateLabel\}, update \$\{actionReference\}`\}/);
   for (const action of ["Edit", "Publish", "Open public permalink for", "Unpublish", "Delete"]) {
     assert.match(actions, new RegExp(`aria-label=\\{\\\`${escapeRegExp(action)}[^\\\`]+update \\$\\{actionReference\\}`));
   }
-  assert.match(actions, /The publication result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
-  assert.match(actions, /The unpublish result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
-  assert.match(actions, /The deletion result could not be confirmed\. Check this Aitta’s saved state before deleting this update again\./);
+  assert.match(actions, /copy\.publicationFailureDraft/);
+  assert.match(actions, /copy\.publicationFailureUnpublish/);
+  assert.match(actions, /copy\.deletionFailure/);
   assert.match(actions, /href="\/owner"[^>]+aria-label=\{`Check current state/);
   assert.match(actions, /href="\/owner"[^>]+aria-label=\{`Check saved state/);
   assert.match(actions, /const actionReference = id;/);
   assert.doesNotMatch(actions, /boundedActionReference|slice\(-8\)/);
   assert.equal(countMatches(actions, /const outcome = classifyOwnerMutationResponse\(response\);/g), 0);
   assert.equal(countMatches(actions, /setMessage\(await safeError\(response\)\);\s*setBusy\(false\);/g), 0);
-  assert.match(actions, /readPublicationStateResponse\(response, \{ id, state: nextState \}\)[\s\S]*if \(result\.outcome === "unconfirmed"\) \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*return;\s*\}\s*setMessage\(lifecycleFailureMessage\(nextState, result\.message\)\);\s*setBusy\(false\);/);
-  assert.match(actions, /const outcome = await readDeletionResponse\(response, id\);[\s\S]*if \(outcome\.outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*return;\s*\}\s*setMessage\(`The server rejected this deletion request\. \$\{outcome\.message\}`\);\s*setBusy\(false\);/);
+  assert.match(actions, /readPublicationStateResponse\(response, \{ id, state: nextState \}\)[\s\S]*if \(result\.outcome === "unconfirmed"\) \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*return;\s*\}\s*setMessage\(lifecycleFailureMessage\(nextState, result\.message, copy\)\);\s*setBusy\(false\);/);
+  assert.match(actions, /const outcome = await readDeletionResponse\(response, id\);[\s\S]*if \(outcome\.outcome === "unconfirmed"\) \{\s*showUnconfirmedResult\(copy\.deletionFailure\);\s*return;\s*\}\s*setMessage\(`The server rejected this deletion request\. \$\{outcome\.message\}`\);\s*setBusy\(false\);/);
   assert.match(actions, /catch \{\s*showUnconfirmedLifecycleResult\(nextState\);\s*\}/);
-  assert.match(actions, /catch \{\s*showUnconfirmedResult\("The deletion result could not be confirmed\.[^\n]+\);\s*\}/);
+  assert.match(actions, /catch \{\s*showUnconfirmedResult\(copy\.deletionFailure\);\s*\}/);
   assert.match(actions, /function showUnconfirmedResult\(message: string\) \{\s*setMessage\(message\);\s*setDeletionRecoveryRequired\(true\);\s*setBusy\(false\);\s*\}/);
-  assert.match(actions, /setBusy\(true\);\s*setMessage\(nextState === "published" \? "Publishing this update…"/);
+  assert.match(actions, /setBusy\(true\);\s*setMessage\(copy\.saveStateSaving\)/);
   assert.match(actions, /if \(lifecycleRecoveryRequired\) return;/);
   assert.equal(countMatches(actions, /disabled=\{busy \|\| lifecycleRecoveryRequired\}/g), 2);
   assert.match(dashboard, /<EntryActions id=\{entry\.id\} state=\{entry\.state\} label=\{entry\.title \?\? entry\.body\.slice\(0, 90\)\}/);

@@ -20,33 +20,81 @@ type EntryFormPayload = {
   destinationUrl: FormDataEntryValue | null;
 };
 
+type EntryFormCopy = {
+  formAriaCreate: string;
+  formAriaEdit: string;
+  editHeading: string;
+  createHeading: string;
+  text: string;
+  privateWorkspace: string;
+  kind: string;
+  titleOptional: string;
+  linkOptional: string;
+  linkRequired: string;
+  destinationHelpRequired: string;
+  destinationHelpOptional: string;
+  fieldsLegend: string;
+  bodyHelp: string;
+  kindGuidanceNote: string;
+  kindGuidanceArticle: string;
+  kindGuidanceAnnouncement: string;
+  kindGuidanceLink: string;
+  validationFailed: string;
+  editActionPublish: string;
+  editActionCreate: string;
+  updateContextPublic: string;
+  updateContextPrivate: string;
+  updateSaveNote: string;
+  updateSaveDraftOnly: string;
+  createIntro: string;
+  updateNewDraft: string;
+  updateNewDraftSummary: string;
+  saveUpdateText: string;
+  saveDraftText: string;
+  saveSuccessPublished: string;
+  saveSuccessPrivate: string;
+  submitErrorText: string;
+  reloadAfterError: string;
+  checkSavedState: string;
+  checkDraftsBeforeRetry: string;
+  sourceUpdateLabel: string;
+  checkSavedUpdatesBeforeRetry: string;
+  kindOptionsNote: {
+    note: string;
+    article: string;
+    announcement: string;
+    link: string;
+  };
+};
+
 type EntryContext = {
   heading: string;
   summary: string;
 };
 
-const entryFieldNames = new Set<EntryFieldName>([
+const entryFieldNames = new Set<EntryFieldKind>([
   "kind",
   "title",
   "body",
   "destinationUrl",
 ]);
 
-const entryKindGuidance: Record<EntryKind, string> = {
-  note: "A short update. Text is required; a title and destination URL are optional.",
-  article: "A fuller update. Text is required; a title helps readers, and a destination URL is optional.",
-  announcement: "A time-sensitive update. Text is required; a title helps readers, and a destination URL is optional.",
-  link: "Share a destination. Text is required to explain the link, and a destination URL is required. A title is optional.",
-};
+type EntryFieldKind = "kind" | "title" | "body" | "destinationUrl";
 
-export function EntryForm({ entry }: { entry: Entry | null }) {
+export function EntryForm({
+  entry,
+  copy,
+}: {
+  entry: Entry | null;
+  copy: EntryFormCopy;
+}) {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [recoveryRequired, setRecoveryRequired] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [kind, setKind] = useState<EntryKind>(entry?.kind ?? "note");
   const isPublished = entry?.state === "published";
-  const context = resolveEntryContext(entry, isPublished);
+  const context = resolveEntryContext(entry, isPublished, copy);
 
   const handleKindChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextKind = event.currentTarget.value;
@@ -57,17 +105,17 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
     }
   };
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     await submitEntryForm({
       event,
       recoveryRequired,
       entry,
-      kind,
       setFieldErrors,
       setStatus,
       setBusy,
       setRecoveryRequired,
       isPublished,
+      copy,
     });
   }
 
@@ -89,18 +137,19 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
     <form
       className={`${sharedStyles['owner-form']} ${styles['entry-editor-form']}`}
       aria-label={entry ? "Edit update" : "Create private draft"}
-      onSubmit={handleSubmit}
+      onSubmit={submit}
       onInput={clearFieldError}
       aria-busy={busy}
       noValidate
     >
-      <EntryContextHeader context={context} isPublished={isPublished} />
+      <EntryContextHeader context={context} isPublished={isPublished} copy={copy} />
       <EntryFields
         kind={kind}
         entry={entry}
         fieldErrors={fieldErrors}
         onKindChange={handleKindChange}
         recovery={recoveryRequired}
+        copy={copy}
       />
       <EntryFooter
         entry={entry}
@@ -108,17 +157,18 @@ export function EntryForm({ entry }: { entry: Entry | null }) {
         status={status}
         recoveryRequired={recoveryRequired}
         isPublished={isPublished}
+        copy={copy}
       />
     </form>
   );
 }
 
-function EntryContextHeader({ context, isPublished }: { context: EntryContext; isPublished: boolean }) {
+function EntryContextHeader({ context, isPublished, copy }: { context: EntryContext; isPublished: boolean; copy: EntryFormCopy }) {
   return (
     <section className={styles['entry-save-context']} aria-labelledby="entry-save-context-title">
       <strong id="entry-save-context-title">{context.heading}</strong>
       <span>{isPublished
-        ? "Saving replaces this Aitta’s public update without changing its publication state."
+        ? copy.updateSaveNote
         : context.summary}
       </span>
     </section>
@@ -131,18 +181,20 @@ function EntryFields({
   fieldErrors,
   onKindChange,
   recovery,
+  copy,
 }: {
   kind: EntryKind;
   entry: Entry | null;
   fieldErrors: FieldErrors;
   onKindChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   recovery: boolean;
+  copy: EntryFormCopy;
 }) {
   return (
-    <fieldset className={styles['entry-editor-fields']} aria-disabled={recovery}>
-      <legend>Update content</legend>
+    <fieldset className="entry-editor-fields" aria-disabled={recovery}>
+      <legend>{copy.fieldsLegend}</legend>
       <label className={`${sharedStyles['owner-form-field']} ${styles['entry-body-field']}`} htmlFor="entry-body">
-        <span>Text</span>
+        <span>{copy.text}</span>
         <textarea
           id="entry-body"
           name="body"
@@ -153,13 +205,13 @@ function EntryFields({
           aria-invalid={Boolean(fieldErrors.body) || undefined}
           aria-describedby={describedBy("entry-body-help", errorId("body", fieldErrors.body))}
         />
-        <small id="entry-body-help">Write the update first. Plain text only in this POC.</small>
+        <small id="entry-body-help">{copy.bodyHelp}</small>
         <FieldError name="body" error={fieldErrors.body} />
       </label>
 
       <div className={`${sharedStyles['owner-form-field-grid']} ${sharedStyles['owner-form-field-grid-two']}`}>
         <label className={sharedStyles['owner-form-field']} htmlFor="entry-kind">
-          <span>Kind</span>
+          <span>{copy.kind}</span>
           <select
             id="entry-kind"
             name="kind"
@@ -174,11 +226,11 @@ function EntryFields({
               </option>
             ))}
           </select>
-          <small className={styles['entry-kind-guidance']} id="entry-kind-help">{entryKindGuidance[kind]}</small>
+          <small className={styles['entry-kind-guidance']} id="entry-kind-help">{entryKindGuidance(kind, copy)}</small>
           <FieldError name="kind" error={fieldErrors.kind} />
         </label>
           <label className={sharedStyles['owner-form-field']} htmlFor="entry-title">
-          <span>Title (optional)</span>
+          <span>{copy.titleOptional}</span>
           <input
             id="entry-title"
             name="title"
@@ -192,7 +244,7 @@ function EntryFields({
       </div>
 
       <label className={sharedStyles['owner-form-field']} htmlFor="entry-destinationUrl">
-        <span>{kind === "link" ? "Destination URL (required for Link)" : "Destination URL (optional)"}</span>
+        <span>{kind === "link" ? copy.linkRequired : copy.linkOptional}</span>
           <input
           id="entry-destinationUrl"
           name="destinationUrl"
@@ -205,8 +257,8 @@ function EntryFields({
         />
         <small className={styles['entry-destination-guidance']} id="entry-destination-help">
           {kind === "link"
-            ? "Use the complete https:// or http:// address this update should open."
-            : "Leave this empty unless the update should point to a web address."}
+            ? copy.destinationHelpRequired
+            : copy.destinationHelpOptional}
         </small>
         <FieldError name="destinationUrl" error={fieldErrors.destinationUrl} />
       </label>
@@ -220,45 +272,47 @@ function EntryFooter({
   status,
   recoveryRequired,
   isPublished,
+  copy,
 }: {
   entry: Entry | null;
   busy: boolean;
   status: string;
   recoveryRequired: boolean;
   isPublished: boolean;
+  copy: EntryFormCopy;
 }) {
   return (
-    <div className={`${sharedStyles['owner-form-footer']} ${styles['entry-editor-footer']}`}>
+    <div className={`${sharedStyles['owner-form-footer']} ${styles['entry-editor-footer']} `}>
       <button className="button" type="submit" disabled={busy || recoveryRequired}>
         {entry && isPublished ? "Save update" : "Save private draft"}
       </button>
-      <a className="button button-quiet" href="/owner">Back to this Aitta</a>
+      <a className="button button-quiet" href="/owner">{copy.privateWorkspace}</a>
       <p className={sharedStyles['owner-form-status']} role="status" aria-live="polite" aria-atomic="true">{status}</p>
       {recoveryRequired ? (
           <a
             className="button button-quiet"
             href={entry ? `/owner/entries/${encodeURIComponent(entry.id)}` : "/owner"}
           >
-          {entry ? "Reload saved update before retrying" : "Check saved updates before retrying"}
+          {entry ? copy.reloadAfterError : copy.checkSavedState}
         </a>
       ) : null}
     </div>
   );
 }
 
-function resolveEntryContext(entry: Entry | null, isPublished: boolean): EntryContext {
+function resolveEntryContext(entry: Entry | null, isPublished: boolean, copy: EntryFormCopy): EntryContext {
   if (entry) {
     return {
-      heading: isPublished ? "Editing a public update" : "Editing a private draft",
+      heading: isPublished ? copy.updateContextPublic : copy.updateContextPrivate,
       summary: isPublished
-        ? "Saving replaces this Aitta’s public update without changing its publication state."
-        : "Only the owner can read this saved draft. Saving does not publish it.",
+        ? copy.updateSaveNote
+        : copy.updateSaveDraftOnly,
     };
   }
 
   return {
-    heading: "New private draft",
-    summary: "Saving creates a private draft in this Aitta. Nothing becomes public from this form.",
+    heading: copy.updateNewDraft,
+    summary: copy.updateNewDraftSummary,
   };
 }
 
@@ -266,40 +320,45 @@ async function submitEntryForm({
   event,
   recoveryRequired,
   entry,
-  kind,
   setFieldErrors,
   setStatus,
   setBusy,
   setRecoveryRequired,
   isPublished,
+  copy,
 }: {
   event: FormEvent<HTMLFormElement>;
   recoveryRequired: boolean;
   entry: Entry | null;
-  kind: EntryKind;
   setFieldErrors: (value: FieldErrors | ((current: FieldErrors) => FieldErrors)) => void;
   setStatus: (value: string) => void;
   setBusy: (value: boolean) => void;
   setRecoveryRequired: (value: boolean) => void;
   isPublished: boolean;
+  copy: EntryFormCopy;
 }) {
   event.preventDefault();
   if (recoveryRequired) return;
 
-  const formElement = event.currentTarget;
   setFieldErrors({});
   setStatus("");
+  const formElement = event.currentTarget;
   if (!formElement.checkValidity()) {
-    setStatus("Update was not saved. Complete the required text and correct invalid URLs.");
+    setStatus(copy.validationFailed);
     formElement.reportValidity();
     return;
   }
 
   const formData = new FormData(formElement);
   const requestBody = requestBodyFromForm(formData);
+  function showUnconfirmedSave() {
+    setStatus("The save result is unknown. Do not submit again from this page; the first request may have succeeded.");
+    setRecoveryRequired(true);
+    setBusy(false);
+  }
 
   setBusy(true);
-  setStatus(entry ? "Saving update…" : "Saving private draft…");
+  setStatus(entry ? copy.saveUpdateText : copy.saveDraftText);
 
   try {
     const response = entry
@@ -312,56 +371,62 @@ async function submitEntryForm({
         result,
         formElement,
         setFieldErrors,
-        setStatus,
         setBusy,
-        setRecoveryRequired,
+        setStatus,
+        showUnconfirmedSave,
       });
     }
 
     const result = await readEntryEditResponse(response, {
       id: entry.id,
       state: entry.state,
-      kind,
-      title: formText(formData.get("title")),
+      kind: formText(formData.get("kind")) as EntryKind,
+      title: formText(formData.get("title")) || null,
       body: formText(formData.get("body")),
       destinationUrl: normalizedDestinationUrl(formData.get("destinationUrl")),
     });
 
-    await handleEntryEditResult({
-      result,
-      formElement,
-      isPublished,
-      setFieldErrors,
-      setStatus,
-      setBusy,
-      setRecoveryRequired,
-    });
+    if (result.outcome === "unconfirmed") {
+      showUnconfirmedSave();
+      return;
+    }
+    if (result.outcome === "success") {
+      setStatus(isPublished ? "Public update saved." : "Private draft saved.");
+      setBusy(false);
+      return;
+    }
+    setFieldErrors(result.fieldErrors);
+    setStatus(result.message);
+    focusFirstInvalidField(formElement, result.fieldErrors);
+    setBusy(false);
   } catch {
-    showUnconfirmedSave(setStatus, setRecoveryRequired, setBusy);
+    showUnconfirmedSave();
+    return;
   }
+  setBusy(false);
 }
 
 async function finalizeDraftCreateResult({
   result,
   formElement,
   setFieldErrors,
-  setStatus,
   setBusy,
-  setRecoveryRequired,
+  showUnconfirmedSave,
+  setStatus,
 }: {
   result: Awaited<ReturnType<typeof readDraftCreateResponse>>;
   formElement: HTMLFormElement;
   setFieldErrors: (value: FieldErrors | ((current: FieldErrors) => FieldErrors)) => void;
-  setStatus: (value: string) => void;
   setBusy: (value: boolean) => void;
-  setRecoveryRequired: (value: boolean) => void;
+  showUnconfirmedSave: () => void;
+  setStatus: (value: string) => void;
 }) {
   if (result.outcome === "success") {
     window.location.assign(`/owner/entries/${encodeURIComponent(result.id)}`);
     return;
   }
   if (result.outcome === "unconfirmed") {
-    showUnconfirmedSave(setStatus, setRecoveryRequired, setBusy);
+    showUnconfirmedSave();
     return;
   }
   setFieldErrors(result.fieldErrors);
@@ -370,46 +435,14 @@ async function finalizeDraftCreateResult({
   setBusy(false);
 }
 
-async function handleEntryEditResult({
-  result,
-  formElement,
-  isPublished,
-  setFieldErrors,
-  setStatus,
-  setBusy,
-  setRecoveryRequired,
-}: {
-  result: Awaited<ReturnType<typeof readEntryEditResponse>>;
-  formElement: HTMLFormElement;
-  isPublished: boolean;
-  setFieldErrors: (value: FieldErrors | ((current: FieldErrors) => FieldErrors)) => void;
-  setStatus: (value: string) => void;
-  setBusy: (value: boolean) => void;
-  setRecoveryRequired: (value: boolean) => void;
-}) {
-  if (result.outcome === "success") {
-    setStatus(isPublished ? "Public update saved." : "Private draft saved.");
-    setBusy(false);
-    return;
-  }
-  if (result.outcome === "unconfirmed") {
-    showUnconfirmedSave(setStatus, setRecoveryRequired, setBusy);
-    return;
-  }
-  setFieldErrors(result.fieldErrors);
-  setStatus(result.message);
-  focusFirstInvalidField(formElement, result.fieldErrors);
-  setBusy(false);
-}
-
-function showUnconfirmedSave(
-  setStatus: (value: string) => void,
-  setRecoveryRequired: (value: boolean) => void,
-  setBusy: (value: boolean) => void,
-) {
-  setStatus("The save result is unknown. Do not submit again from this page; the first request may have succeeded. Check this Aitta’s saved state before retrying.");
-  setRecoveryRequired(true);
-  setBusy(false);
+function entryKindGuidance(kind: EntryKind, copy: EntryFormCopy): string {
+  return kind === "note"
+    ? copy.kindGuidanceNote
+    : kind === "article"
+      ? copy.kindGuidanceArticle
+      : kind === "announcement"
+        ? copy.kindGuidanceAnnouncement
+        : copy.kindGuidanceLink;
 }
 
 function requestBodyFromForm(formData: FormData): EntryFormPayload {
@@ -453,7 +486,7 @@ function errorId(name: EntryFieldName, error?: string): string | undefined {
 }
 
 function entryFormFieldName(value: string): EntryFieldName | null {
-  return entryFieldNames.has(value as EntryFieldName) ? value as EntryFieldName : null;
+  return entryFieldNames.has(value as EntryFieldKind) ? value as EntryFieldKind : null;
 }
 
 function isEntryKind(value: string): value is EntryKind {

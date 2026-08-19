@@ -304,7 +304,10 @@ test("public hierarchy CSS preserves contrast, focus, touch, narrow-layout, zoom
   assert.match(css, /\.presence-heading h1\s*\{[^}]*font-size:\s*1\.875rem[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.presence-summary\s*\{[^}]*white-space:\s*pre-wrap[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.presence-about-copy\s*\{[^}]*white-space:\s*pre-wrap[^}]*overflow-wrap:\s*anywhere/s);
-  assert.match(css, /\.public-nav-inner\s*\{[^}]*min-height:\s*60px[^}]*flex-wrap:\s*nowrap/s);
+  assert.match(
+    css,
+    /\.public-nav-inner,\s*:global\(\.public-nav-inner\)\s*\{[^}]*min-height:\s*60px[^}]*flex-wrap:\s*nowrap/s,
+  );
   assert.match(css, /\.public-frame, \.public-presence-column, \.public-wide-content, \.permalink-content\s*\{[^}]*max\(16px, env\(safe-area-inset-left\)\)[^}]*max\(16px, env\(safe-area-inset-right\)\)/s);
   assert.match(css, /\.presence-identity\s*\{[^}]*margin-top:\s*0\.5rem/s);
   assert.match(css, /\.presence-identity-field\s*\{[^}]*height:\s*96px[^}]*background:\s*var\(--accent\)/s);
@@ -340,7 +343,7 @@ test("normal form-control boundaries preserve non-text contrast", async () => {
   const sharedControls = css.match(
     /\.field input, \.field textarea, \.field select\s*\{[^}]*border:\s*1px solid var\(--ink\)[^}]*background:\s*var\(--paper-raised\)[^}]*\}/is,
   );
-  const ownerCanvas = ownerShellCss.match(/\.shell\s*\{[^}]*background:\s*var\(--paper\)/i);
+  const ownerCanvas = ownerShellCss.match(/\.owner-shell\s*\{[^}]*background:\s*var\(--paper\)/i);
   assert.ok(sharedControls, "missing the shared input, textarea, and select colors");
   assert.ok(ownerCanvas, "missing the adjacent owner canvas color");
   const controlBorder = customProperty(css, "ink");

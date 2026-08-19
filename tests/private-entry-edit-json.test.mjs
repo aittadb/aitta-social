@@ -528,7 +528,10 @@ test("EntryForm sends JSON Accept and uses strict edit recovery without changing
   assert.doesNotMatch(source, /\bfetch\s*\(/u);
   assert.match(source, /if \(!entry\) \{[\s\S]*readDraftCreateResponse\(response\)/u);
   assert.match(source, /readEntryEditResponse\(response, \{[\s\S]*id: entry\.id,[\s\S]*state: entry\.state/u);
-  assert.match(source, /kind,[\s\S]*title: formText\(form\.get\("title"\)\) \|\| null,[\s\S]*body: formText\(form\.get\("body"\)\),[\s\S]*destinationUrl: normalizedDestinationUrl/u);
+  assert.match(
+    source,
+    /kind:[\s\S]*title:\s*formText\((?:form|formData)\.get\("title"\)\)\s*\|\|\s*null,[\s\S]*body:\s*formText\((?:form|formData)\.get\("body"\)\),[\s\S]*destinationUrl:\s*normalizedDestinationUrl\((?:form|formData)\.get\("destinationUrl"\)\)/u,
+  );
   assert.match(source, /result\.outcome === "success"[\s\S]*Public update saved\.[\s\S]*Private draft saved\./u);
   assert.match(source, /result\.outcome === "unconfirmed"[\s\S]*showUnconfirmedSave\(\)/u);
   assert.match(source, /setFieldErrors\(result\.fieldErrors\)[\s\S]*focusFirstInvalidField\(formElement, result\.fieldErrors\)/u);

@@ -1,7 +1,7 @@
 import type { Profile } from "@/lib/types";
 import type { CSSProperties, ReactNode } from "react";
+import { en } from "@/lib/i18n/messages/en";
 import { AittaFooterResources } from "./AittaFooterResources";
-import styles from "./PublicPresenceFrame.module.css";
 
 type HeaderAction = {
   href: string;
@@ -15,6 +15,12 @@ type PublicPageFrameProps = {
   displayName: string;
   profile: Pick<Profile, "displayName" | "hidePoweredBy"> | null;
   style?: CSSProperties;
+  copy?: {
+    footerNameFallback: string;
+    poweredByLabel: string;
+    poweredByBrand: string;
+    poweredByUrl: string;
+  };
 };
 
 /**
@@ -28,23 +34,26 @@ export function PublicPageFrame({
   displayName,
   profile,
   style,
+  copy = {
+    footerNameFallback: en.ui.shared.aittaName,
+    poweredByLabel: "Powered by",
+    poweredByBrand: "AittaSocial",
+    poweredByUrl: "https://aitta.social",
+  },
 }: PublicPageFrameProps) {
   const shellClassNames = className
     .split(/\s+/u)
-    .map((token) => {
-      if (token === "template-shell") return styles['template-shell'];
-      if (token === "technical-shell") return styles['public-state-shell'];
-      if (token === "privacy-shell") return styles['public-state-shell'];
-      if (token === "public-state-shell") return styles['public-state-shell'];
-      if (token === "permalink-shell") return styles['permalink-shell'];
-      if (token === "public-shell") return styles['public-shell'];
-      return token;
-    })
-    .filter(Boolean)
-    .join(" ");
+    .filter((token) => token.length > 0);
+
+  const uniqueClassNames = Array.from(
+    new Set(["public-shell", ...shellClassNames]),
+  );
 
   return (
-    <main className={`${styles['public-shell']} ${shellClassNames}`.trim()} style={style}>
+    <main
+      className={uniqueClassNames.join(" ")}
+      style={style}
+    >
       <PublicPresenceHeader
         displayName={displayName}
         identityHref="/"
@@ -57,7 +66,7 @@ export function PublicPageFrame({
         }}
       />
       {children}
-      <PublicFooter profile={profile} />
+      <PublicFooter profile={profile} copy={copy} />
     </main>
   );
 }
@@ -76,12 +85,12 @@ function PublicPresenceHeader({
   action: HeaderAction;
 }) {
   return (
-    <header className={styles['public-nav']} aria-label={label}>
-      <div className={`${styles['public-frame']} ${styles['public-nav-inner']}`}>
-        <a className={styles['public-wordmark']} href={identityHref}>{displayName}</a>
-        <nav className={styles['public-nav-actions']} aria-label={actionsLabel}>
+    <header className="public-nav" aria-label={label}>
+      <div className="public-frame public-nav-inner">
+        <a className="wordmark" href={identityHref}>{displayName}</a>
+        <nav className="public-nav-actions" aria-label={actionsLabel}>
           <a
-            className={styles['public-nav-action']}
+            className="public-nav-action"
             href={action.href}
             aria-label={action.accessibleName}
           >
@@ -100,13 +109,15 @@ export function PresenceIdentityTile({
   displayName: string;
   size?: "profile" | "update";
 }) {
+  const sizeClass = size === "profile"
+    ? "presence-identity-tile presence-identity-tile-profile public-presence-tile public-presence-tile-profile"
+    : "presence-identity-tile presence-identity-tile-update public-presence-tile public-presence-tile-update";
+
   return (
-    <span
-      className={`${styles['public-presence-tile']} ${size === "profile"
-        ? styles['public-presence-tile-profile']
-        : styles['public-presence-tile-update']}`}
-      aria-hidden="true"
-    >
+        <span
+        className={sizeClass}
+        aria-hidden="true"
+      >
       {presenceInitials(displayName)}
     </span>
   );
@@ -114,19 +125,26 @@ export function PresenceIdentityTile({
 
 function PublicFooter({
   profile,
+  copy,
 }: {
   profile: Pick<Profile, "displayName" | "hidePoweredBy"> | null;
+  copy: {
+    footerNameFallback: string;
+    poweredByLabel: string;
+    poweredByBrand: string;
+    poweredByUrl: string;
+  };
 }) {
   return (
-    <footer className={styles['public-footer']}>
-      <div className={`${styles['public-frame']} ${styles['public-footer-inner']}`}>
-        <span className={styles['public-footer-name']}>
-          {profile?.displayName ?? "Independent Aitta"}
+    <footer className="public-footer">
+      <div className="public-frame public-footer-inner">
+        <span className="public-footer-name">
+          {profile?.displayName ?? copy.footerNameFallback}
         </span>
-        <div className={styles['public-footer-context']}>
+        <div className="public-footer-context">
           {!profile?.hidePoweredBy ? (
-            <span className={styles['public-attribution']}>
-              Powered by <strong><a href="https://aitta.social" rel="noopener noreferrer">AittaSocial</a></strong>
+            <span className="public-attribution">
+              <span dangerouslySetInnerHTML={{ __html: `${copy.poweredByLabel} <strong><a href="${copy.poweredByUrl}" rel="noopener noreferrer">${copy.poweredByBrand}</a></strong>` }} />
             </span>
           ) : null}
           <AittaFooterResources />

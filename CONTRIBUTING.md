@@ -9,12 +9,11 @@ and accessibility requirements are part of the contribution context.
 
 “What feedback do you most want: vision clarity, landing-page messaging, technical architecture, source code, or potential contributors?”
 
-The most useful feedback is currently vision clarity, landing-page messaging,
-and potential contributors (for ideas):
+The most useful feedback right now is:
 
 - vision clarity;
 - landing-page messaging; and
-- potential contributors, for ideas about who the project should serve or what
+- potential contributors, for ideas about who the project should serve and what
   outcomes it should support.
 
 Please describe the desired outcome, user need, or idea in a
@@ -23,13 +22,12 @@ relevant product context, documentation or security concern, and accessibility
 impact when applicable. A proposed change must still be accepted into
 `PLAN.md` before implementation; the plan is the authority for current work.
 
-## Source-code changes
+## Source-code changes and review flow
 
-The maintainer is not seeking source-code contributors or third-party pull
-requests for this agentic coding workflow. Internal AI tools make implementing
-changes faster and easier than reviewing and integrating external pull
-requests, while the maintainer retains responsibility for product direction,
-security, privacy, accessibility, and release decisions.
+A maintainer does not seek source-code contributors or third-party pull requests
+for this agentic coding workflow. Internal AI tools implement and review changes
+while the maintainer retains responsibility for product direction, security,
+privacy, accessibility, and release decisions.
 
 That is not a request to withhold useful technical observations: describe the
 problem, desired behavior, constraints, evidence, and risks in an Issue. The

@@ -34,6 +34,14 @@
   background: var(--paper-raised);
 }
 
+:global(.entry-editor-fields) {
+  margin: 0 0 1.25rem;
+  padding: 1.1rem 1.1rem 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper-raised);
+}
+
 .entry-editor-fields legend {
   padding: 0 0.35rem;
   margin: 0;
@@ -71,6 +79,10 @@
 
 @media (max-width: 640px) {
   .entry-editor-fields {
+    padding: 0.9rem 0.9rem 0;
+  }
+
+  :global(.entry-editor-fields) {
     padding: 0.9rem 0.9rem 0;
   }
 

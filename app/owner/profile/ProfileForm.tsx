@@ -14,6 +14,7 @@ import type { ProfileInput } from "@/lib/types";
 import { describedBy } from "../form-field-description";
 import { readProfileSaveResponse } from "./profile-save-response";
 import { saveProfileRequest } from "./profile-save-request";
+import type { Messages } from "@/lib/i18n/messages/en";
 import sharedStyles from "../_components/owner-form-shared.module.css";
 import styles from "./ProfileForm.module.css";
 
@@ -69,11 +70,13 @@ export function ProfileForm({
   canonicalDefault,
   canonicalDefaultSource,
   readiness,
+  copy,
 }: {
   profile: ProfileInput | null;
   canonicalDefault: string;
   canonicalDefaultSource: CanonicalDefaultSource;
   readiness: IdentityReadiness;
+  copy: Messages["ui"]["owner"]["profile"];
 }) {
   const loadedValues = initialFormValues(profile, canonicalDefault);
   const [status, setStatus] = useState("");
@@ -140,22 +143,22 @@ export function ProfileForm({
     setStatus("");
     if (!formElement.checkValidity()) {
       if (hasInvalidOptionalPublicDetails(formElement)) openOptionalDetails();
-      setStatus("Identity was not saved. Complete the required fields and correct invalid URLs.");
+      setStatus(copy.requiredFieldError);
       formElement.reportValidity();
       return;
     }
     if (accentReplacementRequired) {
       const accentErrors = {
-        accentColor: "Choose an accent color before saving this historical profile.",
+        accentColor: copy.editPrompt,
       };
       setFieldErrors(accentErrors);
-      setStatus("Identity was not saved. Choose a replacement for the historical accent and try again.");
+      setStatus(copy.unsaved);
       focusFirstInvalidField(formElement, accentErrors);
       return;
     }
 
-    setBusy(true);
-    setStatus("Saving Identity…");
+      setBusy(true);
+    setStatus(copy.saveButton);
     const form = new FormData(formElement);
     const externalLinks = String(form.get("externalLinks") ?? "")
       .split("\n")
@@ -182,7 +185,7 @@ export function ProfileForm({
       });
       const result = await readProfileSaveResponse(response);
       if (result.outcome === "success") {
-        setStatus("Identity saved. Reloading server-saved readiness…");
+        setStatus(copy.newIdentity);
         window.location.assign("/owner/profile");
         return;
       }
@@ -202,51 +205,65 @@ export function ProfileForm({
   }
 
   return (
-    <form className={styles['owner-form-root']} aria-label="Identity and profile settings" onSubmit={submit} onInput={updatePreview} onInvalidCapture={revealInvalidOptionalDetails} aria-busy={busy} noValidate>
-      <section className={`${styles['identity-form-readiness']} ${readiness.state === "complete" ? styles['identity-readiness-complete'] : styles['identity-readiness-incomplete']}`} aria-labelledby="identity-form-readiness-title">
+    <form
+      className="owner-form"
+      aria-label={copy.settingsAria}
+      onSubmit={submit}
+      onInput={updatePreview}
+      onInvalidCapture={revealInvalidOptionalDetails}
+      aria-busy={busy}
+      noValidate
+    >
+      <section
+        className={`${styles['identity-form-readiness']} ${readiness.state === "complete" ? styles['identity-readiness-complete'] : styles['identity-readiness-incomplete']}`}
+        aria-labelledby="identity-form-readiness-title"
+      >
         <div>
-          <p className="eyebrow">Server-saved readiness</p>
+          <p className="eyebrow">{copy.readinessHeadline}</p>
           <h2 id="identity-form-readiness-title">{readinessTitle(readiness.state)}</h2>
           <p>{canonicalExplanation(readiness, canonicalDefaultSource)}</p>
           {readiness.canonicalUrl ? (
             <p className={styles.effectiveCanonical}>
-              <span>Effective public URL · {canonicalSourceLabel(readiness.canonicalSource)}</span>
+              <span>{`${canonicalSourceHeading(readiness.canonicalSource)} · ${canonicalSourceLabel(readiness.canonicalSource)}`}</span>
               <code>{readiness.canonicalUrl}</code>
             </p>
           ) : null}
         </div>
-        <a className="text-link" href="/">Preview saved public profile</a>
+        <a className="text-link" href="/">{copy.previewPublicProfile}</a>
       </section>
 
-      <p className={`${styles['owner-save-state']} ${styles[saveStateClass(dirty, profile, canonicalDefaultSource)]}`} aria-live="polite">
+        <p
+          className={`identity-save-state ${saveStateClass(dirty, profile, canonicalDefaultSource)}`}
+          aria-live="polite"
+        >
         <strong>{dirty
-          ? "Unsaved changes"
-          : canonicalDefaultSource === "invalid-stored-omitted" && profile
-            ? "Saved profile loaded without its invalid URL"
+            ? copy.unsaved
+            : canonicalDefaultSource === "invalid-stored-omitted" && profile
+            ? copy.savedFallback
           : canonicalDefaultSource === "runtime-substitution" && profile
-            ? "Saved profile loaded with a safe URL substitution"
+            ? copy.savedFallbackSubstitution
             : profile
-              ? "Saved values loaded"
-              : "New Identity, not saved"}</strong>
+              ? copy.savedValuesLoaded
+              : copy.newIdentity}</strong>
         <span>{dirty
-          ? "These edits exist only in this open form. Server-saved readiness above has not changed."
+          ? copy.editPrompt
           : canonicalDefaultSource === "invalid-stored-omitted" && profile
-            ? "The saved canonical fallback is invalid and was omitted from this form. Other profile values were loaded from this Aitta. Saving a valid HTTPS fallback will replace the invalid D1 value."
+            ? copy.savedFallback
           : canonicalDefaultSource === "runtime-substitution" && profile
-            ? "The saved canonical fallback is invalid, so the effective protected runtime URL is prefilled below. Saving will replace the invalid D1 fallback."
-          : profile
-            ? "The form matches the profile values loaded from this Aitta."
+            ? copy.savedFallbackSubstitution
+            : profile
+              ? copy.savedProfileUnchanged
             : canonicalDefaultSource === "runtime-substitution"
-              ? "The protected runtime URL is prefilled as a fallback starting value. Complete the profile fields and save to create this Aitta’s outward profile."
-              : "Complete the required fields and save to create this Aitta’s outward profile."}</span>
+              ? copy.previewLocal
+              : copy.identitySetupDescription}</span>
       </p>
 
-      <fieldset className={styles['primary-fields']}>
-        <legend>Required Identity</legend>
-        <p className={styles['fieldset-introduction']}>These four fields create the outward profile this Aitta controls.</p>
-        <Field label="Display name" name="displayName" required maxLength={100} defaultValue={profile?.displayName} error={fieldErrors.displayName} />
+      <fieldset className="identity-primary-fields">
+        <legend>{copy.requiredIdentity}</legend>
+        <p className={styles['fieldset-introduction']}>{copy.fieldHelp}</p>
+        <Field label={copy.displayName} name="displayName" required maxLength={100} defaultValue={profile?.displayName} error={fieldErrors.displayName} />
         <label className={sharedStyles['owner-form-field']} htmlFor="profile-shortDescription">
-          <span>Short description</span>
+          <span>{copy.shortDescription}</span>
           <textarea
             id="profile-shortDescription"
             name="shortDescription"
@@ -257,21 +274,21 @@ export function ProfileForm({
             aria-invalid={Boolean(fieldErrors.shortDescription) || undefined}
             aria-describedby={describedBy("short-description-help", errorId("shortDescription", fieldErrors.shortDescription))}
           />
-          <small id="short-description-help">One clear sentence for the top of the public profile.</small>
+          <small id="short-description-help">{copy.shortDescriptionHelp}</small>
           <FieldError name="shortDescription" error={fieldErrors.shortDescription} />
         </label>
         <Field
-          label="Canonical URL fallback"
+          label={copy.canonicalUrlLabel}
           name="canonicalUrl"
           type="url"
           required
           defaultValue={canonicalDefault}
-          placeholder="https://aitta.example"
+          placeholder={copy.canonicalUrlPlaceholder}
           help={canonicalFieldHelp(readiness.canonicalSource, canonicalDefaultSource)}
           error={fieldErrors.canonicalUrl}
         />
-          <label className={sharedStyles['owner-form-field']} htmlFor="profile-introduction">
-          <span>Longer introduction</span>
+        <label className={sharedStyles['owner-form-field']} htmlFor="profile-introduction">
+          <span>{copy.longerIntroduction}</span>
           <textarea
             id="profile-introduction"
             name="introduction"
@@ -286,46 +303,46 @@ export function ProfileForm({
         </label>
       </fieldset>
 
-      <details
+        <details
         ref={optionalDetailsRef}
         className={styles['optional-details']}
         open={optionalDetailsOpen}
         onToggle={(event) => setOptionalDetailsOpen(event.currentTarget.open)}
       >
         <summary>
-          <span>Optional public details</span>
-          <span className={styles['optional-details-count']}>{optionalDetailsCount} of 3 added</span>
+          <span>{copy.optionalPublicDetails}</span>
+          <span className={styles['optional-details-count']}>{optionalDetailsCount} {copy.optionalCountSuffix}</span>
         </summary>
           <div className={styles['optional-details-content']}>
-          <p>Location, website, and external links appear publicly only when you add them.</p>
+          <p>{copy.locationWebsiteIntro}</p>
           <div className={`${sharedStyles['owner-form-field-grid']} ${sharedStyles['owner-form-field-grid-two']}`}>
-            <Field label="Location (optional)" name="location" maxLength={120} defaultValue={profile?.location ?? ""} error={fieldErrors.location} />
-            <Field label="Website (optional)" name="website" type="url" defaultValue={profile?.website ?? ""} placeholder="https://example.com" error={fieldErrors.website} />
+            <Field label={copy.locationOptional} name="location" maxLength={120} defaultValue={profile?.location ?? ""} error={fieldErrors.location} />
+            <Field label={copy.websiteOptional} name="website" type="url" defaultValue={profile?.website ?? ""} placeholder={copy.canonicalUrlPlaceholder} error={fieldErrors.website} />
           </div>
             <label className={sharedStyles['owner-form-field']} htmlFor="profile-externalLinks">
-            <span>External links (optional)</span>
+            <span>{copy.externalLinks}</span>
             <textarea
               id="profile-externalLinks"
               name="externalLinks"
               rows={4}
               defaultValue={profile?.externalLinks.map((link) => `${link.label} | ${link.url}`).join("\n")}
-              placeholder={"Documentation | https://example.com/docs\nContact | https://example.com/contact"}
+              placeholder={copy.externalLinksPlaceholder}
               aria-invalid={Boolean(fieldErrors.externalLinks) || undefined}
               aria-describedby={describedBy("external-links-help", errorId("externalLinks", fieldErrors.externalLinks))}
             />
-            <small id="external-links-help">One per line in “Label | URL” form. Maximum eight.</small>
+            <small id="external-links-help">{copy.externalLinksHelp}</small>
             <FieldError name="externalLinks" error={fieldErrors.externalLinks} />
           </label>
         </div>
       </details>
 
       <fieldset className={styles['secondary-fields']}>
-        <legend>Appearance</legend>
-        <p className={styles['fieldset-introduction']}>Optional restrained choices for this Aitta’s public profile and update list.</p>
+        <legend>{copy.appearance}</legend>
+        <p className={styles['fieldset-introduction']}>{copy.appearanceGuide}</p>
         <div className={styles['identity-appearance-layout']}>
-          <div className={styles['identity-appearance-controls']}>
+            <div className={styles['identity-appearance-controls']}>
             <label className={`${sharedStyles['owner-form-field']} ${sharedStyles['owner-form-color-field']}`} htmlFor="profile-accentColor">
-              <span>Accent color</span>
+              <span>{copy.accent}</span>
               <input
                 id="profile-accentColor"
                 name="accentColor"
@@ -335,12 +352,12 @@ export function ProfileForm({
                 aria-describedby={describedBy("accent-color-help", errorId("accentColor", fieldErrors.accentColor))}
               />
               <small id="accent-color-help">{accentReplacementRequired
-                ? "The historical saved accent cannot be shown safely. Choose a replacement before saving; reload leaves the stored value unchanged."
-                : "The saved choice stays exact. This preview derives a contrast-safe display color."}</small>
+                ? copy.editPrompt
+                : copy.previewLocal}</small>
               <FieldError name="accentColor" error={fieldErrors.accentColor} />
             </label>
             <label className={sharedStyles['owner-form-field']} htmlFor="profile-density">
-              <span>Update spacing</span>
+              <span>{copy.spacing}</span>
               <select
                 id="profile-density"
                 name="density"
@@ -351,10 +368,14 @@ export function ProfileForm({
                 <option value="comfortable">Comfortable</option>
                 <option value="compact">Compact</option>
               </select>
-              <small id="density-help">Choose comfortable or compact spacing for public updates.</small>
+              <small id="density-help">
+                {previewDensity(preview.density) === "compact"
+                  ? `${copy.previewSpacingCompact} / ${copy.previewSpacingComfortable}`
+                  : `${copy.previewSpacingComfortable} / ${copy.previewSpacingCompact}`}
+              </small>
               <FieldError name="density" error={fieldErrors.density} />
             </label>
-            <label className={sharedStyles['owner-form-check-field']}><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>Hide the restrained “Powered by AittaSocial” attribution</span></label>
+            <label className="check-field"><input name="hidePoweredBy" type="checkbox" defaultChecked={profile?.hidePoweredBy} /><span>{copy.hideAttribution}</span></label>
           </div>
 
             <aside
@@ -363,49 +384,49 @@ export function ProfileForm({
             style={{ "--accent": resolvePresentationAccent(preview.accentColor) } as CSSProperties}
           >
             <div className={styles['identity-appearance-preview-heading']}>
-              <p className="eyebrow">Appearance preview</p>
+              <p className="eyebrow">{copy.previewTitle}</p>
               <p className={`${styles['identity-appearance-preview-state']} ${dirty ? styles['identity-appearance-preview-unsaved'] : profile ? styles['identity-appearance-preview-saved'] : styles['identity-appearance-preview-new']}`}>
-                <strong>{dirty ? "Unsaved preview" : profile ? "Saved appearance" : "Appearance not saved"}</strong>
+                <strong>{dirty ? copy.previewStateUnsaved : profile ? copy.previewStateSaved : copy.previewStateNotSaved}</strong>
                 <span>{dirty
-                  ? "These choices are temporary until Save Identity succeeds."
+                  ? copy.unsaved
                   : profile
-                    ? "This matches the appearance loaded from this Aitta."
-                    : "Choose an appearance, then save Identity to make it public."}</span>
+                    ? copy.previewStateSaved
+                    : copy.previewLocal}</span>
               </p>
-              <h2 id="identity-draft-preview-title">{preview.displayName.trim() || "Your display name"}</h2>
-              <p>{preview.shortDescription.trim() || "A short description will introduce this profile."}</p>
+              <h2 id="identity-draft-preview-title">{preview.displayName.trim() || copy.displayName}</h2>
+              <p>{preview.shortDescription.trim() || copy.shortDescription}</p>
             </div>
 
             <div className={styles['identity-draft-progress']}>
-              <label htmlFor="identity-draft-progress">Fields filled in this form: {requiredCount(preview)} of 4</label>
+              <label htmlFor="identity-draft-progress">{copy.previewNotSaved.replace("{count}", String(requiredCount(preview)))}</label>
               <progress id="identity-draft-progress" max="4" value={requiredCount(preview)}>{requiredCount(preview)} of 4</progress>
-              <small>This local count is not server readiness. {dirty ? "It remains temporary until Save Identity succeeds." : canonicalDefaultSource === "invalid-stored-omitted" ? "The preview excludes the invalid saved canonical fallback described above." : canonicalDefaultSource === "runtime-substitution" ? "The preview includes the safe runtime URL substitution described above." : profile ? "The preview uses the loaded saved values." : "Nothing has been saved yet."}</small>
+              <small>{dirty ? copy.unsaved : copy.previewLocal}</small>
             </div>
 
-            <div className={styles['identity-appearance-sample']} aria-label="Public update appearance sample">
-              <div className={styles['identity-appearance-sample-summary']} aria-label="Current appearance choices">
-                <span>Spacing · {previewDensity(preview.density) === "compact" ? "Compact" : "Comfortable"}</span>
-                <span>Attribution · {preview.hidePoweredBy ? "Hidden" : "Visible"}</span>
+            <div className={styles['identity-appearance-sample']} aria-label={copy.examplePublicUpdate}>
+              <div className={styles['identity-appearance-sample-summary']} aria-label={copy.previewNotSaved}>
+                <span>{copy.previewSpacingLabel} · {previewDensity(preview.density) === "compact" ? copy.previewSpacingCompact : copy.previewSpacingComfortable}</span>
+                <span>{copy.previewAttributionLabel} · {preview.hidePoweredBy ? copy.hidden : copy.visible}</span>
               </div>
               <article className={styles['identity-appearance-sample-update']}>
-                <strong>Example public update</strong>
-                <span>Spacing changes here without changing update content.</span>
+                <strong>{copy.examplePublicUpdate}</strong>
+                <span>{copy.exampleSpacingText}</span>
               </article>
               <article className={styles['identity-appearance-sample-update']}>
-                <strong>Another public update</strong>
-                <span>The preview remains local until the complete form is saved.</span>
+                <strong>{copy.examplePublicUpdate}</strong>
+                <span>{copy.previewLocal}</span>
               </article>
-              {preview.hidePoweredBy ? null : <p className={styles['identity-appearance-sample-attribution']}>Powered by AittaSocial</p>}
+              {preview.hidePoweredBy ? null : <p className={styles['identity-appearance-sample-attribution']}>{copy.previewAttributionBrand}</p>}
             </div>
           </aside>
         </div>
       </fieldset>
 
-      <div className={sharedStyles['owner-form-footer']}>
-        <button className="button" type="submit" disabled={busy || recoveryRequired}>Save Identity</button>
-        <a className="button button-quiet" href="/">Preview saved public profile</a>
+        <div className={sharedStyles['owner-form-footer']}>
+        <button className="button" type="submit" disabled={busy || recoveryRequired}>{copy.saveButton}</button>
+        <a className="button button-quiet" href="/">{copy.previewPublicProfile}</a>
         <p className={sharedStyles['owner-form-status']} role="status" aria-live="polite" aria-atomic="true">{status}</p>
-        {recoveryRequired ? <a className="button button-quiet" href="/owner/profile">Reload saved Identity before retrying</a> : null}
+        {recoveryRequired ? <a className="button button-quiet" href="/owner/profile">{copy.reloadSavedIdentity}</a> : null}
       </div>
     </form>
   );
@@ -419,13 +440,13 @@ function readinessTitle(state: IdentityReadiness["state"]): string {
 
 function canonicalExplanation(readiness: IdentityReadiness, defaultSource: CanonicalDefaultSource): string {
   if (defaultSource === "invalid-stored-omitted") {
-    return "The saved profile remains in this Aitta, but its invalid canonical fallback was omitted from this form. Save a valid HTTPS fallback below.";
+    return readiness.canonicalSource === "runtime"
+      ? "Canonical fallback is invalid and was omitted from this form. The effective protected runtime URL is available below; saving updates the runtime fallback."
+      : "Canonical fallback is invalid and was omitted from this form. The stored value is excluded from this form because it is invalid.";
   }
   if (readiness.canonicalSource === "runtime") {
     if (defaultSource === "runtime-substitution") {
-      return readiness.state === "fresh"
-        ? "A protected runtime URL is active for this Aitta and prefilled below as a fallback starting value. Saving creates the D1 fallback."
-        : "A protected runtime URL is currently public for this Aitta. Because the stored fallback is invalid, that effective URL is prefilled below; saving replaces the invalid D1 fallback.";
+      return "Canonical fallback is invalid. The effective protected runtime URL is available below and prefilled from the protected runtime URL. Saving updates the runtime fallback.";
     }
     return readiness.state === "fresh"
       ? "A protected runtime URL is active for this Aitta. Save the required profile fields below; the canonical field saves a fallback only."
@@ -445,9 +466,17 @@ function canonicalSourceLabel(source: IdentityReadiness["canonicalSource"]): str
   return "not configured";
 }
 
+function canonicalSourceHeading(source: IdentityReadiness["canonicalSource"]): string {
+  if (source === "runtime") return "Effective public URL";
+  if (source === "stored") return "Canonical URL fallback";
+  return "Public URL source";
+}
+
 function canonicalFieldHelp(source: IdentityReadiness["canonicalSource"], defaultSource: CanonicalDefaultSource): string {
   if (defaultSource === "invalid-stored-omitted") {
-    return "No URL is prefilled because the saved fallback is invalid. Saving a valid HTTPS URL replaces it in this Aitta’s D1.";
+    return source === "runtime"
+      ? "No URL is prefilled because the saved fallback is invalid and was omitted from this form. Prefilled from the protected runtime URL because no valid fallback is available. Saving writes this value to D1 as the replacement fallback; it cannot change the protected runtime URL."
+      : "No URL is prefilled because the saved fallback is invalid. Saving a valid HTTPS URL replaces it in this Aitta’s D1.";
   }
   if (source === "runtime") {
     if (defaultSource === "runtime-substitution") {

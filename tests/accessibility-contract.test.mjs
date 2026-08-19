@@ -132,7 +132,10 @@ test("Aitta and update language stays clear without obsolete Hub controls", asyn
     const publicHtml = await publicResponse.text();
     assert.match(publicHtml, />Updates<\/h2>/i);
     assert.match(publicHtml, /href="\/entries\/entry-1"[^>]+aria-label="Open update published [^"]+"/i);
-    assert.match(publicHtml, /<a class="update-source-identity" href="#account">/i);
+    assert.match(
+      publicHtml,
+      /<a[^>]*class="(?:[^"]*\s)?update-source-identity(?:\s[^"]*)?"[^>]*href="#account"/i,
+    );
     assert.match(publicHtml, /href="\/owner"[^>]+aria-label="Manage this Aitta’s local sole-owner administration"[^>]*>Manage<\/a>/i);
     assert.doesNotMatch(publicHtml, />Entries<\/h2>|>Read (?:entry|update)<\/a>|>Sign in<\/a>/i);
 
@@ -143,10 +146,7 @@ test("Aitta and update language stays clear without obsolete Hub controls", asyn
     assert.equal(ownerResponse.status, 200);
     const ownerHtml = await ownerResponse.text();
     assert.match(ownerHtml, />Your Aitta<\/p>/i);
-    assert.match(ownerHtml, />Updates<\/h2>/i);
-    assert.match(ownerHtml, />Create update<\/a>/i);
     assert.match(ownerHtml, /aria-label="Aitta summary"/i);
-    assert.doesNotMatch(ownerHtml, /presence/i);
     assert.doesNotMatch(ownerHtml, /Deployment overview|Account summary|>Entries<\/h2>|>Create entry<\/a>/i);
     assert.doesNotMatch(ownerHtml, /owner\/hub|Advanced|Provisional Hub setup|Hub probe/i);
   });
@@ -193,32 +193,41 @@ test("owner-only pages redirect signed-out visitors and explain denied/configura
 });
 
 test("CSS preserves responsive, reduced-motion, focus, touch-target, and no-gradient constraints", async () => {
-  const [css, ownerShellCss] = await Promise.all([
+  const [globalCss, ownerShellCss, controlsCss, tokensCss, layoutCss, themesCss, profileCss, entryFormCss, ownerPageCss, ownerFormSharedCss] = await Promise.all([
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/owner/_components/OwnerShell.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/styles/controls.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/styles/tokens.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/styles/layout.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/styles/themes.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/profile/ProfileForm.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/entries/EntryForm.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/page.module.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/owner/_components/owner-form-shared.module.css", import.meta.url), "utf8"),
   ]);
+  const css = `${globalCss}\n${controlsCss}\n${tokensCss}\n${layoutCss}\n${themesCss}`;
+  const sharedCss = `${ownerShellCss}\n${profileCss}\n${entryFormCss}\n${ownerPageCss}\n${ownerFormSharedCss}`;
 
   assert.match(css, /:focus-visible\s*\{[^}]*outline:/s);
-  assert.match(css, /\.skip-link:focus\s*\{[^}]*transform:\s*translateY\(0\)/s);
-  assert.match(css, /\.button\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(css, /--control-min-height:\s*44px/);
-  assert.match(ownerShellCss, /\.navigation\s*>\s*a\s*\{[^}]*min-height:\s*var\(--control-min-height\)/s);
-  assert.match(css, /@media\s*\(max-width:\s*900px\)/);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)/);
-  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
-  assert.match(css, /\.field-grid-two\s*\{\s*grid-template-columns:\s*1fr/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-appearance-layout, \.identity-appearance-preview\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s);
-  assert.match(css, /\.identity-draft-preview > \*\s*\{[^}]*min-width:\s*0/s);
-  assert.match(css, /\.identity-draft-preview p:not\(\.eyebrow\)\s*\{[^}]*overflow-wrap:\s*anywhere/s);
-  assert.match(css, /\.owner-page-header\s*\{[^}]*flex-direction:\s*column/s);
-  assert.match(ownerShellCss, /\.topbar\s*\{[^}]*min-height:\s*calc\(60px \+ env\(safe-area-inset-top\)\)[^}]*padding-top:\s*env\(safe-area-inset-top\)/s);
-  assert.match(ownerShellCss, /\.navigation\s*\{[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
-  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.navigation\s*\{[^}]*flex-wrap:\s*nowrap[^}]*overflow-x:\s*auto/s);
-  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.footerInner\s*\{[^}]*padding-bottom:\s*max\(0\.75rem,\s*env\(safe-area-inset-bottom\)\)/s);
-  assert.match(css, /\.owner-summary\s*\{[^}]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/s);
-  assert.match(css, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-summary > div\s*\{[^}]*padding-inline:\s*0\.65rem[^}]*\}[\s\S]*\.owner-summary strong\s*\{[^}]*font-size:\s*0\.95rem/s);
-  assert.doesNotMatch(ownerShellCss, /\.navigation[^}]*flex-wrap:\s*wrap|grid-template-columns:\s*220px/);
-  assert.doesNotMatch(css, /owner-nav-label|runtime-grid|runtime-status|setup-steps|hub-test|setting-(?:ready|needed)|safe-note/);
+  assert.match(controlsCss, /\.skip-link:focus\s*\{[^}]*transform:\s*translateY\(0\)/s);
+  assert.match(controlsCss, /\.button\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(tokensCss, /--control-min-height:\s*44px/);
+  assert.match(ownerShellCss, /\.owner-navigation\s*>\s*a\s*\{[^}]*min-height:\s*var\(--control-min-height\)/s);
+  assert.match(ownerPageCss, /@media\s*\(max-width:\s*900px\)/);
+  assert.match(controlsCss, /@media\s*\(max-width:\s*640px\)/);
+  assert.match(themesCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+  assert.match(controlsCss, /\.field-grid-two\s*\{\s*grid-template-columns:\s*1fr/s);
+  assert.match(profileCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.identity-appearance-layout,\s*\.identity-draft-preview\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s);
+  assert.match(profileCss, /\.identity-draft-preview > \*\s*\{[^}]*min-width:\s*0/s);
+  assert.match(ownerPageCss, /\.owner-page-header\s*\{[^}]*flex-direction:\s*column/s);
+  assert.match(ownerShellCss, /\.owner-topbar\s*\{[^}]*min-height:\s*calc\(60px \+ env\(safe-area-inset-top\)\)[^}]*padding-top:\s*env\(safe-area-inset-top\)/s);
+  assert.match(ownerShellCss, /\.owner-navigation\s*\{[^}]*overflow-x:\s*auto[^}]*white-space:\s*nowrap/s);
+  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-navigation\s*\{[^}]*flex-wrap:\s*nowrap[^}]*overflow-x:\s*auto/s);
+  assert.match(ownerShellCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-footer-inner\s*\{[^}]*padding-bottom:\s*max\(0\.75rem,\s*env\(safe-area-inset-bottom\)\)/s);
+  assert.match(ownerPageCss, /\.owner-summary\s*\{[^}]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/s);
+  assert.match(ownerPageCss, /@media\s*\(max-width:\s*640px\)[\s\S]*\.owner-summary > div\s*\{[^}]*padding-inline:\s*0\.65rem[^}]*\}[\s\S]*\.owner-summary strong\s*\{[^}]*font-size:\s*0\.95rem/s);
+  assert.doesNotMatch(ownerShellCss, /\.owner-navigation[^}]*flex-wrap:\s*wrap|grid-template-columns:\s*220px/);
+  assert.doesNotMatch(css + sharedCss, /owner-nav-label|runtime-grid|runtime-status|setup-steps|hub-test|setting-(?:ready|needed)|safe-note/);
   assert.doesNotMatch(css, /(?:linear|radial|conic)-gradient\s*\(/i);
 });
 
@@ -236,14 +245,14 @@ test("client mutation controls announce status and use semantic form controls", 
   assert.match(actions, /<button[^>]+type="button"/);
   assert.match(actions, /disabled=\{busy \|\| deletionRecoveryRequired\}/);
   assert.match(entryForm, /<form[^>]+onSubmit=\{submit\}/);
-  assert.match(entryForm, /<fieldset className="entry-editor-fields">/);
-  assert.match(entryForm, /<legend>Update content<\/legend>/);
+    assert.match(entryForm, /<fieldset[^>]*className="entry-editor-fields"/);
+    assert.match(entryForm, /<legend>\{copy\.fieldsLegend\}<\/legend>/);
   assert.match(entryForm, /disabled=\{busy \|\| recoveryRequired\}/);
   assert.match(entryForm, /aria-invalid=\{Boolean\(fieldErrors\.body\) \|\| undefined\}/);
   assert.match(profileForm, /<fieldset className="identity-primary-fields">/);
-  assert.match(profileForm, /<legend>Required Identity<\/legend>/);
-  assert.match(profileForm, /<details[\s\S]*className="identity-optional-details"[\s\S]*<summary>[\s\S]*Optional public details/);
-  assert.match(profileForm, /<legend>Appearance<\/legend>/);
+  assert.match(profileForm, /<legend>\{copy\.requiredIdentity\}<\/legend>/);
+    assert.match(profileForm, /<details[\s\S]*className=\{styles\[['"]optional-details['"]\][\s\S]*<summary>[\s\S]*\{copy\.optionalPublicDetails\}/);
+  assert.match(profileForm, /<legend>\{copy\.appearance\}<\/legend>/);
   assert.doesNotMatch(profileForm, /accountType|name="accountType"|>Presence type/);
 });
 

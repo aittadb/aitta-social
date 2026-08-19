@@ -95,8 +95,8 @@ test("delete controls have an irreversible update-specific confirmation and isol
     readFile(new URL("../docs/deployment.md", import.meta.url), "utf8"),
   ]);
 
-  assert.match(actions, /window\.confirm\(`Delete “\$\{updateLabel\}” \(update \$\{actionReference\}\) permanently\? This cannot be undone\.`\)/);
-  assert.match(actions, /if \(!confirmed\) \{\s*setMessage\("Deletion cancelled\. This update was not deleted\."\);\s*return;/);
+  assert.match(actions, /window\.confirm\(formatCopyTemplate\(copy\.confirmDelete, updateLabel, actionReference\)\)/);
+  assert.match(actions, /if \(!confirmed\) \{\s*setMessage\(copy\.deleteCanceled\);\s*return;/);
   assert.match(actions, /import \{ readDeletionResponse \} from "\.\.\/entries\/deletion-response"/u);
   assert.match(actions, /import \{ changeEntryStateRequest, deleteEntryRequest \} from "\.\.\/entries\/entry-mutation-requests"/u);
   assert.match(actions, /const response = await deleteEntryRequest\(id\);/u);
@@ -104,11 +104,11 @@ test("delete controls have an irreversible update-specific confirmation and isol
   assert.match(actions, /readDeletionResponse\(response, id\)/u);
   assert.match(actions, /if \(outcome\.outcome === "success"\) \{\s*window\.location\.assign\("\/owner"\);/u);
   assert.match(actions, /The server rejected this deletion request\. \$\{outcome\.message\}/u);
-  assert.match(actions, /The deletion result could not be confirmed\. Check this Aitta’s saved state before deleting this update again\./);
+  assert.match(actions, /copy\.deletionFailure/);
   assert.match(actions, /setDeletionRecoveryRequired\(true\);[\s\S]*setBusy\(false\);/);
   assert.match(actions, /disabled=\{busy \|\| deletionRecoveryRequired\}[\s\S]*Delete/);
   assert.match(actions, /disabled=\{busy \|\| lifecycleRecoveryRequired\}[\s\S]*Publish/);
-  assert.match(actions, /href="\/owner"[\s\S]*Check this Aitta’s saved state/);
+  assert.match(actions, /href="\/owner"[\s\S]*copy\.checkSavedState/);
   assert.doesNotMatch(actions, /Reload Your presence|This update was deleted|This update remains/i);
   assert.equal((actions.match(/deleteEntryRequest\(/g) ?? []).length, 1, "delete makes one request and has no retry path");
 

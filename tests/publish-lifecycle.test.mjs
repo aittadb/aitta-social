@@ -66,19 +66,20 @@ test("publish controls make Draft and Published meaning, confirmation, definitiv
     readFile(new URL("../docs/privacy.md", import.meta.url), "utf8"),
   ]);
 
-  assert.match(actions, /<strong>\{state === "draft" \? "Draft" : "Published"\}<\/strong>/);
-  assert.match(actions, /only the owner can read this update\. Publishing makes it publicly readable on this Aitta\./);
-  assert.match(actions, /this update is publicly readable on this Aitta\. Unpublishing returns it to a private draft\./);
-  assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*publicly readable on this Aitta at its permalink[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
+  assert.match(actions, /<strong>\{state === "draft" \? copy\.stateDraftLabel : copy\.statePublishedLabel\}<\/strong>/);
+  assert.match(actions, /copy\.stateDraftContext/);
+  assert.match(actions, /copy\.statePublishedContext/);
+  assert.match(actions, /function requestPublish\(\)[\s\S]*window\.confirm\([\s\S]*copy\.confirmPublish[\s\S]*copy\.confirmUnpublish[\s\S]*if \(!confirmed\)[\s\S]*return;[\s\S]*void changeState\("published"\)/);
   assert.match(actions, /if \(lifecycleRecoveryRequired\) return;/);
   assert.match(actions, /showUnconfirmedLifecycleResult\(nextState\)/);
-  assert.match(actions, /The publication result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
-  assert.match(actions, /The unpublish result could not be confirmed\. Check this Aitta’s saved state before changing this update’s publication state again\./);
+  assert.match(actions, /copy\.publicationFailureDraft/);
+  assert.match(actions, /copy\.publicationFailureUnpublish/);
   assert.match(actions, /disabled=\{busy \|\| lifecycleRecoveryRequired\}/g);
-  assert.match(actions, /The server rejected this publication request\. \$\{failure\}/);
-  assert.match(actions, /The server rejected this unpublish request\. \$\{failure\}/);
+  assert.match(actions, /copy\.serverRejectedPublish/);
+  assert.match(actions, /copy\.serverRejectedUnpublish/);
   assert.doesNotMatch(actions, /This update was not published|This update remains published/);
-  assert.match(actions, /Check this Aitta’s current saved state/);
+  assert.match(actions, /copy\.checkSavedStateTitle/);
+  assert.match(actions, /copy\.checkSavedState/);
   assert.equal((actions.match(/changeEntryStateRequest\(/g) ?? []).length, 1, "state makes one request with no retry loop");
   assert.equal((actions.match(/deleteEntryRequest\(/g) ?? []).length, 1, "delete makes one request with no retry loop");
 

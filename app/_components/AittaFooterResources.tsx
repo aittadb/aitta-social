@@ -1,21 +1,31 @@
-/** Fixed Aitta resources shared by public and private human-page footers. */
-import styles from "./AittaFooterResources.module.css";
+import { en } from "@/lib/i18n/messages/en";
 
-export function AittaFooterResources() {
+type FooterCopy = {
+  technicalResourcesAria: string;
+  privacy: string;
+  technical: string;
+  githubAria: string;
+  github: string;
+  manifest: string;
+  profile: string;
+  updates: string;
+};
+
+export function AittaFooterResources({ copy = en.ui.footer }: { copy?: FooterCopy }) {
   return (
-    <nav className={styles['footer-resources']} aria-label="Technical resources">
-      <a href="/privacy">Privacy</a>
-      <a href="/technical">Technical</a>
+    <nav className="technical-links" aria-label={copy.technicalResourcesAria}>
+      <a href="/privacy">{copy.privacy}</a>
+      <a href="/technical">{copy.technical}</a>
       <a
         href="https://github.com/aittadb/aitta-social"
         rel="noopener noreferrer"
-        aria-label="AittaSocial source on GitHub"
+        aria-label={copy.githubAria}
       >
-        GitHub
+        {copy.github}
       </a>
-      <a href="/.well-known/aitta-social.json">Manifest</a>
-      <a href="/api/v1/site">Profile</a>
-      <a href="/api/v1/entries">Updates</a>
+      <a href="/.well-known/aitta-social.json">{copy.manifest}</a>
+      <a href="/api/v1/site">{copy.profile}</a>
+      <a href="/api/v1/entries">{copy.updates}</a>
     </nav>
   );
 }

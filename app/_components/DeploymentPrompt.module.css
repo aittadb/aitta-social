@@ -1,28 +1,29 @@
 /**
- * Styles owned by DeploymentPrompt.
+ * Component styles owned by DeploymentPrompt.
  *
- * Keep this component’s prompt box and form controls local.
- * Do not add unrelated deployment or page-level layout styles.
+ * Keep this deployment prompt presentation local to the component and consume
+ * shared design tokens from the global layer.
  */
+
 .deployment-prompt {
   min-width: 0;
   align-self: end;
 }
 
-.deployment-prompt > label {
+.deployment-prompt :global(label) {
   display: block;
   margin-bottom: 0.35rem;
   color: var(--ink);
   font-weight: 750;
 }
 
-.deployment-prompt > p {
+.deployment-prompt :global(p) {
   margin: 0 0 0.8rem;
   color: var(--muted);
   font-size: 0.9rem;
 }
 
-.deployment-prompt textarea {
+.deployment-prompt :global(textarea) {
   width: 100%;
   min-height: 12rem;
   padding: 1rem;

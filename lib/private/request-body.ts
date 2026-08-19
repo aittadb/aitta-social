@@ -13,7 +13,7 @@ export function isJsonUtf8ContentType(value: string | null): boolean {
   if (parts.length === 1) return true;
 
   const parameter = parts[1]?.trim() ?? "";
-  const match = /^charset\s*=\s*(?:\"([^\"]+)\"|([^\s\"]+))$/iu.exec(parameter);
+  const match = /^charset\s*=\s*(?:"([^"]+)"|([^\s"]+))$/iu.exec(parameter);
   const charset = (match?.[1] ?? match?.[2] ?? "").toLowerCase();
   return charset === "utf-8";
 }

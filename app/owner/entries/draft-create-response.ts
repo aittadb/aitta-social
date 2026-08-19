@@ -145,6 +145,9 @@ function parseEntryAttributes(attributes: unknown): {
   body: string;
   destinationUrl: string | null;
   state: "draft" | "published";
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 } | null {
   if (!isRecord(attributes) || !hasExactKeys(attributes, [
     "kind",
@@ -162,9 +165,13 @@ function parseEntryAttributes(attributes: unknown): {
   if (
     !isNormalizedBoundedText(attributes.kind, 1, 32) ||
     (typeof attributes.title !== "string" && attributes.title !== null) ||
+    (typeof attributes.title === "string" && !isNormalizedBoundedText(attributes.title, 1, 200)) ||
     !isNormalizedBoundedText(attributes.body, 1, 50000) ||
     !isValidDestination(attributes.destinationUrl) ||
-    !isEntryState(attributes.state)
+    !isEntryState(attributes.state) ||
+    !isIsoDatetime(attributes.createdAt) ||
+    !isIsoDatetime(attributes.updatedAt) ||
+    !isOptionalIsoDatetime(attributes.publishedAt)
   ) {
     return null;
   }
@@ -175,6 +182,9 @@ function parseEntryAttributes(attributes: unknown): {
     body: attributes.body,
     destinationUrl: attributes.destinationUrl,
     state: attributes.state,
+    publishedAt: attributes.publishedAt,
+    createdAt: attributes.createdAt,
+    updatedAt: attributes.updatedAt,
   };
 }
 
@@ -330,6 +340,18 @@ function isPublicDestination(value: unknown): value is string | null {
   } catch {
     return false;
   }
+}
+
+function isIsoDatetime(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(value)) return false;
+  const parsed = Date.parse(value);
+  if (!Number.isFinite(parsed)) return false;
+  return new Date(parsed).toISOString() === value;
+}
+
+function isOptionalIsoDatetime(value: unknown): value is string | null {
+  return value === null || isIsoDatetime(value);
 }
 
 function isLink(

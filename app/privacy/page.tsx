@@ -1,74 +1,36 @@
+import { PublicPageFrame } from "@/app/_components/PublicPresenceFrame";
+import { getLocale, getMessages } from "@/lib/i18n";
+import { en } from "@/lib/i18n/messages/en";
 import type { Metadata } from "next";
-import styles from "./information-page.module.css";
-import {
-  PublicPageFrame,
-} from "@/app/_components/PublicPresenceFrame";
 
 export const metadata: Metadata = {
   title: { absolute: "Privacy · Independent Aitta" },
-  description: "How this independently controlled Aitta handles public and private data.",
+  description: "Public privacy commitments for this Aitta.",
   referrer: "strict-origin-when-cross-origin",
   robots: { index: false, follow: false },
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  return metadata;
+}
+
 type PrivacySectionContent = {
   id: string;
-  heading: string;
-  body: string[];
+  title: string;
+  body: readonly string[];
 };
 
-const privacySections: PrivacySectionContent[] = [
-  {
-    id: "privacy-public",
-    heading: "What is public",
-    body: [
-      "A configured profile and published updates are public through the human pages and protocol 1.0 resources. Public data can include the display name, description, About text, optional profile links, presentation choices, published update content and timestamps, stable update identifiers, canonical URLs, and the discovery manifest.",
-      "Publishing makes an update readable without sign-in. Unpublishing removes it from this Aitta’s public views, but cannot recall a copy already saved, indexed, quoted, or cached elsewhere.",
-    ],
-  },
-  {
-    id: "privacy-private",
-    heading: "What stays private",
-    body: [
-      "Drafts and unpublished updates remain in this Aitta’s own D1 database and are available only through the private owner workspace. A signed-in visitor who is not the configured sole owner receives none of that owner-only content.",
-      "Sign in with ChatGPT is used only for local owner administration. The server compares the signed-in email with a protected owner setting. This Aitta does not store that ChatGPT identity in D1, publish it as the profile, or treat it as AittaSocial network membership.",
-    ],
-  },
-  {
-    id: "privacy-settings",
-    heading: "Protected settings",
-    body: [
-      "Owner authorization and other protected runtime settings remain on the server. Their values are not included in public pages or public data resources. A normalized canonical URL is public when configured, and a Hub verification challenge is public in the manifest only while the owner explicitly configures one.",
-    ],
-  },
-  {
-    id: "privacy-sites",
-    heading: "ChatGPT Sites boundary",
-    body: [
-      "ChatGPT Sites provides this app’s hosting, D1 storage, and sign-in processing boundary. Provider-level request processing, access policy, backups, and retention are outside this application’s direct control. This Aitta does not add its own identity provider, shared content database, or external content store.",
-    ],
-  },
-  {
-    id: "privacy-network",
-    heading: "Network and analytics",
-    body: [
-      "This Aitta currently has no Hub connection, outbound Hub probe, registration, or network credential flow. Public profile and update reads continue to work without the AittaSocial Hub.",
-      "The application adds no analytics subsystem, advertising, tracking feature, media store, or browser-storage record for profile and update content.",
-    ],
-  },
-  {
-    id: "privacy-retention",
-    heading: "Retention and owner control",
-    body: [
-      "Profile saves replace the stored profile values. Drafts remain until the owner publishes or deletes them. Unpublishing retains an update privately; deleting removes the application record. Hosting backups or provider recovery retention may continue outside this app’s direct control.",
-    ],
-  },
-];
+type PrivacyCopy = {
+  readonly title: string;
+  readonly heading: string;
+  readonly intro: string;
+  readonly sections: readonly PrivacySectionContent[];
+};
 
-function PrivacySection({ id, heading, body }: PrivacySectionContent) {
+function PrivacySection({ id, title, body }: PrivacySectionContent) {
   return (
-    <section className={styles.publicInformationSection} aria-labelledby={id}>
-      <h2 id={id}>{heading}</h2>
+    <section className="public-information-section" aria-labelledby={id}>
+      <h2 id={id}>{title}</h2>
       {body.map((paragraph) => (
         <p key={`${id}-${paragraph.slice(0, 16)}`}>{paragraph}</p>
       ))}
@@ -76,29 +38,92 @@ function PrivacySection({ id, heading, body }: PrivacySectionContent) {
   );
 }
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const locale = await getLocale();
+  const messages = await getMessages(locale);
+  const ui = messages.ui;
+
+  const displayName =
+    typeof ui.shared.aittaName === "string" ? ui.shared.aittaName : en.ui.shared.aittaName;
+  const copy = normalizePrivacyCopy(ui.owner.privacy);
+  const sectionCopy = Array.isArray(copy.sections) ? copy.sections : en.ui.owner.privacy.sections;
+
   return (
     <PublicPageFrame
       className="privacy-shell"
       profile={null}
-      displayName="Independent Aitta"
+      displayName={displayName}
     >
-      <article className={styles.publicInformationPage} aria-labelledby="privacy-title">
+      <article className="public-information-page" aria-labelledby="privacy-title">
         <header>
-          <p className="eyebrow">Privacy</p>
-          <h1 id="privacy-title">How this Aitta handles data</h1>
-          <p className={styles.publicInformationLead}>
-            This page describes the current application behavior. It does not
-            invent an operator identity, contact address, consent service, or
-            legal promise for the owner of this Aitta.
-          </p>
+          <p className="eyebrow">{copy.title}</p>
+          <h1 id="privacy-title">{copy.heading}</h1>
+          <p className="public-information-lead">{copy.intro}</p>
         </header>
 
-        {privacySections.map((section) => (
-          <PrivacySection key={section.id} {...section} />
+        {sectionCopy.map((section: PrivacySectionContent) => (
+          <PrivacySection
+            key={section.id}
+            {...section}
+          />
         ))}
       </article>
-
     </PublicPageFrame>
   );
+}
+
+function normalizePrivacyCopy(value: unknown): PrivacyCopy {
+  if (!value || typeof value !== "object") {
+    return en.ui.owner.privacy;
+  }
+
+  const candidate = value as {
+    title?: unknown;
+    heading?: unknown;
+    intro?: unknown;
+    sections?: unknown;
+  };
+
+  const rawSections = Array.isArray(candidate.sections)
+    ? candidate.sections
+      .map((entry): PrivacySectionContent | null => {
+        if (!entry || typeof entry !== "object") return null;
+        const section = entry as {
+          id?: unknown;
+          title?: unknown;
+          body?: unknown;
+        };
+
+        if (typeof section.id !== "string" || section.id.length === 0) return null;
+        if (typeof section.title !== "string" || section.title.length === 0) return null;
+
+        const body = Array.isArray(section.body)
+          ? section.body
+            .filter((line): line is string => typeof line === "string" && line.length > 0)
+          : [];
+        const normalizedBody: readonly string[] = body.length > 0 ? body : [""];
+
+        return {
+          id: section.id,
+          title: section.title,
+          body: normalizedBody,
+        };
+      })
+      .filter((entry): entry is PrivacySectionContent => entry !== null)
+    : [];
+
+  return {
+    title: typeof candidate.title === "string" && candidate.title.length > 0
+      ? candidate.title
+      : en.ui.owner.privacy.title,
+    heading: typeof candidate.heading === "string" && candidate.heading.length > 0
+      ? candidate.heading
+      : en.ui.owner.privacy.heading,
+    intro: typeof candidate.intro === "string" && candidate.intro.length > 0
+      ? candidate.intro
+      : en.ui.owner.privacy.intro,
+    sections: rawSections.length > 0
+      ? rawSections
+      : en.ui.owner.privacy.sections,
+  };
 }

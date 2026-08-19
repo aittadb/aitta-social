@@ -1,12 +1,18 @@
 import deploymentPromptContent from "@/content/deployment-prompt.json";
 import styles from "./DeploymentPrompt.module.css";
 
-export function DeploymentPrompt() {
+export function DeploymentPrompt({
+  label,
+  help,
+}: {
+  label: string;
+  help: string;
+}) {
   return (
     <div className={styles['deployment-prompt']}>
-      <label htmlFor="deployment-prompt">Prompt for ChatGPT</label>
+      <label htmlFor="deployment-prompt">{label}</label>
       <p id="deployment-prompt-help">
-        Select and copy this prompt into ChatGPT to set up your own Aitta.
+        {help}
       </p>
       <textarea
         id="deployment-prompt"
